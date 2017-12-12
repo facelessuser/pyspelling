@@ -1,0 +1,27 @@
+documents:
+- name: Python Source
+  parser: pyspelling.parsers.python_parser
+  options:
+    strings: false
+    comments: false
+  src:
+  - pyspelling
+  aspell:
+    lang: en
+  dictionary:
+    lang: en
+    wordlists:
+    - docs/src/dictionary/en-custom.txt
+    # - docs/src/dictionary/en-python.txt
+    output: build/dictionary/python.dic
+  filters:
+  - pyspelling.filters.context_filter:
+      context_visible_first: true
+      escapes: \\[\\`~]
+      delimiters:
+      - open: (?P<open>`+)
+        content: .*?
+        close: (?P=open)
+      - open: (?s)^(?P<open>\s*~{3,})
+        content: .*?
+        close: ^(?P=open)
