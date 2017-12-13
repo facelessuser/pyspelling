@@ -1,18 +1,12 @@
 """Spell check with Aspell or Hunspell."""
 from __future__ import unicode_literals
 import os
-import sys
 import fnmatch
 import re
 import importlib
 from . import util
 
-__version__ = '0.1.0'
 
-
-###################
-# Spell Checker
-###################
 class Spelling(object):
     """Spell check class."""
 
@@ -51,8 +45,9 @@ class Spelling(object):
                 print('CHECK: %s' % source.context)
 
             text = source.text
-            for f in self.filters:
-                text = f.filter(text)
+            for f, disallow in self.filters:
+                if source.type not in disallow:
+                    text = f.filter(text)
 
             if self.spellchecker == 'hunspell':
                 cmd = [
@@ -249,12 +244,20 @@ class Spelling(object):
         """Get filters."""
         self.filters = []
         for f in documents.get('filters', []):
+            # Retrieve module and module options
             if isinstance(f, dict):
                 name, options = list(f.items())[0]
             else:
                 name = f
                 options = {}
-            self.filters.append(self.get_module(name, 'get_filter')(options))
+
+            # Extract disallowed tokens
+            disallow = tuple()
+            if 'disallow' in options:
+                disallow = options['disallow']
+                del options['disallow']
+
+            self.filters.append((self.get_module(name, 'get_filter')(options), disallow))
 
     def get_module(self, module, accessor):
         """Get module."""

@@ -4,6 +4,9 @@ from collections import namedtuple
 import bs4
 import re
 from .. import util
+from html.parser import HTMLParser
+
+RE_SELECTOR = re.compile(r'''(\#|\.)?[-\w]+|\*|\[([\w\-:]+)(?:([~^|*$]?=)(\"[^"]+\"|'[^']'|[^'"\[\]]+))?\]''')
 
 
 class Selector(namedtuple('IgnoreRule', ['tag', 'id', 'classes', 'attributes'])):
@@ -17,11 +20,10 @@ class SelectorAttribute(namedtuple('AttrRule', ['attribute', 'pattern'])):
 class HTMLFilter(filters.Filter):
     """HTML filter."""
 
-    RE_SELECTOR = re.compile(r'''(\#|\.)?[-\w]+|\*|\[([\w\-:]+)(?:([~^|*$]?=)(\"[^"]+\"|'[^']'|[^'"\[\]]+))?\]''')
-
     def __init__(self, options):
         """Initialize."""
 
+        self.html_parser = HTMLParser()
         self.attributes = set(options.get('attributes', []))
         self.selectors = self.process_selectors(*options.get('ignores', []))
 
@@ -45,7 +47,7 @@ class HTMLFilter(filters.Filter):
             classes = set()
             attributes = []
 
-            for m in self.RE_SELECTOR.finditer(selector):
+            for m in RE_SELECTOR.finditer(selector):
                 if m.group(2):
                     attr = m.group(2).lower()
                     op = m.group(3)
@@ -158,7 +160,7 @@ class HTMLFilter(filters.Filter):
                         text.append(util.ustr(child))
 
         if root:
-            return '<body>%s %s</body>' % (' '.join(text), ' '.join(attributes))
+            return self.html_parser.unescape(' '.join(' '.join(text), ' '.join(attributes)))
 
         return text, attributes
 

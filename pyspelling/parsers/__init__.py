@@ -7,6 +7,20 @@ import os
 import functools
 from collections import namedtuple
 
+RE_UTF_BOM = re.compile(
+    b'^(?:(' +
+    codecs.BOM_UTF8 +
+    b')[\x00-\xFF]{,2}|(' +
+    codecs.BOM_UTF32_BE +
+    b')|(' +
+    codecs.BOM_UTF32_LE +
+    b')|(' +
+    codecs.BOM_UTF16_BE +
+    b')|(' +
+    codecs.BOM_UTF16_LE +
+    b'))'
+)
+
 
 class SourceText(namedtuple('SourceText', ['text', 'context', 'encoding', 'type'])):
     """Ignore rule."""
@@ -21,19 +35,6 @@ class Decoder(object):
     """
 
     MAX_GUESS_SIZE = 31457280
-    RE_UTF_BOM = re.compile(
-        b'^(?:(' +
-        codecs.BOM_UTF8 +
-        b')[\x00-\xFF]{,2}|(' +
-        codecs.BOM_UTF32_BE +
-        b')|(' +
-        codecs.BOM_UTF32_LE +
-        b')|(' +
-        codecs.BOM_UTF16_BE +
-        b')|(' +
-        codecs.BOM_UTF16_LE +
-        b'))'
-    )
 
     def _is_very_large(self, size):
         """Check if content is very large."""
@@ -65,7 +66,7 @@ class Decoder(object):
         """Check for UTF8, UTF16, and UTF32 BOMs."""
 
         encoding = None
-        m = self.RE_UTF_BOM.match(content)
+        m = RE_UTF_BOM.match(content)
         if m is not None:
             if m.group(1):
                 encoding = 'utf-8-sig'

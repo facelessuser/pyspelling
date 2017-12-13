@@ -5,33 +5,28 @@ Parse Python docstrings.
 """
 from .. import parsers
 import re
-import tokenize
 import textwrap
 import codecs
+import tokenize
 from .. import util
-# import markdown
 
-if util.PY3:
-    tokenizer = tokenize.tokenize
-    PREV_DOC_TOKENS = (tokenize.INDENT, tokenize.DEDENT, tokenize.NEWLINE, tokenize.ENCODING)
-else:
-    tokenizer = tokenize.generate_tokens
-    PREV_DOC_TOKENS = (tokenize.INDENT, tokenize.DEDENT, tokenize.NEWLINE)
+PREV_DOC_TOKENS = (tokenize.INDENT, tokenize.DEDENT, tokenize.NEWLINE, tokenize.ENCODING)
+
+RE_PY_ENCODE = re.compile(
+    br'^[^\r\n]*?coding[:=]\s*([-\w.]+)|[^\r\n]*?\r?\n[^\r\n]*?coding[:=]\s*([-\w.]+)'
+)
+RE_NON_PRINTABLE_ASCII = re.compile(br"[^ -~]+")
 
 
 class PythonDecoder(parsers.Decoder):
     """Detect Python encoding."""
-
-    RE_PY_ENCODE = re.compile(
-        br'^[^\r\n]*?coding[:=]\s*([-\w.]+)|[^\r\n]*?\r?\n[^\r\n]*?coding[:=]\s*([-\w.]+)'
-    )
 
     def special_encode_check(self, content, ext):
         """Special Python encoding check."""
 
         encode = None
 
-        m = self.RE_PY_ENCODE.match(content)
+        m = RE_PY_ENCODE.match(content)
         if m:
             if m.group(1):
                 enc = m.group(1).decode('ascii')
@@ -60,31 +55,21 @@ class PythonParser(parsers.Parser):
     def __init__(self, config, encoding='ascii'):
         """Initialization."""
 
-        # self.markdown = config.get('markdown', False)
-        # self.extensions = []
-        # self.extension_configs = {}
-        # for item in config.get('markdown_extensions', []):
-        #     if isinstance(item, util.ustr):
-        #         self.extensions.append(item)
-        #     else:
-        #         k, v = list(item.items())[0]
-        #         self.extensions.append(k)
-        #         if v is not None:
-        #             self.extension_configs[k] = v
         self.comments = config.get('comments', True) is True
         self.docstrings = config.get('docstrings', True) is True
         self.strings = config.get('strings', True) is True
+        self.bytes = config.get('bytes', False) is True
         super(PythonParser, self).__init__(config, encoding)
 
     def detect_encoding(self, source_file):
         """Get default encoding."""
 
-        if util.PY3:
-            # In Py3, the tokenizer will tell us what the encoding is.
-            encoding = 'ascii'
-        else:
-            encoding = self.DECODER().guess(source_file, verify=False)
-        return encoding
+        return 'ascii'
+
+    def get_ascii(self, text):
+        """Retrieve ASCII text from byte string."""
+
+        return RE_NON_PRINTABLE_ASCII.sub(r' ', text).decode('ascii')
 
     def parse_docstrings(self, source_file):
         """Retrieve the Python docstrings."""
@@ -99,21 +84,16 @@ class PythonParser(parsers.Parser):
 
         encoding = self.detect_encoding(source_file)
 
-        # if self.markdown:
-        #     md = markdown.Markdown(extensions=self.extensions, extension_configs=self.extension_configs)
-        # else:
-        #     md = None
-
         with open(source_file, 'rb') as source:
-            for token in tokenizer(source.readline):
+            for token in tokenize.tokenize(source.readline):
                 token_type = token[0]
                 value = token[1]
                 line = util.ustr(token[2][0])
 
-                if util.PY3 and token_type == tokenize.ENCODING:
+                if token_type == tokenize.ENCODING:
                     encoding = value
 
-                value = token[1] if util.PY3 else token[1].decode(encoding)
+                value = token[1]
                 line = util.ustr(token[2][0])
 
                 # Track function and class ancestry
@@ -134,7 +114,7 @@ class PythonParser(parsers.Parser):
                 if token_type == tokenize.COMMENT and self.comments:
                     # Capture comments
                     if len(stack) > 1:
-                        loc ="%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
+                        loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
                     else:
                         loc = "%s(%s)" % (stack[0][0], line)
                     comments.append(parsers.SourceText(value, loc, encoding, 'comment'))
@@ -146,18 +126,18 @@ class PythonParser(parsers.Parser):
                         if self.docstrings:
                             string = textwrap.dedent(eval(value.strip()))
                             if not isinstance(string, util.ustr):
-                                string = string.decode(encoding)
-                            # if md:
-                            #     string = md.convert(string)
-                            #     md.reset()
+                                string = self.get_ascii(string)
                             loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
                             docstrings.append(parsers.SourceText(string, loc, encoding, 'docstring'))
                     elif self.strings:
                         string = eval(value.strip())
-                        if not isinstance(string, util.ustr):
-                            string = string.decode(encoding)
-                        loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
-                        strings.append(parsers.SourceText(string, loc, encoding, 'string'))
+                        if isinstance(string, util.ustr) or self.bytes:
+                            string_type = 'string'
+                            if not isinstance(string, util.ustr):
+                                string = self.get_ascii(string)
+                                string_type = 'bytes'
+                            loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
+                            strings.append(parsers.SourceText(string, loc, encoding, string_type))
 
                 if token_type == tokenize.INDENT:
                     indent = value
@@ -182,6 +162,6 @@ class PythonParser(parsers.Parser):
 
 
 def get_parser():
-    """Return the parser"""
+    """Return the parser."""
 
     return PythonParser

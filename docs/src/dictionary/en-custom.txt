@@ -1,0 +1,8 @@
+BOM
+BOMs
+BeautifulSoup
+PyYaml's
+UTF
+docstrings
+pre
+sortable

@@ -9,6 +9,6 @@ class TextParser(parsers.Parser):
 
 
 def get_parser():
-    """Return the parser"""
+    """Return the parser."""
 
     return TextParser

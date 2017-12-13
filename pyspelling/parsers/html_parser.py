@@ -7,21 +7,21 @@ from .. import parsers
 import re
 import codecs
 
+RE_HTML_ENCODE = re.compile(
+    br'''(?x)
+    <meta(?!\s*(?:name|value)\s*=)(?:[^>]*?content\s*=[\s"']*)?(?:[^>]*?)[\s"';]*charset\s*=[\s"']*([^\s"'/>]*)
+    '''
+)
+
 
 class HTMLDecoder(parsers.Decoder):
     """Detect HTML encoding."""
-
-    RE_HTML_ENCODE = re.compile(
-        br'''(?x)
-        <meta(?!\s*(?:name|value)\s*=)(?:[^>]*?content\s*=[\s"']*)?(?:[^>]*?)[\s"';]*charset\s*=[\s"']*([^\s"'/>]*)
-        '''
-    )
 
     def special_encode_check(self, content, ext):
         """Special HTML encoding check."""
 
         encode = None
-        m = self.RE_HTML_ENCODE.search(content)
+        m = RE_HTML_ENCODE.search(content)
         if m:
             enc = m.group(1).decode('ascii')
             try:
@@ -47,13 +47,13 @@ class HTMLParser(parsers.Parser):
         try:
             with codecs.open(source_file, 'r', encoding=encoding) as f:
                 text = f.read()
-            html = [parser.SourceText(text, source_file, encoding, 'html')]
+            html = [parsers.SourceText(text, source_file, encoding, 'html')]
         except Exception as e:
             html = [parsers.SourceText('', source_file, 'bin', 'binary')]
         return html
 
 
 def get_parser():
-    """Return the parser"""
+    """Return the parser."""
 
     return HTMLParser

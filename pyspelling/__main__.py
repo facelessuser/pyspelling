@@ -3,6 +3,7 @@ import sys
 import argparse
 from pyspelling import settings
 from pyspelling import Spelling
+from pyspelling import __version__
 
 
 def main():
@@ -10,7 +11,7 @@ def main():
 
     parser = argparse.ArgumentParser(prog='spellcheck', description='Spell checking tool.')
     # Flag arguments
-    parser.add_argument('--version', action='version', version=('%(prog)s ' + '0.1.0'))
+    parser.add_argument('--version', action='version', version=('%(prog)s ' + __version__.version))
     parser.add_argument('--verbose', '-v', action='store_true', default=False, help="verbose.")
     parser.add_argument('--config', '-c', action='store', default='.spelling.yml', help="Spelling config.")
     args = parser.parse_args()
@@ -21,5 +22,6 @@ def main():
     if spelling.check():
         fail = True
     return fail
+
 
 sys.exit(main())
