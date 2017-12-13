@@ -25,6 +25,7 @@ class HTMLFilter(filters.Filter):
         """Initialize."""
 
         self.html_parser = HTMLParser()
+        self.comments = options.get('comments', True) is True
         self.attributes = set(options.get('attributes', []))
         self.selectors = self.process_selectors(*options.get('ignores', []))
 
@@ -132,7 +133,7 @@ class HTMLFilter(filters.Filter):
             break
         return skip
 
-    def html_to_text(self, tree, root=True):
+    def html_to_text(self, tree):
         """
         Parse the HTML creating a buffer with each tags content.
 
@@ -142,33 +143,44 @@ class HTMLFilter(filters.Filter):
 
         text = []
         attributes = []
+        root = tree.name == '[document]'
 
-        if not self.skip_tag(tree):
-            for attr in self.attributes:
-                value = tree.attrs.get(attr, '').strip()
-                if value:
-                    attributes.append(value)
+        # Handle comments
+        if isinstance(tree, bs4.Comment):
+            if self.comments:
+                string = util.ustr(tree).strip()
+                if string:
+                    text.append(string)
+        elif root or not self.skip_tag(tree):
+            # Check attributes for normal tags
+            if not root:
+                for attr in self.attributes:
+                    value = tree.attrs.get(attr, '').strip()
+                    if value:
+                        attributes.append(value)
 
+            # Walk children
             for child in tree:
                 if isinstance(child, bs4.element.Tag):
                     if child.contents:
-                        t, a = (self.html_to_text(child, False))
+                        t, a = (self.html_to_text(child))
                         text.extend(t)
                         attributes.extend(a)
-                else:
+                # Get content if not the root
+                elif not root:
                     string = util.ustr(child).strip()
                     if string:
-                        text.append(util.ustr(child))
+                        text.append(string)
 
         if root:
-            return self.html_parser.unescape(' '.join(' '.join(text), ' '.join(attributes)))
-
-        return text, attributes
+            return self.html_parser.unescape(' '.join([' '.join(text), ' '.join(attributes)]))
+        else:
+            return (text, attributes)
 
     def filter(self, text):
         """Filter the text."""
 
-        return self.html_to_text(bs4.BeautifulSoup(text, "html5lib").html)
+        return self.html_to_text(bs4.BeautifulSoup(text, "html5lib"))
 
 
 def get_filter():
