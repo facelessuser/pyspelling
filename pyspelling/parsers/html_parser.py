@@ -3,6 +3,7 @@ HTML parsing.
 
 Detect encoding from HTML header.
 """
+from __future__ import unicode_literals
 from .. import parsers
 import re
 import codecs

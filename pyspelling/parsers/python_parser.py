@@ -3,14 +3,21 @@ Python parsing.
 
 Parse Python docstrings.
 """
+from __future__ import unicode_literals
 from .. import parsers
 import re
 import textwrap
 import codecs
 import tokenize
+import ast
 from .. import util
 
-PREV_DOC_TOKENS = (tokenize.INDENT, tokenize.DEDENT, tokenize.NEWLINE, tokenize.ENCODING)
+if util.PY3:
+    tokenizer = tokenize.tokenize
+    PREV_DOC_TOKENS = (tokenize.INDENT, tokenize.DEDENT, tokenize.NEWLINE, tokenize.ENCODING)
+else:
+    tokenizer = tokenize.generate_tokens
+    PREV_DOC_TOKENS = (tokenize.INDENT, tokenize.DEDENT, tokenize.NEWLINE)
 
 RE_PY_ENCODE = re.compile(
     br'^[^\r\n]*?coding[:=]\s*([-\w.]+)|[^\r\n]*?\r?\n[^\r\n]*?coding[:=]\s*([-\w.]+)'
@@ -61,10 +68,36 @@ class PythonParser(parsers.Parser):
         self.bytes = config.get('bytes', False) is True
         super(PythonParser, self).__init__(config, encoding)
 
+    def is_py2_unicode_literals(self, text, source_file):
+        """Check if Python 2 Unicode literals is used."""
+
+        uliterals = False
+        root = ast.parse(text, source_file)
+
+        for node in ast.iter_child_nodes(root):
+            if isinstance(node, ast.ImportFrom) and node.module:
+                module = node.module.split('.')
+            else:
+                continue
+
+            if module[0] != '__future__':
+                continue
+
+            for n in node.names:
+                if n.name and n.name.split('.')[0] == 'unicode_literals':
+                    uliterals = True
+                    break
+        return uliterals
+
     def detect_encoding(self, source_file):
         """Get default encoding."""
 
-        return 'ascii'
+        if util.PY3:
+            # In Py3, the tokenizer will tell us what the encoding is.
+            encoding = 'ascii'
+        else:
+            encoding = self.DECODER().guess(source_file, verify=False)
+        return encoding
 
     def get_ascii(self, text):
         """Retrieve ASCII text from byte string."""
@@ -81,16 +114,22 @@ class PythonParser(parsers.Parser):
         indent = ''
         name = None
         stack = [(source_file, 0, self.MODULE)]
+        uliterals = True
 
         encoding = self.detect_encoding(source_file)
 
         with open(source_file, 'rb') as source:
-            for token in tokenize.tokenize(source.readline):
+
+            if not util.PY3:
+                uliterals = self.is_py2_unicode_literals(source.read(), source_file)
+                source.seek(0)
+
+            for token in tokenizer(source.readline):
                 token_type = token[0]
                 value = token[1]
                 line = util.ustr(token[2][0])
 
-                if token_type == tokenize.ENCODING:
+                if util.PY3 and token_type == tokenize.ENCODING:
                     encoding = value
 
                 value = token[1]
@@ -124,13 +163,22 @@ class PythonParser(parsers.Parser):
                     # NL seems to be a different thing.
                     if prev_token_type in PREV_DOC_TOKENS:
                         if self.docstrings:
-                            string = textwrap.dedent(eval(value.strip()))
+                            value = value.strip()
+                            if not util.PY3 and not value.startswith((b'u', b'b')):
+                                value = (b'u' if uliterals else b'b') + value
+                            string = textwrap.dedent(eval(value))
+
                             if not isinstance(string, util.ustr):
-                                string = self.get_ascii(string)
+                                # Since docstrings should be readable and printable,
+                                # if byte string assume 'ascii'.
+                                string = string.decode('ascii')
                             loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
                             docstrings.append(parsers.SourceText(string, loc, encoding, 'docstring'))
                     elif self.strings:
-                        string = eval(value.strip())
+                        value = value.strip()
+                        if not util.PY3 and not value.startswith((b'u', b'b')):
+                            value = (b'u' if uliterals else b'b') + value
+                        string = textwrap.dedent(eval(value))
                         if isinstance(string, util.ustr) or self.bytes:
                             string_type = 'string'
                             if not isinstance(string, util.ustr):

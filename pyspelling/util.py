@@ -1,11 +1,20 @@
 """Utilities."""
+from __future__ import unicode_literals
 import subprocess
 import sys
 import string
 import random
 
-string_type = str
-ustr = str
+PY3 = sys.version_info >= (3, 0)
+
+if PY3:
+    string_type = str
+    ustr = str
+    bstr = bytes
+else:
+    string_type = basestring  # noqa
+    ustr = unicode  # noqa
+    bstr = str
 
 
 def console(cmd, input_file=None, input_text=None):
@@ -43,10 +52,10 @@ def console(cmd, input_file=None, input_text=None):
     returncode = process.returncode
 
     assert returncode == 0, "Runtime Error: %s" % (
-        output[0].rstrip().decode('utf-8')
+        output[0].rstrip().decode('utf-8') if PY3 else output[0]
     )
 
-    return output[0].decode('utf-8')
+    return output[0].decode('utf-8') if PY3 else output[0]
 
 
 def random_name_gen(size=6):

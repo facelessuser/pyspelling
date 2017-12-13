@@ -1,4 +1,5 @@
 """HTML filter."""
+from __future__ import unicode_literals
 from .. import filters
 from collections import namedtuple
 import bs4
