@@ -1,4 +1,31 @@
 documents:
+- name: MkDocs
+  parser: pyspelling.parsers.html_parser
+  src:
+  - site
+  aspell:
+    lang: en
+  dictionary:
+    lang: en
+    wordlists:
+    - docs/src/dictionary/en-custom.txt
+    output: build/dictionary/mkdocs.dic
+  filters:
+  - pyspelling.filters.html_filter:
+      attributes:
+      - title
+      - alt
+      ignores:
+      - code
+      - pre
+      - a.magiclink-compare
+      - a.magiclink-commit
+      - span.keys
+      - .MathJax_Preview
+      - .md-nav__link
+      - .md-footer-custom-text
+      - .md-source__repository
+
 - name: Python Source
   parser: pyspelling.parsers.python_parser
   options:

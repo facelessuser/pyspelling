@@ -193,6 +193,8 @@ class Spelling(object):
         # Override extensions if the user provides their own
         extensions = self.extensions if self.extensions else plugin.EXTENSIONS
         for target in targets:
+            if not os.path.exists(target):
+                continue
             if os.path.isdir(target):
                 if self.skip_target(target):
                     continue
@@ -250,6 +252,8 @@ class Spelling(object):
             else:
                 name = f
                 options = {}
+            if options is None:
+                options = {}
 
             # Extract disallowed tokens
             disallow = tuple()
@@ -290,6 +294,4 @@ class Spelling(object):
             for sources in self.walk_src(documents.get('src', []), parser):
                 if self.check_spelling(sources, options, output):
                     fail = True
-
-            break
         return fail
