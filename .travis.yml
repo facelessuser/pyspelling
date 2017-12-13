@@ -1,0 +1,59 @@
+sudo: false
+
+language: python
+
+# Limit git depth to speed up build
+git:
+  depth: 5
+
+matrix:
+  include:
+  # - python: 3.4
+  #   env: TOXENV=py34-unittests
+  # - python: 3.5
+  #   env: TOXENV=py35-unittests
+  # - python: 3.6
+  #   env: TOXENV=py36-unittests
+  - python: 3.6
+    env: TOXENV=lint
+  # - python: 3.6
+  #   env: TOXENV=documents
+
+addons:
+  apt:
+    packages:
+    - aspell
+    - aspell-en
+
+install:
+- pip install tox
+# - pip install codecov
+
+script:
+- tox
+
+# after_success:
+# - codecov
+
+# deploy:
+#   - provider: pypi
+#     user: facelessuser
+#     server: https://upload.pypi.org/legacy/
+#     password:
+#       secure: 
+#     distributions: "sdist bdist_wheel"
+#     skip_upload_docs: true
+#     on:
+#       tags: true
+#       repo: facelessuser/pyspelling
+#       condition: "$TOXENV = documents"
+#   - provider: pages
+#     github_token: $GITHUB_TOKEN
+#     name: $GITHUB_USER
+#     email: $GITHUB_EMAIL
+#     skip_cleanup: true
+#     local_dir: site
+#     on:
+#       tags: true
+#       repo: facelessuser/pyspelling
+#       condition: "$TOXENV = documents"

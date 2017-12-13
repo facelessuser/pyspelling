@@ -12,7 +12,6 @@ documents:
     lang: en
     wordlists:
     - docs/src/dictionary/en-custom.txt
-    # - docs/src/dictionary/en-python.txt
     output: build/dictionary/python.dic
   filters:
   - pyspelling.filters.context_filter:
