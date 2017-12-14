@@ -84,7 +84,9 @@ class Decoder(object):
     def utf_strip_bom(self, encoding):
         """Return an encoding that will ignore the BOM."""
 
-        if encoding == 'utf-8':
+        if encoding is None:
+            pass
+        elif encoding == 'utf-8':
             encoding = 'utf-8-sig'
         elif encoding.startswith('utf-16'):
             encoding = 'utf-16'
@@ -133,7 +135,7 @@ class Decoder(object):
                             encoding = 'bin'
             else:
                 encoding = 'bin'
-        except Exception as e:  # pragma: no cover
+        except Exception:  # pragma: no cover
             encoding = 'bin'
             pass
 

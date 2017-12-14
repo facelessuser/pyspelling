@@ -28,3 +28,9 @@ class MarkdownFilter(filters.Filter):
 
         self.markdown.reset()
         return self.markdown.convert(text)
+
+
+def get_filter():
+    """Return the filter."""
+
+    return MarkdownFilter

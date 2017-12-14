@@ -1,6 +1,20 @@
 documents:
 - name: MkDocs
   parser: pyspelling.parsers.html_parser
+  options:
+    attributes:
+    - title
+    - alt
+    ignores:
+    - code
+    - pre
+    - a.magiclink-compare
+    - a.magiclink-commit
+    - span.keys
+    - .MathJax_Preview
+    - .md-nav__link
+    - .md-footer-custom-text
+    - .md-source__repository
   src:
   - site
   aspell:
@@ -10,7 +24,22 @@ documents:
     wordlists:
     - docs/src/dictionary/en-custom.txt
     output: build/dictionary/mkdocs.dic
+
+- name: Markdown
+  extensions:
+  - '*.md'
+  parser: pyspelling.parsers.text_parser
+  src:
+  - README.md
+  aspell:
+    lang: en
+  dictionary:
+    lang: en
+    wordlists:
+    - docs/src/dictionary/en-custom.txt
+    output: build/dictionary/mkdocs.dic
   filters:
+  - pyspelling.filters.markdown_filter:
   - pyspelling.filters.html_filter:
       attributes:
       - title

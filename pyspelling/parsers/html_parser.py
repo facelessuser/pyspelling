@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 from .. import parsers
 import re
 import codecs
+from ..filters import html_filter
 
 RE_HTML_ENCODE = re.compile(
     br'''(?x)
@@ -41,6 +42,12 @@ class HTMLParser(parsers.Parser):
     EXTENSIONS = ('*.html', '*.htm')
     DECODER = HTMLDecoder
 
+    def __init__(self, config, encoding='ascii'):
+        """Initialization."""
+
+        self.filter = html_filter.HTMLFilter(config)
+        super(HTMLParser, self).__init__(config, encoding)
+
     def parse_file(self, source_file):
         """Parse HTML file."""
 
@@ -48,8 +55,8 @@ class HTMLParser(parsers.Parser):
         try:
             with codecs.open(source_file, 'r', encoding=encoding) as f:
                 text = f.read()
-            html = [parsers.SourceText(text, source_file, encoding, 'html')]
-        except Exception as e:
+            html = [parsers.SourceText(self.filter.filter(text), source_file, encoding, 'html')]
+        except Exception:
             html = [parsers.SourceText('', source_file, 'bin', 'binary')]
         return html
 

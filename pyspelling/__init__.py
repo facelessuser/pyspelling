@@ -114,7 +114,7 @@ class Spelling(object):
                 for word in words:
                     print(word)
                 print('-' * 80)
-                print('\n')
+                print('')
         return fail
 
     def compile_dictionary(self, lang, wordlists, output):
@@ -278,6 +278,7 @@ class Spelling(object):
 
         fail = False
         for documents in self.documents:
+            print('')
             # Setup parser and variables for the spell check
             parser = self.get_module(documents['parser'], 'get_parser')(
                 documents.get('options', {}), documents.get('fallback_encoding', 'ascii')
