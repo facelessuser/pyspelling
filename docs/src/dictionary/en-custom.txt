@@ -1,6 +1,7 @@
 BOM
 BOMs
 BeautifulSoup
+PySpelling
 PyYaml's
 UTF
 docstrings

@@ -2,6 +2,7 @@ documents:
 - name: MkDocs
   parser: pyspelling.parsers.html_parser
   options:
+    comments: false
     attributes:
     - title
     - alt
@@ -41,6 +42,7 @@ documents:
   filters:
   - pyspelling.filters.markdown_filter:
   - pyspelling.filters.html_filter:
+      comments: false
       attributes:
       - title
       - alt

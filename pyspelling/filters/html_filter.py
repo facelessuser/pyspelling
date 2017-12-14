@@ -166,8 +166,8 @@ class HTMLFilter(filters.Filter):
                         t, a = (self.html_to_text(child))
                         text.extend(t)
                         attributes.extend(a)
-                # Get content if not the root
-                elif not root:
+                # Get content if not the root and not a comment (unless we want comments).
+                elif not root and (not isinstance(child, bs4.Comment) or self.comments):
                     string = util.ustr(child).strip()
                     if string:
                         text.append(string)
