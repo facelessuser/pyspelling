@@ -1,0 +1,15 @@
+recursive-include pyspelling *.py
+recursive-include tests *.txt *.html *.yml *.py *.css
+recursive-include docs/src/markdown *.md *.png *.gif *.html
+recursive-include docs/src/dictionary *.txt
+recursive-include docs/theme *.js *.css *.html
+recursive-include requirements *.txt
+recursive-exclude site *
+include mkdocs.yml
+include setup.py
+include setup.cfg
+include tox.ini
+include .coveragerc
+include LICENSE.md
+include README.md
+include MANIFEST.in
