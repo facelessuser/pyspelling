@@ -27,7 +27,7 @@ documents:
     output: build/dictionary/mkdocs.dic
 
 - name: Markdown
-  extensions:
+  file_patterns:
   - '*.md'
   parser: pyspelling.parsers.text_parser
   src:

@@ -39,7 +39,7 @@ class HTMLDecoder(parsers.Decoder):
 class HTMLParser(parsers.Parser):
     """Spelling Python."""
 
-    EXTENSIONS = ('*.html', '*.htm')
+    FILE_PATTERNS = ('*.html', '*.htm')
     DECODER = HTMLDecoder
 
     def __init__(self, config, encoding='ascii'):

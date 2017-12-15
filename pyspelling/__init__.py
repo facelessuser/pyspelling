@@ -176,13 +176,13 @@ class Spelling(object):
                 break
         return exclude
 
-    def is_extension(self, file_name, extensions):
-        """Is extension in current extensions."""
+    def is_valid_file(self, file_name, file_patterns):
+        """Is file in current file patterns."""
 
         okay = False
         lowered = file_name.lower()
-        for ext in extensions:
-            if fnmatch.fnmatch(lowered, ext):
+        for pattern in file_patterns:
+            if fnmatch.fnmatch(lowered, pattern):
                 okay = True
                 break
         return okay
@@ -190,8 +190,8 @@ class Spelling(object):
     def walk_src(self, targets, plugin):
         """Walk source and parse files."""
 
-        # Override extensions if the user provides their own
-        extensions = self.extensions if self.extensions else plugin.EXTENSIONS
+        # Override file_patterns if the user provides their own
+        file_patterns = self.file_patterns if self.file_patterns else plugin.FILE_PATTERNS
         for target in targets:
             if not os.path.exists(target):
                 continue
@@ -204,9 +204,9 @@ class Spelling(object):
                         file_path = os.path.join(base, f)
                         if self.skip_target(file_path):
                             continue
-                        if self.is_extension(f, extensions):
+                        if self.is_valid_file(f, file_patterns):
                             yield plugin.parse_file(file_path)
-            elif self.is_extension(target, extensions):
+            elif self.is_valid_file(target, file_patterns):
                 if self.skip_target(target):
                     continue
                 yield plugin.parse_file(target)
@@ -283,7 +283,7 @@ class Spelling(object):
             parser = self.get_module(documents['parser'], 'get_parser')(
                 documents.get('options', {}), documents.get('fallback_encoding', 'ascii')
             )
-            self.extensions = documents.get('extensions', [])
+            self.file_patterns = documents.get('file_patterns', [])
 
             options = self.setup_spellchecker(documents)
             output = self.setup_dictionary(documents)

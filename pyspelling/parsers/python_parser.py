@@ -52,7 +52,7 @@ class PythonDecoder(parsers.Decoder):
 class PythonParser(parsers.Parser):
     """Spelling Python."""
 
-    EXTENSIONS = ('*.py', '*.pyw')
+    FILE_PATTERNS = ('*.py', '*.pyw')
     DECODER = PythonDecoder
 
     MODULE = 0

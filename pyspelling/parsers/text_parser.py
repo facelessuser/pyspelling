@@ -6,7 +6,7 @@ from .. import parsers
 class TextParser(parsers.Parser):
     """Text parser."""
 
-    EXTENSIONS = ('*.txt', '*.text')
+    FILE_PATTERNS = ('*.txt', '*.text')
 
 
 def get_parser():

@@ -25,15 +25,8 @@ theme:
 pages:
   - PySpelling: index.md
   - Installation: installation.md
-  - Usage Notes: usage_notes.md
-  - Parsers:
-    - HTML: parsers/html_parser.md
-    - Python: parsers/python_parser.md
-    - Text: parsers/text_parser.md
-  - Filters:
-    - Context: filters/context_filter.md
-    - HTML: filters/html_filter.md
-    - Markdown: filters/markdown_filter.md
+  - Parsers: parsers.md
+  - Filters: filters.md
   - Contributing &amp; Support: contributing.md
   - Development: development.md
   - Changelog: changelog.md
