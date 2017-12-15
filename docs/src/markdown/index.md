@@ -102,7 +102,7 @@ documents:
 
 ### File Patterns
 
-A given parser will have a list of valid file patterns, so when you are searching a folder, you only search the relevant files. If you want to use the parser on a file type that is not currently covered, you can override the file pattern for that parser with the `file_patterns` option. Let's say we wanted to parse file types `*.python` with the Python file parser, you could use:
+A given parser will have a list of valid wildcard file patterns, so when you are searching a folder, you only search the relevant files. If you want to use the parser on a file type that is not currently covered, you can override the file pattern for that parser with the `file_patterns` option. Let's say we wanted to parse file types `*.python` with the Python file parser, you could use:
 
 ```yaml
 documents:
@@ -142,8 +142,134 @@ Each spelling task must define sources to search via the `src` key. Each source 
 
 ### Excludes
 
-### Aspell Options
+Sometimes when searching folders, you'll need to exclude certain files and folders.  PySpelling allows you to define wildcard excludes:
+
+```yaml
+- name: Python Source
+  parser: pyspelling.parsers.python_parser
+  src:
+  - pyspelling
+  excludes:
+  - pyspelling/subfolder/*
+```
+
+If wildcard patterns are not sufficient, you can also use regular expression:
+
+```yaml
+- name: Python Source
+  parser: pyspelling.parsers.python_parser
+  src:
+  - pyspelling
+  regex_excludes:
+  - pyspelling/(?:folder|other-folder)/.*
+```
+
+### Filters
+
+Some times your may want to take a buffer and run it through a filter. Filters operate directly on a text buffer returning the altered text.
+
+Let's say you had some Markdown files and wanted to convert them to HTML, and then filter out specific tags. You could configure your task with the Markdown filter followed by the HTML filter:
+
+
+```yaml
+- name: Markdown
+  file_patterns:
+  - '*.md'
+  parser: pyspelling.parsers.text_parser
+  src:
+  - README.md
+  filters:
+  - pyspelling.filters.markdown_filter:
+  - pyspelling.filters.html_filter:
+      comments: false
+      attributes:
+      - title
+      - alt
+      ignores:
+      - code
+      - pre
+      - a.magiclink-compare
+      - a.magiclink-commit
+      - span.keys
+      - .MathJax_Preview
+      - .md-nav__link
+      - .md-footer-custom-text
+      - .md-source__repository
+```
 
 ### Personal Dictionaries/Word Lists
 
-### Filters
+When spell checking a document, sometimes you'll have words that are not in your default, installed dictionary. PySpelling automates compiling your own personal dictionary from a list of word lists.
+
+There are two things that must be defined: the default language/dictionary the wordlist is for via the the `lang` option, and `wordlists` which is an array of word lists.  Optionally, you can also define the output location and file name for the compiled dictionary.
+
+```yaml
+documents:
+- name: Python Source
+  parser: pyspelling.parsers.python_parser
+  options:
+    strings: false
+    comments: false
+  src:
+  - pyspelling
+  aspell:
+    lang: en
+  dictionary:
+    lang: en
+    wordlists:
+    - docs/src/dictionary/en-custom.txt
+    output: build/dictionary/python.dic
+```
+
+PySpelling will add the output dictionary via the `--add-extra-dicts` option automatically.
+
+### Aspell Options
+
+Though PySpelling is a wrapper around Aspell, you can still set a number of Aspell's options directly, such as default dictionary, search options and filters. Basically, relevant search options are passed directly to Aspell, while others are ignored, like Replace options (which aren't relevant in PySpelling) and options like encoding (which are handled internally by PySpelling).
+
+To configure an Aspell option, just configure the desired options under the `aspell` key minus the leading dashes.  So `-H` would simply be `H` and `--lang` would be `lang`.
+
+Boolean flags would be set to `true`.
+
+```yaml
+documents:
+- name: HTML
+  parser: pyspelling.parsers.html_parser
+  src:
+  - docs
+  aspell:
+    H: true
+```
+
+
+Other options would be set to a string or an integer value (intergers would be converted over to a string internally).
+
+```yaml
+documents:
+- name: Python Source
+  parser: pyspelling.parsers.python_parser
+  options:
+    strings: false
+    comments: false
+  src:
+  - pyspelling
+  aspell:
+    lang: en
+```
+
+Lastly, if you have an option that can be used multiple times, just set the value up as an array, and the option will be added for each value in the array:
+
+```yaml
+documents:
+- name: Python Source
+  parser: pyspelling.parsers.python_parser
+  options:
+    strings: false
+    comments: false
+  src:
+  - pyspelling
+  aspell:
+    add-extra-dicts:
+      - my-dictionary.dic
+      - my-other-dictionary.dic
+```
