@@ -68,6 +68,15 @@ def random_name_gen(size=6):
     ) if size > 0 else ''
 
 
+class Results(namedtuple('Results', ['words', 'context', 'category', 'error'])):
+    """Results."""
+
+    def __new__(cls, words, context, category, error=None):
+        """Allow defaults."""
+
+        return super(Results, cls).__new__(cls, words, context, category, error)
+
+
 class SourceText(namedtuple('SourceText', ['text', 'context', 'encoding', 'category', 'error'])):
     """Source text."""
 

@@ -20,8 +20,20 @@ def main():
     fail = False
     config = settings.read_config(args.config)
     spelling = Spelling(config, verbose=args.verbose)
-    if spelling.check():
-        fail = True
+    for results in spelling.check():
+        if results.error:
+            fail = True
+            print('ERROR: Could not read %s -- %s' % (results.context, results.error))
+        elif results.words:
+            fail = True
+            print('Misspelled words:\n<%s> %s' % (results.category, results.context))
+            print('-' * 80)
+            for word in results.words:
+                print(word)
+            print('-' * 80)
+            print('')
+        elif args.verbose:
+            print('CHECK: %s' % results.context)
     return fail
 
 

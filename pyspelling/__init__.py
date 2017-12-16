@@ -35,15 +35,11 @@ class Spelling(object):
     def check_spelling(self, sources, options, personal_dict):
         """Check spelling."""
 
-        fail = False
-
         for source in sources:
 
             if source._has_error():
-                print('ERROR: Could not read %s: %s' % (source.context, source.error))
+                yield util.Results([], source.context, source.category, source.error)
                 continue
-            if self.verbose:
-                print('CHECK: %s' % source.context)
 
             text = source.text
             if not source._is_bytes():
@@ -108,17 +104,7 @@ class Spelling(object):
                             cmd.extend([key, util.ustr(value)])
 
             wordlist = util.console(cmd, input_text=text)
-            words = [w for w in sorted(set(wordlist.split('\n'))) if w]
-
-            if words:
-                fail = True
-                print('Misspelled words:\n<%s> %s' % (source.category, source.context))
-                print('-' * 80)
-                for word in words:
-                    print(word)
-                print('-' * 80)
-                print('')
-        return fail
+            yield util.Results([w for w in sorted(set(wordlist.split('\n'))) if w], source.context, source.category)
 
     def compile_dictionary(self, lang, wordlists, output):
         """Compile user dictionary."""
@@ -279,7 +265,6 @@ class Spelling(object):
     def check(self):
         """Walk source and initiate spell check."""
 
-        fail = False
         for documents in self.documents:
             print('')
             # Setup parser and variables for the spell check
@@ -296,6 +281,5 @@ class Spelling(object):
             # Perform spell check
             print('Spell Checking %s...' % documents.get('name', ''))
             for sources in self.walk_src(documents.get('src', []), parser):
-                if self.check_spelling(sources, options, output):
-                    fail = True
-        return fail
+                for result in self.check_spelling(sources, options, output):
+                    yield result
