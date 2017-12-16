@@ -8,6 +8,7 @@ from .. import parsers
 import re
 import codecs
 from ..filters import html_filter
+from .. import util
 
 RE_HTML_ENCODE = re.compile(
     br'''(?x)
@@ -31,8 +32,6 @@ class HTMLDecoder(parsers.Decoder):
                 encode = enc
             except LookupError:
                 pass
-        else:
-            print('No match')
         return encode
 
 
@@ -52,14 +51,11 @@ class HTMLParser(parsers.Parser):
         """Parse HTML file."""
 
         encoding = self.detect_encoding(source_file)
-        try:
-            assert encoding != 'bin', 'Could not detect encoding!'
 
-            with codecs.open(source_file, 'r', encoding=encoding) as f:
-                text = f.read()
-            content = [parsers.SourceText(self.filter.filter(text), source_file, encoding, 'html')]
-        except Exception as e:
-            content = [parsers.SourceError(source_file, str(e))]
+        with codecs.open(source_file, 'r', encoding=encoding) as f:
+            text = f.read()
+        content = [util.SourceText(self.filter.filter(text), source_file, encoding, 'html')]
+
         return content
 
 

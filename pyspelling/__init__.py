@@ -5,7 +5,6 @@ import fnmatch
 import re
 import importlib
 from . import util
-from . import parsers
 
 
 class Spelling(object):
@@ -39,16 +38,17 @@ class Spelling(object):
         fail = False
 
         for source in sources:
-            if isinstance(source, parsers.SourceError):
-                print('ERROR: Could not read %s' % source.context)
+
+            if source._has_error():
+                print('ERROR: Could not read %s: %s' % (source.context, source.error))
                 continue
             if self.verbose:
                 print('CHECK: %s' % source.context)
 
             text = source.text
-            if isinstance(source, parsers.SourceText):
+            if not source._is_bytes():
                 for f, disallow in self.filters:
-                    if source.type not in disallow:
+                    if source.category not in disallow:
                         text = f.filter(text)
                 text = text.encode(source.encoding)
 
@@ -112,7 +112,7 @@ class Spelling(object):
 
             if words:
                 fail = True
-                print('Misspelled words:\n<%s> %s' % (source.type, source.context))
+                print('Misspelled words:\n<%s> %s' % (source.category, source.context))
                 print('-' * 80)
                 for word in words:
                     print(word)

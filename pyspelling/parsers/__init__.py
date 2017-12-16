@@ -6,7 +6,7 @@ import contextlib
 import mmap
 import os
 import functools
-from collections import namedtuple
+from .. import util
 
 RE_UTF_BOM = re.compile(
     b'^(?:(' +
@@ -21,18 +21,6 @@ RE_UTF_BOM = re.compile(
     codecs.BOM_UTF16_LE +
     b'))'
 )
-
-
-class SourceText(namedtuple('SourceText', ['text', 'context', 'encoding', 'type'])):
-    """Source text."""
-
-
-class SourceBytes(namedtuple('SourceBytes', ['text', 'context', 'encoding', 'type'])):
-    """Source bytes."""
-
-
-class SourceError(namedtuple('SourceError', ['context', 'error'])):
-    """Source error."""
 
 
 class Decoder(object):
@@ -140,11 +128,11 @@ class Decoder(object):
 
                     if verify and encoding and encoding != 'bin':
                         if not self.verify_encode(f, encoding.encode, verify_blocks, verify_block_size):
-                            encoding = 'bin'
+                            raise UnicodeDecodeError('Could not verify encoding!')
             else:
-                encoding = 'bin'
+                raise UnicodeDecodeError('Unicode detection is not applied to very large files!')
         except Exception:  # pragma: no cover
-            encoding = 'bin'
+            raise UnicodeDecodeError('Cannot resolve encoding!')
             pass
 
         return encoding
@@ -177,14 +165,19 @@ class Parser(object):
 
         encoding = self.detect_encoding(source_file)
 
-        try:
-            assert encoding != 'bin', 'Could not detect encoding!'
+        with codecs.open(source_file, 'r', encoding=encoding) as f:
+            text = f.read()
+        content = [util.SourceText(text, source_file, encoding, 'text')]
 
-            with codecs.open(source_file, 'r', encoding=encoding) as f:
-                text = f.read()
-            content = [SourceText(text, source_file, encoding, 'text')]
+        return content
+
+    def _parse(self, source_file):
+        """Parse the file."""
+
+        try:
+            content = self.parse_file(source_file)
         except Exception as e:
-            content = [SourceError(source_file, str(e))]
+            content = [util.SourceText('', source_file, '', str(e))]
         return content
 
 
@@ -210,5 +203,6 @@ class RawParser(Parser):
 
         with open(source_file, 'rb') as f:
             text = f.read()
+        content = [util.SourceText(text, source_file, encoding, 'text')]
 
-        return [SourceBytes(text, source_file, encoding, 'text')]
+        return content

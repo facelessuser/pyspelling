@@ -4,6 +4,7 @@ import subprocess
 import sys
 import string
 import random
+from collections import namedtuple
 
 PY3 = sys.version_info >= (3, 0)
 
@@ -65,3 +66,24 @@ def random_name_gen(size=6):
         [random.choice(string.ascii_uppercase)] +
         [random.choice(string.ascii_uppercase + string.digits) for i in range(size - 1)]
     ) if size > 0 else ''
+
+
+class SourceText(namedtuple('SourceText', ['text', 'context', 'encoding', 'category', 'error'])):
+    """Source text."""
+
+    __slots__ = ()
+
+    def __new__(cls, text, context, encoding, category, error=None):
+        """Allow defaults."""
+
+        return super(SourceText, cls).__new__(cls, text, context, encoding, category, error)
+
+    def _is_bytes(self):
+        """Is bytes."""
+
+        return isinstance(self.text, bstr)
+
+    def _has_error(self):
+        """Check if object has an error associated with it."""
+
+        return self.error is not None

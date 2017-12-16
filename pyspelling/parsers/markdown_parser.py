@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from .. import parsers
 import codecs
 from ..filters import markdown_filter
+from .. import util
 
 
 class MarkdownParser(parsers.Parser):
@@ -20,14 +21,11 @@ class MarkdownParser(parsers.Parser):
         """Parse Markdown file."""
 
         encoding = self.detect_encoding(source_file)
-        try:
-            assert encoding != 'bin', 'Could not detect encoding!'
 
-            with codecs.open(source_file, 'r', encoding=encoding) as f:
-                text = f.read()
-            content = [parsers.SourceText(self.filter.filter(text), source_file, encoding, 'markdown')]
-        except Exception as e:
-            content = [parsers.SourceError(source_file, str(e))]
+        with codecs.open(source_file, 'r', encoding=encoding) as f:
+            text = f.read()
+        content = [util.SourceText(self.filter.filter(text), source_file, encoding, 'markdown')]
+
         return content
 
 
