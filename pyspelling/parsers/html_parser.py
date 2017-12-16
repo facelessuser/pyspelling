@@ -54,7 +54,7 @@ class HTMLParser(parsers.Parser):
 
         with codecs.open(source_file, 'r', encoding=encoding) as f:
             text = f.read()
-        content = [util.SourceText(self.filter.filter(text), source_file, encoding, 'html')]
+        content = [util.SourceText(self.filter.filter(text, encoding), source_file, encoding, 'html')]
 
         return content
 

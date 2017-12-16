@@ -23,7 +23,7 @@ class MarkdownFilter(filters.Filter):
                     extension_configs[k] = v
         self.markdown = markdown.Markdown(extensions=extensions, extension_configs=extension_configs)
 
-    def filter(self, text):
+    def filter(self, text, encoding):
         """Apply Markdown filter."""
 
         self.markdown.reset()

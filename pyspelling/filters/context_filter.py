@@ -27,7 +27,7 @@ class ContextFilter(filters.Filter):
         if escapes:
             self.escapes = re.compile(escapes)
 
-    def filter(self, text):
+    def filter(self, text, encoding):
         """Context delimiter filter."""
 
         new_text = []

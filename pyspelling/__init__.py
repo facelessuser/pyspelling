@@ -49,7 +49,7 @@ class Spelling(object):
             if not source._is_bytes():
                 for f, disallow in self.filters:
                     if source.category not in disallow:
-                        text = f.filter(text)
+                        text = f.filter(text, source.encoding)
                 text = text.encode(source.encoding)
 
             if self.spellchecker == 'hunspell':
@@ -212,7 +212,7 @@ class Spelling(object):
             elif self.is_valid_file(target, file_patterns):
                 if self.skip_target(target):
                     continue
-                yield plugin.parse_file(target)
+                yield plugin._parse(target)
 
     def setup_spellchecker(self, documents):
         """Setup spell checker."""

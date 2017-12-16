@@ -177,7 +177,7 @@ class HTMLFilter(filters.Filter):
         else:
             return (text, attributes)
 
-    def filter(self, text):
+    def filter(self, text, encoding):
         """Filter the text."""
 
         return self.html_to_text(bs4.BeautifulSoup(text, "html5lib"))
