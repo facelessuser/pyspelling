@@ -13,11 +13,14 @@ PyYaml's
 UTF
 YAML
 backticks
+chunking
 docstring
 docstrings
 lxml
 parsers
 pre
+regex
 sacrifice
 sortable
 sublicense
+wildcard

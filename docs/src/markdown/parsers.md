@@ -8,7 +8,7 @@ In general, parsers will detect the encoding of the file, and return one or more
 
 ## Available Parsers
 
-PySpelling comes with a couple of builtin parsers.
+PySpelling comes with a couple of built-in parsers.
 
 ### Raw
 

@@ -6,7 +6,7 @@ Filters are objects that take a Unicode string and encoding and return an augmen
 
 ## Available Filters
 
-PySpelling comes with a couple of builtin filters.
+PySpelling comes with a couple of built-in filters.
 
 ### Markdown
 
