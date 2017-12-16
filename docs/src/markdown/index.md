@@ -245,7 +245,7 @@ documents:
 ```
 
 
-Other options would be set to a string or an integer value (intergers would be converted over to a string internally).
+Other options would be set to a string or an integer value (integers would be converted over to a string internally).
 
 ```yaml
 documents:

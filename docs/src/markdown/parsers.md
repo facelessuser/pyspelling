@@ -24,7 +24,7 @@ The Markdown parser converts a text file using Python Markdown and returns a sin
 
 ### HTML
 
-The HTML parsers will look for the encoding of the HTML in its header and convert the buffer to Unicode.  It then uses BeautifulSoup4 to convert the content to HTML, and then aggregates all text that should be spell checked in a single `SourceText` object.  It can be configured to avoid certain tags, classes, IDs, or other attributes if desired.  It can also be instructed to scan certain tag attributes for spell checkable content. It can be included via `pyspelling.parsers.html_parser`.
+The HTML parsers will look for the encoding of the HTML in its header and convert the buffer to Unicode.  It then uses BeautifulSoup4 to convert the content to HTML, and then aggregates all text that should be spell checked in a single `SourceText` object.  It can be configured to avoid certain tags, classes, IDs, or other attributes if desired.  It can also be instructed to scan certain tag attributes for content to spell check. It can be included via `pyspelling.parsers.html_parser`.
 
 ### Python
 
