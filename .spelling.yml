@@ -27,9 +27,7 @@ documents:
     output: build/dictionary/mkdocs.dic
 
 - name: Markdown
-  file_patterns:
-  - '*.md'
-  parser: pyspelling.parsers.text_parser
+  parser: pyspelling.parsers.markdown_parser
   src:
   - README.md
   aspell:
@@ -40,7 +38,6 @@ documents:
     - docs/src/dictionary/en-custom.txt
     output: build/dictionary/mkdocs.dic
   filters:
-  - pyspelling.filters.markdown_filter:
   - pyspelling.filters.html_filter:
       comments: false
       attributes:

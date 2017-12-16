@@ -24,7 +24,11 @@ RE_UTF_BOM = re.compile(
 
 
 class SourceText(namedtuple('SourceText', ['text', 'context', 'encoding', 'type'])):
-    """Ignore rule."""
+    """Source text."""
+
+
+class SourceBytes(namedtuple('SourceBytes', ['text', 'context', 'encoding', 'type'])):
+    """Source bytes."""
 
 
 class Decoder(object):
@@ -175,3 +179,31 @@ class Parser(object):
         else:
             text = ''
         return [SourceText(text, source_file, encoding, 'text')]
+
+
+class RawParser(Parser):
+    """Spelling language."""
+
+    EXTENSIONS = tuple('*',)
+
+    def __init__(self, config, encoding='ascii'):
+        """Initialize."""
+
+        self.default_encoding = encoding
+
+    def detect_encoding(self, source_file):
+        """Detect encoding."""
+
+        return None
+
+    def parse_file(self, source_file):
+        """Parse HTML file."""
+
+        encoding = self.detect_encoding(source_file)
+
+        if encoding != 'bin':
+            with open(source_file, 'rb') as f:
+                text = f.read()
+        else:
+            text = ''
+        return [SourceBytes(text, source_file, encoding, 'text')]

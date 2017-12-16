@@ -87,6 +87,8 @@ documents:
   parser: pyspelling.parsers.python_parser
 ```
 
+If you use the `pyspelling.parsers.raw_parser`, the file will be read in as bytes and will be sent directly to Aspell bypassing any PySpelling filters, but you can still configure Aspell to use its filters.
+
 ### Parser Options
 
 Depending on the specified parser, there may be specific options that can be configured. For instance, in the default Python parser, we can configure it to only parse docstrings by disabling comments and strings:

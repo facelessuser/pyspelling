@@ -5,6 +5,7 @@ import fnmatch
 import re
 import importlib
 from . import util
+from . import parsers
 
 
 class Spelling(object):
@@ -45,9 +46,12 @@ class Spelling(object):
                 print('CHECK: %s' % source.context)
 
             text = source.text
-            for f, disallow in self.filters:
-                if source.type not in disallow:
-                    text = f.filter(text)
+            if isinstance(source, parsers.SourceText):
+                for f, disallow in self.filters:
+                    if source.type not in disallow:
+                        text = f.filter(text)
+                print(text)
+                text = text.encode(source.encoding)
 
             if self.spellchecker == 'hunspell':
                 cmd = [
@@ -104,7 +108,7 @@ class Spelling(object):
                         for value in v:
                             cmd.extend([key, util.ustr(value)])
 
-            wordlist = util.console(cmd, input_text=text.encode('utf-8'))
+            wordlist = util.console(cmd, input_text=text)
             words = [w for w in sorted(set(wordlist.split('\n'))) if w]
 
             if words:
