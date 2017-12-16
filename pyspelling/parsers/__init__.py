@@ -31,6 +31,10 @@ class SourceBytes(namedtuple('SourceBytes', ['text', 'context', 'encoding', 'typ
     """Source bytes."""
 
 
+class SourceError(namedtuple('SourceError', ['context', 'error'])):
+    """Source error."""
+
+
 class Decoder(object):
     """
     Simple detect encoding class.
@@ -173,12 +177,15 @@ class Parser(object):
 
         encoding = self.detect_encoding(source_file)
 
-        if encoding != 'bin':
+        try:
+            assert encoding != 'bin', 'Could not detect encoding!'
+
             with codecs.open(source_file, 'r', encoding=encoding) as f:
                 text = f.read()
-        else:
-            text = ''
-        return [SourceText(text, source_file, encoding, 'text')]
+            content = [SourceText(text, source_file, encoding, 'text')]
+        except Exception as e:
+            content = [SourceError(source_file, str(e))]
+        return content
 
 
 class RawParser(Parser):
@@ -194,16 +201,14 @@ class RawParser(Parser):
     def detect_encoding(self, source_file):
         """Detect encoding."""
 
-        return None
+        return self.default_encoding
 
     def parse_file(self, source_file):
         """Parse HTML file."""
 
         encoding = self.detect_encoding(source_file)
 
-        if encoding != 'bin':
-            with open(source_file, 'rb') as f:
-                text = f.read()
-        else:
-            text = ''
+        with open(source_file, 'rb') as f:
+            text = f.read()
+
         return [SourceBytes(text, source_file, encoding, 'text')]

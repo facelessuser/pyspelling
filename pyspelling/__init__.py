@@ -39,7 +39,7 @@ class Spelling(object):
         fail = False
 
         for source in sources:
-            if source.encoding == 'bin':
+            if isinstance(source, parsers.SourceError):
                 print('ERROR: Could not read %s' % source.context)
                 continue
             if self.verbose:
@@ -50,7 +50,6 @@ class Spelling(object):
                 for f, disallow in self.filters:
                     if source.type not in disallow:
                         text = f.filter(text)
-                print(text)
                 text = text.encode(source.encoding)
 
             if self.spellchecker == 'hunspell':

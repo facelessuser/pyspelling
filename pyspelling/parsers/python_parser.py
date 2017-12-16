@@ -199,14 +199,13 @@ class PythonParser(parsers.Parser):
         return docstrings + comments + strings
 
     def parse_file(self, source_file):
-        """Parse Python file returning docstrings."""
+        """Parse Python file returning content."""
 
         try:
-            docstrings = self.parse_docstrings(source_file)
+            content = self.parse_docstrings(source_file)
         except Exception as e:
-            print(e)
-            docstrings = [parsers.SourceText('', source_file, 'bin', 'binary')]
-        return docstrings
+            content = [parsers.SourceError(source_file, str(e))]
+        return content
 
 
 def get_parser():

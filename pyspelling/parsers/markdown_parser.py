@@ -21,12 +21,14 @@ class MarkdownParser(parsers.Parser):
 
         encoding = self.detect_encoding(source_file)
         try:
+            assert encoding != 'bin', 'Could not detect encoding!'
+
             with codecs.open(source_file, 'r', encoding=encoding) as f:
                 text = f.read()
-            html = [parsers.SourceText(self.filter.filter(text), source_file, encoding, 'markdown')]
-        except Exception:
-            html = [parsers.SourceText('', source_file, 'bin', 'binary')]
-        return html
+            content = [parsers.SourceText(self.filter.filter(text), source_file, encoding, 'markdown')]
+        except Exception as e:
+            content = [parsers.SourceError(source_file, str(e))]
+        return content
 
 
 def get_parser():
