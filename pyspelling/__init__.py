@@ -284,7 +284,7 @@ class Spelling(object):
             print('')
             # Setup parser and variables for the spell check
             parser = self.get_module(documents['parser'], 'get_parser')(
-                documents.get('options', {}), documents.get('fallback_encoding', 'ascii')
+                documents.get('options', {}), documents.get('default_encoding', 'ascii')
             )
             self.file_patterns = documents.get('file_patterns', [])
 

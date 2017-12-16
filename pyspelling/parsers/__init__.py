@@ -144,10 +144,10 @@ class Parser(object):
     EXTENSIONS = tuple('*',)
     DECODER = Decoder
 
-    def __init__(self, config, encoding='ascii'):
+    def __init__(self, config, default_encoding='ascii'):
         """Initialize."""
 
-        self.default_encoding = encoding
+        self.default_encoding = default_encoding
 
     def detect_encoding(self, source_file):
         """Detect encoding."""

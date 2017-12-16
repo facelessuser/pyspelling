@@ -41,11 +41,11 @@ class HTMLParser(parsers.Parser):
     FILE_PATTERNS = ('*.html', '*.htm')
     DECODER = HTMLDecoder
 
-    def __init__(self, config, encoding='ascii'):
+    def __init__(self, config, default_encoding='ascii'):
         """Initialization."""
 
         self.filter = html_filter.HTMLFilter(config)
-        super(HTMLParser, self).__init__(config, encoding)
+        super(HTMLParser, self).__init__(config, default_encoding)
 
     def parse_file(self, source_file):
         """Parse HTML file."""

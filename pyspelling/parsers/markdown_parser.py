@@ -11,11 +11,11 @@ class MarkdownParser(parsers.Parser):
 
     FILE_PATTERNS = ('*.md', '*.markdown')
 
-    def __init__(self, config, encoding='ascii'):
+    def __init__(self, config, default_encoding='ascii'):
         """Initialization."""
 
         self.filter = markdown_filter.MarkdownFilter(config)
-        super(MarkdownParser, self).__init__(config, encoding)
+        super(MarkdownParser, self).__init__(config, default_encoding)
 
     def parse_file(self, source_file):
         """Parse Markdown file."""
