@@ -79,7 +79,7 @@ documents:
 
 ### Parser
 
-Spelling tasks need to specify a file parser to use for the files in a given task. This is done via the `parser` option. Parsers are plugins for the PySpelling that will determine the encoding for a file, and parse the content for relevant text chunks to search.  The value is a string that references the Python import path for the given plugin.  To reference the default Python file parser, which is located at `pyspelling.parsers.python_parser`, the following would be used:
+Spelling tasks need to specify a file parser to use for the files in a given task. This is done via the `parser` option. Parsers are plugins for the PySpelling that will determine the encoding for a file and then parse the content into relevant Unicode text chunks to search.  The configuration value is a string that references the Python import path for the given plugin.  To reference the default Python file parser, which is located at `pyspelling.parsers.python_parser`, the following would be used:
 
 ```yaml
 documents:
@@ -87,7 +87,7 @@ documents:
   parser: pyspelling.parsers.python_parser
 ```
 
-If you use the `pyspelling.parsers.raw_parser`, the file will be read in as bytes and will be sent directly to Aspell bypassing any PySpelling filters, but you can still configure Aspell to use its filters.
+If you use the `pyspelling.parsers.raw_parser`, the encoding will be resolved, but the text will be read in as bytes and will be sent directly to Aspell bypassing any PySpelling filters, but you can still configure Aspell to use its filters.
 
 ### Parser Options
 
@@ -118,15 +118,18 @@ Notice that `file_patterns` should be an array of values.
 
 ### Encoding
 
-When parsing a file, PySpelling only checks for UTF BOMs, and, depending on the file parser, the file type's encoding declaration in the header (if applicable). If there is no BOM or encoding declaration, PySpelling will usually use 'ASCII' as the fallback, but you can override the fallback with `fallback_encoding`:
+When parsing a file, PySpelling only checks for low hanging fruit that it has 100% confidence in, such as UTF BOMs, and depending on the file parser, the file type's encoding declaration in the header (if applicable). If there is no BOM or encoding declaration, PySpelling will usually default to 'ASCII' as the fallback, but you can override the fallback with `default_encoding`:
 
 ```yaml
 - name: Markdown
   file_patterns:
   - '*.md'
   parser: pyspelling.parsers.text_parser
-  fallback_encoding: utf-8
+  default_encoding: utf-8
 ```
+
+!!! note "Note"
+    Keep in mind, a file parser may ignore the default encoding if it makes sense.  For instance, Python code, per the specifications, assumes the file to be ASCII unless a UTF BOM or encoding deceleration is defined in the header.  The Python parser will ignore `default_encoding` in order to adhere to the that file's specification.
 
 ### Sources
 
@@ -168,9 +171,9 @@ If wildcard patterns are not sufficient, you can also use regular expression:
 
 ### Filters
 
-Some times your may want to take a buffer and run it through a filter. Filters operate directly on a text buffer returning the altered text.
+Some times your may want to take a buffer and run it through a filter or filters. Filters operate directly on a text buffer returning the altered text and can be chained together.  Each filter takes the text from the previous, alters it, and passes it on to the next.
 
-Let's say you had some Markdown files and wanted to convert them to HTML, and then filter out specific tags. You could configure your task with the Markdown filter followed by the HTML filter:
+Let's say you had some Markdown files and wanted to convert them to HTML, and then filter out specific tags. You could just use the Markdown parser and then filter it through the HTML filter, but to illustrate filter chaining, we'll parse the file as text, and then run it through the markdown filter followed by the HTML filter that will return the content of the tags (and selected attributes) excluding certain selectors.
 
 
 ```yaml
@@ -203,7 +206,7 @@ Let's say you had some Markdown files and wanted to convert them to HTML, and th
 
 When spell checking a document, sometimes you'll have words that are not in your default, installed dictionary. PySpelling automates compiling your own personal dictionary from a list of word lists.
 
-There are two things that must be defined: the default language/dictionary the wordlist is for via the the `lang` option, and `wordlists` which is an array of word lists.  Optionally, you can also define the output location and file name for the compiled dictionary.
+There are two things that must be defined: the default dictionary via the the `lang` option, and `wordlists` which is an array of word lists.  Optionally, you can also define the output location and file name for the compiled dictionary. PySpelling will add the output dictionary via Aspell's `--add-extra-dicts` option automatically.
 
 ```yaml
 documents:
@@ -223,11 +226,9 @@ documents:
     output: build/dictionary/python.dic
 ```
 
-PySpelling will add the output dictionary via the `--add-extra-dicts` option automatically.
-
 ### Aspell Options
 
-Though PySpelling is a wrapper around Aspell, you can still set a number of Aspell's options directly, such as default dictionary, search options and filters. Basically, relevant search options are passed directly to Aspell, while others are ignored, like Replace options (which aren't relevant in PySpelling) and options like encoding (which are handled internally by PySpelling).
+Though PySpelling is a wrapper around Aspell, you can still set a number of Aspell's options directly, such as default dictionary, search options, and filters. Basically, relevant search options are passed directly to Aspell, while others are ignored, like Replace options (which aren't relevant in PySpelling) and options like encoding (which are handled internally by PySpelling).
 
 To configure an Aspell option, just configure the desired options under the `aspell` key minus the leading dashes.  So `-H` would simply be `H` and `--lang` would be `lang`.
 
@@ -274,4 +275,10 @@ documents:
     add-extra-dicts:
       - my-dictionary.dic
       - my-other-dictionary.dic
+```
+
+Output:
+
+```
+aspell --add-extra-dicts my-dictionary.doc --add-extra-dicts my-other-dictionary.dic
 ```
