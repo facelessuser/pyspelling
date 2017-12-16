@@ -41,6 +41,18 @@ def get_version():
         fp.close()
 
 
+def get_requirements():
+    """Get the dependencies."""
+
+    with open("requirements/project.txt") as f:
+        requirements = []
+        for line in f.readlines():
+            line = line.strip()
+            if line and not line.startswith('#'):
+                requirements.append(line)
+    return requirements
+
+
 VER, DEVSTATUS = get_version()
 
 
@@ -54,12 +66,7 @@ setup(
     author_email='Isaac.Muse@gmail.com',
     url='https://github.com/facelessuser/pyspelling',
     packages=find_packages(exclude=['tools', 'tests']),
-    install_requires=[
-        'beautifulsoup4',
-        'html5lib',
-        'markdown',
-        'pyyaml'
-    ],
+    install_requires=get_requirements(),
     license='MIT License',
     classifiers=[
         'Development Status :: %s' % DEVSTATUS,
@@ -67,6 +74,8 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
