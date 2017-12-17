@@ -75,9 +75,9 @@ PySpelling requires a YAML configuration file. All spelling tasks are defined un
 
 ```yaml
 documents:
-  - task1
+- task1
 
-  - task2
+- task2
 ```
 
 Each task requires, at the very least, a `name` for the tasks, a `parser`, and `src`s to search.
@@ -123,7 +123,7 @@ documents:
 
 ### Name
 
-Each spelling tasks needs a name, this is defined with the `name` key.
+Each spelling tasks *should* have a unique name. This is defined with the `name` key.
 
 ```yaml
 documents:
