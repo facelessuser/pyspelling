@@ -35,7 +35,7 @@ script:
 # after_success:
 # - codecov
 
-# deploy:
+deploy:
 #   - provider: pypi
 #     user: facelessuser
 #     server: https://upload.pypi.org/legacy/
@@ -47,13 +47,13 @@ script:
 #       tags: true
 #       repo: facelessuser/pyspelling
 #       condition: "$TOXENV = documents"
-#   - provider: pages
-#     github_token: $GITHUB_TOKEN
-#     name: $GITHUB_USER
-#     email: $GITHUB_EMAIL
-#     skip_cleanup: true
-#     local_dir: site
-#     on:
-#       tags: true
-#       repo: facelessuser/pyspelling
-#       condition: "$TOXENV = documents"
+  - provider: pages
+    github_token: $GITHUB_TOKEN
+    name: $GITHUB_USER
+    email: $GITHUB_EMAIL
+    skip_cleanup: true
+    local_dir: site
+    on:
+      tags: true
+      repo: facelessuser/pyspelling
+      condition: "$TOXENV = documents"
