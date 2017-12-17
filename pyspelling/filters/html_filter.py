@@ -5,7 +5,11 @@ from collections import namedtuple
 import bs4
 import re
 from .. import util
-from html.parser import HTMLParser
+
+if util.PY3:
+    from html.parser import HTMLParser
+else:
+    from HTMLParser import HTMLParser
 
 RE_SELECTOR = re.compile(r'''(\#|\.)?[-\w]+|\*|\[([\w\-:]+)(?:([~^|*$]?=)(\"[^"]+\"|'[^']'|[^'"\[\]]+))?\]''')
 
