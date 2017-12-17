@@ -1,5 +1,8 @@
 # PySpelling
 
+!!! warning "Documents Under Construction"
+    This project is in the early alpha stage. Features may be in flux, and documentation may be incomplete and/or changing.  Use at your own risk.
+
 ## Overview
 
 PySpelling is a module to help with automating spell checking with Aspell. You can setup different spelling tasks for different file types and filter the content as needed.
@@ -15,6 +18,46 @@ Aspell is a very good spell check tool that comes with various filters, but the 
 PySpelling was created to work around Aspell's searching shortcomings by creating a wrapper around Aspell that could be extended to handle more advanced kinds of situations. If I wanted to filter out specific HTML tags with specific IDs or class names, PySpelling can do it. If I want to scan Python files for docstrings, but also avoid content within a docstring that is wrapped in backticks, I can do that. Additionally, I wanted to leverage existing modules that are already highly aware of certain file type's context to save me from writing complex lexers and parsers.  The sacrifice is fine tracking of where a misspelled word is ans many of the libraries augment the buffer under search, but all I care about is what words in a file are misspelled.
 
 For instance, it's much easier to spell check a Markdown file once it is in HTML form.  Instead of being aware of all the different Markdown syntax, you HTML is just tags. So converting Markdown to HTML, and then scanning the HTML is a much easier filtering process. But because the entire buffer is augmented in translation, history of lines and column positions is lost in conversion, but since all I want to do is identify the words, losing that history is okay. PySpelling allows you to create plugins that leverage existing Python Modules for parsing a file's context so you don't have to write your own elaborate parser unless you want to. To parse HTML, you can just run it through BeatifulSoup, lxml, or whatever else you prefer.
+
+## Command Line Usage
+
+```
+usage: spellcheck [-h] [--version] [--verbose] [--name NAME] [--config CONFIG]
+
+Spell checking tool.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --version             show program's version number and exit
+  --verbose, -v         Verbosity level.
+  --name NAME, -n NAME  Specific spelling task by name to run.
+  --config CONFIG, -c CONFIG
+                        Spelling config.
+```
+
+PySpelling can be run with the command below.  By default it will look for the spelling configuration file at `./.spelling.yml`.
+
+```
+python -m pyspelling
+```
+
+To specify a specific configuration file:
+
+```
+python -m pyspelling -c myconfig.yml
+```
+
+To run a spelling task by name:
+
+```
+python -m pyspelling -n my_task
+```
+
+To run a more verbose output, use the `-v` flag. You can increase verbosity level by including more `v`: `-vv`.  You can currently go up to about three levels.
+
+```
+python -m pyspelling -v
+```
 
 ## Configuring
 
