@@ -48,18 +48,19 @@ class Spelling(object):
                 continue
 
             text = source.text
+            encoding = self.normalize_utf(source.encoding)
             if not source._is_bytes():
                 for f, disallow in self.filters:
                     if source.category not in disallow:
-                        text = f.filter(text, source.encoding)
-                text = text.encode(source.encoding)
+                        text = f.filter(text, encoding)
+                text = text.encode(encoding)
             self.log(text, 3)
 
             if self.spellchecker == 'hunspell':
                 cmd = [
                     'hunspell',
                     '-l',
-                    '-i', self.normalize_utf(source.encoding),
+                    '-i', encoding,
                 ]
 
                 if personal_dict:
@@ -74,7 +75,7 @@ class Spelling(object):
                 cmd = [
                     'aspell',
                     'list',
-                    '--encoding', self.normalize_utf(source.encoding)
+                    '--encoding', encoding
                 ]
 
                 if personal_dict:
