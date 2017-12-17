@@ -24,7 +24,6 @@ theme:
 
 pages:
   - PySpelling: index.md
-  - Installation: installation.md
   - Parsers: parsers.md
   - Filters: filters.md
   - Contributing &amp; Support: contributing.md

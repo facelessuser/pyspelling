@@ -5,7 +5,7 @@
 
 ## Overview
 
-PySpelling is a module to help with automating spell checking with Aspell. You can setup different spelling tasks for different file types and filter the content as needed.
+PySpelling is a module to help with automating spell checking with [Aspell][aspell]. You can setup different spelling tasks for different file types and filter the content as needed.
 
 PySpelling is not designed to auto replace misspelled words or have interactive replace sessions, there are already modules to do that. PySpelling is mainly meant automate reporting of spelling issues in different file types. So if you are looking for a find and replace spelling tool, this isn't for you.
 
@@ -18,6 +18,16 @@ Aspell is a very good spell check tool that comes with various filters, but the 
 PySpelling was created to work around Aspell's searching shortcomings by creating a wrapper around Aspell that could be extended to handle more advanced kinds of situations. If I wanted to filter out specific HTML tags with specific IDs or class names, PySpelling can do it. If I want to scan Python files for docstrings, but also avoid content within a docstring that is wrapped in backticks, I can do that. Additionally, I wanted to leverage existing modules that are already highly aware of certain file type's context to save me from writing complex lexers and parsers.  The sacrifice is fine tracking of where a misspelled word is ans many of the libraries augment the buffer under search, but all I care about is what words in a file are misspelled.
 
 For instance, it's much easier to spell check a Markdown file once it is in HTML form.  Instead of being aware of all the different Markdown syntax, you HTML is just tags. So converting Markdown to HTML, and then scanning the HTML is a much easier filtering process. But because the entire buffer is augmented in translation, history of lines and column positions is lost in conversion, but since all I want to do is identify the words, losing that history is okay. PySpelling allows you to create plugins that leverage existing Python Modules for parsing a file's context so you don't have to write your own elaborate parser unless you want to. To parse HTML, you can just run it through BeatifulSoup, lxml, or whatever else you prefer.
+
+## Installing
+
+Installation is easy with pip:
+
+```bash
+pip install pyspelling
+```
+
+If you want to manually install it, run `#!bash python setup.py build` and `#!bash python setup.py install`.
 
 ## Command Line Usage
 
@@ -325,3 +335,5 @@ Output:
 ```
 aspell --add-extra-dicts my-dictionary.doc --add-extra-dicts my-other-dictionary.dic
 ```
+
+--8<-- "refs.md"
