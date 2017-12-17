@@ -12,14 +12,20 @@ class Spelling(object):
 
     DICTIONARY = 'dictionary.dic'
 
-    def __init__(self, config, verbose=False):
+    def __init__(self, config, name='', verbose=0):
         """Initialize."""
 
         # General options
+        self.name = name
         self.verbose = verbose
         self.dict_bin = os.path.abspath(self.DICTIONARY)
         self.documents = config.get('documents', [])
         self.dictionary = config.get('dictionary', [])
+
+    def log(self, text, level):
+        """Log level."""
+        if self.verbose >= level:
+            print(text)
 
     def normalize_utf(self, encoding):
         """Normalize UTF encoding."""
@@ -47,6 +53,7 @@ class Spelling(object):
                     if source.category not in disallow:
                         text = f.filter(text, source.encoding)
                 text = text.encode(source.encoding)
+            self.log(text, 3)
 
             if self.spellchecker == 'hunspell':
                 cmd = [
@@ -103,6 +110,7 @@ class Spelling(object):
                         for value in v:
                             cmd.extend([key, util.ustr(value)])
 
+            self.log(str(cmd), 2)
             wordlist = util.console(cmd, input_text=text)
             yield util.Results([w for w in sorted(set(wordlist.split('\n'))) if w], source.context, source.category)
 
@@ -115,7 +123,7 @@ class Spelling(object):
         if os.path.exists(output):
             os.remove(output)
 
-        print("Compiling Dictionary...")
+        self.log("Compiling Dictionary...", 1)
         # Read word lists and create a unique set of words
         words = set()
         for wordlist in wordlists:
@@ -266,7 +274,12 @@ class Spelling(object):
         """Walk source and initiate spell check."""
 
         for documents in self.documents:
-            print('')
+            if self.name and self.name != documents.get('name', ''):
+                continue
+
+            # Perform spell check
+            self.log('\nSpell Checking %s...' % documents.get('name', ''), 1)
+
             # Setup parser and variables for the spell check
             parser = self.get_module(documents['parser'], 'get_parser')(
                 documents.get('options', {}), documents.get('default_encoding', 'ascii')
@@ -278,8 +291,6 @@ class Spelling(object):
             self.get_filters(documents)
             self.setup_excludes(documents)
 
-            # Perform spell check
-            print('Spell Checking %s...' % documents.get('name', ''))
             for sources in self.walk_src(documents.get('src', []), parser):
                 for result in self.check_spelling(sources, options, output):
                     yield result

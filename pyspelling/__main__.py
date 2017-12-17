@@ -13,13 +13,14 @@ def main():
     parser = argparse.ArgumentParser(prog='spellcheck', description='Spell checking tool.')
     # Flag arguments
     parser.add_argument('--version', action='version', version=('%(prog)s ' + __version__.version))
-    parser.add_argument('--verbose', '-v', action='store_true', default=False, help="verbose.")
+    parser.add_argument('--verbose', '-v', action='count', default=0, help="Verbosity level.")
+    parser.add_argument('--name', '-n', action='store', default='', help="Specific spelling task by name to run.")
     parser.add_argument('--config', '-c', action='store', default='.spelling.yml', help="Spelling config.")
     args = parser.parse_args()
 
     fail = False
     config = settings.read_config(args.config)
-    spelling = Spelling(config, verbose=args.verbose)
+    spelling = Spelling(config, name=args.name, verbose=args.verbose)
     for results in spelling.check():
         if results.error:
             fail = True

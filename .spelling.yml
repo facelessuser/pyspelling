@@ -1,5 +1,5 @@
 documents:
-- name: MkDocs
+- name: mkdocs
   parser: pyspelling.parsers.html_parser
   options:
     comments: false
@@ -26,7 +26,7 @@ documents:
     - docs/src/dictionary/en-custom.txt
     output: build/dictionary/mkdocs.dic
 
-- name: Markdown
+- name: markdown
   parser: pyspelling.parsers.markdown_parser
   src:
   - README.md
@@ -54,7 +54,7 @@ documents:
       - .md-footer-custom-text
       - .md-source__repository
 
-- name: Python Source
+- name: python
   parser: pyspelling.parsers.python_parser
   options:
     strings: false
