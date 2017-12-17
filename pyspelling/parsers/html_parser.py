@@ -26,12 +26,7 @@ class HTMLDecoder(parsers.Decoder):
         encode = None
         m = RE_HTML_ENCODE.search(content)
         if m:
-            enc = m.group(1).decode('ascii')
-            try:
-                codecs.getencoder(enc)
-                encode = enc
-            except LookupError:
-                pass
+            encode = m.group(1).decode('ascii')
         return encode
 
 
@@ -47,10 +42,8 @@ class HTMLParser(parsers.Parser):
         self.filter = html_filter.HTMLFilter(config)
         super(HTMLParser, self).__init__(config, default_encoding)
 
-    def parse_file(self, source_file):
+    def parse_file(self, source_file, encoding):
         """Parse HTML file."""
-
-        encoding = self.detect_encoding(source_file)
 
         with codecs.open(source_file, 'r', encoding=encoding) as f:
             text = f.read()

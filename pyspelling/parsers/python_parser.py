@@ -7,7 +7,6 @@ from __future__ import unicode_literals
 from .. import parsers
 import re
 import textwrap
-import codecs
 import tokenize
 import ast
 from .. import util
@@ -36,14 +35,9 @@ class PythonDecoder(parsers.Decoder):
         m = RE_PY_ENCODE.match(content)
         if m:
             if m.group(1):
-                enc = m.group(1).decode('ascii')
+                encode = m.group(1).decode('ascii')
             elif m.group(2):
-                enc = m.group(2).decode('ascii')
-            try:
-                codecs.getencoder(enc)
-                encode = enc
-            except LookupError:
-                pass
+                encode = m.group(2).decode('ascii')
         if encode is None:
             encode = 'ascii'
         return encode
@@ -89,22 +83,12 @@ class PythonParser(parsers.Parser):
                     break
         return uliterals
 
-    def detect_encoding(self, source_file):
-        """Get default encoding."""
-
-        if util.PY3:
-            # In Py3, the tokenizer will tell us what the encoding is.
-            encoding = 'ascii'
-        else:
-            encoding = self.DECODER().guess(source_file, verify=False)
-        return encoding
-
     def get_ascii(self, text):
         """Retrieve ASCII text from byte string."""
 
         return RE_NON_PRINTABLE_ASCII.sub(r' ', text).decode('ascii')
 
-    def parse_docstrings(self, source_file):
+    def parse_docstrings(self, source_file, encoding):
         """Retrieve the Python docstrings."""
 
         docstrings = []
@@ -115,8 +99,6 @@ class PythonParser(parsers.Parser):
         name = None
         stack = [(source_file, 0, self.MODULE)]
         uliterals = True
-
-        encoding = self.detect_encoding(source_file)
 
         with open(source_file, 'rb') as source:
 
@@ -130,6 +112,7 @@ class PythonParser(parsers.Parser):
                 line = util.ustr(token[2][0])
 
                 if util.PY3 and token_type == tokenize.ENCODING:
+                    # PY3 will tell us for sure what our encoding is
                     encoding = value
 
                 value = token[1]
@@ -198,10 +181,10 @@ class PythonParser(parsers.Parser):
 
         return docstrings + comments + strings
 
-    def parse_file(self, source_file):
+    def parse_file(self, source_file, encoding):
         """Parse Python file returning content."""
 
-        return self.parse_docstrings(source_file)
+        return self.parse_docstrings(source_file, encoding)
 
 
 def get_parser():

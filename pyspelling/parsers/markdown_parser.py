@@ -17,10 +17,8 @@ class MarkdownParser(parsers.Parser):
         self.filter = markdown_filter.MarkdownFilter(config)
         super(MarkdownParser, self).__init__(config, default_encoding)
 
-    def parse_file(self, source_file):
+    def parse_file(self, source_file, encoding):
         """Parse Markdown file."""
-
-        encoding = self.detect_encoding(source_file)
 
         with codecs.open(source_file, 'r', encoding=encoding) as f:
             text = f.read()

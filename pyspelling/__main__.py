@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import sys
 import argparse
 from pyspelling import settings
-from pyspelling import Spelling
+from pyspelling import Aspell
 from pyspelling import __version__
 
 
@@ -20,7 +20,7 @@ def main():
 
     fail = False
     config = settings.read_config(args.config)
-    spelling = Spelling(config, name=args.name, verbose=args.verbose)
+    spelling = Aspell(config, name=args.name, verbose=args.verbose)
     for results in spelling.check():
         if results.error:
             fail = True

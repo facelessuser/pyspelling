@@ -171,7 +171,7 @@ Notice that `file_patterns` should be an array of values.
 
 ### Encoding
 
-When parsing a file, PySpelling only checks for low hanging fruit that it has 100% confidence in, such as UTF BOMs, and depending on the file parser, the file type's encoding declaration in the header (if applicable). If there is no BOM or encoding declaration, PySpelling will usually default to 'ASCII' as the fallback, but you can override the fallback with `default_encoding`:
+When parsing a file, PySpelling only checks for low hanging fruit that it has 100% confidence in, such as UTF BOMs, and depending on the file parser, there may be additional logic like the file type's encoding declaration in the file header. If there is no BOM, encoding declaration, or other special logic, PySpelling will usually default to 'ASCII' as the fallback, but you can override the fallback with `default_encoding`:
 
 ```yaml
 - name: Markdown
@@ -181,8 +181,12 @@ When parsing a file, PySpelling only checks for low hanging fruit that it has 10
   default_encoding: utf-8
 ```
 
+Keep in mind that the encoding of the file gets passed to Aspell. Aspell is limited to very specific encodings, so if your file is using an unsupported encoding, it will fail.
+
+PySpelling doesn't really try to do any expensive encoding detection. For the most part it relies on the user to give a sound default or for the files to describes what encoding they are in the header. But, you could easily enough write you own file parser plugins that utilize `chardet` or `cchardet` etc.
+
 !!! note "Note"
-    Keep in mind, a file parser may ignore the default encoding if it makes sense.  For instance, Python code, per the specifications, assumes the file to be ASCII unless a UTF BOM or encoding deceleration is defined in the header.  The Python parser will ignore `default_encoding` in order to adhere to the that file's specification.
+    Keep in mind, a file parser may ignore the default encoding if it makes sense.  For instance, Python code, per the specifications, assumes the file to be ASCII unless a UTF BOM or encoding deceleration is defined in the header.  The Python parser will ignore `default_encoding` in order to adhere to that file's specification. If there is a catastrophic failure, it may attempt the default encoding.
 
 ### Sources
 

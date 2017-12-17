@@ -12,7 +12,7 @@ PySpelling comes with a couple of built-in parsers.
 
 ### Raw
 
-The Raw parser will not bother to detect encoding, and will instead only use the `default_encoding` provided by the user. It will return the content a byte string in a single `SourceText` object that will be passed directly to Aspell bypassing additional filters. It is included via `pyspelling.parsers.raw_parser`.
+The Raw parser will not bother to detect encoding, it will return the content as a byte string in a single `SourceText` object with the `default_encoding` provided by the user, all of which will be passed directly to Aspell bypassing additional filters. It is included via `pyspelling.parsers.raw_parser`.
 
 ### Text
 

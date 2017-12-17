@@ -5,8 +5,15 @@ import codecs
 import contextlib
 import mmap
 import os
-import functools
 from .. import util
+
+PYTHON_ENCODING_NAMES = {
+    'iso-8859-8-i': 'iso-8859-8',
+    'macintosh': 'mac-roman',
+    'windows-874': 'cp874',
+    'x-mac-cyrillic': 'mac-cyrillic',
+    "x-sjis": "shift-jis"
+}
 
 RE_UTF_BOM = re.compile(
     b'^(?:(' +
@@ -38,26 +45,16 @@ class Decoder(object):
 
         return size >= self.MAX_GUESS_SIZE
 
-    def _verify_encode(self, file_obj, encoding, blocks=1, chunk_size=4096):
-        """
-        Iterate through the file chunking the data into blocks and decoding them.
+    def _verify_encoding(self, enc):
+        """Verify encoding is okay."""
 
-        Here we can adjust how the size of blocks and how many to validate. By default,
-        we are just going to check the first 4K block.
-        """
-
-        good = True
-        file_obj.seek(0)
-        binary_chunks = iter(functools.partial(file_obj.read, chunk_size), b"")
+        enc = PYTHON_ENCODING_NAMES.get(enc, enc)
         try:
-            for unicode_chunk in codecs.iterdecode(binary_chunks, encoding):  # noqa
-                if blocks:
-                    blocks -= 1
-                else:
-                    break
-        except Exception:
-            good = False
-        return good
+            codecs.getencoder(enc)
+            encoding = enc
+        except LookupError:
+            encoding = None
+        return encoding
 
     def _has_bom(self, content):
         """Check for UTF8, UTF16, and UTF32 BOMs."""
@@ -109,7 +106,7 @@ class Decoder(object):
 
         return encoding
 
-    def guess(self, filename, verify=True, verify_blocks=1, verify_block_size=4096):
+    def guess(self, filename):
         """Guess the encoding and decode the content of the file."""
 
         encoding = None
@@ -125,10 +122,8 @@ class Decoder(object):
                         encoding = 'ascii'
                     else:
                         encoding = self._detect_encoding(f, ext, file_size)
-
-                    if verify and encoding and encoding != 'bin':
-                        if not self.verify_encode(f, encoding.encode, verify_blocks, verify_block_size):
-                            raise UnicodeDecodeError('Could not verify encoding!')
+                        if encoding is not None:
+                            encoding = self._verify_encoding(encoding)
             else:
                 raise UnicodeDecodeError('Unicode detection is not applied to very large files!')
         except Exception:  # pragma: no cover
@@ -147,23 +142,21 @@ class Parser(object):
     def __init__(self, config, default_encoding='ascii'):
         """Initialize."""
 
-        self.default_encoding = default_encoding
+        self.default_encoding = PYTHON_ENCODING_NAMES.get(default_encoding, default_encoding)
 
-    def detect_encoding(self, source_file):
+    def _detect_encoding(self, source_file):
         """Detect encoding."""
 
         detect = self.DECODER()
-        encoding = detect.guess(source_file, verify=False)
+        encoding = detect.guess(source_file)
         # If we didn't explicitly detect an encoding, assume default.
         if not encoding:
             encoding = self.default_encoding
 
-        return self.default_encoding if not encoding else encoding
+        return encoding
 
-    def parse_file(self, source_file):
+    def parse_file(self, source_file, encoding):
         """Parse HTML file."""
-
-        encoding = self.detect_encoding(source_file)
 
         with codecs.open(source_file, 'r', encoding=encoding) as f:
             text = f.read()
@@ -174,14 +167,26 @@ class Parser(object):
     def _parse(self, source_file):
         """Parse the file."""
 
+        self.current_encoding = self.default_encoding
+        error = None
+        encoding = None
         try:
-            content = self.parse_file(source_file)
+            encoding = self._detect_encoding(source_file)
+            content = self.parse_file(source_file, encoding)
         except Exception as e:
-            content = [util.SourceText('', source_file, '', str(e))]
+            error = str(e)
+            try:
+                if not encoding or encoding != self.default_encoding:
+                    error = None
+                    content = self.parse_file(source_file, self.default_encoding)
+            except Exception as e:
+                error = str(e)
+        if error:
+            content = [util.SourceText('', source_file, '', error)]
         return content
 
 
-class RawParser(Parser):
+class RawParser(object):
     """Spelling language."""
 
     EXTENSIONS = tuple('*',)
@@ -189,20 +194,18 @@ class RawParser(Parser):
     def __init__(self, config, default_encoding='ascii'):
         """Initialize."""
 
-        self.default_encoding = default_encoding
+        self.default_encoding = PYTHON_ENCODING_NAMES.get(default_encoding, default_encoding)
 
-    def detect_encoding(self, source_file):
-        """Detect encoding."""
-
-        return self.default_encoding
-
-    def parse_file(self, source_file):
-        """Parse HTML file."""
-
-        encoding = self.detect_encoding(source_file)
+    def parse_file(self, source_file, encoding):
+        """Parse raw file."""
 
         with open(source_file, 'rb') as f:
             text = f.read()
         content = [util.SourceText(text, source_file, encoding, 'text')]
 
         return content
+
+    def _parse(self, source_file):
+        """Parse the file."""
+
+        self.parse_file(source_file, self.default_encoding)
