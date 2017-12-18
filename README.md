@@ -1,7 +1,36 @@
+[![Unix Build Status][travis-image]][travis-link]
+[![Requirements Status][requires-image]][requires-link]
+[![pypi-version][pypi-image]][pypi-link]
+![License][license-image-mit]
+
 # PySpelling
 
-PySpelling is wrapper around Aspell that is used to automating spell checking of different file types. Essentially you set up spelling tasks for different file types and it will iterate through them applying your search options and filters for each specific task. Its aim is not to provide an system for interactively replacing misspelled words, but to provide a quick way to setup, filter, test, and automate spell checking for your project.
+## Overview
 
-Since PySpelling doesn't need to track exactly where a misspelled word is for replace, it can leverage other libraries that augment the buffer making filtering of the content more flexible and easier. This makes it much easier to write your own filter or parser for your specific file type.
+PySpelling is a module to help with automating spell checking with [Aspell](http://aspell.net/). It is essentially a wrapper around the Aspell command line utility, and allows you to setup different spelling tasks for different file types and filter the content as needed. It also allows you to do more advancing filtering of text via plugins since Aspell's filters are limited to a handful of types with limited options.
 
-PySpelling will return all the misspelled words for each file under testing, and depending on the file parser, it may even return misspelled words for specific text blocks within the file.
+PySpelling is not designed to auto replace misspelled words or have interactive replace sessions, there are already modules to do that. PySpelling is mainly meant automate reporting of spelling issues in different file types. So if you are looking for a find and replace spelling tool, this isn't for you.
+
+## Documentation
+
+Extension documentation is found here: http://facelessuser.github.io/pyspelling/.
+
+## License
+
+Rummage is released under the MIT license.
+
+Copyright (c) 2017 Isaac Muse <isaacmuse@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+[travis-image]: https://img.shields.io/travis/facelessuser/pyspelling/master.svg?label=Unix%20Build
+[travis-link]: https://travis-ci.org/facelessuser/pyspelling
+[requires-image]: https://img.shields.io/requires/github/facelessuser/pyspelling/master.svg
+[requires-link]: https://requires.io/github/facelessuser/pyspelling/requirements/?branch=master
+[pypi-image]: https://img.shields.io/pypi/v/pyspelling.svg
+[pypi-link]: https://pypi.python.org/pypi/pyspelling
+[license-image-mit]: https://img.shields.io/badge/license-MIT-blue.svg
