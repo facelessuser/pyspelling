@@ -272,7 +272,7 @@ class Aspell(object):
             self.get_filters(documents)
             self.setup_excludes(documents)
 
-            for sources in self.walk_src(documents.get('src', []), parser):
+            for sources in self.walk_src(documents.get('sources', []), parser):
                 for result in self.check_spelling(sources, options, output):
                     yield result
 

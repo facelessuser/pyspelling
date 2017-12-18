@@ -18,7 +18,7 @@ documents:
     - .md-source__repository
     - .headerlink
     - .md-icon
-  src:
+  sources:
   - site
   aspell:
     lang: en
@@ -30,7 +30,7 @@ documents:
 
 - name: markdown
   parser: pyspelling.parsers.markdown_parser
-  src:
+  sources:
   - README.md
   aspell:
     lang: en
@@ -61,7 +61,7 @@ documents:
   options:
     strings: false
     comments: false
-  src:
+  sources:
   - pyspelling
   aspell:
     lang: en
