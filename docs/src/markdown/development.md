@@ -49,7 +49,7 @@ mkdocs serve
 
 ## Spell Checking Documents
 
-During validation we build the docs and run a spell checker on them and the source code.  This project is used to spell check itself, but [Aspell][aspell] must be installed.  Currently this project uses the latest Aspell.  As the latest Aspell is not available on Windows, it is not expected that everyone will install and run Aspell locally.  In order to perform the spell check, it is expected you are setup to build the documents, and that you have Aspell installed in the your system path. To initiate the spell check, run the following command from the root of the project:
+During validation we build the docs and spell check them along with the source code docstrings. This project is used to spell check itself, but [Aspell][aspell] must be installed.  Currently this project uses the latest Aspell.  Since the latest Aspell is not available on Windows, and this has not been tested with older versions, it is not expected that everyone will install and run Aspell locally.  In order to perform the spell check, it is expected you are setup to build the documents, and that you have Aspell installed in the your system path. To initiate the spell check, run the following command from the root of the project:
 
 ```
 python -m pyspelling

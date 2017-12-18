@@ -4,8 +4,10 @@ BeatifulSoup
 BeautifulSoup
 Changelog
 EmojiOne
+GitHub
 GitLab
 MERCHANTABILITY
+MULTILINE
 MkDocs
 NONINFRINGEMENT
 Parsers
@@ -15,11 +17,14 @@ PyYaml's
 UTF
 YAML
 backticks
+bool
 builtins
 chunking
+dicts
 docstring
 docstrings
 ebeweber
+encodings
 facelessuser
 gforcada
 linter
