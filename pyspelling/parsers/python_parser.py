@@ -27,7 +27,7 @@ RE_NON_PRINTABLE_ASCII = re.compile(br"[^ -~]+")
 class PythonDecoder(parsers.Decoder):
     """Detect Python encoding."""
 
-    def special_encode_check(self, content, ext):
+    def header_check(self, content):
         """Special Python encoding check."""
 
         encode = None
@@ -156,7 +156,7 @@ class PythonParser(parsers.Parser):
                                 # if byte string assume 'ascii'.
                                 string = string.decode('ascii')
                             loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
-                            docstrings.append(util.SourceText(string, loc, encoding, 'docstring'))
+                            docstrings.append(parsers.SourceText(string, loc, encoding, 'docstring'))
                     elif self.strings:
                         value = value.strip()
                         if not util.PY3 and not value.startswith((b'u', b'b')):
@@ -168,7 +168,7 @@ class PythonParser(parsers.Parser):
                                 string = self.get_ascii(string)
                                 string_type = 'bytes'
                             loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
-                            strings.append(util.SourceText(string, loc, encoding, string_type))
+                            strings.append(parsers.SourceText(string, loc, encoding, string_type))
 
                 if token_type == tokenize.INDENT:
                     indent = value

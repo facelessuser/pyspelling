@@ -75,24 +75,3 @@ class Results(namedtuple('Results', ['words', 'context', 'category', 'error'])):
         """Allow defaults."""
 
         return super(Results, cls).__new__(cls, words, context, category, error)
-
-
-class SourceText(namedtuple('SourceText', ['text', 'context', 'encoding', 'category', 'error'])):
-    """Source text."""
-
-    __slots__ = ()
-
-    def __new__(cls, text, context, encoding, category, error=None):
-        """Allow defaults."""
-
-        return super(SourceText, cls).__new__(cls, text, context, encoding, category, error)
-
-    def _is_bytes(self):
-        """Is bytes."""
-
-        return isinstance(self.text, bstr)
-
-    def _has_error(self):
-        """Check if object has an error associated with it."""
-
-        return self.error is not None

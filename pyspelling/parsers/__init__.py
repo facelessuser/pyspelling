@@ -5,6 +5,7 @@ import codecs
 import contextlib
 import mmap
 import os
+from collections import namedtuple
 from .. import util
 
 PYTHON_ENCODING_NAMES = {
@@ -28,6 +29,27 @@ RE_UTF_BOM = re.compile(
     codecs.BOM_UTF16_LE +
     b'))'
 )
+
+
+class SourceText(namedtuple('SourceText', ['text', 'context', 'encoding', 'category', 'error'])):
+    """Source text."""
+
+    __slots__ = ()
+
+    def __new__(cls, text, context, encoding, category, error=None):
+        """Allow defaults."""
+
+        return super(SourceText, cls).__new__(cls, text, context, encoding, category, error)
+
+    def _is_bytes(self):
+        """Is bytes."""
+
+        return isinstance(self.text, util.bstr)
+
+    def _has_error(self):
+        """Check if object has an error associated with it."""
+
+        return self.error is not None
 
 
 class Decoder(object):
@@ -74,7 +96,7 @@ class Decoder(object):
                 encoding = 'utf-16'
         return encoding
 
-    def utf_strip_bom(self, encoding):
+    def _utf_strip_bom(self, encoding):
         """Return an encoding that will ignore the BOM."""
 
         if encoding is None:
@@ -87,12 +109,17 @@ class Decoder(object):
             encoding = 'utf-32'
         return encoding
 
-    def special_encode_check(self, content, ext):
+    def header_check(self, content, ext):
         """Special encode check."""
 
         return None
 
-    def _detect_encoding(self, f, ext, file_size):
+    def content_check(self, file_handle):
+        """File content check."""
+
+        return None
+
+    def _detect_encoding(self, f):
         """Guess by checking BOM, and checking `_special_encode_check`, and using memory map."""
 
         encoding = None
@@ -102,7 +129,11 @@ class Decoder(object):
             m.seek(0)
             # Check file extensions
             if encoding is None:
-                encoding = self.utf_strip_bom(self.special_encode_check(m.read(1024), ext))
+                encoding = self._utf_strip_bom(self.header_check(m.read(1024)))
+                m.seek(0)
+            if encoding is None:
+                m.seek(0)
+                encoding = self._utf_strip_bom(self.content_check(m))
 
         return encoding
 
@@ -112,7 +143,6 @@ class Decoder(object):
         encoding = None
 
         try:
-            ext = os.path.splitext(filename)[1].lower()
             file_size = os.path.getsize(filename)
             # If the file is really big, lets just call it binary.
             # We dont' have time to let Python chug through a massive file.
@@ -121,7 +151,7 @@ class Decoder(object):
                     if file_size == 0:
                         encoding = 'ascii'
                     else:
-                        encoding = self._detect_encoding(f, ext, file_size)
+                        encoding = self._detect_encoding(f)
                         if encoding is not None:
                             encoding = self._verify_encoding(encoding)
             else:
@@ -160,7 +190,7 @@ class Parser(object):
 
         with codecs.open(source_file, 'r', encoding=encoding) as f:
             text = f.read()
-        content = [util.SourceText(text, source_file, encoding, 'text')]
+        content = [SourceText(text, source_file, encoding, 'text')]
 
         return content
 
@@ -182,7 +212,7 @@ class Parser(object):
             except Exception as e:
                 error = str(e)
         if error:
-            content = [util.SourceText('', source_file, '', error)]
+            content = [SourceText('', source_file, '', error)]
         return content
 
 
@@ -201,7 +231,7 @@ class RawParser(object):
 
         with open(source_file, 'rb') as f:
             text = f.read()
-        content = [util.SourceText(text, source_file, encoding, 'text')]
+        content = [SourceText(text, source_file, encoding, 'text')]
 
         return content
 

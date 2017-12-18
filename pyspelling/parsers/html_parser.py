@@ -8,7 +8,6 @@ from .. import parsers
 import re
 import codecs
 from ..filters import html_filter
-from .. import util
 
 RE_HTML_ENCODE = re.compile(
     br'''(?x)
@@ -20,7 +19,7 @@ RE_HTML_ENCODE = re.compile(
 class HTMLDecoder(parsers.Decoder):
     """Detect HTML encoding."""
 
-    def special_encode_check(self, content, ext):
+    def header_check(self, content):
         """Special HTML encoding check."""
 
         encode = None
@@ -47,7 +46,7 @@ class HTMLParser(parsers.Parser):
 
         with codecs.open(source_file, 'r', encoding=encoding) as f:
             text = f.read()
-        content = [util.SourceText(self.filter.filter(text, encoding), source_file, encoding, 'html')]
+        content = [parsers.SourceText(self.filter.filter(text, encoding), source_file, encoding, 'html')]
 
         return content
 
