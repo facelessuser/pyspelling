@@ -44,25 +44,31 @@ optional arguments:
 PySpelling can be run with the command below.  By default it will look for the spelling configuration file at `./.spelling.yml`.
 
 ```
+pyspelling
+```
+
+or
+
+```
 python -m pyspelling
 ```
 
 To specify a specific configuration file:
 
 ```
-python -m pyspelling -c myconfig.yml
+pyspelling -c myconfig.yml
 ```
 
 To run a spelling task by name:
 
 ```
-python -m pyspelling -n my_task
+pyspelling -n my_task
 ```
 
 To run a more verbose output, use the `-v` flag. You can increase verbosity level by including more `v`: `-vv`.  You can currently go up to about three levels.
 
 ```
-python -m pyspelling -v
+pyspelling -v
 ```
 
 ## Configuring
