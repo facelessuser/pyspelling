@@ -106,7 +106,7 @@ Options                 | Type     | Default       | Description
         close: (?P=open)
       - open: (?s)^(?P<open>\s*~{3,})
         content: .*?
-        close: ^(?P=open)
+        close: ^(?P=open)$
 ```
 
 ### Writing a Filter
