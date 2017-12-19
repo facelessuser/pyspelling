@@ -249,13 +249,6 @@ Let's say you had some Markdown files and wanted to convert them to HTML, and th
       ignores:
       - code
       - pre
-      - a.magiclink-compare
-      - a.magiclink-commit
-      - span.keys
-      - .MathJax_Preview
-      - .md-nav__link
-      - .md-footer-custom-text
-      - .md-source__repository
 ```
 
 ### Personal Dictionaries/Word Lists

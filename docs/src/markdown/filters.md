@@ -62,13 +62,6 @@ Options      | Type     | Defaults     | Description
       ignores:
       - code
       - pre
-      - a.magiclink-compare
-      - a.magiclink-commit
-      - span.keys
-      - .MathJax_Preview
-      - .md-nav__link
-      - .md-footer-custom-text
-      - .md-source__repository
 ```
 
 ### Context
