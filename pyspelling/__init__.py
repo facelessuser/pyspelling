@@ -6,6 +6,10 @@ import re
 import codecs
 import importlib
 from . import util
+from . import __version__
+
+version = __version__.version
+version_info = __version__.version_info
 
 
 class Aspell(object):

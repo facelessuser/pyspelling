@@ -36,17 +36,17 @@ script:
 # - codecov
 
 deploy:
-#   - provider: pypi
-#     user: facelessuser
-#     server: https://upload.pypi.org/legacy/
-#     password:
-#       secure: 
-#     distributions: "sdist bdist_wheel"
-#     skip_upload_docs: true
-#     on:
-#       tags: true
-#       repo: facelessuser/pyspelling
-#       condition: "$TOXENV = documents"
+  - provider: pypi
+    user: facelessuser
+    server: https://upload.pypi.org/legacy/
+    password:
+      secure: GdfcDHk2Md3Ul4QvDctXt8pg4rNnUWbVM4tY2CX/D6ZRIaLMgcczfwtRxIQHrY610wifBF7Dr9M1un05Kx1UHD/xD9pr91TgbvlOnjtwo+dvRbVgKI6+xySUKCqvmsMuciIbO7zlXa7CR4yaR4cwLbZ6tM1cfbf6KUdsUF2RSefDLrUPujamoKqwgg9HGVHqEP5CHqCt0ZW2BA+RhVto/OHnP3862qBKLdYTx+Gyf3OFBOD6KgKpLM4NYtA0bMD2wweFwpbKZunYuppdQMkvXYmyE6isTlZkCc2BAK6zW/OR28RMI1E9a+hOFGeScPMSyQP+VsJm+Ek21EQSgG9Q9p+zgvj6iK/qrWOOfc6p6bbYEVqrRTcN6D61RW+yelDQgciXH+yTFBAg3BygahmV7m80VL4QpTxketDDfvQ3FMn/oepH1rPGyordxMqE+14m8rGKpX1aq7Xz5fkU0xthG1Wq2TQ1TG+cAGBDyj6GcXMPlearWFW1j+kV7kzBRxxUA9R/HgCpMxG6jbSvS7zsV4cUEDzzzOJxNavsZpjPsOJrOCHgKX8Utu1BZGMMfzvn5/TBcJ+dxqufnDmOOPdhsn/+fIr2qYLGpi2HbpJkzlqEAchm4EmqgDfBc73ux16+UhNnS831N38ctFBQxVl/xWx+RdHggrkW2DVjNY1EQEg=
+    distributions: "sdist bdist_wheel"
+    skip_upload_docs: true
+    on:
+      tags: true
+      repo: facelessuser/pyspelling
+      condition: "$TOXENV = documents"
   - provider: pages
     github_token: $GITHUB_TOKEN
     name: $GITHUB_USER
