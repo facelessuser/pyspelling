@@ -55,6 +55,11 @@ def get_requirements():
 
 VER, DEVSTATUS = get_version()
 
+entry_points = {
+    'console_scripts': [
+        'pyspelling=pyspelling.__main__:main'
+    ]
+}
 
 setup(
     name='pyspelling',
@@ -66,6 +71,7 @@ setup(
     author_email='Isaac.Muse@gmail.com',
     url='https://github.com/facelessuser/pyspelling',
     packages=find_packages(exclude=['tools', 'tests']),
+    entry_points=entry_points,
     install_requires=get_requirements(),
     license='MIT License',
     classifiers=[

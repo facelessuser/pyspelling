@@ -7,7 +7,7 @@ from pyspelling import Aspell
 from pyspelling import __version__
 
 
-def main():
+def run():
     """Main."""
 
     parser = argparse.ArgumentParser(prog='spellcheck', description='Spell checking tool.')
@@ -38,4 +38,11 @@ def main():
     return fail
 
 
-sys.exit(main())
+def main():
+    """Main entry point."""
+
+    sys.exit(run())
+
+
+if __name__ == "__main__":
+    main()
