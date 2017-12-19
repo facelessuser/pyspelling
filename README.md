@@ -9,7 +9,7 @@
 
 PySpelling is a module to help with automating spell checking with [Aspell](http://aspell.net/). It is essentially a wrapper around the Aspell command line utility, and allows you to setup different spelling tasks for different file types and filter the content as needed. It also allows you to do more advancing filtering of text via plugins since Aspell's filters are limited to a handful of types with limited options.
 
-PySpelling is not designed to auto replace misspelled words or have interactive replace sessions, there are already modules to do that. PySpelling is mainly meant automate reporting of spelling issues in different file types. So if you are looking for a find and replace spelling tool, this isn't for you.
+PySpelling is not designed to auto replace misspelled words or have interactive replace sessions, there are already modules to do that. PySpelling is mainly meant for automate reporting of spelling issues in different file types. So if you are looking for a find and replace spelling tool, this isn't for you.
 
 ## Documentation
 
