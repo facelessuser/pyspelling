@@ -81,9 +81,9 @@ Text is returned in blocks based on the context of the text.  Each docstring is 
 
 Options          | Type | Default       | Description
 ---------------- | ---- | ------------- | -----------
-`strings`        | bool | `#!py3 True`  | Return `SourceText` entries for each string.
 `comments`       | bool | `#!py3 True`  | Return `SourceText` entries for each comment.
 `docstrings`     | bool | `#!py3 True`  | Return `SourceText` entries for each docstrings.
+`strings`        | bool | `#!py3 False` | Return `SourceText` entries for each string.
 `bytes`          | bool | `#!py3 False` | Return `SourceText` entries for each byte string. Only ASCII content will be included, and encoding will be returned as ASCII.
 `group_comments` | bool | `#!py3 False` | Group consecutive Python comments as one `SourceText` entry.
 

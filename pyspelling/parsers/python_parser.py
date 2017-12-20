@@ -58,7 +58,7 @@ class PythonParser(parsers.Parser):
 
         self.comments = options.get('comments', True) is True
         self.docstrings = options.get('docstrings', True) is True
-        self.strings = options.get('strings', True) is True
+        self.strings = options.get('strings', False) is True
         self.bytes = options.get('bytes', False) is True
         self.group_comments = options.get('group_comments', False) is True
         super(PythonParser, self).__init__(options, default_encoding)
