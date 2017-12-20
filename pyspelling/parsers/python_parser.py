@@ -53,14 +53,14 @@ class PythonParser(parsers.Parser):
     FUNCTION = 1
     CLASS = 2
 
-    def __init__(self, config, default_encoding='ascii'):
+    def __init__(self, options, default_encoding='ascii'):
         """Initialization."""
 
-        self.comments = config.get('comments', True) is True
-        self.docstrings = config.get('docstrings', True) is True
-        self.strings = config.get('strings', True) is True
-        self.bytes = config.get('bytes', False) is True
-        super(PythonParser, self).__init__(config, default_encoding)
+        self.comments = options.get('comments', True) is True
+        self.docstrings = options.get('docstrings', True) is True
+        self.strings = options.get('strings', True) is True
+        self.bytes = options.get('bytes', False) is True
+        super(PythonParser, self).__init__(options, default_encoding)
 
     def is_py2_unicode_literals(self, text, source_file):
         """Check if Python 2 Unicode literals is used."""
