@@ -58,8 +58,9 @@ class PythonParser(parsers.Parser):
 
         self.comments = options.get('comments', True) is True
         self.docstrings = options.get('docstrings', True) is True
-        self.strings = options.get('strings', True) is True
+        self.strings = options.get('strings', False) is True
         self.bytes = options.get('bytes', False) is True
+        self.group_comments = options.get('group_comments', False) is True
         super(PythonParser, self).__init__(options, default_encoding)
 
     def is_py2_unicode_literals(self, text, source_file):
@@ -110,6 +111,7 @@ class PythonParser(parsers.Parser):
                 token_type = token[0]
                 value = token[1]
                 line = util.ustr(token[2][0])
+                line_num = token[2][0]
 
                 if util.PY3 and token_type == tokenize.ENCODING:
                     # PY3 will tell us for sure what our encoding is
@@ -135,11 +137,20 @@ class PythonParser(parsers.Parser):
 
                 if token_type == tokenize.COMMENT and self.comments:
                     # Capture comments
-                    if len(stack) > 1:
-                        loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
+                    if (
+                        self.group_comments and
+                        prev_token_type == tokenize.NL and
+                        comments and (comments[-1][2] + 1) == line_num
+                    ):
+                        # Group multiple consecutive comments
+                        comments[-1][0] += '\n' + value[1:]
+                        comments[-1][2] = line_num
                     else:
-                        loc = "%s(%s)" % (stack[0][0], line)
-                    comments.append(parsers.SourceText(value, loc, encoding, 'comment'))
+                        if len(stack) > 1:
+                            loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
+                        else:
+                            loc = "%s(%s)" % (stack[0][0], line)
+                        comments.append([value[1:], loc, line_num])
                 if token_type == tokenize.STRING:
                     # Capture docstrings
                     # If previously we captured an INDENT or NEWLINE previously we probably have a docstring.
@@ -179,7 +190,11 @@ class PythonParser(parsers.Parser):
 
                 prev_token_type = token_type
 
-        return docstrings + comments + strings
+        final_comments = []
+        for comment in comments:
+            final_comments.append(parsers.SourceText(textwrap.dedent(comment[0]), comment[1], encoding, 'comment'))
+
+        return docstrings + final_comments + strings
 
     def parse_file(self, source_file, encoding):
         """Parse Python file returning content."""
