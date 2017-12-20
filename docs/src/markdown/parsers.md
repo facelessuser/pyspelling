@@ -22,9 +22,9 @@ This is a parser that parsers general text files to Unicode.  It takes a file an
 
 The Markdown parser converts a text file using Python Markdown and returns a single `SourceText` object containing HTML text. It can be included via `pyspelling.parsers.markdown_parser`.
 
-Options               | Type          | Description
---------------------- | ------------- | -----------
-`markdown_extensions` | [string/dict] | A list of strings defining markdown extensions to use. You can substitute the string with a dict that defines the extension as the key and the value as a dictionary of options.
+Options               | Type          | Default    | Description
+--------------------- | ------------- | ---------- | -----------
+`markdown_extensions` | [string/dict] | `#!py3 []` | A list of strings defining markdown extensions to use. You can substitute the string with a dict that defines the extension as the key and the value as a dictionary of options.
 
 ```yaml
 - name: Markdown
@@ -43,11 +43,11 @@ Options               | Type          | Description
 
 The HTML parsers will look for the encoding of the HTML in its header and convert the buffer to Unicode.  It then uses BeautifulSoup4 to convert the content to HTML, and then aggregates all text that should be spell checked in a single `SourceText` object.  It can be configured to avoid certain tags, classes, IDs, or other attributes if desired.  It can also be instructed to scan certain tag attributes for content to spell check. It can be included via `pyspelling.parsers.html_parser`.
 
-Options      | Type     | Description
------------- | -------- | -----------
-`comments`   | bool     | Include comment text in the output.
-`attributes` | [string] | Attributes whose content should be included in the output.
-`ignores`    | [string] | Simple selectors that identify tags to ignore. Only allows tags, IDs, classes, and other attributes.
+Options      | Type     | Default      | Description
+------------ | -------- | ------------ | -----------
+`comments`   | bool     | `#!py3 True` | Include comment text in the output.
+`attributes` | [string] | `#!py3 []`   | Attributes whose content should be included in the output.
+`ignores`    | [string] | `#!py3 []`   | Simple selectors that identify tags to ignore. Only allows tags, IDs, classes, and other attributes.
 
 ```yaml
 - name: mkdocs
@@ -79,12 +79,13 @@ The Python parser will look for the encoding of the file in the header, and conv
 
 Text is returned in blocks based on the context of the text.  Each docstring is returned as its own object.  Comments are returned as their own as well as strings. This is in case you do something like write your docstrings in Markdown, you can run each one individually through the Markdown filter, or some other filter if required.
 
-Options      | Type | Description
------------- | ---- | -----------
-`strings`    | bool | Return `SourceText` entries for each string.
-`comments`   | bool | Return `SourceText` entries for each comment.
-`docstrings` | bool | Return `SourceText` entries for each docstrings.
-`bytes`      | bool | Return `SourceText` entries for each byte string. Only ASCII content will be included, and encoding will be returned as ASCII.
+Options          | Type | Default       | Description
+---------------- | ---- | ------------- | -----------
+`strings`        | bool | `#!py3 True`  | Return `SourceText` entries for each string.
+`comments`       | bool | `#!py3 True`  | Return `SourceText` entries for each comment.
+`docstrings`     | bool | `#!py3 True`  | Return `SourceText` entries for each docstrings.
+`bytes`          | bool | `#!py3 False` | Return `SourceText` entries for each byte string. Only ASCII content will be included, and encoding will be returned as ASCII.
+`group_comments` | bool | `#!py3 False` | Group consecutive Python comments as one `SourceText` entry.
 
 ```yaml
 - name: python
