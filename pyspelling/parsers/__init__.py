@@ -109,7 +109,7 @@ class Decoder(object):
             encoding = 'utf-32'
         return encoding
 
-    def header_check(self, content, ext):
+    def header_check(self, content):
         """Special encode check."""
 
         return None
@@ -203,7 +203,7 @@ class Parser(object):
         try:
             encoding = self._detect_encoding(source_file)
             content = self.parse_file(source_file, encoding)
-        except Exception as e:
+        except UnicodeDecodeError as e:
             error = str(e)
             try:
                 if not encoding or encoding != self.default_encoding:
@@ -211,8 +211,10 @@ class Parser(object):
                     content = self.parse_file(source_file, self.default_encoding)
             except Exception as e:
                 error = str(e)
+        except Exception as e:
+            error = str(e)
         if error:
-            content = [SourceText('', source_file, '', error)]
+            content = [SourceText('', source_file, '', '', error)]
         return content
 
 
