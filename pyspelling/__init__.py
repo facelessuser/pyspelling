@@ -17,11 +17,12 @@ class Aspell(object):
 
     DICTIONARY = 'dictionary.dic'
 
-    def __init__(self, config, name='', verbose=0):
+    def __init__(self, config, name='', binary='', verbose=0):
         """Initialize."""
 
         # General options
         self.name = name
+        self.binary = binary if binary else 'aspell'
         self.verbose = verbose
         self.dict_bin = os.path.abspath(self.DICTIONARY)
         self.documents = config.get('documents', [])
@@ -47,7 +48,7 @@ class Aspell(object):
         """Setup the command."""
 
         cmd = [
-            'aspell',
+            self.binary,
             'list',
             '--encoding', codecs.lookup(encoding).name
         ]
@@ -130,7 +131,7 @@ class Aspell(object):
         # Compile wordlist against language
         util.console(
             [
-                'aspell',
+                self.binary,
                 '--lang', lang,
                 '--encoding=utf-8',
                 'create',

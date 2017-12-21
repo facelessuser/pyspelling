@@ -28,7 +28,8 @@ If you want to manually install it, run `#!bash python setup.py build` and `#!ba
 ## Command Line Usage
 
 ```
-usage: spellcheck [-h] [--version] [--verbose] [--name NAME] [--config CONFIG]
+usage: spellcheck [-h] [--version] [--verbose] [--name NAME] [--binary BINARY]
+                  [--config CONFIG]
 
 Spell checking tool.
 
@@ -37,6 +38,8 @@ optional arguments:
   --version             show program's version number and exit
   --verbose, -v         Verbosity level.
   --name NAME, -n NAME  Specific spelling task by name to run.
+  --binary BINARY, -b BINARY
+                        Provide path to Aspell binary.
   --config CONFIG, -c CONFIG
                         Spelling config.
 ```
@@ -69,6 +72,12 @@ To run a more verbose output, use the `-v` flag. You can increase verbosity leve
 
 ```
 pyspelling -v
+```
+
+If Aspell is not found in your path, you can provide a path to the Aspell binary.
+
+```
+pyspelling -b "path/to/aspell"
 ```
 
 ## Configuring
