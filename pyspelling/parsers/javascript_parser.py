@@ -34,7 +34,7 @@ class JavaScriptParser(parsers.Parser):
         self.lines = options.get('line_comments', True) is True
         # self.strings = options.get('strings', False) is True
         self.group_comments = options.get('group_comments', False) is True
-        self.jsdocs = options.get('jsdocs', True) is True
+        self.jsdocs = options.get('jsdocs', False) is True
         super(JavaScriptParser, self).__init__(options, default_encoding)
 
     def _evaluate(self, m):

@@ -97,6 +97,28 @@ Options          | Type | Default       | Description
   - pyspelling
 ```
 
+### JavaScript
+
+The JavaScript will use the normal encoding detection. Text is returned in blocks based on the context of the text depending on what is enabled.  The parser can return JSDoc comments, block comments, and/or inline comments. Each is returned as its own object.
+
+Options          | Type | Default       | Description
+---------------- | ---- | ------------- | -----------
+`block_comments` | bool | `#!py3 True`  | Return `SourceText` entries for each block comment.
+`line_comments`  | bool | `#!py3 True`  | Return `SourceText` entries for each line comment.
+`jsdocs`         | bool | `#!py3 False` | Return `SourceText` entries for each JSDoc comment.
+`group_comments` | bool | `#!py3 False` | Group consecutive Python comments as one `SourceText` entry.
+
+```yaml
+- name: javascript
+  parser: pyspelling.parsers.javascript_parser
+  options:
+    jsdocs: true
+    line_comments: false
+    block_comments: false
+  sources:
+    - js_files
+```
+
 ### Writing a Parser
 
 To write a parser, there are three classes to be aware: `Decoder`, `Parser`, and `SourceText` which are all found in `pyspelling.parsers`. In general, you'll only need to define your own `Decoder` class if you have special considerations in regard to encoding, such as a header deceleration that defines decoding.
