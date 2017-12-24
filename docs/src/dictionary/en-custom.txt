@@ -6,6 +6,7 @@ Changelog
 EmojiOne
 GitHub
 GitLab
+JSDoc
 MERCHANTABILITY
 MULTILINE
 MkDocs
