@@ -6,6 +6,10 @@
 - **NEW**: Drop Python 2 support.
 - **NEW**: Better Python encoding detection.
 - **NEW**: Better HTML encoding detection.
+- **NEW**: Drop `file_extensions` option and `parser` option.
+- **NEW**: Filters no longer define file extensions. Sources must specify a wildcard path that matches desired files.
+- **NEW**: Drop regular expression support for sources.
+- **NEW**: Drop raw filter.
 
 ## 0.1.0a3
 

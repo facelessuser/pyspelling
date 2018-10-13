@@ -25,8 +25,6 @@ RE_COMMENT = re.compile(
 class JavaScriptFilter(filters.Filter):
     """JavaScript filter."""
 
-    FILE_PATTERNS = ('*.js',)
-
     def __init__(self, options, default_encoding='ascii'):
         """Initialization."""
 

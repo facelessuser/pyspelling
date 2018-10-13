@@ -9,8 +9,6 @@ import markdown
 class MarkdownFilter(filters.Filter):
     """Spelling Python."""
 
-    FILE_PATTERNS = ('*.md', '*.markdown')
-
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
