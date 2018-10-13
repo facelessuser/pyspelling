@@ -87,8 +87,8 @@ class JavaScriptParser(parsers.Parser):
 
         return ''.join(map(lambda m: self._evaluate(m), RE_COMMENT.finditer(text)))
 
-    def parse_file(self, source_file, encoding):
-        """Parse HTML file."""
+    def _filter(self, text, context, encoding):
+        """Filter JavaScript comments."""
 
         content = []
         self.line_num = 1
@@ -98,37 +98,49 @@ class JavaScriptParser(parsers.Parser):
         self.block_comments = []
         self.line_comments = []
 
-        with codecs.open(source_file, 'r', encoding=encoding) as f:
-            self.find_comments(f.read())
-            for comment, line in self.jsdoc_comments:
-                content.append(
-                    parsers.SourceText(
-                        textwrap.dedent(comment),
-                        "%s (%d)" % (source_file, line),
-                        encoding,
-                        'jsdocs'
-                    )
+        self.find_comments(text)
+        for comment, line in self.jsdoc_comments:
+            content.append(
+                parsers.SourceText(
+                    textwrap.dedent(comment),
+                    "%s (%d)" % (context, line),
+                    encoding,
+                    'jsdocs'
                 )
-            for comment, line in self.block_comments:
-                content.append(
-                    parsers.SourceText(
-                        textwrap.dedent(comment),
-                        "%s (%d)" % (source_file, line),
-                        encoding,
-                        'block-comment'
-                    )
+            )
+        for comment, line in self.block_comments:
+            content.append(
+                parsers.SourceText(
+                    textwrap.dedent(comment),
+                    "%s (%d)" % (context, line),
+                    encoding,
+                    'block-comment'
                 )
-            for comment, line in self.line_comments:
-                content.append(
-                    parsers.SourceText(
-                        textwrap.dedent(comment),
-                        "%s (%d)" % (source_file, line),
-                        encoding,
-                        'line-comment'
-                    )
+            )
+        for comment, line in self.line_comments:
+            content.append(
+                parsers.SourceText(
+                    textwrap.dedent(comment),
+                    "%s (%d)" % (context, line),
+                    encoding,
+                    'line-comment'
                 )
+            )
 
         return content
+
+    def parse_file(self, source_file, encoding):
+        """Parse HTML file."""
+
+        with codecs.open(source_file, 'r', encoding=encoding) as f:
+            text = f.read()
+
+        return self.filter(text, source_file, encoding)
+
+    def filter(self, source):
+        """Filter."""
+
+        return self._filter(source.text, source.context, source, encoding)
 
 
 def get_parser():

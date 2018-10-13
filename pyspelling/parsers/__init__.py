@@ -172,6 +172,7 @@ class Parser(object):
     def __init__(self, config, default_encoding='ascii'):
         """Initialize."""
 
+        self.config = config
         self.default_encoding = PYTHON_ENCODING_NAMES.get(default_encoding, default_encoding)
 
     def _detect_encoding(self, source_file):
@@ -190,9 +191,7 @@ class Parser(object):
 
         with codecs.open(source_file, 'r', encoding=encoding) as f:
             text = f.read()
-        content = [SourceText(text, source_file, encoding, 'text')]
-
-        return content
+        return [SourceText(text, source_file, encoding, 'text')]
 
     def _parse(self, source_file):
         """Parse the file."""
@@ -217,6 +216,11 @@ class Parser(object):
             content = [SourceText('', source_file, '', '', error)]
         return content
 
+    def filter(self, source):
+        """Execute filter."""
+
+        return [SourceText(source.text, source.context, source.encoding, 'text')]
+
 
 class RawParser(object):
     """Spelling language."""
@@ -226,6 +230,7 @@ class RawParser(object):
     def __init__(self, config, default_encoding='ascii'):
         """Initialize."""
 
+        self.config = config
         self.default_encoding = PYTHON_ENCODING_NAMES.get(default_encoding, default_encoding)
 
     def parse_file(self, source_file, encoding):
@@ -233,11 +238,14 @@ class RawParser(object):
 
         with open(source_file, 'rb') as f:
             text = f.read()
-        content = [SourceText(text, source_file, encoding, 'text')]
-
-        return content
+        return [SourceText(text, source_file, encoding, 'text')]
 
     def _parse(self, source_file):
         """Parse the file."""
 
         self.parse_file(source_file, self.default_encoding)
+
+    def filter(self, source):
+        """Filter."""
+
+        return [SourceText(source.text.encode(source.encoding), source.context, 'ascii', 'text')]

@@ -1,8 +1,9 @@
 """Markdown parsing."""
 from __future__ import unicode_literals
 from .. import parsers
+from .. import util
 import codecs
-from ..filters import markdown_filter
+import markdown
 
 
 class MarkdownParser(parsers.Parser):
@@ -13,7 +14,17 @@ class MarkdownParser(parsers.Parser):
     def __init__(self, options, default_encoding='ascii'):
         """Initialization."""
 
-        self.filter = markdown_filter.MarkdownFilter(options)
+        extensions = []
+        extension_configs = {}
+        for item in options.get('markdown_extensions', []):
+            if isinstance(item, util.ustr):
+                extensions.append(item)
+            else:
+                k, v = list(item.items())[0]
+                extensions.append(k)
+                if v is not None:
+                    extension_configs[k] = v
+        self.markdown = markdown.Markdown(extensions=extensions, extension_configs=extension_configs)
         super(MarkdownParser, self).__init__(options, default_encoding)
 
     def parse_file(self, source_file, encoding):
@@ -21,9 +32,18 @@ class MarkdownParser(parsers.Parser):
 
         with codecs.open(source_file, 'r', encoding=encoding) as f:
             text = f.read()
-        content = [parsers.SourceText(self.filter.filter(text, encoding), source_file, encoding, 'markdown')]
+        return [parsers.SourceText(self._filter(text), source_file, encoding, 'markdown')]
 
-        return content
+    def _filter(self, text):
+        """Filter markdown."""
+
+        self.markdown.reset()
+        return self.markdown.convert(text)
+
+    def filter(self, source):
+        """Filter."""
+
+        return [parsers.SourceText(self._filter(source.text), source.context, source.encoding, 'markdown')]
 
 
 def get_parser():

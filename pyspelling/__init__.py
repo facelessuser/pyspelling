@@ -87,29 +87,42 @@ class Aspell(object):
                         cmd.extend([key, util.ustr(value)])
         return cmd
 
+    def _check_spelling(self, sources, options, personal_dict, filter_index=1):
+        """Recursive check spelling filters."""
+        for source in sources:
+            if source._has_error():
+                yield source
+            elif not source._is_bytes():
+                if filter_index < len(self.filters):
+                    f, disallow = self.filters[filter_index]
+                    if source.category not in disallow:
+                        yield from self._check_spelling(
+                            f.filter(source), options, personal_dict, filter_index + 1
+                        )
+                    else:
+                        yield source
+                else:
+                    yield source
+            else:
+                yield source
+
     def check_spelling(self, sources, options, personal_dict):
         """Check spelling."""
 
-        for source in sources:
-
+        for source in self._check_spelling(sources, options, personal_dict):
             if source._has_error():
                 yield util.Results([], source.context, source.category, source.error)
-                continue
+            else:
+                if source._is_bytes():
+                    text = source.text
+                else:
+                    text = source.text.encode(self.normalize_utf(source.encoding))
+                self.log(text, 3)
+                cmd = self.setup_command(self.normalize_utf(source.encoding), options, personal_dict)
+                self.log(str(cmd), 2)
 
-            text = source.text
-            encoding = self.normalize_utf(source.encoding)
-            if not source._is_bytes():
-                for f, disallow in self.filters:
-                    if source.category not in disallow:
-                        text = f.filter(text, source.encoding)
-                text = text.encode(encoding)
-            self.log(text, 3)
-
-            cmd = self.setup_command(encoding, options, personal_dict)
-            self.log(str(cmd), 2)
-
-            wordlist = util.console(cmd, input_text=text)
-            yield util.Results([w for w in sorted(set(wordlist.split('\n'))) if w], source.context, source.category)
+                wordlist = util.console(cmd, input_text=text)
+                yield util.Results([w for w in sorted(set(wordlist.split('\n'))) if w], source.context, source.category)
 
     def compile_dictionary(self, lang, wordlists, output):
         """Compile user dictionary."""
@@ -227,8 +240,12 @@ class Aspell(object):
 
     def get_filters(self, documents):
         """Get filters."""
+
         self.filters = []
-        for f in documents.get('filters', []):
+        filters = documents.get('filters', [])
+        if not filters:
+            filters.append('pyspelling.parsers.text_parser')
+        for f in filters:
             # Retrieve module and module options
             if isinstance(f, dict):
                 name, options = list(f.items())[0]
@@ -244,7 +261,7 @@ class Aspell(object):
                 disallow = options['disallow']
                 del options['disallow']
 
-            self.filters.append((self.get_module(name, 'get_filter')(options), disallow))
+            self.filters.append((self.get_module(name, 'get_parser')(options), disallow))
 
     def get_module(self, module, accessor):
         """Get module."""
@@ -266,19 +283,16 @@ class Aspell(object):
             # Perform spell check
             self.log('\nSpell Checking %s...' % documents.get('name', ''), 1)
 
-            # Setup parser and variables for the spell check
-            parser = self.get_module(documents['parser'], 'get_parser')(
-                documents.get('options', {}), documents.get('default_encoding', 'ascii')
-            )
+            # Setup filters and variables for the spell check
+            self.encoding = documents.get('default_encoding', 'ascii')
             self.file_patterns = documents.get('file_patterns', [])
-
             options = self.setup_spellchecker(documents)
             output = self.setup_dictionary(documents)
             self.get_filters(documents)
             self.setup_excludes(documents)
 
-            for sources in self.walk_src(documents.get('sources', []), parser):
-                for result in self.check_spelling(sources, options, output):
+            for sources in self.walk_src(documents.get('sources', []), self.filters[0][0]):
+                for result in self.check_spelling(sources, options, output, ):
                     yield result
 
 

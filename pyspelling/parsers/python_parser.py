@@ -8,20 +8,19 @@ from .. import parsers
 import re
 import textwrap
 import tokenize
-import ast
+import codecs
+import io
 from .. import util
 
-if util.PY3:
-    tokenizer = tokenize.tokenize
-    PREV_DOC_TOKENS = (tokenize.INDENT, tokenize.DEDENT, tokenize.NEWLINE, tokenize.ENCODING)
-else:
-    tokenizer = tokenize.generate_tokens
-    PREV_DOC_TOKENS = (tokenize.INDENT, tokenize.DEDENT, tokenize.NEWLINE)
+tokenizer = tokenize.generate_tokens
+PREV_DOC_TOKENS = (tokenize.INDENT, tokenize.DEDENT, tokenize.NEWLINE, tokenize.ENCODING)
 
 RE_PY_ENCODE = re.compile(
     br'^[^\r\n]*?coding[:=]\s*([-\w.]+)|[^\r\n]*?\r?\n[^\r\n]*?coding[:=]\s*([-\w.]+)'
 )
 RE_NON_PRINTABLE_ASCII = re.compile(br"[^ -~]+")
+
+DEFAULT_ENCODING = 'utf-8'
 
 
 class PythonDecoder(parsers.Decoder):
@@ -39,7 +38,7 @@ class PythonDecoder(parsers.Decoder):
             elif m.group(2):
                 encode = m.group(2).decode('ascii')
         if encode is None:
-            encode = 'ascii'
+            encode = DEFAULT_ENCODING
         return encode
 
 
@@ -53,7 +52,7 @@ class PythonParser(parsers.Parser):
     FUNCTION = 1
     CLASS = 2
 
-    def __init__(self, options, default_encoding='ascii'):
+    def __init__(self, options, default_encoding=DEFAULT_ENCODING):
         """Initialization."""
 
         self.comments = options.get('comments', True) is True
@@ -63,33 +62,12 @@ class PythonParser(parsers.Parser):
         self.group_comments = options.get('group_comments', False) is True
         super(PythonParser, self).__init__(options, default_encoding)
 
-    def is_py2_unicode_literals(self, text, source_file):
-        """Check if Python 2 Unicode literals is used."""
-
-        uliterals = False
-        root = ast.parse(text, source_file)
-
-        for node in ast.iter_child_nodes(root):
-            if isinstance(node, ast.ImportFrom) and node.module:
-                module = node.module.split('.')
-            else:
-                continue
-
-            if module[0] != '__future__':
-                continue
-
-            for n in node.names:
-                if n.name and n.name.split('.')[0] == 'unicode_literals':
-                    uliterals = True
-                    break
-        return uliterals
-
     def get_ascii(self, text):
         """Retrieve ASCII text from byte string."""
 
         return RE_NON_PRINTABLE_ASCII.sub(r' ', text).decode('ascii')
 
-    def parse_docstrings(self, source_file, encoding):
+    def filter(self, source):
         """Retrieve the Python docstrings."""
 
         docstrings = []
@@ -98,108 +76,99 @@ class PythonParser(parsers.Parser):
         prev_token_type = tokenize.NEWLINE
         indent = ''
         name = None
-        stack = [(source_file, 0, self.MODULE)]
+        stack = [(source.context, 0, self.MODULE)]
         uliterals = True
 
-        with open(source_file, 'rb') as source:
+        src = io.StringIO(source.text)
 
-            if not util.PY3:
-                uliterals = self.is_py2_unicode_literals(source.read(), source_file)
-                source.seek(0)
+        for token in tokenizer(src.readline):
+            token_type = token[0]
+            value = token[1]
+            line = util.ustr(token[2][0])
+            line_num = token[2][0]
 
-            for token in tokenizer(source.readline):
-                token_type = token[0]
-                value = token[1]
-                line = util.ustr(token[2][0])
-                line_num = token[2][0]
+            value = token[1]
+            line = util.ustr(token[2][0])
 
-                if util.PY3 and token_type == tokenize.ENCODING:
-                    # PY3 will tell us for sure what our encoding is
-                    encoding = value
+            # Track function and class ancestry
+            if token_type == tokenize.NAME:
+                if value in ('def', 'class'):
+                    name = value
+                elif name:
+                    parent = stack[-1][2]
+                    prefix = ''
+                    if parent != self.MODULE:
+                        prefix = '.' if parent == self.CLASS else ', '
+                    if name == 'class':
+                        stack.append(('%s%s' % (prefix, value), len(indent), self.CLASS))
+                    elif name == 'def':
+                        stack.append(('%s%s()' % (prefix, value), len(indent), self.FUNCTION))
+                    name = None
 
-                value = token[1]
-                line = util.ustr(token[2][0])
-
-                # Track function and class ancestry
-                if token_type == tokenize.NAME:
-                    if value in ('def', 'class'):
-                        name = value
-                    elif name:
-                        parent = stack[-1][2]
-                        prefix = ''
-                        if parent != self.MODULE:
-                            prefix = '.' if parent == self.CLASS else ', '
-                        if name == 'class':
-                            stack.append(('%s%s' % (prefix, value), len(indent), self.CLASS))
-                        elif name == 'def':
-                            stack.append(('%s%s()' % (prefix, value), len(indent), self.FUNCTION))
-                        name = None
-
-                if token_type == tokenize.COMMENT and self.comments:
-                    # Capture comments
-                    if (
-                        self.group_comments and
-                        prev_token_type == tokenize.NL and
-                        comments and (comments[-1][2] + 1) == line_num
-                    ):
-                        # Group multiple consecutive comments
-                        comments[-1][0] += '\n' + value[1:]
-                        comments[-1][2] = line_num
+            if token_type == tokenize.COMMENT and self.comments:
+                # Capture comments
+                if (
+                    self.group_comments and
+                    prev_token_type == tokenize.NL and
+                    comments and (comments[-1][2] + 1) == line_num
+                ):
+                    # Group multiple consecutive comments
+                    comments[-1][0] += '\n' + value[1:]
+                    comments[-1][2] = line_num
+                else:
+                    if len(stack) > 1:
+                        loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
                     else:
-                        if len(stack) > 1:
-                            loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
-                        else:
-                            loc = "%s(%s)" % (stack[0][0], line)
-                        comments.append([value[1:], loc, line_num])
-                if token_type == tokenize.STRING:
-                    # Capture docstrings
-                    # If previously we captured an INDENT or NEWLINE previously we probably have a docstring.
-                    # NL seems to be a different thing.
-                    if prev_token_type in PREV_DOC_TOKENS:
-                        if self.docstrings:
-                            value = value.strip()
-                            if not util.PY3 and not value.startswith((b'u', b'b')):
-                                value = (b'u' if uliterals else b'b') + value
-                            string = textwrap.dedent(eval(value))
-
-                            if not isinstance(string, util.ustr):
-                                # Since docstrings should be readable and printable,
-                                # if byte string assume 'ascii'.
-                                string = string.decode('ascii')
-                            loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
-                            docstrings.append(parsers.SourceText(string, loc, encoding, 'docstring'))
-                    elif self.strings:
+                        loc = "%s(%s)" % (stack[0][0], line)
+                    comments.append([value[1:], loc, line_num])
+            if token_type == tokenize.STRING:
+                # Capture docstrings
+                # If previously we captured an INDENT or NEWLINE previously we probably have a docstring.
+                # NL seems to be a different thing.
+                if prev_token_type in PREV_DOC_TOKENS:
+                    if self.docstrings:
                         value = value.strip()
-                        if not util.PY3 and not value.startswith((b'u', b'b')):
-                            value = (b'u' if uliterals else b'b') + value
                         string = textwrap.dedent(eval(value))
-                        if isinstance(string, util.ustr) or self.bytes:
-                            string_type = 'string'
-                            if not isinstance(string, util.ustr):
-                                string = self.get_ascii(string)
-                                string_type = 'bytes'
-                            loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
-                            strings.append(parsers.SourceText(string, loc, encoding, string_type))
 
-                if token_type == tokenize.INDENT:
-                    indent = value
-                elif token_type == tokenize.DEDENT:
-                    indent = indent[:-4]
-                    if len(stack) > 1 and len(indent) <= stack[-1][1]:
-                        stack.pop()
+                        if not isinstance(string, util.ustr):
+                            # Since docstrings should be readable and printable,
+                            # if byte string assume 'ascii'.
+                            string = string.decode('ascii')
+                        loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
+                        docstrings.append(parsers.SourceText(string, loc, source.encoding, 'docstring'))
+                elif self.strings:
+                    value = value.strip()
+                    string = textwrap.dedent(eval(value))
+                    if isinstance(string, util.ustr) or self.bytes:
+                        string_type = 'string'
+                        if not isinstance(string, util.ustr):
+                            string = self.get_ascii(string)
+                            string_type = 'bytes'
+                        loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
+                        strings.append(parsers.SourceText(string, loc, source.encoding, string_type))
 
-                prev_token_type = token_type
+            if token_type == tokenize.INDENT:
+                indent = value
+            elif token_type == tokenize.DEDENT:
+                indent = indent[:-4]
+                if len(stack) > 1 and len(indent) <= stack[-1][1]:
+                    stack.pop()
+
+            prev_token_type = token_type
 
         final_comments = []
         for comment in comments:
-            final_comments.append(parsers.SourceText(textwrap.dedent(comment[0]), comment[1], encoding, 'comment'))
+            final_comments.append(parsers.SourceText(textwrap.dedent(comment[0]), comment[1], source.encoding, 'comment'))
 
         return docstrings + final_comments + strings
 
     def parse_file(self, source_file, encoding):
         """Parse Python file returning content."""
 
-        return self.parse_docstrings(source_file, encoding)
+        with codecs.open(source_file, 'r', encoding=encoding) as f:
+            text = f.read()
+
+        return self.filter(parsers.SourceText(text, source_file, encoding, 'text'))
 
 
 def get_parser():
