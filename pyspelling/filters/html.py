@@ -284,14 +284,14 @@ class HtmlFilter(filters.Filter):
 
         return self.html_to_text(bs4.BeautifulSoup(text, "html5lib"))
 
-    def parse_file(self, source_file, encoding):
+    def filter(self, source_file, encoding):
         """Parse HTML file."""
 
         with codecs.open(source_file, 'r', encoding=encoding) as f:
             text = f.read()
         return [filters.SourceText(self._filter(text), source_file, encoding, 'html')]
 
-    def filter(self, source):
+    def sfilter(self, source):
         """Filter."""
 
         return [filters.SourceText(self._filter(source.text), source.context, source.encoding, 'html')]

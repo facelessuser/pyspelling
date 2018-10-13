@@ -31,7 +31,7 @@ class ContextFilter(filters.Filter):
 
         super(ContextFilter, self).__init__(options, default_encoding)
 
-    def parse_file(self, source_file, encoding):
+    def filter(self, source_file, encoding):
         """Parse file."""
 
         with codecs.open(source_file, 'r', encoding=encoding) as f:
@@ -39,7 +39,7 @@ class ContextFilter(filters.Filter):
 
         return [filters.SourceText(self._filter(text), source_file, encoding, 'text')]
 
-    def filter(self, source):
+    def sfilter(self, source):
         """Filter."""
 
         return [filters.SourceText(self._filter(source.text), source.context, source.encoding, 'text')]

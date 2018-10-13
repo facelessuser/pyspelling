@@ -67,7 +67,7 @@ class PythonFilter(filters.Filter):
 
         return RE_NON_PRINTABLE_ASCII.sub(r' ', text).decode('ascii')
 
-    def filter(self, source):
+    def _filter(self, text, context, encoding):
         """Retrieve the Python docstrings."""
 
         docstrings = []
@@ -76,10 +76,10 @@ class PythonFilter(filters.Filter):
         prev_token_type = tokenize.NEWLINE
         indent = ''
         name = None
-        stack = [(source.context, 0, self.MODULE)]
+        stack = [(context, 0, self.MODULE)]
         uliterals = True
 
-        src = io.StringIO(source.text)
+        src = io.StringIO(text)
 
         for token in tokenizer(src.readline):
             token_type = token[0]
@@ -135,7 +135,7 @@ class PythonFilter(filters.Filter):
                             # if byte string assume 'ascii'.
                             string = string.decode('ascii')
                         loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
-                        docstrings.append(filters.SourceText(string, loc, source.encoding, 'docstring'))
+                        docstrings.append(filters.SourceText(string, loc, encoding, 'docstring'))
                 elif self.strings:
                     value = value.strip()
                     string = textwrap.dedent(eval(value))
@@ -145,7 +145,7 @@ class PythonFilter(filters.Filter):
                             string = self.get_ascii(string)
                             string_type = 'bytes'
                         loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
-                        strings.append(filters.SourceText(string, loc, source.encoding, string_type))
+                        strings.append(filters.SourceText(string, loc, encoding, string_type))
 
             if token_type == tokenize.INDENT:
                 indent = value
@@ -158,17 +158,20 @@ class PythonFilter(filters.Filter):
 
         final_comments = []
         for comment in comments:
-            final_comments.append(filters.SourceText(textwrap.dedent(comment[0]), comment[1], source.encoding, 'comment'))
+            final_comments.append(filters.SourceText(textwrap.dedent(comment[0]), comment[1], encoding, 'comment'))
 
         return docstrings + final_comments + strings
 
-    def parse_file(self, source_file, encoding):
+    def filter(self, source_file, encoding):
         """Parse Python file returning content."""
 
         with codecs.open(source_file, 'r', encoding=encoding) as f:
-            text = f.read()
+            return self._filter(f.read(), source_file, encoding)
 
-        return self.filter(filters.SourceText(text, source_file, encoding, 'text'))
+    def sfilter(self, source):
+        """Filter."""
+
+        return self._filter(source.text, source.context, source.encoding)
 
 
 def get_filter():

@@ -186,8 +186,8 @@ class Filter(object):
 
         return encoding
 
-    def parse_file(self, source_file, encoding):
-        """Parse HTML file."""
+    def filter(self, source_file, encoding):
+        """Open and filter the file from disk."""
 
         with codecs.open(source_file, 'r', encoding=encoding) as f:
             text = f.read()
@@ -201,13 +201,13 @@ class Filter(object):
         encoding = None
         try:
             encoding = self._detect_encoding(source_file)
-            content = self.parse_file(source_file, encoding)
+            content = self.filter(source_file, encoding)
         except UnicodeDecodeError as e:
             error = str(e)
             try:
                 if not encoding or encoding != self.default_encoding:
                     error = None
-                    content = self.parse_file(source_file, self.default_encoding)
+                    content = self.filter(source_file, self.default_encoding)
             except Exception as e:
                 error = str(e)
         except Exception as e:
@@ -216,7 +216,7 @@ class Filter(object):
             content = [SourceText('', source_file, '', '', error)]
         return content
 
-    def filter(self, source):
+    def sfilter(self, source):
         """Execute filter."""
 
         return [SourceText(source.text, source.context, source.encoding, 'text')]
@@ -233,7 +233,7 @@ class RawFilter(object):
         self.config = config
         self.default_encoding = PYTHON_ENCODING_NAMES.get(default_encoding, default_encoding)
 
-    def parse_file(self, source_file, encoding):
+    def filter(self, source_file, encoding):
         """Parse raw file."""
 
         with open(source_file, 'rb') as f:
@@ -243,9 +243,9 @@ class RawFilter(object):
     def _parse(self, source_file):
         """Parse the file."""
 
-        self.parse_file(source_file, self.default_encoding)
+        self.filter(source_file, self.default_encoding)
 
-    def filter(self, source):
+    def sfilter(self, source):
         """Filter."""
 
-        return [SourceText(source.text.encode(source.encoding), source.context, 'ascii', 'text')]
+        return [SourceText(source.text.encode(source.encoding), source.context, source.encoding, 'text')]

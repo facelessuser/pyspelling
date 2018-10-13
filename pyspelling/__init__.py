@@ -97,7 +97,7 @@ class Aspell(object):
                     f, disallow = self.filters[filter_index]
                     if source.category not in disallow:
                         yield from self._check_spelling(
-                            f.filter(source), options, personal_dict, filter_index + 1
+                            f.sfilter(source), options, personal_dict, filter_index + 1
                         )
                     else:
                         yield source

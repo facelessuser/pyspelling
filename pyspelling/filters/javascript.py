@@ -129,7 +129,7 @@ class JavaScriptFilter(filters.Filter):
 
         return content
 
-    def parse_file(self, source_file, encoding):
+    def filter(self, source_file, encoding):
         """Parse HTML file."""
 
         with codecs.open(source_file, 'r', encoding=encoding) as f:
@@ -137,7 +137,7 @@ class JavaScriptFilter(filters.Filter):
 
         return self.filter(text, source_file, encoding)
 
-    def filter(self, source):
+    def sfilter(self, source):
         """Filter."""
 
         return self._filter(source.text, source.context, source, encoding)

@@ -27,7 +27,7 @@ class MarkdownFilter(filters.Filter):
         self.markdown = markdown.Markdown(extensions=extensions, extension_configs=extension_configs)
         super(MarkdownFilter, self).__init__(options, default_encoding)
 
-    def parse_file(self, source_file, encoding):
+    def filter(self, source_file, encoding):
         """Parse Markdown file."""
 
         with codecs.open(source_file, 'r', encoding=encoding) as f:
@@ -40,7 +40,7 @@ class MarkdownFilter(filters.Filter):
         self.markdown.reset()
         return self.markdown.convert(text)
 
-    def filter(self, source):
+    def sfilter(self, source):
         """Filter."""
 
         return [filters.SourceText(self._filter(source.text), source.context, source.encoding, 'markdown')]
