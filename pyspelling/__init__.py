@@ -244,7 +244,7 @@ class Aspell(object):
         self.filters = []
         filters = documents.get('filters', [])
         if not filters:
-            filters.append('pyspelling.parsers.text_parser')
+            filters.append('pyspelling.filters.text')
         for f in filters:
             # Retrieve module and module options
             if isinstance(f, dict):
@@ -261,7 +261,7 @@ class Aspell(object):
                 disallow = options['disallow']
                 del options['disallow']
 
-            self.filters.append((self.get_module(name, 'get_parser')(options), disallow))
+            self.filters.append((self.get_module(name, 'get_filter')(options), disallow))
 
     def get_module(self, module, accessor):
         """Get module."""

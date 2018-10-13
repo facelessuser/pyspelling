@@ -1,4 +1,4 @@
-"""Plugins."""
+"""Filter Plugins."""
 from __future__ import unicode_literals
 import re
 import codecs
@@ -163,7 +163,7 @@ class Decoder(object):
         return encoding
 
 
-class Parser(object):
+class Filter(object):
     """Spelling language."""
 
     EXTENSIONS = tuple('*',)
@@ -222,7 +222,7 @@ class Parser(object):
         return [SourceText(source.text, source.context, source.encoding, 'text')]
 
 
-class RawParser(object):
+class RawFilter(object):
     """Spelling language."""
 
     EXTENSIONS = tuple('*',)

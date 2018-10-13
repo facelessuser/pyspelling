@@ -10,7 +10,7 @@ documents:
       - docs/src/dictionary/en-custom.txt
     output: build/dictionary/mkdocs.dic
   filters:
-    - pyspelling.parsers.html_parser:
+    - pyspelling.filters.html:
         comments: false
         attributes:
           - title
@@ -39,8 +39,8 @@ documents:
       - docs/src/dictionary/en-custom.txt
     output: build/dictionary/mkdocs.dic
   filters:
-    - pyspelling.parsers.markdown_parser:
-    - pyspelling.parsers.html_parser:
+    - pyspelling.filters.markdown:
+    - pyspelling.filters.html:
         comments: false
         attributes:
           - title
@@ -61,10 +61,10 @@ documents:
       - docs/src/dictionary/en-custom.txt
     output: build/dictionary/python.dic
   filters:
-    - pyspelling.parsers.python_parser:
+    - pyspelling.filters.python:
         strings: false
         comments: false
-    - pyspelling.parsers.context_parser:
+    - pyspelling.filters.context:
         context_visible_first: true
         escapes: \\[\\`~]
         delimiters:

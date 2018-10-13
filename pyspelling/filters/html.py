@@ -1,10 +1,10 @@
 """
-HTML parsing.
+HTML filter.
 
 Detect encoding from HTML header.
 """
 from __future__ import unicode_literals
-from .. import parsers
+from .. import filters
 from .. import util
 import re
 import codecs
@@ -28,7 +28,7 @@ class SelectorAttribute(namedtuple('AttrRule', ['attribute', 'pattern'])):
     """Selector attribute rule."""
 
 
-class HTMLDecoder(parsers.Decoder):
+class HTMLDecoder(filters.Decoder):
     """Detect HTML encoding."""
 
     def header_check(self, content):
@@ -41,7 +41,7 @@ class HTMLDecoder(parsers.Decoder):
         return encode
 
 
-class HtmlParser(parsers.Parser):
+class HtmlFilter(filters.Filter):
     """Spelling Python."""
 
     FILE_PATTERNS = ('*.html', '*.htm')
@@ -54,7 +54,7 @@ class HtmlParser(parsers.Parser):
         self.comments = options.get('comments', True) is True
         self.attributes = set(options.get('attributes', []))
         self.selectors = self.process_selectors(*options.get('ignores', []))
-        super(HtmlParser, self).__init__(options, default_encoding)
+        super(HtmlFilter, self).__init__(options, default_encoding)
 
     def process_selectors(self, *args):
         """
@@ -214,15 +214,15 @@ class HtmlParser(parsers.Parser):
 
         with codecs.open(source_file, 'r', encoding=encoding) as f:
             text = f.read()
-        return [parsers.SourceText(self._filter(text), source_file, encoding, 'html')]
+        return [filters.SourceText(self._filter(text), source_file, encoding, 'html')]
 
     def filter(self, source):
         """Filter."""
 
-        return [parsers.SourceText(self._filter(source.text), source.context, source.encoding, 'html')]
+        return [filters.SourceText(self._filter(source.text), source.context, source.encoding, 'html')]
 
 
-def get_parser():
-    """Return the parser."""
+def get_filter():
+    """Return the filter."""
 
-    return HtmlParser
+    return HtmlFilter

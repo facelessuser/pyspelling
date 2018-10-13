@@ -1,7 +1,7 @@
-"""JavaScript parser."""
+"""JavaScript filter."""
 import re
 import codecs
-from pyspelling import parsers
+from .. import filters
 import textwrap
 
 RE_LINE_PRESERVE = re.compile(r"\r?\n", re.MULTILINE)
@@ -22,8 +22,8 @@ RE_COMMENT = re.compile(
 )
 
 
-class JavaScriptParser(parsers.Parser):
-    """JavaScript parser."""
+class JavaScriptFilter(filters.Filter):
+    """JavaScript filter."""
 
     FILE_PATTERNS = ('*.js',)
 
@@ -35,7 +35,7 @@ class JavaScriptParser(parsers.Parser):
         # self.strings = options.get('strings', False) is True
         self.group_comments = options.get('group_comments', False) is True
         self.jsdocs = options.get('jsdocs', False) is True
-        super(JavaScriptParser, self).__init__(options, default_encoding)
+        super(JavaScriptFilter, self).__init__(options, default_encoding)
 
     def _evaluate(self, m):
         """Search for comments."""
@@ -101,7 +101,7 @@ class JavaScriptParser(parsers.Parser):
         self.find_comments(text)
         for comment, line in self.jsdoc_comments:
             content.append(
-                parsers.SourceText(
+                filters.SourceText(
                     textwrap.dedent(comment),
                     "%s (%d)" % (context, line),
                     encoding,
@@ -110,7 +110,7 @@ class JavaScriptParser(parsers.Parser):
             )
         for comment, line in self.block_comments:
             content.append(
-                parsers.SourceText(
+                filters.SourceText(
                     textwrap.dedent(comment),
                     "%s (%d)" % (context, line),
                     encoding,
@@ -119,7 +119,7 @@ class JavaScriptParser(parsers.Parser):
             )
         for comment, line in self.line_comments:
             content.append(
-                parsers.SourceText(
+                filters.SourceText(
                     textwrap.dedent(comment),
                     "%s (%d)" % (context, line),
                     encoding,
@@ -143,7 +143,7 @@ class JavaScriptParser(parsers.Parser):
         return self._filter(source.text, source.context, source, encoding)
 
 
-def get_parser():
-    """Get parser."""
+def get_filter():
+    """Get filter."""
 
-    return JavaScriptParser
+    return JavaScriptFilter

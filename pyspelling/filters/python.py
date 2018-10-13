@@ -1,10 +1,10 @@
 """
-Python parsing.
+Python filter.
 
 Parse Python docstrings.
 """
 from __future__ import unicode_literals
-from .. import parsers
+from .. import filters
 import re
 import textwrap
 import tokenize
@@ -23,7 +23,7 @@ RE_NON_PRINTABLE_ASCII = re.compile(br"[^ -~]+")
 DEFAULT_ENCODING = 'utf-8'
 
 
-class PythonDecoder(parsers.Decoder):
+class PythonDecoder(filters.Decoder):
     """Detect Python encoding."""
 
     def header_check(self, content):
@@ -42,7 +42,7 @@ class PythonDecoder(parsers.Decoder):
         return encode
 
 
-class PythonParser(parsers.Parser):
+class PythonFilter(filters.Filter):
     """Spelling Python."""
 
     FILE_PATTERNS = ('*.py', '*.pyw')
@@ -60,7 +60,7 @@ class PythonParser(parsers.Parser):
         self.strings = options.get('strings', False) is True
         self.bytes = options.get('bytes', False) is True
         self.group_comments = options.get('group_comments', False) is True
-        super(PythonParser, self).__init__(options, default_encoding)
+        super(PythonFilter, self).__init__(options, default_encoding)
 
     def get_ascii(self, text):
         """Retrieve ASCII text from byte string."""
@@ -135,7 +135,7 @@ class PythonParser(parsers.Parser):
                             # if byte string assume 'ascii'.
                             string = string.decode('ascii')
                         loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
-                        docstrings.append(parsers.SourceText(string, loc, source.encoding, 'docstring'))
+                        docstrings.append(filters.SourceText(string, loc, source.encoding, 'docstring'))
                 elif self.strings:
                     value = value.strip()
                     string = textwrap.dedent(eval(value))
@@ -145,7 +145,7 @@ class PythonParser(parsers.Parser):
                             string = self.get_ascii(string)
                             string_type = 'bytes'
                         loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
-                        strings.append(parsers.SourceText(string, loc, source.encoding, string_type))
+                        strings.append(filters.SourceText(string, loc, source.encoding, string_type))
 
             if token_type == tokenize.INDENT:
                 indent = value
@@ -158,7 +158,7 @@ class PythonParser(parsers.Parser):
 
         final_comments = []
         for comment in comments:
-            final_comments.append(parsers.SourceText(textwrap.dedent(comment[0]), comment[1], source.encoding, 'comment'))
+            final_comments.append(filters.SourceText(textwrap.dedent(comment[0]), comment[1], source.encoding, 'comment'))
 
         return docstrings + final_comments + strings
 
@@ -168,10 +168,10 @@ class PythonParser(parsers.Parser):
         with codecs.open(source_file, 'r', encoding=encoding) as f:
             text = f.read()
 
-        return self.filter(parsers.SourceText(text, source_file, encoding, 'text'))
+        return self.filter(filters.SourceText(text, source_file, encoding, 'text'))
 
 
-def get_parser():
-    """Return the parser."""
+def get_filter():
+    """Return the filter."""
 
-    return PythonParser
+    return PythonFilter

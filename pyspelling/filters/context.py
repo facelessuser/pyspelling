@@ -1,12 +1,12 @@
 """Text parser."""
 from __future__ import unicode_literals
-from .. import parsers
+from .. import filters
 from .. import util
 import re
 
 
-class ContextParser(parsers.Parser):
-    """Text parser."""
+class ContextFilter(filters.Filter):
+    """Context filter."""
 
     FILE_PATTERNS = ('*.txt', '*.text')
 
@@ -29,7 +29,7 @@ class ContextParser(parsers.Parser):
         if escapes:
             self.escapes = re.compile(escapes)
 
-        super(ContextParser, self).__init__(options, default_encoding)
+        super(ContextFilter, self).__init__(options, default_encoding)
 
     def parse_file(self, source_file, encoding):
         """Parse file."""
@@ -37,12 +37,12 @@ class ContextParser(parsers.Parser):
         with codecs.open(source_file, 'r', encoding=encoding) as f:
             text = f.read()
 
-        return [parsers.SourceText(self._filter(text), source_file, encoding, 'text')]
+        return [filters.SourceText(self._filter(text), source_file, encoding, 'text')]
 
     def filter(self, source):
         """Filter."""
 
-        return [parsers.SourceText(self._filter(source.text), source.context, source.encoding, 'text')]
+        return [filters.SourceText(self._filter(source.text), source.context, source.encoding, 'text')]
 
     def _filter(self, text):
         """Context delimiter filter."""
@@ -77,7 +77,7 @@ class ContextParser(parsers.Parser):
         return ' '.join(new_text)
 
 
-def get_parser():
-    """Return the parser."""
+def get_filter():
+    """Return the filter."""
 
-    return ContextParser
+    return ContextFilter
