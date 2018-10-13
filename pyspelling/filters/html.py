@@ -12,11 +12,29 @@ import bs4
 from collections import namedtuple
 from html.parser import HTMLParser
 
+RE_XML_START = re.compile(
+    b'^(?:(' +
+    b'<\\?xml[^>]+?>' +  # ASCII like
+    b')|(' +
+    re.escape('<?xml'.encode('utf-32-be')) + b'.+?' + re.escape('>'.encode('utf-32-be')) +
+    b')|(' +
+    re.escape('<?xml'.encode('utf-32-le')) + b'.+?' + re.escape('>'.encode('utf-32-le')) +
+    b')|(' +
+    re.escape('<?xml'.encode('utf-16-be')) + b'.+?' + re.escape('>'.encode('utf-16-be')) +
+    b')|(' +
+    re.escape('<?xml'.encode('utf-16-le')) + b'.+?' + re.escape('>'.encode('utf-16-le')) +
+    b'))'
+)
+
 RE_HTML_ENCODE = re.compile(
-    br'''(?x)
-    <meta(?!\s*(?:name|value)\s*=)(?:[^>]*?content\s*=[\s"']*)?(?:[^>]*?)[\s"';]*charset\s*=[\s"']*([^\s"'/>]*)
+    br'''(?xi)
+    <\s*meta(?!\s*(?:name|value)\s*=)(?:[^>]*?content\s*=[\s"']*)?(?:[^>]*?)[\s"';]*charset\s*=[\s"']*([^\s"'/>]*)
     '''
 )
+
+RE_XML_ENCODE = re.compile(br'''(?i)^<\?xml[^>]*encoding=(['"])(.*?)\1[^>]*\?>''')
+RE_XML_ENCODE_U = re.compile(r'''(?i)^<\?xml[^>]*encoding=(['"])(.*?)\1[^>]*\?>''')
+
 RE_SELECTOR = re.compile(r'''(\#|\.)?[-\w]+|\*|\[([\w\-:]+)(?:([~^|*$]?=)(\"[^"]+\"|'[^']'|[^'"\[\]]+))?\]''')
 
 
@@ -31,13 +49,70 @@ class SelectorAttribute(namedtuple('AttrRule', ['attribute', 'pattern'])):
 class HTMLDecoder(filters.Decoder):
     """Detect HTML encoding."""
 
+    def _has_xml_encode(self, content):
+        """Check XML encoding."""
+
+        encode = None
+
+        m = RE_XML_START.match(content)
+        if m:
+            if m.group(1):
+                m2 = RE_XML_ENCODE.match(m.group(1))
+
+                if m2:
+                    enc = m2.group(2).decode('ascii')
+
+                    try:
+                        codecs.getencoder(enc)
+                        encode = enc
+                    except LookupError:
+                        pass
+            else:
+                if m.group(2):
+                    enc = 'utf-32-be'
+                    text = m.group(2)
+                elif m.group(3):
+                    enc = 'utf-32-le'
+                    text = m.group(3)
+                elif m.group(4):
+                    enc = 'utf-16-be'
+                    text = m.group(4)
+                elif m.group(5):
+                    enc = 'utf-16-le'
+                    text = m.group(5)
+                try:
+                    m2 = RE_XML_ENCODE_U.match(text.decode(enc))
+                except Exception:  # pragma: no cover
+                    m2 = None
+
+                if m2:
+                    enc = m2.group(2)
+
+                    try:
+                        codecs.getencoder(enc)
+                        encode = enc
+                    except Exception:
+                        pass
+
+        return encode
+
     def header_check(self, content):
         """Special HTML encoding check."""
 
         encode = None
+
+        # Look for meta charset
         m = RE_HTML_ENCODE.search(content)
         if m:
-            encode = m.group(1).decode('ascii')
+            enc = m.group(1).decode('ascii')
+
+            try:
+                codecs.getencoder(enc)
+                encode = enc
+            except LookupError:
+                pass
+        else:
+            encode = self._has_xml_encode(content)
         return encode
 
 
@@ -47,7 +122,7 @@ class HtmlFilter(filters.Filter):
     FILE_PATTERNS = ('*.html', '*.htm')
     DECODER = HTMLDecoder
 
-    def __init__(self, options, default_encoding='ascii'):
+    def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
         self.html_parser = HTMLParser()

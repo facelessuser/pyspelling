@@ -20,7 +20,7 @@ theme:
     text: Roboto
     code: Roboto Mono
 
-pages:
+nav:
   - PySpelling: index.md
   - Parsers: parsers.md
   - Filters: filters.md

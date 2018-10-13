@@ -238,10 +238,13 @@ class Aspell(object):
         self.excludes = documents.get('excludes', [])
         self.regex_excludes = [re.compile(exclude) for exclude in documents.get('regex_excludes', [])]
 
-    def get_filters(self, documents):
+    def get_filters(self, documents, default_encoding):
         """Get filters."""
 
         self.filters = []
+        kwargs = {}
+        if default_encoding:
+            kwargs["default_encoding"] = default_encoding
         filters = documents.get('filters', [])
         if not filters:
             filters.append('pyspelling.filters.text')
@@ -261,7 +264,7 @@ class Aspell(object):
                 disallow = options['disallow']
                 del options['disallow']
 
-            self.filters.append((self.get_module(name, 'get_filter')(options), disallow))
+            self.filters.append((self.get_module(name, 'get_filter')(options, **kwargs), disallow))
 
     def get_module(self, module, accessor):
         """Get module."""
@@ -284,11 +287,11 @@ class Aspell(object):
             self.log('\nSpell Checking %s...' % documents.get('name', ''), 1)
 
             # Setup filters and variables for the spell check
-            self.encoding = documents.get('default_encoding', 'ascii')
+            encoding = documents.get('default_encoding', '')
             self.file_patterns = documents.get('file_patterns', [])
             options = self.setup_spellchecker(documents)
             output = self.setup_dictionary(documents)
-            self.get_filters(documents)
+            self.get_filters(documents, encoding)
             self.setup_excludes(documents)
 
             for sources in self.walk_src(documents.get('sources', []), self.filters[0][0]):
