@@ -45,7 +45,6 @@ class PythonDecoder(filters.Decoder):
 class PythonFilter(filters.Filter):
     """Spelling Python."""
 
-    FILE_PATTERNS = ('*.py', '*.pyw')
     DECODER = PythonDecoder
 
     MODULE = 0

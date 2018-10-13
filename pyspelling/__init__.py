@@ -7,6 +7,7 @@ import codecs
 import importlib
 from . import util
 from . import __version__
+from wcmatch import glob
 
 version = __version__.version
 version_info = __version__.version_info
@@ -94,8 +95,8 @@ class Aspell(object):
                 yield source
             elif not source._is_bytes():
                 if filter_index < len(self.filters):
-                    f, disallow = self.filters[filter_index]
-                    if source.category not in disallow:
+                    f = self.filters[filter_index]
+                    if source.category not in f._get_disallowed():
                         yield from self._check_spelling(
                             f.sfilter(source), options, personal_dict, filter_index + 1
                         )
@@ -153,65 +154,15 @@ class Aspell(object):
             input_text=b'\n'.join(sorted(words)) + b'\n'
         )
 
-    def skip_target(self, target):
-        """Check if target should be skipped."""
-
-        return self.skip_wild_card_target(target) or self.skip_regex_target(target)
-
-    def skip_wild_card_target(self, target):
-        """Check if target should be skipped via wildcard patterns."""
-
-        exclude = False
-        for pattern in self.excludes:
-            if fnmatch.fnmatch(target, pattern):
-                exclude = True
-                break
-        return exclude
-
-    def skip_regex_target(self, target):
-        """Check if target should be skipped via regex."""
-
-        exclude = False
-        for pattern in self.regex_excludes:
-            if pattern.match(target, pattern):
-                exclude = True
-                break
-        return exclude
-
-    def is_valid_file(self, file_name, file_patterns):
-        """Is file in current file patterns."""
-
-        okay = False
-        lowered = file_name.lower()
-        for pattern in file_patterns:
-            if fnmatch.fnmatch(lowered, pattern):
-                okay = True
-                break
-        return okay
-
     def walk_src(self, targets, plugin):
         """Walk source and parse files."""
 
-        # Override file_patterns if the user provides their own
-        file_patterns = self.file_patterns if self.file_patterns else plugin.FILE_PATTERNS
         for target in targets:
-            if not os.path.exists(target):
-                continue
-            if os.path.isdir(target):
-                if self.skip_target(target):
-                    continue
-                for base, dirs, files in os.walk(target):
-                    [dirs.remove(d) for d in dirs[:] if self.skip_target(os.path.join(base, d))]
-                    for f in files:
-                        file_path = os.path.join(base, f)
-                        if self.skip_target(file_path):
-                            continue
-                        if self.is_valid_file(f, file_patterns):
-                            yield plugin._parse(file_path)
-            elif self.is_valid_file(target, file_patterns):
-                if self.skip_target(target):
-                    continue
-                yield plugin._parse(target)
+            flags = glob.N | glob.M | glob.G | glob.B | glob.E
+            patterns = glob.globsplit(target, flags=flags)
+            for f in glob.iglob(patterns, flags=flags):
+                if not os.path.isdir(f):
+                    yield plugin._parse(f)
 
     def setup_spellchecker(self, documents):
         """Setup spell checker."""
@@ -230,13 +181,6 @@ class Aspell(object):
         else:
             output = None
         return output
-
-    def setup_excludes(self, documents):
-        """Setup excludes."""
-
-        # Read excludes
-        self.excludes = documents.get('excludes', [])
-        self.regex_excludes = [re.compile(exclude) for exclude in documents.get('regex_excludes', [])]
 
     def get_filters(self, documents, default_encoding):
         """Get filters."""
@@ -258,13 +202,7 @@ class Aspell(object):
             if options is None:
                 options = {}
 
-            # Extract disallowed tokens
-            disallow = tuple()
-            if 'disallow' in options:
-                disallow = options['disallow']
-                del options['disallow']
-
-            self.filters.append((self.get_module(name, 'get_filter')(options, **kwargs), disallow))
+            self.filters.append(self.get_module(name, 'get_filter')(options, **kwargs))
 
     def get_module(self, module, accessor):
         """Get module."""
@@ -292,9 +230,8 @@ class Aspell(object):
             options = self.setup_spellchecker(documents)
             output = self.setup_dictionary(documents)
             self.get_filters(documents, encoding)
-            self.setup_excludes(documents)
 
-            for sources in self.walk_src(documents.get('sources', []), self.filters[0][0]):
+            for sources in self.walk_src(documents.get('sources', []), self.filters[0]):
                 for result in self.check_spelling(sources, options, output, ):
                     yield result
 

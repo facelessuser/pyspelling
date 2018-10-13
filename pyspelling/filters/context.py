@@ -8,8 +8,6 @@ import re
 class ContextFilter(filters.Filter):
     """Context filter."""
 
-    FILE_PATTERNS = ('*.txt', '*.text')
-
     def __init__(self, options, default_encoding='ascii'):
         """Initialization."""
 

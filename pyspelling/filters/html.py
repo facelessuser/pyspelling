@@ -119,7 +119,6 @@ class HTMLDecoder(filters.Decoder):
 class HtmlFilter(filters.Filter):
     """Spelling Python."""
 
-    FILE_PATTERNS = ('*.html', '*.htm')
     DECODER = HTMLDecoder
 
     def __init__(self, options, default_encoding='utf-8'):

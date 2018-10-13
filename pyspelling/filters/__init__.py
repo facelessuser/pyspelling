@@ -166,7 +166,6 @@ class Decoder(object):
 class Filter(object):
     """Spelling language."""
 
-    EXTENSIONS = tuple('*',)
     DECODER = Decoder
 
     def __init__(self, config, default_encoding='ascii'):
@@ -174,6 +173,11 @@ class Filter(object):
 
         self.config = config
         self.default_encoding = PYTHON_ENCODING_NAMES.get(default_encoding, default_encoding)
+
+    def _get_disallowed(self):
+        """Get disallowed items."""
+
+        return set(self.config.get('disallow', []))
 
     def _detect_encoding(self, source_file):
         """Detect encoding."""
@@ -220,32 +224,3 @@ class Filter(object):
         """Execute filter."""
 
         return [SourceText(source.text, source.context, source.encoding, 'text')]
-
-
-class RawFilter(object):
-    """Spelling language."""
-
-    EXTENSIONS = tuple('*',)
-
-    def __init__(self, config, default_encoding='ascii'):
-        """Initialize."""
-
-        self.config = config
-        self.default_encoding = PYTHON_ENCODING_NAMES.get(default_encoding, default_encoding)
-
-    def filter(self, source_file, encoding):
-        """Parse raw file."""
-
-        with open(source_file, 'rb') as f:
-            text = f.read()
-        return [SourceText(text, source_file, encoding, 'text')]
-
-    def _parse(self, source_file):
-        """Parse the file."""
-
-        self.filter(source_file, self.default_encoding)
-
-    def sfilter(self, source):
-        """Filter."""
-
-        return [SourceText(source.text.encode(source.encoding), source.context, source.encoding, 'text')]

@@ -1,7 +1,7 @@
 documents:
 - name: mkdocs
   sources:
-    - site
+    - site/**/*.html
   aspell:
     lang: en
   dictionary:
@@ -52,7 +52,7 @@ documents:
 - name: python
   sources:
     - setup.py
-    - pyspelling
+    - pyspelling/**/*.py
   aspell:
     lang: en
   dictionary:
