@@ -133,7 +133,7 @@ class JavaScriptFilter(filters.Filter):
         with codecs.open(source_file, 'r', encoding=encoding) as f:
             text = f.read()
 
-        return self.filter(text, source_file, encoding)
+        return self._filter(text, source_file, encoding)
 
     def sfilter(self, source):
         """Filter."""
