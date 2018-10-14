@@ -23,8 +23,22 @@ RE_NON_PRINTABLE_ASCII = re.compile(br"[^ -~]+")
 DEFAULT_ENCODING = 'utf-8'
 
 
-class PythonDecoder(filters.Decoder):
-    """Detect Python encoding."""
+class PythonFilter(filters.Filter):
+    """Spelling Python."""
+
+    MODULE = 0
+    FUNCTION = 1
+    CLASS = 2
+
+    def __init__(self, options, default_encoding=DEFAULT_ENCODING):
+        """Initialization."""
+
+        self.comments = options.get('comments', True) is True
+        self.docstrings = options.get('docstrings', True) is True
+        self.strings = options.get('strings', False) is True
+        self.bytes = options.get('bytes', False) is True
+        self.group_comments = options.get('group_comments', False) is True
+        super(PythonFilter, self).__init__(options, default_encoding)
 
     def header_check(self, content):
         """Special Python encoding check."""
@@ -40,26 +54,6 @@ class PythonDecoder(filters.Decoder):
         if encode is None:
             encode = DEFAULT_ENCODING
         return encode
-
-
-class PythonFilter(filters.Filter):
-    """Spelling Python."""
-
-    DECODER = PythonDecoder
-
-    MODULE = 0
-    FUNCTION = 1
-    CLASS = 2
-
-    def __init__(self, options, default_encoding=DEFAULT_ENCODING):
-        """Initialization."""
-
-        self.comments = options.get('comments', True) is True
-        self.docstrings = options.get('docstrings', True) is True
-        self.strings = options.get('strings', False) is True
-        self.bytes = options.get('bytes', False) is True
-        self.group_comments = options.get('group_comments', False) is True
-        super(PythonFilter, self).__init__(options, default_encoding)
 
     def get_ascii(self, text):
         """Retrieve ASCII text from byte string."""
