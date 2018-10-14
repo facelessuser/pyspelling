@@ -25,7 +25,7 @@ class MarkdownFilter(filters.Filter):
         self.markdown = markdown.Markdown(extensions=extensions, extension_configs=extension_configs)
         super(MarkdownFilter, self).__init__(options, default_encoding)
 
-    def filter(self, source_file, encoding):
+    def filter(self, source_file, encoding):  # noqa A001
         """Parse Markdown file."""
 
         with codecs.open(source_file, 'r', encoding=encoding) as f:

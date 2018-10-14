@@ -76,7 +76,6 @@ class PythonFilter(filters.Filter):
         indent = ''
         name = None
         stack = [(context, 0, self.MODULE)]
-        uliterals = True
 
         src = io.StringIO(text)
 
@@ -161,7 +160,7 @@ class PythonFilter(filters.Filter):
 
         return docstrings + final_comments + strings
 
-    def filter(self, source_file, encoding):
+    def filter(self, source_file, encoding):  # noqa A001
         """Parse Python file returning content."""
 
         with codecs.open(source_file, 'r', encoding=encoding) as f:

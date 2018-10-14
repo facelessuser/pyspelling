@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 from .. import filters
 from .. import util
+import codecs
 import re
 
 
@@ -29,7 +30,7 @@ class ContextFilter(filters.Filter):
 
         super(ContextFilter, self).__init__(options, default_encoding)
 
-    def filter(self, source_file, encoding):
+    def filter(self, source_file, encoding):  # noqa A001
         """Parse file."""
 
         with codecs.open(source_file, 'r', encoding=encoding) as f:

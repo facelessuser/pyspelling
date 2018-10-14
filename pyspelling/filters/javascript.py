@@ -127,7 +127,7 @@ class JavaScriptFilter(filters.Filter):
 
         return content
 
-    def filter(self, source_file, encoding):
+    def filter(self, source_file, encoding):  # noqa A001
         """Parse HTML file."""
 
         with codecs.open(source_file, 'r', encoding=encoding) as f:
@@ -138,7 +138,7 @@ class JavaScriptFilter(filters.Filter):
     def sfilter(self, source):
         """Filter."""
 
-        return self._filter(source.text, source.context, source, encoding)
+        return self._filter(source.text, source.context, source.encoding)
 
 
 def get_filter():

@@ -190,7 +190,7 @@ class Filter(object):
 
         return encoding
 
-    def filter(self, source_file, encoding):
+    def filter(self, source_file, encoding):  # noqa A001
         """Open and filter the file from disk."""
 
         with codecs.open(source_file, 'r', encoding=encoding) as f:

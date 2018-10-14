@@ -283,7 +283,7 @@ class HtmlFilter(filters.Filter):
 
         return self.html_to_text(bs4.BeautifulSoup(text, "html5lib"))
 
-    def filter(self, source_file, encoding):
+    def filter(self, source_file, encoding):  # noqa A001
         """Parse HTML file."""
 
         with codecs.open(source_file, 'r', encoding=encoding) as f:

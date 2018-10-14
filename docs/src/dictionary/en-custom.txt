@@ -20,7 +20,9 @@ YAML
 backticks
 bool
 builtins
+chainable
 chunking
+could've
 dicts
 docstring
 docstrings
@@ -30,6 +32,7 @@ facelessuser
 gforcada
 linter
 lxml
+metadata
 mkdocs
 parsers
 pre
