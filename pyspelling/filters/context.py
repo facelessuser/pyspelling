@@ -1,14 +1,15 @@
-"""Context filter."""
+"""Text parser."""
 from __future__ import unicode_literals
 from .. import filters
-import re
 from .. import util
+import codecs
+import re
 
 
 class ContextFilter(filters.Filter):
-    """Context delimiter class."""
+    """Context filter."""
 
-    def __init__(self, options):
+    def __init__(self, options, default_encoding='ascii'):
         """Initialization."""
 
         self.context_visible_first = options.get('context_visible_first', False) is True
@@ -27,7 +28,22 @@ class ContextFilter(filters.Filter):
         if escapes:
             self.escapes = re.compile(escapes)
 
-    def filter(self, text, encoding):
+        super(ContextFilter, self).__init__(options, default_encoding)
+
+    def filter(self, source_file, encoding):  # noqa A001
+        """Parse file."""
+
+        with codecs.open(source_file, 'r', encoding=encoding) as f:
+            text = f.read()
+
+        return [filters.SourceText(self._filter(text), source_file, encoding, 'text')]
+
+    def sfilter(self, source):
+        """Filter."""
+
+        return [filters.SourceText(self._filter(source.text), source.context, source.encoding, 'text')]
+
+    def _filter(self, text):
         """Context delimiter filter."""
 
         new_text = []
@@ -56,6 +72,7 @@ class ContextFilter(filters.Filter):
             index += 1
         if last < end and self.context_visible_first is True:
             new_text.append(text[last:end])
+
         return ' '.join(new_text)
 
 

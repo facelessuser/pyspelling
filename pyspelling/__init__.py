@@ -1,15 +1,35 @@
 """Spell check with Aspell or Hunspell."""
 from __future__ import unicode_literals
 import os
-import fnmatch
-import re
 import codecs
 import importlib
 from . import util
 from . import __version__
+from wcmatch import glob
 
 version = __version__.version
 version_info = __version__.version_info
+
+glob_flag_map = {
+    "FORECECASE": glob.F,
+    "F": glob.F,
+    "IGNORECASE": glob.I,
+    "I": glob.I,
+    "RAWCHARS": glob.R,
+    "R": glob.R,
+    "NEGATE": glob.N,
+    "N": glob.N,
+    "MINUSNEGATE": glob.M,
+    "M": glob.M,
+    "GLOBSTAR": glob.G,
+    "G": glob.G,
+    "DOTGLOB": glob.D,
+    "D": glob.D,
+    "EXTGLOB": glob.E,
+    "E": glob.E,
+    "BRACE": glob.B,
+    "B": glob.B
+}
 
 
 class Aspell(object):
@@ -87,29 +107,42 @@ class Aspell(object):
                         cmd.extend([key, util.ustr(value)])
         return cmd
 
+    def _check_spelling(self, sources, options, personal_dict, filter_index=1):
+        """Recursive check spelling filters."""
+        for source in sources:
+            if source._has_error():
+                yield source
+            elif not source._is_bytes():
+                if filter_index < len(self.filters):
+                    f = self.filters[filter_index]
+                    if source.category not in f._get_disallowed():
+                        yield from self._check_spelling(
+                            f.sfilter(source), options, personal_dict, filter_index + 1
+                        )
+                    else:
+                        yield source
+                else:
+                    yield source
+            else:
+                yield source
+
     def check_spelling(self, sources, options, personal_dict):
         """Check spelling."""
 
-        for source in sources:
-
+        for source in self._check_spelling(sources, options, personal_dict):
             if source._has_error():
                 yield util.Results([], source.context, source.category, source.error)
-                continue
+            else:
+                if source._is_bytes():
+                    text = source.text
+                else:
+                    text = source.text.encode(self.normalize_utf(source.encoding))
+                self.log(text, 3)
+                cmd = self.setup_command(self.normalize_utf(source.encoding), options, personal_dict)
+                self.log(str(cmd), 2)
 
-            text = source.text
-            encoding = self.normalize_utf(source.encoding)
-            if not source._is_bytes():
-                for f, disallow in self.filters:
-                    if source.category not in disallow:
-                        text = f.filter(text, source.encoding)
-                text = text.encode(encoding)
-            self.log(text, 3)
-
-            cmd = self.setup_command(encoding, options, personal_dict)
-            self.log(str(cmd), 2)
-
-            wordlist = util.console(cmd, input_text=text)
-            yield util.Results([w for w in sorted(set(wordlist.split('\n'))) if w], source.context, source.category)
+                wordlist = util.console(cmd, input_text=text)
+                yield util.Results([w for w in sorted(set(wordlist.split('\n'))) if w], source.context, source.category)
 
     def compile_dictionary(self, lang, wordlists, output):
         """Compile user dictionary."""
@@ -140,65 +173,14 @@ class Aspell(object):
             input_text=b'\n'.join(sorted(words)) + b'\n'
         )
 
-    def skip_target(self, target):
-        """Check if target should be skipped."""
-
-        return self.skip_wild_card_target(target) or self.skip_regex_target(target)
-
-    def skip_wild_card_target(self, target):
-        """Check if target should be skipped via wildcard patterns."""
-
-        exclude = False
-        for pattern in self.excludes:
-            if fnmatch.fnmatch(target, pattern):
-                exclude = True
-                break
-        return exclude
-
-    def skip_regex_target(self, target):
-        """Check if target should be skipped via regex."""
-
-        exclude = False
-        for pattern in self.regex_excludes:
-            if pattern.match(target, pattern):
-                exclude = True
-                break
-        return exclude
-
-    def is_valid_file(self, file_name, file_patterns):
-        """Is file in current file patterns."""
-
-        okay = False
-        lowered = file_name.lower()
-        for pattern in file_patterns:
-            if fnmatch.fnmatch(lowered, pattern):
-                okay = True
-                break
-        return okay
-
-    def walk_src(self, targets, plugin):
+    def walk_src(self, targets, flags, plugin):
         """Walk source and parse files."""
 
-        # Override file_patterns if the user provides their own
-        file_patterns = self.file_patterns if self.file_patterns else plugin.FILE_PATTERNS
         for target in targets:
-            if not os.path.exists(target):
-                continue
-            if os.path.isdir(target):
-                if self.skip_target(target):
-                    continue
-                for base, dirs, files in os.walk(target):
-                    [dirs.remove(d) for d in dirs[:] if self.skip_target(os.path.join(base, d))]
-                    for f in files:
-                        file_path = os.path.join(base, f)
-                        if self.skip_target(file_path):
-                            continue
-                        if self.is_valid_file(f, file_patterns):
-                            yield plugin._parse(file_path)
-            elif self.is_valid_file(target, file_patterns):
-                if self.skip_target(target):
-                    continue
-                yield plugin._parse(target)
+            patterns = glob.globsplit(target, flags=flags)
+            for f in glob.iglob(patterns, flags=flags):
+                if not os.path.isdir(f):
+                    yield plugin._parse(f)
 
     def setup_spellchecker(self, documents):
         """Setup spell checker."""
@@ -218,17 +200,17 @@ class Aspell(object):
             output = None
         return output
 
-    def setup_excludes(self, documents):
-        """Setup excludes."""
-
-        # Read excludes
-        self.excludes = documents.get('excludes', [])
-        self.regex_excludes = [re.compile(exclude) for exclude in documents.get('regex_excludes', [])]
-
-    def get_filters(self, documents):
+    def get_filters(self, documents, default_encoding):
         """Get filters."""
+
         self.filters = []
-        for f in documents.get('filters', []):
+        kwargs = {}
+        if default_encoding:
+            kwargs["default_encoding"] = default_encoding
+        filters = documents.get('filters', [])
+        if not filters:
+            filters.append('pyspelling.filters.text')
+        for f in filters:
             # Retrieve module and module options
             if isinstance(f, dict):
                 name, options = list(f.items())[0]
@@ -238,13 +220,7 @@ class Aspell(object):
             if options is None:
                 options = {}
 
-            # Extract disallowed tokens
-            disallow = tuple()
-            if 'disallow' in options:
-                disallow = options['disallow']
-                del options['disallow']
-
-            self.filters.append((self.get_module(name, 'get_filter')(options), disallow))
+            self.filters.append(self.get_module(name, 'get_filter')(options, **kwargs))
 
     def get_module(self, module, accessor):
         """Get module."""
@@ -256,6 +232,16 @@ class Aspell(object):
             raise ValueError("Could not find accessor '%s'!" % accessor)
         return attr()
 
+    def _to_flags(self, text):
+        """Convert text representation of flags to actual flags."""
+
+        flags = 0
+        for x in text.split('|'):
+            value = x.strip().upper()
+            if value:
+                flags |= glob_flag_map.get(value, 0)
+        return flags
+
     def check(self):
         """Walk source and initiate spell check."""
 
@@ -266,18 +252,14 @@ class Aspell(object):
             # Perform spell check
             self.log('\nSpell Checking %s...' % documents.get('name', ''), 1)
 
-            # Setup parser and variables for the spell check
-            parser = self.get_module(documents['parser'], 'get_parser')(
-                documents.get('options', {}), documents.get('default_encoding', 'ascii')
-            )
-            self.file_patterns = documents.get('file_patterns', [])
-
+            # Setup filters and variables for the spell check
+            encoding = documents.get('default_encoding', '')
             options = self.setup_spellchecker(documents)
             output = self.setup_dictionary(documents)
-            self.get_filters(documents)
-            self.setup_excludes(documents)
+            glob_flags = self._to_flags(documents.get('glob_flags', "N|B|G"))
+            self.get_filters(documents, encoding)
 
-            for sources in self.walk_src(documents.get('sources', []), parser):
+            for sources in self.walk_src(documents.get('sources', []), glob_flags, self.filters[0]):
                 for result in self.check_spelling(sources, options, output):
                     yield result
 

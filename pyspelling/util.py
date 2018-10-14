@@ -53,10 +53,10 @@ def console(cmd, input_file=None, input_text=None):
     returncode = process.returncode
 
     assert returncode == 0, "Runtime Error: %s" % (
-        output[0].rstrip().decode('utf-8') if PY3 else output[0]
+        output[0].rstrip().decode('utf-8')
     )
 
-    return output[0].decode('utf-8') if PY3 else output[0]
+    return output[0].decode('utf-8')
 
 
 def random_name_gen(size=6):

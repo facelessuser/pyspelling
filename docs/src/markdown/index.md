@@ -5,15 +5,15 @@
 
 ## Overview
 
-PySpelling is a module to help with automating spell checking with [Aspell][aspell]. It is essentially a wrapper around the Aspell command line utility, and allows you to setup different spelling tasks for different file types and filter the content as needed. It also allows you to do more advancing filtering of text via plugins since Aspell's filters are limited to a handful of types with limited options.
+PySpelling is a module to help with automating spell checking with [Aspell][aspell]. It is essentially a wrapper around the Aspell command line utility, and allows you to setup different spelling tasks for different file types and filter the content as needed. It also allows you to do more advanced filtering of text via plugins since Aspell's filters are limited to a handful of types with limited options.
 
-PySpelling is not designed to auto replace misspelled words or have interactive replace sessions, there are already modules to do that. PySpelling is mainly meant for automate reporting of spelling issues in different file types. So if you are looking for a find and replace spelling tool, this isn't for you.
+PySpelling is not designed to auto replace misspelled words or have interactive replace sessions, there are already modules to do that. PySpelling is mainly meant to help automate reporting of spelling issues in different file types. So if you are looking for a find and replace spelling tool, this isn't for you.
 
 ## Motivation
 
-Aspell is a very good spell check tool that comes with various filters, but the filters are limited in types and aren't as flexible as I would have liked. I mainly wanted to provide an automated spell check tool that I could run locally and in continuous integration environments like Travis CI. Scanning HTML was sometimes frustrating as I would want to simply ignore a tag with a specific class. Yes you can wrap your content in something like `<nospell></nospell>`, but since my document sources are in Markdown, it would dirty up my Markdown source, and directly spell checking the Markdown was quite a bit more difficult to ignore types of content.
+Aspell is a very good spell check tool that comes with various filters, but the filters are limited in types and aren't extremely flexible. I mainly wanted to provide an automated spell check tool that I could run locally and in continuous integration environments like Travis CI. Scanning HTML was sometimes frustrating as I would want to simply ignore a tag with a specific class. I could've wrapped my content in something like `<nospell></nospell>`, but since my document sources are in Markdown, it would dirty up the Markdown source. Directly spell checking the Markdown was was even more difficult to the nature of the Markdown syntax.
 
-PySpelling was created to work around Aspell's searching shortcomings by creating a wrapper around Aspell that could be extended to handle more advanced kinds of situations. If I wanted to filter out specific HTML tags with specific IDs or class names, PySpelling can do it. If I want to scan Python files for docstrings, but also avoid content within a docstring that is wrapped in backticks, I can do that. Additionally, I wanted to leverage existing Python modules that are already highly aware of certain file type's context to save me from writing complex lexers and parsers.  The sacrifice is fine tracking of where a misspelled word is and many of the libraries augment the buffer under search, but all I care about is what words in a file are misspelled. So with PySpelling, I can quickly write a plugin to parse a file or filter the content in an automated process.
+PySpelling was created to work around Aspell's search shortcomings by creating a wrapper around Aspell that could be extended to handle more advanced kinds of situations. If I want to filter out specific HTML tags with specific IDs or class names, PySpelling can do it. If I want to scan Python files for docstrings, but also avoid content within a docstring that is wrapped in backticks, I can do that. Additionally, you can leverage existing Python modules that are already highly aware of certain file type's context to save yourself the effort of writing complex lexers and parsers.
 
 ## Installing
 
@@ -91,27 +91,22 @@ documents:
 - task2
 ```
 
-Each task requires, at the very least, a `name` for the tasks (while it doesn't enforce a unique name, it should be a unique name), a `parser`, and `sources` to search.
+Each task requires, at the very least, a `name` for the tasks (while it doesn't enforce a unique name, it should be a unique name) and `sources` to search. If no filter is added, the `pyspelling.filters.text` filter will be used.
 
 ```yaml
 documents:
 - name: Python Source
-  parser: pyspelling.parsers.python_parser
   sources:
-  - pyspelling
+  - pyspelling/**/*.py
 ```
 
-But if needed, you can configure more complex setup including your own custom word list, additional filters, etc.
+But if needed, you can configure more complex setup including your own custom word list, specific filters, etc.
 
 ```yaml
 documents:
 - name: Python Source
-  parser: pyspelling.parsers.python_parser
-  options:
-    strings: false
-    comments: false
   sources:
-  - pyspelling
+  - pyspelling/**/*.py
   aspell:
     lang: en
   dictionary:
@@ -120,7 +115,10 @@ documents:
     - docs/src/dictionary/en-custom.txt
     output: build/dictionary/python.dic
   filters:
-  - pyspelling.filters.context_filter:
+  - pyspelling.filters.python:
+      strings: false
+      comments: false
+  - pyspelling.filters.context:
       context_visible_first: true
       escapes: \\[\\`~]
       delimiters:
@@ -141,123 +139,63 @@ documents:
 - name: Python Source
 ```
 
-### Parser
-
-Spelling tasks need to specify a file parser to use for the files in a given task. This is done via the `parser` option. Parsers are plugins for PySpelling that will determine the encoding for a file and then parse the content into relevant text chunks to search (usually Unicode).  The configuration value is a string that references the Python import path for the given plugin.  To reference the default Python file parser, which is located at `pyspelling.parsers.python_parser`, the following would be used:
-
-```yaml
-documents:
-- name: Python Source
-  parser: pyspelling.parsers.python_parser
-```
-
-If you use the `pyspelling.parsers.raw_parser`, the encoding will not be resolved, and instead will use the supplied `default_encoding`. The text will be read in as bytes and will be sent directly to Aspell with the aforementioned default encoding. Since the raw parser stores the text as bytes, the filters will be skipped as they only accept Unicode.
-
-### Parser Options
-
-Depending on the specified parser, there may be specific `options` that can be configured. For instance, in the default Python parser, we can configure it to only parse docstrings by disabling comments and strings:
-
-```yaml
-documents:
-- name: Python Source
-  parser: pyspelling.parsers.python_parser
-  options:
-    strings: false
-    comments: false
-```
-
-### File Patterns
-
-A given parser will have a list of valid wildcard file patterns, so when you are searching a folder, you only search the relevant files. If you want to use the parser on a file type that is not currently covered, you can override the file pattern for that parser with the `file_patterns` option. Let's say we wanted to parse file types `*.python` with the Python file parser, you could use:
-
-```yaml
-documents:
-- name: Python Source
-  parser: pyspelling.parsers.python_parser
-  file_patterns:
-    - '*.python'
-```
-
 Notice that `file_patterns` should be an array of values.
 
 ### Default Encoding
 
-When parsing a file, PySpelling only checks for low hanging fruit that it has 100% confidence in, such as UTF BOMs, and depending on the file parser, there may be additional logic like the file type's encoding declaration in the file header. If there is no BOM, encoding declaration, or other special logic, PySpelling will usually default to "ASCII" as the fallback, but you can override the fallback with `default_encoding`:
+When parsing a file, PySpelling only checks for low hanging fruit that it has 100% confidence in, such as UTF BOMs, and depending on the file parser, there may be additional logic like the file type's encoding declaration in the file header. If there is no BOM, encoding declaration, or other special logic, PySpelling will use the default encoding specified by the first filter which will initially parse the file. Depending on the file type, this could differ, but if you specify no filter, the `text` filter will be used which has a default of "ASCII" as the fallback. You can override the fallback with `default_encoding`:
 
 ```yaml
 - name: Markdown
-  file_patterns:
-  - '*.md'
-  parser: pyspelling.parsers.text_parser
+  filters:
+    - pyspelling.filters.text
+  sources:
+    - '**/*.md'
   default_encoding: utf-8
 ```
 
 Keep in mind that the encoding of the file gets passed to Aspell. Aspell is limited to very specific encodings, so if your file is using an unsupported encoding, it will fail. PySpelling *should* properly convert your encoding name (assuming the encoding is valid for Aspell) into an alias that is acceptable to Aspell. So if you specify `latin-1`, PySpelling will send it to Aspell as `iso8859-1`.
 
-If you really need advanced encoding detection, you could easily enough write you own file parser plugin that utilize `chardet` or `cchardet` etc.
+If you really need advanced encoding detection, you could easily enough write you own filter plugin that utilizes `chardet` or `cchardet` etc.
 
 ### Sources
 
-Each spelling task must define sources to search via the `sources` key. Each source can either be a file, or a folder (folders will be recursively searched for valid files). PySpelling will iterate these sources matching the files against the file patterns in `extensions`:
+Each spelling task must define sources to search via the `sources` key. Each source should be a wildcard pattern that should match one or more files. PySpelling will iterate these sources performing a glob to determine which files should be spell checked. You can also have multiple patterns on one line that will be considered simultaneously if they are separated with `|`.  This is useful if you'd like to provide an exclusion pattern along with your file pattern. For instance, if we wanted to scan all python files in our folder, but exclude any in the build folder, we could provide the following pattern: `**/*.py|!build/**`.
+
+PySpelling uses [Wildcard Match's `glob` library](https://facelessuser.github.io/wcmatch/glob/) to perform the file searching.  By default, it uses the `NEGATE`, `GLOBSTAR`, and `BRACE` flags, but you can override the flag options with the `glob_flags` option.
 
 ```yaml
 - name: Python Source
-  parser: pyspelling.parsers.python_parser
-  options:
-    strings: false
-    comments: false
+  filters:
+    - pyspelling.parsers.python_parser:
+        strings: false
+        comments: false
+  glob_flags: N|G|B
   sources:
-  - pyspelling
-```
-
-### Excludes
-
-Sometimes when searching folders, you'll need to exclude certain files and folders.  PySpelling allows you to define wildcard excludes:
-
-```yaml
-- name: Python Source
-  parser: pyspelling.parsers.python_parser
-  sources:
-  - pyspelling
-  excludes:
-  - pyspelling/subfolder/*
-```
-
-If wildcard patterns are not sufficient, you can also use regular expression:
-
-```yaml
-- name: Python Source
-  parser: pyspelling.parsers.python_parser
-  sources:
-  - pyspelling
-  regex_excludes:
-  - pyspelling/(?:folder|other-folder)/.*
+  - pyspelling/**/*.py
 ```
 
 ### Filters
 
-Some times your may want to take a buffer and run it through a filter or filters. Filters operate directly on a text buffer returning the altered text and can be chained together.  Each filter takes the text from the previous, alters it, and passes it on to the next.
+Some times your may want to take a buffer and run it through a filter or even multiple filters. Filters operate directly on a text buffer returning the altered text and can be chained together.  Each filter takes the text from the previous, alters it, and passes it on to the next.
 
-Let's say you had some Markdown files and wanted to convert them to HTML, and then filter out specific tags. You could just use the Markdown parser and then filter it through the HTML filter, but to illustrate filter chaining, we'll parse the file as text, and then run it through the markdown filter followed by the HTML filter that will return the content of the tags (and selected attributes) excluding certain selectors.
+Let's say you had some Markdown files and wanted to convert them to HTML, and then filter out specific tags. You could just use the Markdown parser and then filter it through the HTML filter.
 
 
 ```yaml
 - name: Markdown
-  file_patterns:
-  - '*.md'
-  parser: pyspelling.parsers.text_parser
   sources:
-  - README.md
+    - README.md
   filters:
-  - pyspelling.filters.markdown_filter:
-  - pyspelling.filters.html_filter:
-      comments: false
-      attributes:
-      - title
-      - alt
-      ignores:
-      - code
-      - pre
+    - pyspelling.filters.markdown_filter:
+    - pyspelling.filters.html_filter:
+        comments: false
+        attributes:
+        - title
+        - alt
+        ignores:
+        - code
+        - pre
 ```
 
 ### Personal Dictionaries/Word Lists
@@ -269,24 +207,24 @@ There are two things that must be defined: the default dictionary via the the `l
 ```yaml
 documents:
 - name: Python Source
-  parser: pyspelling.parsers.python_parser
-  options:
-    strings: false
-    comments: false
   sources:
-  - pyspelling
+    - pyspelling/**/*.py
   aspell:
     lang: en
   dictionary:
     lang: en
     wordlists:
-    - docs/src/dictionary/en-custom.txt
+      - docs/src/dictionary/en-custom.txt
     output: build/dictionary/python.dic
+  filters:
+    - pyspelling.filters.python:
+        strings: false
+        comments: false
 ```
 
 ### Aspell Options
 
-Though PySpelling is a wrapper around Aspell, you can still set a number of Aspell's options directly, such as default dictionary, search options, and filters. Basically, relevant search options are passed directly to Aspell, while others are ignored, like Replace options (which aren't relevant in PySpelling) and options like encoding (which are handled internally by PySpelling).
+Though PySpelling is a wrapper around Aspell, you can still set a number of Aspell's options directly, such as default dictionary, search options, and filters. Basically, relevant search options are passed directly to Aspell, while others are ignored, like replace options (which aren't relevant in PySpelling) and encoding (which are handled internally by PySpelling).
 
 To configure an Aspell option, just configure the desired options under the `aspell` key minus the leading dashes.  So `-H` would simply be `H` and `--lang` would be `lang`.
 
@@ -295,11 +233,12 @@ Boolean flags would be set to `true`.
 ```yaml
 documents:
 - name: HTML
-  parser: pyspelling.parsers.html_parser
   sources:
-  - docs
+    - docs/**/*.html
   aspell:
     H: true
+  filters:
+    - pyspelling.filters.html
 ```
 
 
@@ -308,14 +247,14 @@ Other options would be set to a string or an integer value (integers would be co
 ```yaml
 documents:
 - name: Python Source
-  parser: pyspelling.parsers.python_parser
-  options:
-    strings: false
-    comments: false
   sources:
-  - pyspelling
+    - pyspelling/**/*.py
   aspell:
     lang: en
+  filters:
+    - pyspelling.filters.python:
+        strings: false
+        comments: false
 ```
 
 Lastly, if you have an option that can be used multiple times, just set the value up as an array, and the option will be added for each value in the array:
@@ -323,16 +262,16 @@ Lastly, if you have an option that can be used multiple times, just set the valu
 ```yaml
 documents:
 - name: Python Source
-  parser: pyspelling.parsers.python_parser
-  options:
-    strings: false
-    comments: false
   sources:
-  - pyspelling
+    - pyspelling/**/*.py
   aspell:
     add-extra-dicts:
       - my-dictionary.dic
       - my-other-dictionary.dic
+  filters:
+    - pyspelling.filters.python:
+        strings: false
+        comments: false
 ```
 
 Output:

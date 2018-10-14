@@ -1,7 +1,7 @@
-"""JavaScript parser."""
+"""JavaScript filter."""
 import re
 import codecs
-from pyspelling import parsers
+from .. import filters
 import textwrap
 
 RE_LINE_PRESERVE = re.compile(r"\r?\n", re.MULTILINE)
@@ -22,10 +22,8 @@ RE_COMMENT = re.compile(
 )
 
 
-class JavaScriptParser(parsers.Parser):
-    """JavaScript parser."""
-
-    FILE_PATTERNS = ('*.js',)
+class JavaScriptFilter(filters.Filter):
+    """JavaScript filter."""
 
     def __init__(self, options, default_encoding='ascii'):
         """Initialization."""
@@ -35,7 +33,7 @@ class JavaScriptParser(parsers.Parser):
         # self.strings = options.get('strings', False) is True
         self.group_comments = options.get('group_comments', False) is True
         self.jsdocs = options.get('jsdocs', False) is True
-        super(JavaScriptParser, self).__init__(options, default_encoding)
+        super(JavaScriptFilter, self).__init__(options, default_encoding)
 
     def _evaluate(self, m):
         """Search for comments."""
@@ -87,8 +85,8 @@ class JavaScriptParser(parsers.Parser):
 
         return ''.join(map(lambda m: self._evaluate(m), RE_COMMENT.finditer(text)))
 
-    def parse_file(self, source_file, encoding):
-        """Parse HTML file."""
+    def _filter(self, text, context, encoding):
+        """Filter JavaScript comments."""
 
         content = []
         self.line_num = 1
@@ -98,40 +96,52 @@ class JavaScriptParser(parsers.Parser):
         self.block_comments = []
         self.line_comments = []
 
-        with codecs.open(source_file, 'r', encoding=encoding) as f:
-            self.find_comments(f.read())
-            for comment, line in self.jsdoc_comments:
-                content.append(
-                    parsers.SourceText(
-                        textwrap.dedent(comment),
-                        "%s (%d)" % (source_file, line),
-                        encoding,
-                        'jsdocs'
-                    )
+        self.find_comments(text)
+        for comment, line in self.jsdoc_comments:
+            content.append(
+                filters.SourceText(
+                    textwrap.dedent(comment),
+                    "%s (%d)" % (context, line),
+                    encoding,
+                    'jsdocs'
                 )
-            for comment, line in self.block_comments:
-                content.append(
-                    parsers.SourceText(
-                        textwrap.dedent(comment),
-                        "%s (%d)" % (source_file, line),
-                        encoding,
-                        'block-comment'
-                    )
+            )
+        for comment, line in self.block_comments:
+            content.append(
+                filters.SourceText(
+                    textwrap.dedent(comment),
+                    "%s (%d)" % (context, line),
+                    encoding,
+                    'block-comment'
                 )
-            for comment, line in self.line_comments:
-                content.append(
-                    parsers.SourceText(
-                        textwrap.dedent(comment),
-                        "%s (%d)" % (source_file, line),
-                        encoding,
-                        'line-comment'
-                    )
+            )
+        for comment, line in self.line_comments:
+            content.append(
+                filters.SourceText(
+                    textwrap.dedent(comment),
+                    "%s (%d)" % (context, line),
+                    encoding,
+                    'line-comment'
                 )
+            )
 
         return content
 
+    def filter(self, source_file, encoding):  # noqa A001
+        """Parse HTML file."""
 
-def get_parser():
-    """Get parser."""
+        with codecs.open(source_file, 'r', encoding=encoding) as f:
+            text = f.read()
 
-    return JavaScriptParser
+        return self._filter(text, source_file, encoding)
+
+    def sfilter(self, source):
+        """Filter."""
+
+        return self._filter(source.text, source.context, source.encoding)
+
+
+def get_filter():
+    """Get filter."""
+
+    return JavaScriptFilter

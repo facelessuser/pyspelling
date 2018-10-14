@@ -6,22 +6,6 @@ from setuptools import setup, find_packages
 import os
 import imp
 
-LONG_DESC = '''
-PySpelling is a spell checker that wraps around Aspell.
-You can check out the list of available extensions and learn more about them by `reading the docs`_.
-
-.. _`reading the docs`: http://facelessuser.github.io/pyspelling/
-
-Support
-=======
-
-Help and support is available here at the repositories `bug tracker`_.
-Please read about `support and contributing`_ before creating issues.
-
-.. _`bug tracker`: https://github.com/facelessuser/pyspelling/issues
-.. _`support and contributing`: http://facelessuser.github.io/pyspelling/contributing/
-'''
-
 
 def get_version():
     """Get version and version_info without importing the entire module."""
@@ -53,6 +37,14 @@ def get_requirements():
     return requirements
 
 
+def get_description():
+    """Get long description."""
+
+    with open("README.md", 'r') as f:
+        desc = f.read()
+    return desc
+
+
 VER, DEVSTATUS = get_version()
 
 entry_points = {
@@ -66,7 +58,8 @@ setup(
     version=VER,
     keywords='spelling',
     description='Spell checker.',
-    long_description=LONG_DESC,
+    long_description=get_description(),
+    long_description_content_type='text/markdown',
     author='Isaac Muse',
     author_email='Isaac.Muse@gmail.com',
     url='https://github.com/facelessuser/pyspelling',
@@ -80,8 +73,6 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',

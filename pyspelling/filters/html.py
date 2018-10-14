@@ -1,15 +1,39 @@
-"""HTML filter."""
+"""
+HTML filter.
+
+Detect encoding from HTML header.
+"""
 from __future__ import unicode_literals
 from .. import filters
-from collections import namedtuple
-import bs4
-import re
 from .. import util
+import re
+import codecs
+import bs4
+from collections import namedtuple
+from html.parser import HTMLParser
 
-if util.PY3:
-    from html.parser import HTMLParser
-else:
-    from HTMLParser import HTMLParser
+RE_XML_START = re.compile(
+    b'^(?:(' +
+    b'<\\?xml[^>]+?>' +  # ASCII like
+    b')|(' +
+    re.escape('<?xml'.encode('utf-32-be')) + b'.+?' + re.escape('>'.encode('utf-32-be')) +
+    b')|(' +
+    re.escape('<?xml'.encode('utf-32-le')) + b'.+?' + re.escape('>'.encode('utf-32-le')) +
+    b')|(' +
+    re.escape('<?xml'.encode('utf-16-be')) + b'.+?' + re.escape('>'.encode('utf-16-be')) +
+    b')|(' +
+    re.escape('<?xml'.encode('utf-16-le')) + b'.+?' + re.escape('>'.encode('utf-16-le')) +
+    b'))'
+)
+
+RE_HTML_ENCODE = re.compile(
+    br'''(?xi)
+    <\s*meta(?!\s*(?:name|value)\s*=)(?:[^>]*?content\s*=[\s"']*)?(?:[^>]*?)[\s"';]*charset\s*=[\s"']*([^\s"'/>]*)
+    '''
+)
+
+RE_XML_ENCODE = re.compile(br'''(?i)^<\?xml[^>]*encoding=(['"])(.*?)\1[^>]*\?>''')
+RE_XML_ENCODE_U = re.compile(r'''(?i)^<\?xml[^>]*encoding=(['"])(.*?)\1[^>]*\?>''')
 
 RE_SELECTOR = re.compile(r'''(\#|\.)?[-\w]+|\*|\[([\w\-:]+)(?:([~^|*$]?=)(\"[^"]+\"|'[^']'|[^'"\[\]]+))?\]''')
 
@@ -22,16 +46,89 @@ class SelectorAttribute(namedtuple('AttrRule', ['attribute', 'pattern'])):
     """Selector attribute rule."""
 
 
-class HTMLFilter(filters.Filter):
-    """HTML filter."""
+class HTMLDecoder(filters.Decoder):
+    """Detect HTML encoding."""
 
-    def __init__(self, options):
-        """Initialize."""
+    def _has_xml_encode(self, content):
+        """Check XML encoding."""
+
+        encode = None
+
+        m = RE_XML_START.match(content)
+        if m:
+            if m.group(1):
+                m2 = RE_XML_ENCODE.match(m.group(1))
+
+                if m2:
+                    enc = m2.group(2).decode('ascii')
+
+                    try:
+                        codecs.getencoder(enc)
+                        encode = enc
+                    except LookupError:
+                        pass
+            else:
+                if m.group(2):
+                    enc = 'utf-32-be'
+                    text = m.group(2)
+                elif m.group(3):
+                    enc = 'utf-32-le'
+                    text = m.group(3)
+                elif m.group(4):
+                    enc = 'utf-16-be'
+                    text = m.group(4)
+                elif m.group(5):
+                    enc = 'utf-16-le'
+                    text = m.group(5)
+                try:
+                    m2 = RE_XML_ENCODE_U.match(text.decode(enc))
+                except Exception:  # pragma: no cover
+                    m2 = None
+
+                if m2:
+                    enc = m2.group(2)
+
+                    try:
+                        codecs.getencoder(enc)
+                        encode = enc
+                    except Exception:
+                        pass
+
+        return encode
+
+    def header_check(self, content):
+        """Special HTML encoding check."""
+
+        encode = None
+
+        # Look for meta charset
+        m = RE_HTML_ENCODE.search(content)
+        if m:
+            enc = m.group(1).decode('ascii')
+
+            try:
+                codecs.getencoder(enc)
+                encode = enc
+            except LookupError:
+                pass
+        else:
+            encode = self._has_xml_encode(content)
+        return encode
+
+
+class HtmlFilter(filters.Filter):
+    """Spelling Python."""
+
+    DECODER = HTMLDecoder
+
+    def __init__(self, options, default_encoding='utf-8'):
+        """Initialization."""
 
         self.html_parser = HTMLParser()
         self.comments = options.get('comments', True) is True
         self.attributes = set(options.get('attributes', []))
         self.selectors = self.process_selectors(*options.get('ignores', []))
+        super(HtmlFilter, self).__init__(options, default_encoding)
 
     def process_selectors(self, *args):
         """
@@ -181,13 +278,25 @@ class HTMLFilter(filters.Filter):
         else:
             return (text, attributes)
 
-    def filter(self, text, encoding):
-        """Filter the text."""
+    def _filter(self, text):
+        """Filter the source text."""
 
         return self.html_to_text(bs4.BeautifulSoup(text, "html5lib"))
+
+    def filter(self, source_file, encoding):  # noqa A001
+        """Parse HTML file."""
+
+        with codecs.open(source_file, 'r', encoding=encoding) as f:
+            text = f.read()
+        return [filters.SourceText(self._filter(text), source_file, encoding, 'html')]
+
+    def sfilter(self, source):
+        """Filter."""
+
+        return [filters.SourceText(self._filter(source.text), source.context, source.encoding, 'html')]
 
 
 def get_filter():
     """Return the filter."""
 
-    return HTMLFilter
+    return HtmlFilter

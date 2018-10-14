@@ -4,7 +4,7 @@ repo_url: https://github.com/facelessuser/pyspelling
 edit_uri: tree/master/docs/src/markdown
 site_description: Python spell checker.
 copyright: |
-  Copyright &copy; 2017 <a href="https://github.com/facelessuser">Isaac Muse</a>
+  Copyright &copy; 2017 - 2018 <a href="https://github.com/facelessuser">Isaac Muse</a>
   <br><span class="md-footer-custom-text">emoji provided free by </span><a href="http://www.emojione.com">EmojiOne</a>
 
 docs_dir: docs/src/markdown
@@ -20,9 +20,8 @@ theme:
     text: Roboto
     code: Roboto Mono
 
-pages:
+nav:
   - PySpelling: index.md
-  - Parsers: parsers.md
   - Filters: filters.md
   - Contributing &amp; Support: contributing.md
   - Development: development.md
@@ -87,6 +86,6 @@ extra:
     - type: github
       link: https://github.com/facelessuser
 extra_css:
-  - extra-4e53a56959.css
+  - extra-06017885a7.css
 extra_javascript:
-  - extra-d8800ea088.js
+  - extra-0b9b22dd13.js
