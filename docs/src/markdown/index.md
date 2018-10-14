@@ -166,10 +166,10 @@ PySpelling uses [Wildcard Match's `glob` library](https://facelessuser.github.io
 
 ```yaml
 - name: Python Source
-  parser: pyspelling.parsers.python_parser
-  options:
-    strings: false
-    comments: false
+  filters:
+    - pyspelling.parsers.python_parser:
+        strings: false
+        comments: false
   glob_flags: N|G|B
   sources:
   - pyspelling/**/*.py
@@ -185,17 +185,17 @@ Let's say you had some Markdown files and wanted to convert them to HTML, and th
 ```yaml
 - name: Markdown
   sources:
-  - README.md
+    - README.md
   filters:
-  - pyspelling.filters.markdown_filter:
-  - pyspelling.filters.html_filter:
-      comments: false
-      attributes:
-      - title
-      - alt
-      ignores:
-      - code
-      - pre
+    - pyspelling.filters.markdown_filter:
+    - pyspelling.filters.html_filter:
+        comments: false
+        attributes:
+        - title
+        - alt
+        ignores:
+        - code
+        - pre
 ```
 
 ### Personal Dictionaries/Word Lists
@@ -208,13 +208,13 @@ There are two things that must be defined: the default dictionary via the the `l
 documents:
 - name: Python Source
   sources:
-  - pyspelling/**/*.py
+    - pyspelling/**/*.py
   aspell:
     lang: en
   dictionary:
     lang: en
     wordlists:
-    - docs/src/dictionary/en-custom.txt
+      - docs/src/dictionary/en-custom.txt
     output: build/dictionary/python.dic
   filters:
     - pyspelling.filters.python:
@@ -234,7 +234,7 @@ Boolean flags would be set to `true`.
 documents:
 - name: HTML
   sources:
-  - docs/**/*.html
+    - docs/**/*.html
   aspell:
     H: true
   filters:
@@ -248,11 +248,11 @@ Other options would be set to a string or an integer value (integers would be co
 documents:
 - name: Python Source
   sources:
-  - pyspelling/**/*.py
+    - pyspelling/**/*.py
   aspell:
     lang: en
   filters:
-    - pyspelling.filters.python
+    - pyspelling.filters.python:
         strings: false
         comments: false
 ```
@@ -263,13 +263,13 @@ Lastly, if you have an option that can be used multiple times, just set the valu
 documents:
 - name: Python Source
   sources:
-  - pyspelling/**/*.py
+    - pyspelling/**/*.py
   aspell:
     add-extra-dicts:
       - my-dictionary.dic
       - my-other-dictionary.dic
   filters:
-    - pyspelling.filters.python
+    - pyspelling.filters.python:
         strings: false
         comments: false
 ```

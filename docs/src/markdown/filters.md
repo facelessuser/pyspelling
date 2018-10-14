@@ -32,13 +32,13 @@ Options               | Type          | Default    | Description
 ```yaml
 - name: Markdown
   filters:
-    - pyspelling.parsers.markdown_parser
-      markdown_extensions:
-      - markdown.extensions.toc:
-          slugify: !!python/name:pymdownx.slugs.uslugify
-          permalink: "\ue157"
-      - markdown.extensions.admonition
-      - markdown.extensions.smarty
+    - pyspelling.parsers.markdown_parser:
+        markdown_extensions:
+        - markdown.extensions.toc:
+            slugify: !!python/name:pymdownx.slugs.uslugify
+            permalink: "\ue157"
+        - markdown.extensions.admonition
+        - markdown.extensions.smarty
   source:
     - **/*.md
 ```
@@ -59,25 +59,25 @@ Options      | Type     | Default      | Description
 ```yaml
 - name: mkdocs
   filters:
-    - pyspelling.filters.html
-      comments: false
-      attributes:
-      - title
-      - alt
-      ignores:
-      - code
-      - pre
-      - a.magiclink-compare
-      - a.magiclink-commit
-      - span.keys
-      - .MathJax_Preview
-      - .md-nav__link
-      - .md-footer-custom-text
-      - .md-source__repository
-      - .headerlink
-      - .md-icon
+    - pyspelling.filters.html:
+        comments: false
+        attributes:
+        - title
+        - alt
+        ignores:
+        - code
+        - pre
+        - a.magiclink-compare
+        - a.magiclink-commit
+        - span.keys
+        - .MathJax_Preview
+        - .md-nav__link
+        - .md-footer-custom-text
+        - .md-source__repository
+        - .headerlink
+        - .md-icon
   sources:
-  - site/*.html
+    - site/*.html
 ```
 
 ### Python
@@ -122,9 +122,9 @@ Options          | Type     | Default       | Description
 - name: javascript
   filters:
     - pyspelling.filters.javascript
-      jsdocs: true
-      line_comments: false
-      block_comments: false
+        jsdocs: true
+        line_comments: false
+        block_comments: false
   sources:
     - js_files/**/*.js
 ```
