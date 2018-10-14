@@ -7,7 +7,6 @@ import mmap
 import os
 from collections import namedtuple
 from .. import util
-import traceback
 
 PYTHON_ENCODING_NAMES = {
     'iso-8859-8-i': 'iso-8859-8',

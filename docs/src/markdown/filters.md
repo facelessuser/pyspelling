@@ -169,7 +169,7 @@ Options                 | Type     | Default       | Description
 
 To write a parser, there are two classes to be aware: `Filter` and `SourceText`. Both classes are found in `pyspelling.filters`.
 
-When writing a filter, you'll often want to start by subclasses from the `Filter` class.  You'll often want to specify the default encoding and handle all of your custom options, and then pass the parameters to the base class.
+When writing a filter, you'll often want to start by subclassing from the `Filter` class.  You'll often want to specify the default encoding and handle all of your custom options, and then pass the parameters to the base class.
 
 ```py3
 from .. import filters
@@ -188,7 +188,7 @@ class HtmlFilter(filters.Filter):
         super(HtmlFilter, self).__init__(options, default_encoding)
 ```
 
-After that, there are four functions that are exposed for overrides. The fist is `header_check`. `header_check` recieves the first 1024 characters of the file via `content` that can be scanned for an encoding header. A string with the encoding name should be returned or `None` if a valid encoding header cannot be found.
+After that, there are four functions that are exposed for overrides. The fist is `header_check`. `header_check` receives the first 1024 characters of the file via `content` that can be scanned for an encoding header. A string with the encoding name should be returned or `None` if a valid encoding header cannot be found.
 
 ```py3
     def header_check(self, content):
