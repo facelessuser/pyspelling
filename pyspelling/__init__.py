@@ -10,6 +10,27 @@ from wcmatch import glob
 version = __version__.version
 version_info = __version__.version_info
 
+glob_flag_map = {
+    "FORECECASE": glob.F,
+    "F": glob.F,
+    "IGNORECASE": glob.I,
+    "I": glob.I,
+    "RAWCHARS": glob.R,
+    "R": glob.R,
+    "NEGATE": glob.N,
+    "N": glob.N,
+    "MINUSNEGATE": glob.M,
+    "M": glob.M,
+    "GLOBSTAR": glob.G,
+    "G": glob.G,
+    "DOTGLOB": glob.D,
+    "D": glob.D,
+    "EXTGLOB": glob.E,
+    "E": glob.E,
+    "BRACE": glob.B,
+    "B": glob.B
+}
+
 
 class Aspell(object):
     """Aspell spell check class."""
@@ -152,11 +173,10 @@ class Aspell(object):
             input_text=b'\n'.join(sorted(words)) + b'\n'
         )
 
-    def walk_src(self, targets, plugin):
+    def walk_src(self, targets, flags, plugin):
         """Walk source and parse files."""
 
         for target in targets:
-            flags = glob.N | glob.M | glob.G | glob.B | glob.E
             patterns = glob.globsplit(target, flags=flags)
             for f in glob.iglob(patterns, flags=flags):
                 if not os.path.isdir(f):
@@ -212,6 +232,16 @@ class Aspell(object):
             raise ValueError("Could not find accessor '%s'!" % accessor)
         return attr()
 
+    def _to_flags(self, text):
+        """Convert text representation of flags to actual flags."""
+
+        flags = 0
+        for x in text.split('|'):
+            value = x.strip().upper()
+            if value:
+                flags |= glob_flag_map.get(value, 0)
+        return flags
+
     def check(self):
         """Walk source and initiate spell check."""
 
@@ -224,13 +254,13 @@ class Aspell(object):
 
             # Setup filters and variables for the spell check
             encoding = documents.get('default_encoding', '')
-            self.file_patterns = documents.get('file_patterns', [])
             options = self.setup_spellchecker(documents)
             output = self.setup_dictionary(documents)
+            glob_flags = self._to_flags(documents.get('glob_flags', "N|B|G"))
             self.get_filters(documents, encoding)
 
-            for sources in self.walk_src(documents.get('sources', []), self.filters[0]):
-                for result in self.check_spelling(sources, options, output, ):
+            for sources in self.walk_src(documents.get('sources', []), glob_flags, self.filters[0]):
+                for result in self.check_spelling(sources, options, output):
                     yield result
 
 

@@ -160,7 +160,9 @@ If you really need advanced encoding detection, you could easily enough write yo
 
 ### Sources
 
-Each spelling task must define sources to search via the `sources` key. Each source should be a wildcard pattern that should match one or more files. PySpelling will iterate these sources performing a glob to determine which files should be spell checked. You can also have multiple patterns on one line that will be considered simultaneously if they are separated with `|`.  This is useful if you'd like to provide an exclusion pattern along with your file pattern. For instance, if we wanted to scan all python files in our folder, but exclude any in the build folder, we could provide the following pattern: `**/*.py|-build/**`.
+Each spelling task must define sources to search via the `sources` key. Each source should be a wildcard pattern that should match one or more files. PySpelling will iterate these sources performing a glob to determine which files should be spell checked. You can also have multiple patterns on one line that will be considered simultaneously if they are separated with `|`.  This is useful if you'd like to provide an exclusion pattern along with your file pattern. For instance, if we wanted to scan all python files in our folder, but exclude any in the build folder, we could provide the following pattern: `**/*.py|!build/**`.
+
+PySpelling uses [Wildcard Match's `glob` library](https://facelessuser.github.io/wcmatch/glob/) to perform the file searching.  By default, it uses the `NEGATE`, `GLOBSTAR`, and `BRACE` flags, but you can override the flag options with the `glob_flags` option.
 
 ```yaml
 - name: Python Source
@@ -168,6 +170,7 @@ Each spelling task must define sources to search via the `sources` key. Each sou
   options:
     strings: false
     comments: false
+  glob_flags: N|G|B
   sources:
   - pyspelling/**/*.py
 ```
