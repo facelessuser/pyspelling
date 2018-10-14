@@ -46,8 +46,17 @@ class SelectorAttribute(namedtuple('AttrRule', ['attribute', 'pattern'])):
     """Selector attribute rule."""
 
 
-class HTMLDecoder(filters.Decoder):
-    """Detect HTML encoding."""
+class HtmlFilter(filters.Filter):
+    """Spelling Python."""
+
+    def __init__(self, options, default_encoding='utf-8'):
+        """Initialization."""
+
+        self.html_parser = HTMLParser()
+        self.comments = options.get('comments', True) is True
+        self.attributes = set(options.get('attributes', []))
+        self.selectors = self.process_selectors(*options.get('ignores', []))
+        super(HtmlFilter, self).__init__(options, default_encoding)
 
     def _has_xml_encode(self, content):
         """Check XML encoding."""
@@ -114,21 +123,6 @@ class HTMLDecoder(filters.Decoder):
         else:
             encode = self._has_xml_encode(content)
         return encode
-
-
-class HtmlFilter(filters.Filter):
-    """Spelling Python."""
-
-    DECODER = HTMLDecoder
-
-    def __init__(self, options, default_encoding='utf-8'):
-        """Initialization."""
-
-        self.html_parser = HTMLParser()
-        self.comments = options.get('comments', True) is True
-        self.attributes = set(options.get('attributes', []))
-        self.selectors = self.process_selectors(*options.get('ignores', []))
-        super(HtmlFilter, self).__init__(options, default_encoding)
 
     def process_selectors(self, *args):
         """

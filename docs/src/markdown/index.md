@@ -185,17 +185,17 @@ Let's say you had some Markdown files and wanted to convert them to HTML, and th
 ```yaml
 - name: Markdown
   sources:
-    - README.md
+  - README.md
   filters:
-    - pyspelling.filters.markdown_filter:
-    - pyspelling.filters.html_filter:
-        comments: false
-        attributes:
-        - title
-        - alt
-        ignores:
-        - code
-        - pre
+  - pyspelling.filters.markdown_filter:
+  - pyspelling.filters.html_filter:
+      comments: false
+      attributes:
+      - title
+      - alt
+      ignores:
+      - code
+      - pre
 ```
 
 ### Personal Dictionaries/Word Lists
@@ -208,18 +208,18 @@ There are two things that must be defined: the default dictionary via the the `l
 documents:
 - name: Python Source
   sources:
-    - pyspelling/**/*.py
+  - pyspelling/**/*.py
   aspell:
     lang: en
   dictionary:
     lang: en
     wordlists:
-      - docs/src/dictionary/en-custom.txt
+    - docs/src/dictionary/en-custom.txt
     output: build/dictionary/python.dic
   filters:
-    - pyspelling.filters.python:
-        strings: false
-        comments: false
+  - pyspelling.filters.python:
+      strings: false
+      comments: false
 ```
 
 ### Aspell Options
@@ -234,11 +234,11 @@ Boolean flags would be set to `true`.
 documents:
 - name: HTML
   sources:
-    - docs/**/*.html
+  - docs/**/*.html
   aspell:
     H: true
   filters:
-    - pyspelling.filters.html
+  - pyspelling.filters.html
 ```
 
 
@@ -248,13 +248,13 @@ Other options would be set to a string or an integer value (integers would be co
 documents:
 - name: Python Source
   sources:
-    - pyspelling/**/*.py
+  - pyspelling/**/*.py
   aspell:
     lang: en
   filters:
-    - pyspelling.filters.python:
-        strings: false
-        comments: false
+  - pyspelling.filters.python:
+      strings: false
+      comments: false
 ```
 
 Lastly, if you have an option that can be used multiple times, just set the value up as an array, and the option will be added for each value in the array:
@@ -263,15 +263,15 @@ Lastly, if you have an option that can be used multiple times, just set the valu
 documents:
 - name: Python Source
   sources:
-    - pyspelling/**/*.py
+  - pyspelling/**/*.py
   aspell:
     add-extra-dicts:
-      - my-dictionary.dic
-      - my-other-dictionary.dic
+    - my-dictionary.dic
+    - my-other-dictionary.dic
   filters:
-    - pyspelling.filters.python:
-        strings: false
-        comments: false
+  - pyspelling.filters.python:
+      strings: false
+      comments: false
 ```
 
 Output:

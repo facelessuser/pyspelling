@@ -32,15 +32,15 @@ Options               | Type          | Default    | Description
 ```yaml
 - name: Markdown
   filters:
-    - pyspelling.parsers.markdown_parser:
-        markdown_extensions:
-        - markdown.extensions.toc:
-            slugify: !!python/name:pymdownx.slugs.uslugify
-            permalink: "\ue157"
-        - markdown.extensions.admonition
-        - markdown.extensions.smarty
+  - pyspelling.parsers.markdown_parser:
+      markdown_extensions:
+      - markdown.extensions.toc:
+          slugify: !!python/name:pymdownx.slugs.uslugify
+          permalink: "\ue157"
+      - markdown.extensions.admonition
+      - markdown.extensions.smarty
   source:
-    - **/*.md
+  - **/*.md
 ```
 
 ### HTML
@@ -59,25 +59,25 @@ Options      | Type     | Default      | Description
 ```yaml
 - name: mkdocs
   filters:
-    - pyspelling.filters.html:
-        comments: false
-        attributes:
-        - title
-        - alt
-        ignores:
-        - code
-        - pre
-        - a.magiclink-compare
-        - a.magiclink-commit
-        - span.keys
-        - .MathJax_Preview
-        - .md-nav__link
-        - .md-footer-custom-text
-        - .md-source__repository
-        - .headerlink
-        - .md-icon
+  - pyspelling.filters.html:
+      comments: false
+      attributes:
+      - title
+      - alt
+      ignores:
+      - code
+      - pre
+      - a.magiclink-compare
+      - a.magiclink-commit
+      - span.keys
+      - .MathJax_Preview
+      - .md-nav__link
+      - .md-footer-custom-text
+      - .md-source__repository
+      - .headerlink
+      - .md-icon
   sources:
-    - site/*.html
+  - site/*.html
 ```
 
 ### Python
@@ -98,10 +98,9 @@ Options          | Type     | Default       | Description
 ```yaml
 - name: python
   filters:
-    - pyspelling.filters.python
-        options:
-          strings: false
-          comments: false
+  - pyspelling.filters.python:
+      strings: false
+      comments: false
   sources:
   - pyspelling/**/*.py
 ```
@@ -121,45 +120,63 @@ Options          | Type     | Default       | Description
 ```yaml
 - name: javascript
   filters:
-    - pyspelling.filters.javascript
-        jsdocs: true
-        line_comments: false
-        block_comments: false
+  - pyspelling.filters.javascript
+      jsdocs: true
+      line_comments: false
+      block_comments: false
   sources:
-    - js_files/**/*.js
+  - js_files/**/*.js
 ```
 
-### Writing a Parser
+### Context
 
-To write a parser, there are three classes to be aware: `Decoder`, `Filter`, and `SourceText` which are all found in `pyspelling.filters`. In general, you'll only need to define your own `Decoder` class if you have special considerations in regard to encoding, such as a header deceleration that defines decoding.
+The Context filter is used to create regular expression context delimiters for filtering content you want and don't want. Delimiters are defined in pairs, and depending on how the filter is configured, the opening delimiter will swap from ignoring text to gathering text. And when the closing delimiter is met, the filter will swap back from gathering text to ignoring text.  If `context_visible_first` is set to `true`, the logic will be reversed.
 
-If you need a `Decoder`, there are two functions that you can override: `header_check` and `content_check`. `header_check` receives the first 1024 characters of the file so you can check for a header declaration, while `content_check` receives the file handle so you can do what you need to. Both should return either the encoding or `None` if an encoding could not be determined.
+Regular expressions are compiled with the MULTILINE flag so that `^` represents the start of a line and `$` represents the end of a line. `\A` and `\Z` would represent the start and end of the buffer.
 
-The HTML decoder as a simplified example:
+You are able to define general escape patterns to prevent escaped delimiters from being captured. Delimiter entries will have an opening, content (to allow a special pattern to represent inter-content escapes), and closing patterns. `closing` and `content` can see flags and groups specified in prior patterns like `open` etc. So if you set a case insensitive flag in the opening, it applies to content and closing as well.
 
-```py3
-class HTMLDecoder(parsers.Decoder):
-    """Detect HTML encoding."""
+The filter can be included via `pyspelling.filters.context`.
 
-    def header_check(self, content):
-        """Special HTML encoding check."""
+Options                 | Type     | Default       | Description
+----------------------- | -------- | ------------- | -----------
+`disallow`              | [string] | `#!py3 []`    | `SourceText` names to avoid processing.
+`escapes`               | string   | `#!py3 ''`    | Regular expression pattern for character escapes outside delimiters.
+`context_visible_first` | bool     | `#!py3 False` | Context will start as invisible and will be invisible between delimiters.
+`delimiters`            | [dict]   | `#!py3 []`    | A list of dicts that define the regular expression delimiters.
 
-        encode = None
-        m = RE_HTML_ENCODE.search(content)
-        if m:
-            encode = m.group(1).decode('ascii')
-        return encode
+```yaml
+- name: python
+  sources:
+  - pyspelling
+  filters:
+  - pyspelling.filters.python:
+      strings: false
+      comments: false
+  - pyspelling.filters.context_filter:
+      context_visible_first: true
+      escapes: \\[\\`~]
+      delimiters:
+      - open: (?P<open>`+)
+        content: .*?
+        close: (?P=open)
+      - open: (?s)^(?P<open>\s*~{3,})
+        content: .*?
+        close: ^(?P=open)$
 ```
 
-`Filter` is the class you will always need to provide. There are two functions you will want to override: `__init__` which handles your options and `filter` which handles the "first in the chain" file handling (opening, decoding, and initial filtering), and `sfilter` which filters a string buffer. There is also one attribute you may want to define as well: `DECODER` which you'd set to your custom `Decoder` if you have one.
+### Writing a Filter
 
-So below we have the HTML parser that uses the `Decoder` we defined earlier.  You'll notice that we are leveraging the HTML filter for the parser.
+To write a parser, there are two classes to be aware: `Filter` and `SourceText`. Both classes are found in `pyspelling.filters`.
+
+When writing a filter, you'll often want to start by subclassing from the `Filter` class.  You'll often want to specify the default encoding and handle all of your custom options, and then pass the parameters to the base class.
 
 ```py3
+from .. import filters
+
+
 class HtmlFilter(filters.Filter):
     """Spelling Python."""
-
-    DECODER = HTMLDecoder
 
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
@@ -169,48 +186,92 @@ class HtmlFilter(filters.Filter):
         self.attributes = set(options.get('attributes', []))
         self.selectors = self.process_selectors(*options.get('ignores', []))
         super(HtmlFilter, self).__init__(options, default_encoding)
+```
 
-    def html_to_text(text):
-        """Extract the text from the HTML objects."""
+After that, there are four functions that are exposed for overrides. The fist is `header_check`. `header_check` receives the first 1024 characters of the file via `content` that can be scanned for an encoding header. A string with the encoding name should be returned or `None` if a valid encoding header cannot be found.
 
-        # Do some work
+```py3
+    def header_check(self, content):
+        """Special encode check."""
 
-        return text
+        return None
+```
 
-    def _filter(self, text):
-        """Filter the source text."""
+`content_check` receives a file object which allows you to check the entire file buffer to determine encoding. A string with the encoding name should be returned or `None` if a valid encoding header cannot be found.
 
-        return self.html_to_text(bs4.BeautifulSoup(text, "html5lib"))
+```py3
+    def content_check(self, file_handle):
+        """File content check."""
 
-    def filter(self, source_file, encoding):
-        """Parse HTML file."""
+        return None
+```
+
+`filter` is called when the `Filter` object is the first in the chain. This means the file has not been read from disk yet, so we must handle opening the file before applying the filter and then return a list of `SourceText` objects. The first filter in the chain is handled differently in order to give the opportunity to handle files that initially must be parsed in binary format in order to extract the Unicode data. You can read the file in binary format or directly to Unicode.  You can run parsers or anything else you need to in order to get the Unicode text needed for the `SourceText` objects. You can create as many `SourceText` objects as you need and assign them categories so that other `Filter` objects can avoid them if desired. Below is the default which reads the entire file into a single object providing the file name as the context, the encoding, and the category `text`.
+
+```py3
+    def filter(self, source_file, encoding):  # noqa A001
+        """Open and filter the file from disk."""
 
         with codecs.open(source_file, 'r', encoding=encoding) as f:
             text = f.read()
-        return [filters.SourceText(self._filter(text), source_file, encoding, 'html')]
-
-    def sfilter(self, source):
-        """Filter."""
-
-        return [filters.SourceText(self._filter(source.text), source.context, source.encoding, 'html')]
+        return [SourceText(text, source_file, encoding, 'text')]
 ```
 
-Lastly, the parser must return a list of `SourceText` objects.  Each object should contain a Unicode string. `SourceText` objects with byte strings will not be passed to additional filters.  The object needs to return some metadata giving context which can simply be the source file name as shown above, or it can contain more info such a line number of the block of text etc. The encoding of the text should also be returned along with a category that describes the type of text. The identifier is used to exclude certain `SourceText` objects from filters later on.
-
-Keep in mind when adjusting the context, you should really only append as not to wipe out previous contextual data. Aside from the first in chain case, additional filters are not required to modify the context unless more useful context can be added.  In the case above, since the the HTML filter augments the data so much, things like line numbers would not really be helpful anymore, so `sfilter` just uses the existing context, while `filter` (first in the chain filter) just sets the file name.
-
-If you have a particular chunk of text that has a problem, you can return an error.  Errors really only need a valid meta data entry and the error.
+`sfilter` is called for all `Filter` objects following the first.  The function is passed a `SourceText` object from which the text, context, encoding can all be extracted. Here you can manipulate the text back to bytes if needed, wrap the text in an `io.StreamIO` object to act as a file stream, run parsers, or anything you need to manipulate the buffer to filter the Unicode text for the `SourceText` objects.
 
 ```py3
-        if error:
-            content = [SourceText('', source_file, '', '', error)]
+    def sfilter(self, source):
+        """Execute filter."""
+
+        return [SourceText(source.text, source.context, source.encoding, 'text')]
 ```
 
-Don't forget to provide a function called `get_filter` to return your parser:
+If a filter only works either as the first in the chain, or only as a secondary filter in the chain, you could raise an exception if needed.  In most cases, you should be able to have an appropriate `filter` and `sfilter`, but there are most likely cases (particular when dealing with binary data) where only a `fitler` method could be provided.
+
+Check check out the default filter plugins provided with the source to see real world examples.
+
+And don't forget to provide a function in the file called `get_filter`! `get_filter` should return your `Filter` object.
 
 ```py3
 def get_filter():
     """Return the filter."""
 
     return HtmlFilter
+```
+
+### Source Text Objects
+
+As previously mentioned, filters must return a list of `SourceText` objects.
+
+```py3
+class SourceText(namedtuple('SourceText', ['text', 'context', 'encoding', 'category', 'error'])):
+    """Source text."""
+
+    __slots__ = ()
+
+    def __new__(cls, text, context, encoding, category, error=None):
+        """Allow defaults."""
+
+        return super(SourceText, cls).__new__(cls, text, context, encoding, category, error)
+
+    def _is_bytes(self):
+        """Is bytes."""
+
+        return isinstance(self.text, util.bstr)
+
+    def _has_error(self):
+        """Check if object has an error associated with it."""
+
+        return self.error is not None
+```
+
+Each object should contain a Unicode string (`text`), some context on the given text hunk (`context`), the encoding which the Unicode text was originally in (`encoding`), and a `category` that is used to omit certain hunks from other filters in the chain (`category`). `SourceText` should not contain byte strings, and if they do, they will not be passed to additional filters.
+
+Keep in mind when adjusting the context in subsequent items in the chain, you should really only append so as not to wipe out previous contextual data. It may not always make sense to append additional data, so some filters might just pass the previous context as the new context.
+
+If you have a particular chunk of text that has a problem, you can return an error in the `SourceText` object.  Errors really only need a context and the error. `SourceText` objects with errors will not be passed down the chain and will not be passed to the spell checker.
+
+```py3
+        if error:
+            content = [SourceText('', source_file, '', '', error)]
 ```

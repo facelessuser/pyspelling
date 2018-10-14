@@ -52,15 +52,16 @@ class SourceText(namedtuple('SourceText', ['text', 'context', 'encoding', 'categ
         return self.error is not None
 
 
-class Decoder(object):
-    """
-    Simple detect encoding class.
-
-    Attempts to detect UTF encoding via BOMs.
-    Override `special_encode_check` to add additional check logic.
-    """
+class Filter(object):
+    """Spelling language."""
 
     MAX_GUESS_SIZE = 31457280
+
+    def __init__(self, config, default_encoding='ascii'):
+        """Initialize."""
+
+        self.config = config
+        self.default_encoding = PYTHON_ENCODING_NAMES.get(default_encoding, default_encoding)
 
     def _is_very_large(self, size):
         """Check if content is very large."""
@@ -109,17 +110,7 @@ class Decoder(object):
             encoding = 'utf-32'
         return encoding
 
-    def header_check(self, content):
-        """Special encode check."""
-
-        return None
-
-    def content_check(self, file_handle):
-        """File content check."""
-
-        return None
-
-    def _detect_encoding(self, f):
+    def _detect_buffer_encoding(self, f):
         """Guess by checking BOM, and checking `_special_encode_check`, and using memory map."""
 
         encoding = None
@@ -137,43 +128,6 @@ class Decoder(object):
 
         return encoding
 
-    def guess(self, filename):
-        """Guess the encoding and decode the content of the file."""
-
-        encoding = None
-
-        try:
-            file_size = os.path.getsize(filename)
-            # If the file is really big, lets just call it binary.
-            # We dont' have time to let Python chug through a massive file.
-            if not self._is_very_large(file_size):
-                with open(filename, "rb") as f:
-                    if file_size == 0:
-                        encoding = 'ascii'
-                    else:
-                        encoding = self._detect_encoding(f)
-                        if encoding is not None:
-                            encoding = self._verify_encoding(encoding)
-            else:
-                raise UnicodeDecodeError('Unicode detection is not applied to very large files!')
-        except Exception:  # pragma: no cover
-            raise UnicodeDecodeError('Cannot resolve encoding!')
-            pass
-
-        return encoding
-
-
-class Filter(object):
-    """Spelling language."""
-
-    DECODER = Decoder
-
-    def __init__(self, config, default_encoding='ascii'):
-        """Initialize."""
-
-        self.config = config
-        self.default_encoding = PYTHON_ENCODING_NAMES.get(default_encoding, default_encoding)
-
     def _get_disallowed(self):
         """Get disallowed items."""
 
@@ -182,20 +136,12 @@ class Filter(object):
     def _detect_encoding(self, source_file):
         """Detect encoding."""
 
-        detect = self.DECODER()
-        encoding = detect.guess(source_file)
+        encoding = self._guess(source_file)
         # If we didn't explicitly detect an encoding, assume default.
         if not encoding:
             encoding = self.default_encoding
 
         return encoding
-
-    def filter(self, source_file, encoding):  # noqa A001
-        """Open and filter the file from disk."""
-
-        with codecs.open(source_file, 'r', encoding=encoding) as f:
-            text = f.read()
-        return [SourceText(text, source_file, encoding, 'text')]
 
     def _parse(self, source_file):
         """Parse the file."""
@@ -219,6 +165,48 @@ class Filter(object):
         if error:
             content = [SourceText('', source_file, '', '', error)]
         return content
+
+    def _guess(self, filename):
+        """Guess the encoding and decode the content of the file."""
+
+        encoding = None
+
+        try:
+            file_size = os.path.getsize(filename)
+            # If the file is really big, lets just call it binary.
+            # We dont' have time to let Python chug through a massive file.
+            if not self._is_very_large(file_size):
+                with open(filename, "rb") as f:
+                    if file_size == 0:
+                        encoding = 'ascii'
+                    else:
+                        encoding = self._detect_buffer_encoding(f)
+                        if encoding is not None:
+                            encoding = self._verify_encoding(encoding)
+            else:
+                raise UnicodeDecodeError('Unicode detection is not applied to very large files!')
+        except Exception:  # pragma: no cover
+            raise UnicodeDecodeError('Cannot resolve encoding!')
+            pass
+
+        return encoding
+
+    def content_check(self, file_handle):
+        """File content check."""
+
+        return None
+
+    def header_check(self, content):
+        """Special encode check."""
+
+        return None
+
+    def filter(self, source_file, encoding):  # noqa A001
+        """Open and filter the file from disk."""
+
+        with codecs.open(source_file, 'r', encoding=encoding) as f:
+            text = f.read()
+        return [SourceText(text, source_file, encoding, 'text')]
 
     def sfilter(self, source):
         """Execute filter."""

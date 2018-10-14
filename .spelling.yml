@@ -1,76 +1,76 @@
 documents:
 - name: mkdocs
   sources:
-    - site/**/*.html
+  - site/**/*.html
   aspell:
     lang: en
   dictionary:
     lang: en
     wordlists:
-      - docs/src/dictionary/en-custom.txt
+    - docs/src/dictionary/en-custom.txt
     output: build/dictionary/mkdocs.dic
   filters:
-    - pyspelling.filters.html:
-        comments: false
-        attributes:
-          - title
-          - alt
-        ignores:
-          - code
-          - pre
-          - a.magiclink-compare
-          - a.magiclink-commit
-          - span.keys
-          - .MathJax_Preview
-          - .md-nav__link
-          - .md-footer-custom-text
-          - .md-source__repository
-          - .headerlink
-          - .md-icon
+  - pyspelling.filters.html:
+      comments: false
+      attributes:
+      - title
+      - alt
+      ignores:
+      - code
+      - pre
+      - a.magiclink-compare
+      - a.magiclink-commit
+      - span.keys
+      - .MathJax_Preview
+      - .md-nav__link
+      - .md-footer-custom-text
+      - .md-source__repository
+      - .headerlink
+      - .md-icon
 
 - name: markdown
   sources:
-    - README.md
+  - README.md
   aspell:
     lang: en
   dictionary:
     lang: en
     wordlists:
-      - docs/src/dictionary/en-custom.txt
+    - docs/src/dictionary/en-custom.txt
     output: build/dictionary/mkdocs.dic
   filters:
-    - pyspelling.filters.markdown:
-    - pyspelling.filters.html:
-        comments: false
-        attributes:
-          - title
-          - alt
-        ignores:
-          - code
-          - pre
+  - pyspelling.filters.markdown:
+  - pyspelling.filters.html:
+      comments: false
+      attributes:
+      - title
+      - alt
+      ignores:
+      - code
+      - pre
 
 - name: python
   sources:
-    - setup.py
-    - pyspelling/**/*.py
+  - setup.py
+  - pyspelling/**/*.py
   aspell:
     lang: en
   dictionary:
     lang: en
     wordlists:
-      - docs/src/dictionary/en-custom.txt
+    - docs/src/dictionary/en-custom.txt
     output: build/dictionary/python.dic
   filters:
-    - pyspelling.filters.python:
-        strings: false
-        comments: false
-    - pyspelling.filters.context:
-        context_visible_first: true
-        escapes: \\[\\`~]
-        delimiters:
-          - open: (?P<open>`+)
-            content: .*?
-            close: (?P=open)
-          - open: (?s)^(?P<open>\s*~{3,})
-            content: .*?
-            close: ^(?P=open)$
+  - pyspelling.filters.python:
+      strings: false
+      comments: false
+  - pyspelling.filters.context:
+      context_visible_first: true
+      escapes: \\[\\`~]
+      delimiters:
+        - open: (?P<open>`+)
+          content: .*?
+          close: (?P=open)
+        - open: (?s)^(?P<open>\s*~{3,})
+          content: .*?
+          close: ^(?P=open)$

@@ -42,5 +42,6 @@ regex
 sacrifice
 sortable
 squidfunk
+subclassing
 sublicense
 wildcard

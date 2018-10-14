@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.0a2
+
+- **NEW**: Incorporate the Decoder class into the filter class.
+- **FIX**: Add missing documentation about Context filter.
+
 ## 0.2.0a1
 
 - **NEW**: Better filters (combine filters and parsers into just filters).
