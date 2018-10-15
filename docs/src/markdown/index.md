@@ -82,7 +82,7 @@ If the binary for your spell checker is not found in your path, you can provide 
 pyspelling -b "path/to/aspell"
 ```
 
-While the desired spell checker can be defined in the configuration file for each task, you can globally specify the spell checker by specifying it on the command line. This will override whatever the configuration specifies. PySpelling defaults to `aspell` if nothing is defined on the command line or in the configuration file.
+You can specify the spell checker type by specifying it on the command line. PySpelling supports `hunspell` and `aspell`, but defaults to `aspell`.
 
 ```
 pyspelling -s hunspell

@@ -261,6 +261,16 @@ class Aspell(object):
 class Hunspell(Aspell):
     """Hunspell spell check class."""
 
+    def __init__(self, config, binary='', verbose=0):
+        """Initialize."""
+
+        # General options
+        self.binary = binary if binary else 'aspell'
+        self.verbose = verbose
+        self.dict_bin = os.path.abspath(self.DICTIONARY)
+        self.documents = config.get('documents', [])
+        self.dictionary = config.get('dictionary', [])
+
     def setup_spellchecker(self, documents):
         """Setup spell checker."""
 
@@ -304,7 +314,7 @@ class Hunspell(Aspell):
         """Setup command."""
 
         cmd = [
-            'hunspell',
+            self.binary,
             '-l',
             '-i', codecs.lookup(encoding).name
         ]
@@ -344,8 +354,6 @@ def spellcheck(config, name='', binary='', verbose=0, checker=''):
         if name and name != documents.get('name', ''):
             continue
 
-        if not checker:
-            checker = documents.get('spellchecker', 'aspell')
         if checker == "hunspell":
             if hunspell is None:
                 hunspell = Hunspell(config, binary, verbose)

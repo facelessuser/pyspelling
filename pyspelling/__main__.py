@@ -18,7 +18,7 @@ def run():
     parser.add_argument('--binary', '-b', action='store', default='', help="Provide path to spell checker's binary.")
     parser.add_argument('--config', '-c', action='store', default='.spelling.yml', help="Spelling config.")
     parser.add_argument(
-        '--spellchecker', '-s', action='store', default='', help="Choose between aspell and hunspell"
+        '--spellchecker', '-s', action='store', default='aspell', help="Choose between aspell and hunspell"
     )
     args = parser.parse_args()
 
