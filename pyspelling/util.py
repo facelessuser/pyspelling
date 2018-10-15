@@ -4,7 +4,10 @@ import subprocess
 import sys
 import string
 import random
+import re
 from collections import namedtuple
+
+RE_LAST_SPACE_IN_CHUNK = re.compile(rb'(\s+)(?=\S+\Z)')
 
 PY3 = sys.version_info >= (3, 0)
 
@@ -18,7 +21,7 @@ else:
     bstr = str
 
 
-def console(cmd, input_file=None, input_text=None):
+def call(cmd, input_file=None, input_text=None):
     """Call with arguments."""
 
     returncode = None
@@ -49,6 +52,63 @@ def console(cmd, input_file=None, input_text=None):
             process.stdin.write(f.read())
     if input_text is not None:
         process.stdin.write(input_text)
+
+    output = process.communicate()
+    returncode = process.returncode
+
+    assert returncode == 0, "Runtime Error: %s" % (
+        output[0].rstrip().decode('utf-8')
+    )
+
+    return output[0].decode('utf-8')
+
+
+def call_spellchecker(cmd, input_text):
+    """Call spell checker with arguments."""
+
+    returncode = None
+    output = None
+
+    if sys.platform.startswith('win'):
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        process = subprocess.Popen(
+            cmd,
+            startupinfo=startupinfo,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            stdin=subprocess.PIPE,
+            shell=False
+        )
+    else:
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            stdin=subprocess.PIPE,
+            shell=False
+        )
+
+    if input_text is not None:
+        for line in input_text.splitlines():
+            # Hunspell truncates lines at 0x1fff (at least on Windows this has been observed)
+            # Avoid trunctation by chunking the line on white space and inserting a new line to break it.
+            offset = 0
+            end = len(line)
+            while True:
+                chunk_end = offset + 0x1fff
+                m = None if chunk_end >= end else RE_LAST_SPACE_IN_CHUNK.search(line, offset, chunk_end)
+                if m:
+                    chunk_end = m.start(1)
+                    chunk = line[offset:m.start(1)]
+                    offset = m.end(1)
+                else:
+                    chunk = line[offset:chunk_end]
+                    offset = chunk_end
+                process.stdin.write(chunk + b'\n')
+                if offset >= end:
+                    break
+
     output = process.communicate()
     returncode = process.returncode
 

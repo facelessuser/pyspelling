@@ -140,7 +140,7 @@ class Aspell(object):
                 cmd = self.setup_command(self.normalize_utf(source.encoding), options, personal_dict)
                 self.log(str(cmd), 2)
 
-                wordlist = util.console(cmd, input_text=text)
+                wordlist = util.call_spellchecker(cmd, input_text=text)
                 yield util.Results([w for w in sorted(set(wordlist.split('\n'))) if w], source.context, source.category)
 
     def compile_dictionary(self, lang, wordlists, output):
@@ -161,7 +161,7 @@ class Aspell(object):
                     words.add(word.replace(b'\r', b''))
 
         # Compile wordlist against language
-        util.console(
+        util.call(
             [
                 self.binary,
                 '--lang', lang,
