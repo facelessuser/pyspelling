@@ -37,11 +37,10 @@ class Aspell(object):
 
     DICTIONARY = 'dictionary.dic'
 
-    def __init__(self, config, name='', binary='', verbose=0):
+    def __init__(self, config, binary='', verbose=0):
         """Initialize."""
 
         # General options
-        self.name = name
         self.binary = binary if binary else 'aspell'
         self.verbose = verbose
         self.dict_bin = os.path.abspath(self.DICTIONARY)
@@ -242,97 +241,122 @@ class Aspell(object):
                 flags |= glob_flag_map.get(value, 0)
         return flags
 
-    def check(self):
+    def check(self, documents):
         """Walk source and initiate spell check."""
 
-        for documents in self.documents:
-            if self.name and self.name != documents.get('name', ''):
-                continue
+        # Perform spell check
+        self.log('\nSpell Checking %s...' % documents.get('name', ''), 1)
 
-            # Perform spell check
-            self.log('\nSpell Checking %s...' % documents.get('name', ''), 1)
+        # Setup filters and variables for the spell check
+        encoding = documents.get('default_encoding', '')
+        options = self.setup_spellchecker(documents)
+        output = self.setup_dictionary(documents)
+        glob_flags = self._to_flags(documents.get('glob_flags', "N|B|G"))
+        self.get_filters(documents, encoding)
 
-            # Setup filters and variables for the spell check
-            encoding = documents.get('default_encoding', '')
-            options = self.setup_spellchecker(documents)
-            output = self.setup_dictionary(documents)
-            glob_flags = self._to_flags(documents.get('glob_flags', "N|B|G"))
-            self.get_filters(documents, encoding)
-
-            for sources in self.walk_src(documents.get('sources', []), glob_flags, self.filters[0]):
-                for result in self.check_spelling(sources, options, output):
-                    yield result
+        for sources in self.walk_src(documents.get('sources', []), glob_flags, self.filters[0]):
+            yield from self.check_spelling(sources, options, output)
 
 
-# class Hunspell(Aspell):
-#     """Hunspell spell check class."""
+class Hunspell(Aspell):
+    """Hunspell spell check class."""
 
-#     def setup_spellchecker(self, documents):
-#         """Setup spell checker."""
+    def setup_spellchecker(self, documents):
+        """Setup spell checker."""
 
-#         return documents.get('hunspell', {})
+        return documents.get('hunspell', {})
 
-#     def setup_dictionary(self, documents):
-#         """Setup dictionary."""
+    def setup_dictionary(self, documents):
+        """Setup dictionary."""
 
-#         dictionary_options = documents.get('dictionary', {})
-#         output = os.path.abspath(dictionary_options.get('output', self.dict_bin))
-#         lang = dictionary_options.get('lang', 'en_US')
-#         wordlists = dictionary_options.get('wordlists', [])
-#         if lang and wordlists:
-#             self.compile_dictionary(lang, dictionary_options.get('wordlists', []), output)
-#         else:
-#             output = None
-#         return output
+        dictionary_options = documents.get('dictionary', {})
+        output = os.path.abspath(dictionary_options.get('output', self.dict_bin))
+        lang = dictionary_options.get('lang', 'en_US')
+        wordlists = dictionary_options.get('wordlists', [])
+        if lang and wordlists:
+            self.compile_dictionary(lang, dictionary_options.get('wordlists', []), output)
+        else:
+            output = None
+        return output
 
-#     def compile_dictionary(self, lang, wordlists, output):
-#         """Compile user dictionary."""
+    def compile_dictionary(self, lang, wordlists, output):
+        """Compile user dictionary."""
 
-#         output_location = os.path.dirname(output)
-#         if not os.path.exists(output_location):
-#             os.makedirs(output_location)
-#         if os.path.exists(output):
-#             os.remove(output)
+        output_location = os.path.dirname(output)
+        if not os.path.exists(output_location):
+            os.makedirs(output_location)
+        if os.path.exists(output):
+            os.remove(output)
 
-#         self.log("Compiling Dictionary...", 1)
-#         # Read word lists and create a unique set of words
-#         words = set()
-#         for wordlist in wordlists:
-#             with open(wordlist, 'rb') as src:
-#                 for word in src.read().split(b'\n'):
-#                     words.add(word.replace(b'\r', b''))
+        self.log("Compiling Dictionary...", 1)
+        # Read word lists and create a unique set of words
+        words = set()
+        for wordlist in wordlists:
+            with open(wordlist, 'rb') as src:
+                for word in src.read().split(b'\n'):
+                    words.add(word.replace(b'\r', b''))
 
-#         # Sort and create wordlist
-#         with open(self.dict_bin, 'wb') as dest:
-#             dest.write(b'\n'.join(sorted(words)) + b'\n')
+        # Sort and create wordlist
+        with open(output, 'wb') as dest:
+            dest.write(b'\n'.join(sorted(words)) + b'\n')
 
-#     def setup_command(self, encoding, options, personal_dict):
-#         """Setup command."""
+    def setup_command(self, encoding, options, personal_dict):
+        """Setup command."""
 
-#         cmd = [
-#             'hunspell',
-#             '-l',
-#             '-i', codecs.lookup(encoding).name
-#         ]
+        cmd = [
+            'hunspell',
+            '-l',
+            '-i', codecs.lookup(encoding).name
+        ]
 
-#         if personal_dict:
-#             cmd.extend(['-p', personal_dict])
+        if personal_dict:
+            cmd.extend(['-p', personal_dict])
 
-#         allowed = {
-#             'check-apostrophe', 'check-url',
-#             'i', 'd' 'H', 'n', 'o', 'r', 't', 'X'
-#         }
+        allowed = {
+            'check-apostrophe', 'check-url',
+            'd', 'H', 'n', 'o', 'r', 't', 'X'
+        }
 
-#         for k, v in options.items():
-#             if k in allowed:
-#                 key = ('-%s' if len(k) == 1 else '--%s') % k
-#                 if isinstance(v, bool) and v is True:
-#                     cmd.append(key)
-#                 elif isinstance(v, util.ustr):
-#                     cmd.extend([key, v])
-#                 elif isinstance(v, int):
-#                     cmd.extend([key, util.ustr(v)])
-#                 elif isinstance(v, list):
-#                     for value in v:
-#                         cmd.extend([key, util.ustr(value)])
-#         return cmd
+        for k, v in options.items():
+            if k in allowed:
+                key = ('-%s' if len(k) == 1 else '--%s') % k
+                if isinstance(v, bool) and v is True:
+                    cmd.append(key)
+                elif isinstance(v, util.ustr):
+                    cmd.extend([key, v])
+                elif isinstance(v, int):
+                    cmd.extend([key, util.ustr(v)])
+                elif isinstance(v, list):
+                    for value in v:
+                        cmd.extend([key, util.ustr(value)])
+        return cmd
+
+
+def spellcheck(config, name='', binary='', verbose=0, checker=''):
+    """Spellcheck."""
+
+    hunspell = None
+    aspell = None
+    spellchecker = None
+
+    for documents in config.get('documents', []):
+
+        if name and name != documents.get('name', ''):
+            continue
+
+        if not checker:
+            checker = documents.get('spellchecker', 'aspell')
+        if checker == "hunspell":
+            if hunspell is None:
+                hunspell = Hunspell(config, binary, verbose)
+            spellchecker = hunspell
+            
+        elif checker == "aspell":
+            if aspell is None:
+                aspell = Aspell(config, binary, verbose)
+            spellchecker = aspell
+        else:
+            raise ValueError('%s is not a valid spellchecker!' % checker)
+
+        spellchecker.log('Using %s to spellcheck %s' % (checker, documents.get('name', '')), 1)
+        yield from spellchecker.check(documents)

@@ -5,15 +5,15 @@
 
 ## Overview
 
-PySpelling is a module to help with automating spell checking with [Aspell][aspell]. It is essentially a wrapper around the Aspell command line utility, and allows you to setup different spelling tasks for different file types and filter the content as needed. It also allows you to do more advanced filtering of text via plugins since Aspell's filters are limited to a handful of types with limited options.
+PySpelling is a module to help with automating spell checking with [Aspell][aspell] or [Hunspell][hunspell]. It is essentially a wrapper around the command line utility of spell checkers, and allows you to setup different spelling tasks for different file types and filter the content as needed. It also allows you to do more advanced filtering of text via plugins since Aspell's and Hunspell's ability to filter are limited to a handful of types with limited options.
 
 PySpelling is not designed to auto replace misspelled words or have interactive replace sessions, there are already modules to do that. PySpelling is mainly meant to help automate reporting of spelling issues in different file types. So if you are looking for a find and replace spelling tool, this isn't for you.
 
 ## Motivation
 
-Aspell is a very good spell check tool that comes with various filters, but the filters are limited in types and aren't extremely flexible. I mainly wanted to provide an automated spell check tool that I could run locally and in continuous integration environments like Travis CI. Scanning HTML was sometimes frustrating as I would want to simply ignore a tag with a specific class. I could've wrapped my content in something like `<nospell></nospell>`, but since my document sources are in Markdown, it would dirty up the Markdown source. Directly spell checking the Markdown was was even more difficult to the nature of the Markdown syntax.
+Aspell and Hunspell are very good spell checking tools. Aspell particularly comes with various filters, but the filters are limited in types and aren't extremely flexible. I mainly wanted to provide an automated spell check tool that I could run locally and in continuous integration environments like Travis CI. Scanning HTML was sometimes frustrating as I would want to simply ignore a tag with a specific class. I could've wrapped my content in something like `<nospell></nospell>`, but since my document sources are in Markdown, it would dirty up the Markdown source. Directly spell checking the Markdown was was even more difficult to the nature of the Markdown syntax.
 
-PySpelling was created to work around Aspell's search shortcomings by creating a wrapper around Aspell that could be extended to handle more advanced kinds of situations. If I want to filter out specific HTML tags with specific IDs or class names, PySpelling can do it. If I want to scan Python files for docstrings, but also avoid content within a docstring that is wrapped in backticks, I can do that. Additionally, you can leverage existing Python modules that are already highly aware of certain file type's context to save yourself the effort of writing complex lexers and parsers.
+PySpelling was created to work around Aspell's and Hunspell's search shortcomings by creating a wrapper around them that could be extended to handle more advanced kinds of situations. If I want to filter out specific HTML tags with specific IDs or class names, PySpelling can do it. If I want to scan Python files for docstrings, but also avoid content within a docstring that is wrapped in backticks, I can do that. Additionally, you can leverage existing Python modules that are already highly aware of certain file type's context to save yourself the effort of writing complex lexers and parsers.
 
 ## Installing
 
@@ -29,7 +29,7 @@ If you want to manually install it, run `#!bash python setup.py build` and `#!ba
 
 ```
 usage: spellcheck [-h] [--version] [--verbose] [--name NAME] [--binary BINARY]
-                  [--config CONFIG]
+                  [--config CONFIG] [--spellchecker SPELLCHECKER]
 
 Spell checking tool.
 
@@ -39,9 +39,11 @@ optional arguments:
   --verbose, -v         Verbosity level.
   --name NAME, -n NAME  Specific spelling task by name to run.
   --binary BINARY, -b BINARY
-                        Provide path to Aspell binary.
+                        Provide path to spell checker's binary.
   --config CONFIG, -c CONFIG
                         Spelling config.
+  --spellchecker SPELLCHECKER, -s SPELLCHECKER
+                        Choose between aspell and hunspell
 ```
 
 PySpelling can be run with the command below.  By default it will look for the spelling configuration file at `./.spelling.yml`.
@@ -74,10 +76,16 @@ To run a more verbose output, use the `-v` flag. You can increase verbosity leve
 pyspelling -v
 ```
 
-If Aspell is not found in your path, you can provide a path to the Aspell binary.
+If the binary for your spell checker is not found in your path, you can provide a path to the binary.
 
 ```
 pyspelling -b "path/to/aspell"
+```
+
+While the desired spell checker can be defined in the configuration file for each task, you can globally specify the spell checker by specifying it on the command line. This will override whatever the configuration specifies. PySpelling defaults to `aspell` if nothing is defined on the command line or in the configuration file.
+
+```
+pyspelling -s hunspell
 ```
 
 ## Configuring
@@ -154,7 +162,7 @@ When parsing a file, PySpelling only checks for low hanging fruit that it has 10
   default_encoding: utf-8
 ```
 
-Keep in mind that the encoding of the file gets passed to Aspell. Aspell is limited to very specific encodings, so if your file is using an unsupported encoding, it will fail. PySpelling *should* properly convert your encoding name (assuming the encoding is valid for Aspell) into an alias that is acceptable to Aspell. So if you specify `latin-1`, PySpelling will send it to Aspell as `iso8859-1`.
+Keep in mind that the encoding of the file gets passed to the spell checker. They are limited to very specific encodings, so if your file is using an unsupported encoding, it will fail. PySpelling *should* properly convert your encoding name (assuming the encoding is valid for the spellchecker) into an alias that is acceptable. So if you specify `latin-1`, PySpelling will send it as `iso8859-1`.
 
 If you really need advanced encoding detection, you could easily enough write you own filter plugin that utilizes `chardet` or `cchardet` etc.
 
@@ -202,7 +210,7 @@ Let's say you had some Markdown files and wanted to convert them to HTML, and th
 
 When spell checking a document, sometimes you'll have words that are not in your default, installed dictionary. PySpelling automates compiling your own personal dictionary from a list of word lists.
 
-There are two things that must be defined: the default dictionary via the the `lang` option, and `wordlists` which is an array of word lists.  Optionally, you can also define the output location and file name for the compiled dictionary. PySpelling will add the output dictionary via Aspell's `--add-extra-dicts` option automatically.
+There are two things that must be defined: the default dictionary via the the `lang` option, and `wordlists` which is an array of word lists.  Optionally, you can also define the output location and file name for the compiled dictionary. PySpelling will add the output dictionary via the appropriate method for the spell checker.
 
 ```yaml
 documents:
@@ -224,9 +232,9 @@ documents:
 
 ### Aspell Options
 
-Though PySpelling is a wrapper around Aspell, you can still set a number of Aspell's options directly, such as default dictionary, search options, and filters. Basically, relevant search options are passed directly to Aspell, while others are ignored, like replace options (which aren't relevant in PySpelling) and encoding (which are handled internally by PySpelling).
+Though PySpelling is a wrapper, you can still set a number of Aspell's or Hunspell's options directly, such as default dictionary, search options, and filters. Basically, relevant search options are passed directly to the spell checker, while others are ignored, like replace options (which aren't relevant in PySpelling) and encoding (which are handled internally by PySpelling).
 
-To configure an Aspell option, just configure the desired options under the `aspell` key minus the leading dashes.  So `-H` would simply be `H` and `--lang` would be `lang`.
+To configure an Aspell option, just configure the desired options under the `aspell` key minus the leading dashes. Hunspell options would be defined under `hunspell`. So `-H` would simply be `H` and `--lang` would be `lang`.
 
 Boolean flags would be set to `true`.
 

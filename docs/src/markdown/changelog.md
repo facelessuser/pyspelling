@@ -3,6 +3,7 @@
 ## 0.2.0a2
 
 - **NEW**: Incorporate the Decoder class into the filter class.
+- **NEW**: Add Hunspell support.
 - **FIX**: Add missing documentation about Context filter.
 
 ## 0.2.0a1

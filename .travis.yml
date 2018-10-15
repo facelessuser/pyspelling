@@ -24,9 +24,11 @@ addons:
     packages:
     - aspell
     - aspell-en
+    - hunspell
 
 install:
 - pip install tox
+- git clone https://github.com/facelessuser/hunspell-en-us.git docs/src/dictionary/hunspell
 # - pip install codecov
 
 script:
