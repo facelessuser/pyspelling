@@ -333,7 +333,7 @@ class Hunspell(Aspell):
 
 
 def spellcheck(config, name='', binary='', verbose=0, checker=''):
-    """Spellcheck."""
+    """Spell check."""
 
     hunspell = None
     aspell = None
@@ -350,7 +350,7 @@ def spellcheck(config, name='', binary='', verbose=0, checker=''):
             if hunspell is None:
                 hunspell = Hunspell(config, binary, verbose)
             spellchecker = hunspell
-            
+
         elif checker == "aspell":
             if aspell is None:
                 aspell = Aspell(config, binary, verbose)
