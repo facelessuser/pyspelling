@@ -16,8 +16,10 @@ matrix:
   #   env: TOXENV=py36-unittests
   - python: 3.6
     env: TOXENV=lint
-  - python: 3.6
+  - python: 3.7
+    dist: xenial
     env: TOXENV=documents
+    sudo: true
 
 addons:
   apt:
