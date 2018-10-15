@@ -16,21 +16,17 @@ matrix:
   #   env: TOXENV=py36-unittests
   - python: 3.6
     env: TOXENV=lint
-  - python: 3.7
-    dist: artful
+  - python: 3.6
     env: TOXENV=documents
-    sudo: true
 
 addons:
   apt:
     packages:
     - aspell
     - aspell-en
-    - hunspell
 
 install:
 - pip install tox
-- git clone https://github.com/facelessuser/hunspell-en-us.git docs/src/dictionary/hunspell
 # - pip install codecov
 
 script:
