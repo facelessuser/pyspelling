@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.0a3
+
+- **FIX**: Text filter was returning old Parser name instead of new Filter name.
+
 ## 0.2.0a2
 
 - **NEW**: Incorporate the Decoder class into the filter class.

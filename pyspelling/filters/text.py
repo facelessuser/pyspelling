@@ -6,4 +6,4 @@ from .. import filters
 def get_filter():
     """Return the filter."""
 
-    return filters.Parser
+    return filters.Filter
