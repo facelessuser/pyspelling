@@ -9,23 +9,9 @@ from collections import namedtuple
 
 RE_LAST_SPACE_IN_CHUNK = re.compile(rb'(\s+)(?=\S+\Z)')
 
-PY3 = sys.version_info >= (3, 0)
 
-if PY3:
-    string_type = str
-    ustr = str
-    bstr = bytes
-else:
-    string_type = basestring  # noqa
-    ustr = unicode  # noqa
-    bstr = str
-
-
-def call(cmd, input_file=None, input_text=None):
-    """Call with arguments."""
-
-    returncode = None
-    output = None
+def get_process(cmd):
+    """Get a command process."""
 
     if sys.platform.startswith('win'):
         startupinfo = subprocess.STARTUPINFO()
@@ -46,6 +32,25 @@ def call(cmd, input_file=None, input_text=None):
             stdin=subprocess.PIPE,
             shell=False
         )
+    return process
+
+
+def get_process_output(process):
+    """Get the output from the process."""
+
+    output = process.communicate()
+    returncode = process.returncode
+
+    if returncode != 0:
+        raise RuntimeError("Runtime Error: %s" % (output[0].rstrip().decode('utf-8')))
+
+    return output[0].decode('utf-8')
+
+
+def call(cmd, input_file=None, input_text=None):
+    """Call with arguments."""
+
+    process = get_process(cmd)
 
     if input_file is not None:
         with open(input_file, 'rb') as f:
@@ -53,41 +58,13 @@ def call(cmd, input_file=None, input_text=None):
     if input_text is not None:
         process.stdin.write(input_text)
 
-    output = process.communicate()
-    returncode = process.returncode
-
-    assert returncode == 0, "Runtime Error: %s" % (
-        output[0].rstrip().decode('utf-8')
-    )
-
-    return output[0].decode('utf-8')
+    return get_process_output(process)
 
 
 def call_spellchecker(cmd, input_text):
     """Call spell checker with arguments."""
 
-    returncode = None
-    output = None
-
-    if sys.platform.startswith('win'):
-        startupinfo = subprocess.STARTUPINFO()
-        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        process = subprocess.Popen(
-            cmd,
-            startupinfo=startupinfo,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            stdin=subprocess.PIPE,
-            shell=False
-        )
-    else:
-        process = subprocess.Popen(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            stdin=subprocess.PIPE,
-            shell=False
-        )
+    process = get_process(cmd)
 
     if input_text is not None:
         for line in input_text.splitlines():
@@ -109,14 +86,7 @@ def call_spellchecker(cmd, input_text):
                 if offset >= end:
                     break
 
-    output = process.communicate()
-    returncode = process.returncode
-
-    assert returncode == 0, "Runtime Error: %s" % (
-        output[0].rstrip().decode('utf-8')
-    )
-
-    return output[0].decode('utf-8')
+    return get_process_output(process)
 
 
 def random_name_gen(size=6):

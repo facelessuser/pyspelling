@@ -10,7 +10,6 @@ import textwrap
 import tokenize
 import codecs
 import io
-from .. import util
 
 tokenizer = tokenize.generate_tokens
 PREV_DOC_TOKENS = (tokenize.INDENT, tokenize.DEDENT, tokenize.NEWLINE, tokenize.ENCODING)
@@ -76,11 +75,11 @@ class PythonFilter(filters.Filter):
         for token in tokenizer(src.readline):
             token_type = token[0]
             value = token[1]
-            line = util.ustr(token[2][0])
+            line = str(token[2][0])
             line_num = token[2][0]
 
             value = token[1]
-            line = util.ustr(token[2][0])
+            line = str(token[2][0])
 
             # Track function and class ancestry
             if token_type == tokenize.NAME:
@@ -122,7 +121,7 @@ class PythonFilter(filters.Filter):
                         value = value.strip()
                         string = textwrap.dedent(eval(value))
 
-                        if not isinstance(string, util.ustr):
+                        if not isinstance(string, str):
                             # Since docstrings should be readable and printable,
                             # if byte string assume 'ascii'.
                             string = string.decode('ascii')
@@ -131,9 +130,9 @@ class PythonFilter(filters.Filter):
                 elif self.strings:
                     value = value.strip()
                     string = textwrap.dedent(eval(value))
-                    if isinstance(string, util.ustr) or self.bytes:
+                    if isinstance(string, str) or self.bytes:
                         string_type = 'string'
-                        if not isinstance(string, util.ustr):
+                        if not isinstance(string, str):
                             string = self.get_ascii(string)
                             string_type = 'bytes'
                         loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))

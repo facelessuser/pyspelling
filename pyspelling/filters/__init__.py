@@ -6,7 +6,6 @@ import contextlib
 import mmap
 import os
 from collections import namedtuple
-from .. import util
 
 PYTHON_ENCODING_NAMES = {
     'iso-8859-8-i': 'iso-8859-8',
@@ -44,7 +43,7 @@ class SourceText(namedtuple('SourceText', ['text', 'context', 'encoding', 'categ
     def _is_bytes(self):
         """Is bytes."""
 
-        return isinstance(self.text, util.bstr)
+        return isinstance(self.text, bytes)
 
     def _has_error(self):
         """Check if object has an error associated with it."""

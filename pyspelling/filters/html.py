@@ -5,7 +5,6 @@ Detect encoding from HTML header.
 """
 from __future__ import unicode_literals
 from .. import filters
-from .. import util
 import re
 import codecs
 import bs4
@@ -259,7 +258,7 @@ class HtmlFilter(filters.Filter):
         # Handle comments
         if isinstance(tree, bs4.Comment):
             if self.comments:
-                string = util.ustr(tree).strip()
+                string = str(tree).strip()
                 if string:
                     text.append(string)
                     text.append('\n')
@@ -281,7 +280,7 @@ class HtmlFilter(filters.Filter):
                         attributes.extend(a)
                 # Get content if not the root and not a comment (unless we want comments).
                 elif not root and (not isinstance(child, bs4.Comment) or self.comments):
-                    string = util.ustr(child).strip()
+                    string = str(child).strip()
                     if string:
                         text.append(string)
                         text.append(' ')

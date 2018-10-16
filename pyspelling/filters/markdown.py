@@ -1,7 +1,6 @@
 """Markdown filter."""
 from __future__ import unicode_literals
 from .. import filters
-from .. import util
 import codecs
 import markdown
 
@@ -15,7 +14,7 @@ class MarkdownFilter(filters.Filter):
         extensions = []
         extension_configs = {}
         for item in options.get('markdown_extensions', []):
-            if isinstance(item, util.ustr):
+            if isinstance(item, str):
                 extensions.append(item)
             else:
                 k, v = list(item.items())[0]

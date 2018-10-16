@@ -99,3 +99,4 @@ ENV/
 .mypy_cache/
 
 docs/src/dictionary/hunspell
+*.patch
