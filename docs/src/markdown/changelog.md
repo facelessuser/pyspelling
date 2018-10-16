@@ -4,6 +4,7 @@
 
 - **NEW**: Incorporate the Decoder class into the filter class.
 - **NEW**: Add Hunspell support.
+- **NEW**: Drop specifying spell checker in configuration file. It must be set from command line.
 - **FIX**: Add missing documentation about Context filter.
 
 ## 0.2.0a1

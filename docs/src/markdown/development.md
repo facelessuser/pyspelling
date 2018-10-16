@@ -113,4 +113,4 @@ Then run each unit test environment to and coverage will be calculated. All the 
 
 You can checkout `tox.ini` to see how this is accomplished. -->
 
---8<-- "links.md"
+--8<-- "links.txt"

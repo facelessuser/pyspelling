@@ -288,4 +288,4 @@ Output:
 aspell --add-extra-dicts my-dictionary.doc --add-extra-dicts my-other-dictionary.dic
 ```
 
---8<-- "refs.md"
+--8<-- "refs.txt"
