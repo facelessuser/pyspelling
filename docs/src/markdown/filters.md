@@ -4,7 +4,7 @@
 
 Filters are chainable PySpelling plugins that filter the content of a buffer and return only the portions that are desired. The portions that are returned are partitioned in to chunks that contain a little contextual information. Some filters may return only one chunk in the list that is the entirety of the file, and some may return context specific chunks: one for each docstring, one for each comment, etc. The metadata associated with each chunk can be used to halt filtering of specific chunks in the chain. Some of the metadata is also used to give feedback to the user when results are displayed.
 
-Each chunk returned by the filter is a `SourceText` object. These objects contain the desired, filtered text from the source along with some metadata: encoding, display context, and a category that describes what kind of text the data is. After all filters have processed the text, each `SourceText` text is finally passed to Aspell.
+Each chunk returned by the filter is a `SourceText` object. These objects contain the desired, filtered text from the source along with some metadata: encoding, display context, and a category that describes what kind of text the data is. After all filters have processed the text, each `SourceText` text is finally passed to the spell checker.
 
 The text data in a `SourceText` object is always Unicode, but during the filtering process, the filter can decode the Unicode if required as long as it is returned as Unicode at the end. The first filter in the chain is always responsible for initially reading the file from disk and getting the file content into a Unicode buffer that PySpelling can work with. It is also responsible for identifying encoding from the file header if there is special logic to determine such things.
 

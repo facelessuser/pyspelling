@@ -5,7 +5,6 @@ Detect encoding from HTML header.
 """
 from __future__ import unicode_literals
 from .. import filters
-from .. import util
 import re
 import codecs
 import bs4
@@ -48,6 +47,17 @@ class SelectorAttribute(namedtuple('AttrRule', ['attribute', 'pattern'])):
 
 class HtmlFilter(filters.Filter):
     """Spelling Python."""
+
+    block_tags = [
+        # Elements which are invalid to wrap in a `<p>` tag.
+        # See http://w3c.github.io/html/grouping-content.html#the-p-element
+        'address', 'article', 'aside', 'blockquote', 'details', 'div', 'dl',
+        'fieldset', 'figcaption', 'figure', 'footer', 'form', 'h1', 'h2', 'h3',
+        'h4', 'h5', 'h6', 'header', 'hr', 'main', 'menu', 'nav', 'ol', 'p', 'pre',
+        'section', 'table', 'ul',
+        'canvas', 'dd', 'dt', 'group', 'iframe', 'li', 'math', 'noscript', 'output',
+        'script', 'style', 'tbody', 'td', 'th', 'thead', 'tr', 'video'
+    ]
 
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
@@ -123,6 +133,11 @@ class HtmlFilter(filters.Filter):
         else:
             encode = self._has_xml_encode(content)
         return encode
+
+    def is_block(self, el):
+        """Check if tag is a block element."""
+
+        return el.name.lower() in self.block_tags
 
     def process_selectors(self, *args):
         """
@@ -243,9 +258,10 @@ class HtmlFilter(filters.Filter):
         # Handle comments
         if isinstance(tree, bs4.Comment):
             if self.comments:
-                string = util.ustr(tree).strip()
+                string = str(tree).strip()
                 if string:
                     text.append(string)
+                    text.append('\n')
         elif root or not self.skip_tag(tree):
             # Check attributes for normal tags
             if not root:
@@ -253,6 +269,7 @@ class HtmlFilter(filters.Filter):
                     value = tree.attrs.get(attr, '').strip()
                     if value:
                         attributes.append(value)
+                        attributes.append('\n')
 
             # Walk children
             for child in tree:
@@ -263,12 +280,15 @@ class HtmlFilter(filters.Filter):
                         attributes.extend(a)
                 # Get content if not the root and not a comment (unless we want comments).
                 elif not root and (not isinstance(child, bs4.Comment) or self.comments):
-                    string = util.ustr(child).strip()
+                    string = str(child).strip()
                     if string:
                         text.append(string)
+                        text.append(' ')
+        if root or self.is_block(tree):
+            text.append('\n')
 
         if root:
-            return self.html_parser.unescape(' '.join([' '.join(text), ' '.join(attributes)]))
+            return self.html_parser.unescape('\n'.join([''.join(text), ''.join(attributes)]))
         else:
             return (text, attributes)
 

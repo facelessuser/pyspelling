@@ -5,6 +5,7 @@
 from setuptools import setup, find_packages
 import os
 import imp
+import sys
 
 
 def get_version():
@@ -49,7 +50,8 @@ VER, DEVSTATUS = get_version()
 
 entry_points = {
     'console_scripts': [
-        'pyspelling=pyspelling.__main__:main'
+        'pyspelling=pyspelling.__main__:main',
+        'pyspelling%d.%d=pyspelling.__main__:main' % sys.version_info[:2]
     ]
 }
 
