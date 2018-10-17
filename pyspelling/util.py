@@ -5,6 +5,7 @@ import sys
 import string
 import random
 import re
+import locale
 from collections import namedtuple
 
 RE_LAST_SPACE_IN_CHUNK = re.compile(rb'(\s+)(?=\S+\Z)')
@@ -35,19 +36,25 @@ def get_process(cmd):
     return process
 
 
-def get_process_output(process):
+def get_process_output(process, encoding=None):
     """Get the output from the process."""
 
     output = process.communicate()
     returncode = process.returncode
 
+    if encoding is None:
+        try:
+            encoding = sys.stdout.encoding
+        except Exception:
+            encoding = locale.getpreferredencoding()
+
     if returncode != 0:
-        raise RuntimeError("Runtime Error: %s" % (output[0].rstrip().decode('utf-8')))
+        raise RuntimeError("Runtime Error: %s" % (output[0].rstrip().decode(encoding)))
 
-    return output[0].decode('utf-8')
+    return output[0].decode(encoding)
 
 
-def call(cmd, input_file=None, input_text=None):
+def call(cmd, input_file=None, input_text=None, encoding=None):
     """Call with arguments."""
 
     process = get_process(cmd)
@@ -58,10 +65,10 @@ def call(cmd, input_file=None, input_text=None):
     if input_text is not None:
         process.stdin.write(input_text)
 
-    return get_process_output(process)
+    return get_process_output(process, encoding)
 
 
-def call_spellchecker(cmd, input_text):
+def call_spellchecker(cmd, input_text, encoding=None):
     """Call spell checker with arguments."""
 
     process = get_process(cmd)
@@ -86,7 +93,7 @@ def call_spellchecker(cmd, input_text):
                 if offset >= end:
                     break
 
-    return get_process_output(process)
+    return get_process_output(process, encoding)
 
 
 def random_name_gen(size=6):

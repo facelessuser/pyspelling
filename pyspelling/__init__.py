@@ -1,7 +1,6 @@
 """Spell check with Aspell or Hunspell."""
 from __future__ import unicode_literals
 import os
-import codecs
 import importlib
 from . import util
 from . import __version__
@@ -53,17 +52,6 @@ class SpellChecker(object):
         if self.verbose >= level:
             print(text)
 
-    def _normalize_utf(self, encoding):
-        """Normalize UTF encoding."""
-
-        if encoding == 'utf-8-sig':
-            encoding = 'utf-8'
-        if encoding.startswith('utf-16'):
-            encoding = 'utf-16'
-        elif encoding.startswith('utf-32'):
-            encoding = 'utf-32'
-        return encoding
-
     def setup_command(self, encoding, options, personal_dict):
         """Setup the command."""
 
@@ -95,15 +83,16 @@ class SpellChecker(object):
             if source._has_error():
                 yield util.Results([], source.context, source.category, source.error)
             else:
+                encoding = source.encoding
                 if source._is_bytes():
                     text = source.text
                 else:
-                    text = source.text.encode(self._normalize_utf(source.encoding))
+                    text = source.text.encode(encoding)
                 self.log(text, 3)
-                cmd = self.setup_command(self._normalize_utf(source.encoding), options, personal_dict)
+                cmd = self.setup_command(encoding, options, personal_dict)
                 self.log(str(cmd), 2)
 
-                wordlist = util.call_spellchecker(cmd, input_text=text)
+                wordlist = util.call_spellchecker(cmd, input_text=text, encoding=encoding)
                 yield util.Results([w for w in sorted(set(wordlist.split('\n'))) if w], source.context, source.category)
 
     def compile_dictionary(self, lang, wordlists, output):
@@ -249,7 +238,7 @@ class Aspell(SpellChecker):
         cmd = [
             self.binary,
             'list',
-            '--encoding', codecs.lookup(encoding).name
+            '--encoding', encoding
         ]
 
         if personal_dict:
@@ -341,7 +330,7 @@ class Hunspell(SpellChecker):
         cmd = [
             self.binary,
             '-l',
-            '-i', codecs.lookup(encoding).name
+            '-i', encoding
         ]
 
         if personal_dict:

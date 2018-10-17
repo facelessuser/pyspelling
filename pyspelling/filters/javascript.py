@@ -25,7 +25,7 @@ RE_COMMENT = re.compile(
 class JavaScriptFilter(filters.Filter):
     """JavaScript filter."""
 
-    def __init__(self, options, default_encoding='ascii'):
+    def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
         self.blocks = options.get('block_comments', True) is True
