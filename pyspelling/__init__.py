@@ -95,15 +95,16 @@ class SpellChecker(object):
             if source._has_error():
                 yield util.Results([], source.context, source.category, source.error)
             else:
+                encoding = self._normalize_utf(source.encoding)
                 if source._is_bytes():
                     text = source.text
                 else:
-                    text = source.text.encode(self._normalize_utf(source.encoding))
+                    text = source.text.encode(encoding)
                 self.log(text, 3)
-                cmd = self.setup_command(self._normalize_utf(source.encoding), options, personal_dict)
+                cmd = self.setup_command(encoding, options, personal_dict)
                 self.log(str(cmd), 2)
 
-                wordlist = util.call_spellchecker(cmd, input_text=text)
+                wordlist = util.call_spellchecker(cmd, input_text=text, encoding=codecs.lookup(encoding).name)
                 yield util.Results([w for w in sorted(set(wordlist.split('\n'))) if w], source.context, source.category)
 
     def compile_dictionary(self, lang, wordlists, output):
