@@ -49,7 +49,7 @@ class PythonFilter(filters.Filter):
             elif m.group(2):
                 encode = m.group(2).decode('ascii')
         if encode is None:
-            encode = DEFAULT_ENCODING
+            encode = 'utf-8'
         return encode
 
     def get_ascii(self, text):

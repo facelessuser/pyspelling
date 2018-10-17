@@ -6,9 +6,7 @@ import string
 import random
 import re
 import locale
-from os import environ
 from collections import namedtuple
-import unicodedata
 
 RE_LAST_SPACE_IN_CHUNK = re.compile(rb'(\s+)(?=\S+\Z)')
 
