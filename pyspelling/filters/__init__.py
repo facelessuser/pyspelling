@@ -38,6 +38,18 @@ class SourceText(namedtuple('SourceText', ['text', 'context', 'encoding', 'categ
     def __new__(cls, text, context, encoding, category, error=None):
         """Allow defaults."""
 
+        encoding = PYTHON_ENCODING_NAMES.get(encoding, encoding).lower()
+
+        if encoding == 'utf-8-sig':
+            encoding = 'utf-8'
+        if encoding.startswith('utf-16'):
+            encoding = 'utf-16'
+        elif encoding.startswith('utf-32'):
+            encoding = 'utf-32'
+
+        if encoding:
+            encoding = codecs.lookup(encoding).name
+
         return super(SourceText, cls).__new__(cls, text, context, encoding, category, error)
 
     def _is_bytes(self):
@@ -56,11 +68,11 @@ class Filter(object):
 
     MAX_GUESS_SIZE = 31457280
 
-    def __init__(self, config, default_encoding='ascii'):
+    def __init__(self, config, default_encoding='utf-8'):
         """Initialize."""
 
         self.config = config
-        self.default_encoding = PYTHON_ENCODING_NAMES.get(default_encoding, default_encoding)
+        self.default_encoding = PYTHON_ENCODING_NAMES.get(default_encoding, default_encoding).lower()
 
     def _is_very_large(self, size):
         """Check if content is very large."""
@@ -101,11 +113,11 @@ class Filter(object):
 
         if encoding is None:
             pass
-        elif encoding == 'utf-8':
+        elif encoding.lower() == 'utf-8':
             encoding = 'utf-8-sig'
-        elif encoding.startswith('utf-16'):
+        elif encoding.lower().startswith('utf-16'):
             encoding = 'utf-16'
-        elif encoding.startswith('utf-32'):
+        elif encoding.lower().startswith('utf-32'):
             encoding = 'utf-32'
         return encoding
 

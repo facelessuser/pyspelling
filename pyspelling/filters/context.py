@@ -9,7 +9,7 @@ import re
 class ContextFilter(filters.Filter):
     """Context filter."""
 
-    def __init__(self, options, default_encoding='ascii'):
+    def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
         self.context_visible_first = options.get('context_visible_first', False) is True

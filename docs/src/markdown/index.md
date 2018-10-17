@@ -151,7 +151,7 @@ Notice that `file_patterns` should be an array of values.
 
 ### Default Encoding
 
-When parsing a file, PySpelling only checks for low hanging fruit that it has 100% confidence in, such as UTF BOMs, and depending on the file parser, there may be additional logic like the file type's encoding declaration in the file header. If there is no BOM, encoding declaration, or other special logic, PySpelling will use the default encoding specified by the first filter which will initially parse the file. Depending on the file type, this could differ, but if you specify no filter, the `text` filter will be used which has a default of "ASCII" as the fallback. You can override the fallback with `default_encoding`:
+When parsing a file, PySpelling only checks for low hanging fruit that it has 100% confidence in, such as UTF BOMs, and depending on the file parser, there may be additional logic like the file type's encoding declaration in the file header. If there is no BOM, encoding declaration, or other special logic, PySpelling will use the default encoding specified by the first filter which will initially parse the file. Depending on the file type, this could differ, but if you specify no filter, the `text` filter will be used which has a default of `utf-8` as the fallback. You can override the fallback with `default_encoding`:
 
 ```yaml
 - name: Markdown

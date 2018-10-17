@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0a4
+
+- **NEW**: Text filter can handle Unicode normalization and converting to other encodings.
+- **NEW**: Default encoding is now `utf-8` for all filters.
+- **FIX**: Internal encoding handling.
+
 ## 0.2.0a3
 
 - **FIX**: Text filter was returning old Parser name instead of new Filter name.

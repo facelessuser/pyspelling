@@ -19,8 +19,6 @@ RE_PY_ENCODE = re.compile(
 )
 RE_NON_PRINTABLE_ASCII = re.compile(br"[^ -~]+")
 
-DEFAULT_ENCODING = 'utf-8'
-
 
 class PythonFilter(filters.Filter):
     """Spelling Python."""
@@ -29,7 +27,7 @@ class PythonFilter(filters.Filter):
     FUNCTION = 1
     CLASS = 2
 
-    def __init__(self, options, default_encoding=DEFAULT_ENCODING):
+    def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
         self.comments = options.get('comments', True) is True

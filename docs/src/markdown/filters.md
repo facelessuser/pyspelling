@@ -14,15 +14,28 @@ PySpelling comes with a couple of built-in filters.
 
 ### Text
 
-This is a filter that simply retrieves the buffer's text and returns it as Unicode.  It takes a file or file buffer and returns a single `SourceText` object containing all the text in the file.  It is the default is no filter is specified and can be manually included via `pyspelling.filters.text`. When first in the chain, the file's default, assumed encoding of the is `ascii` unless otherwise overridden by the user.
+This is a filter that simply retrieves the buffer's text and returns it as Unicode.  It takes a file or file buffer and returns a single `SourceText` object containing all the text in the file.  It is the default is no filter is specified and can be manually included via `pyspelling.filters.text`. When first in the chain, the file's default, assumed encoding is `utf-8` unless otherwise overridden by the user.
 
-Options               | Type          | Default    | Description
---------------------- | ------------- | ---------- | -----------
-`disallow`            | [string]      | `#!py3 []` | `SourceText` names to avoid processing.
+Options               | Type          | Default          | Description
+--------------------- | ------------- | ---------------- | -----------
+`disallow`            | [string]      | `#!py3 []`       | `SourceText` names to avoid processing.
+`normalize`           | string        | `#!py3 ''`       | Performs Unicode normalization. Valid values are `NFC`, `NFD`, `NFKC`, and `NFKD`.
+`convert_encoding`    | string        | `#!py3 ''`       | Assuming a valid encoding, the text will be converted to the specified encoding.
+`errors`              | string        | `#!py3 'strict'` | Specifies what to do when converting the encoding, and a character can't be converted. Valid values are `strict`, `ignore`, `replace`, `xmlcharrefreplace`, `backslashreplace`, and `namereplace`.
+
+```yaml
+- name: Text
+  default_encoding: cp1252
+  filters:
+  - pyspelling.filters.text:
+      convert_encoding: utf-8
+  source:
+  - **/*.txt
+```
 
 ### Markdown
 
-The Markdown filter converts a text file's buffer using Python Markdown and returns a single `SourceText` object containing the text as HTML. It can be included via `pyspelling.filters.markdown`. When first in the chain, the file's default, assumed encoding of the is `utf-8` unless otherwise overridden by the user.
+The Markdown filter converts a text file's buffer using Python Markdown and returns a single `SourceText` object containing the text as HTML. It can be included via `pyspelling.filters.markdown`. When first in the chain, the file's default, assumed encoding is `utf-8` unless otherwise overridden by the user.
 
 Options               | Type          | Default    | Description
 --------------------- | ------------- | ---------- | -----------
@@ -107,7 +120,7 @@ Options          | Type     | Default       | Description
 
 ### JavaScript
 
-When first int the chain, the JavaScript filter uses no special encoding detection. It will assume `ascii` if no encoding BOM is found, and the user has not overridden the fallback encoding. Text is returned in blocks based on the context of the text depending on what is enabled.  The parser can return JSDoc comments, block comments, and/or inline comments. Each is returned as its own object.
+When first int the chain, the JavaScript filter uses no special encoding detection. It will assume `utf-8` if no encoding BOM is found, and the user has not overridden the fallback encoding. Text is returned in blocks based on the context of the text depending on what is enabled.  The parser can return JSDoc comments, block comments, and/or inline comments. Each is returned as its own object.
 
 Options          | Type     | Default       | Description
 ---------------- | -------- | ------------- | -----------
