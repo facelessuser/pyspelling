@@ -14,7 +14,7 @@ def main():
     parser.add_argument('--verbose', '-v', action='count', default=0, help="Verbosity level.")
     parser.add_argument('--name', '-n', action='store', default='', help="Specific spelling task by name to run.")
     parser.add_argument('--binary', '-b', action='store', default='', help="Provide path to spell checker's binary.")
-    parser.add_argument('--config', '-c', action='store', default='.spelling.yml', help="Spelling config.")
+    parser.add_argument('--config', '-c', action='store', default='', help="Spelling config.")
     parser.add_argument(
         '--spellchecker', '-s', action='store', default='aspell', help="Choose between aspell and hunspell"
     )

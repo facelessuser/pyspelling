@@ -88,9 +88,10 @@ class SpellChecker(object):
                     text = source.text
                 else:
                     text = source.text.encode(encoding)
-                self.log(text, 3)
+                self.log('', 2)
+                self.log(text, 2)
                 cmd = self.setup_command(encoding, options, personal_dict)
-                self.log(str(cmd), 2)
+                self.log(str(cmd), 3)
 
                 wordlist = util.call_spellchecker(cmd, input_text=text, encoding=encoding)
                 yield util.Results([w for w in sorted(set(wordlist.split('\n'))) if w], source.context, source.category)

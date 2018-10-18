@@ -49,14 +49,14 @@ class HtmlFilter(filters.Filter):
     """Spelling Python."""
 
     block_tags = [
-        # Elements which are invalid to wrap in a `<p>` tag.
-        # See http://w3c.github.io/html/grouping-content.html#the-p-element
-        'address', 'article', 'aside', 'blockquote', 'details', 'div', 'dl',
+        # Block level elements (and other blockish elements)
+        'address', 'article', 'aside', 'blockquote', 'details', 'dialog', 'dd',
+        'div', 'dl', 'dt'
         'fieldset', 'figcaption', 'figure', 'footer', 'form', 'h1', 'h2', 'h3',
-        'h4', 'h5', 'h6', 'header', 'hr', 'main', 'menu', 'nav', 'ol', 'p', 'pre',
+        'h4', 'h5', 'h6', 'header', 'hgroup', 'hr', 'li', 'main', 'menu', 'nav', 'ol', 'p', 'pre',
         'section', 'table', 'ul',
-        'canvas', 'dd', 'dt', 'group', 'iframe', 'li', 'math', 'noscript', 'output',
-        'script', 'style', 'tbody', 'td', 'th', 'thead', 'tr', 'video'
+        'canvas', 'group', 'iframe', 'math', 'noscript', 'output',
+        'script', 'style', 'table', 'video', 'body', 'head'
     ]
 
     def __init__(self, options, default_encoding='utf-8'):
@@ -243,6 +243,23 @@ class HtmlFilter(filters.Filter):
             break
         return skip
 
+    def construct_selector(self, el, attr=''):
+        """Construct an selector for context."""
+
+        tag = el.name
+        if tag == '[document]':
+            tag = 'HTML'
+        classes = el.attrs.get('class', [])
+        tag_id = el.attrs.get('id', '').strip()
+        sel = tag.upper()
+        if tag_id:
+            sel += '#' + tag_id
+        if classes:
+            sel += '.' + '.'.join(classes)
+        if attr:
+            sel += '[%s]' % attr
+        return sel
+
     def html_to_text(self, tree):
         """
         Parse the HTML creating a buffer with each tags content.
@@ -253,6 +270,8 @@ class HtmlFilter(filters.Filter):
 
         text = []
         attributes = []
+        comments = []
+        blocks = []
         root = tree.name == '[document]'
 
         # Handle comments
@@ -260,54 +279,73 @@ class HtmlFilter(filters.Filter):
             if self.comments:
                 string = str(tree).strip()
                 if string:
-                    text.append(string)
-                    text.append('\n')
+                    comments.append(self.html_parser.unescape(string))
         elif root or not self.skip_tag(tree):
             # Check attributes for normal tags
             if not root:
                 for attr in self.attributes:
                     value = tree.attrs.get(attr, '').strip()
                     if value:
-                        attributes.append(value)
-                        attributes.append('\n')
+                        sel = self.construct_selector(tree, attr=attr)
+                        attributes.append((self.html_parser.unescape(value), sel))
 
             # Walk children
             for child in tree:
                 if isinstance(child, bs4.element.Tag):
                     if child.contents:
-                        t, a = (self.html_to_text(child))
+                        t, b, a, c = (self.html_to_text(child))
                         text.extend(t)
                         attributes.extend(a)
+                        comments.extend(c)
+                        blocks.extend(b)
                 # Get content if not the root and not a comment (unless we want comments).
                 elif not root and (not isinstance(child, bs4.Comment) or self.comments):
                     string = str(child).strip()
                     if string:
                         text.append(string)
                         text.append(' ')
+
         if root or self.is_block(tree):
-            text.append('\n')
+            content = self.html_parser.unescape(''.join(text))
+            if content:
+                blocks.append((content, self.construct_selector(tree)))
+            text = []
 
         if root:
-            return self.html_parser.unescape('\n'.join([''.join(text), ''.join(attributes)]))
+            return (
+                blocks,
+                attributes,
+                comments
+            )
         else:
-            return (text, attributes)
+            return text, blocks, attributes, comments
 
-    def _filter(self, text):
+    def _filter(self, text, context, encoding):
         """Filter the source text."""
 
-        return self.html_to_text(bs4.BeautifulSoup(text, "html5lib"))
+        content = []
+        blocks, attributes, comments = self.html_to_text(bs4.BeautifulSoup(text, "html5lib"))
+        if self.comments:
+            for c in comments:
+                content.append(filters.SourceText(c, context + ': <!-- comment -->', encoding, 'html-comment'))
+        if self.attributes:
+            for a, desc in attributes:
+                content.append(filters.SourceText(a, context + ': ' + desc, encoding, 'html-attribute'))
+        for b, desc in blocks:
+            content.append(filters.SourceText(b, context + ': ' + desc, encoding, 'html-content'))
+        return content
 
     def filter(self, source_file, encoding):  # noqa A001
         """Parse HTML file."""
 
         with codecs.open(source_file, 'r', encoding=encoding) as f:
             text = f.read()
-        return [filters.SourceText(self._filter(text), source_file, encoding, 'html')]
+        return self._filter(text, source_file, encoding)
 
     def sfilter(self, source):
         """Filter."""
 
-        return [filters.SourceText(self._filter(source.text), source.context, source.encoding, 'html')]
+        return self._filter(source.text, source.context, source.encoding)
 
 
 def get_filter():

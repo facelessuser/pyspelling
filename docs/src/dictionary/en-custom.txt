@@ -15,6 +15,7 @@ Parsers
 PyMdown
 PySpelling
 PyYaml's
+Stylesheets
 UTF
 YAML
 backticks
