@@ -348,7 +348,7 @@ class HtmlFilter(filters.Filter):
         return self._filter(source.text, source.context, source.encoding)
 
 
-def get_filter():
+def get_plugin():
     """Return the filter."""
 
     return HtmlFilter

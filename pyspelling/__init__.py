@@ -151,7 +151,7 @@ class SpellChecker(object):
             if options is None:
                 options = {}
 
-            module = self._get_module(name, 'get_filter')
+            module = self._get_module(name, ('get_plugin', 'get_filter'))
             if issubclass(module, filters.Filter):
                 self.filters.append(module(options, **kwargs))
             elif issubclass(module, flow_control.FlowControl):
@@ -164,7 +164,10 @@ class SpellChecker(object):
 
         if isinstance(module, str):
             mod = importlib.import_module(module)
-        attr = getattr(mod, accessor, None)
+        for name in accessor:
+            attr = getattr(mod, name, None)
+            if attr is not None:
+                break
         if not attr:
             raise ValueError("Could not find accessor '%s'!" % accessor)
         return attr()

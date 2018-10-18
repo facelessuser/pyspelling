@@ -37,7 +37,7 @@ class FlowControl:
         return status
 
 
-def get_filter():
+def get_plugin():
     """Get flow controller."""
 
     return FlowControl

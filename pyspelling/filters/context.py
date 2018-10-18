@@ -76,7 +76,7 @@ class ContextFilter(filters.Filter):
         return ' '.join(new_text)
 
 
-def get_filter():
+def get_plugin():
     """Return the filter."""
 
     return ContextFilter

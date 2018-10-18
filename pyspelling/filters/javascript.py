@@ -45,7 +45,7 @@ class JavaScriptFilter(cpp.CppFilter):
         return super(JavaScriptFilter, self)._filter(text, context, encoding)
 
 
-def get_filter():
+def get_plugin():
     """Get filter."""
 
     return JavaScriptFilter

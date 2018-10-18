@@ -65,7 +65,7 @@ class StylesheetsFilter(cpp.CppFilter):
             self.extend_src_text(content, context, self.line_comments, encoding, 'line-comment')
 
 
-def get_filter():
+def get_plugin():
     """Get filter."""
 
     return StylesheetsFilter

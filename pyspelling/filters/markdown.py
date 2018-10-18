@@ -43,7 +43,7 @@ class MarkdownFilter(filters.Filter):
         return [filters.SourceText(self._filter(source.text), source.context, source.encoding, 'markdown')]
 
 
-def get_filter():
+def get_plugin():
     """Return the filter."""
 
     return MarkdownFilter
