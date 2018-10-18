@@ -2,6 +2,8 @@
 from __future__ import unicode_literals
 import yaml
 import codecs
+import os
+import warnings
 
 __all__ = ("yaml_load", "read_config")
 
@@ -31,6 +33,15 @@ def read_config(file_name):
     """Read configuration."""
 
     config = {}
-    with codecs.open(file_name, 'r', encoding='utf-8') as f:
-        config = yaml_load(f.read())
+    for name in (['.pyspelling.yml', '.spelling.yml'] if not file_name else [file_name]):
+        if os.path.exists(name):
+            if not file_name and name == '.spelling.yml':
+                warnings.warn(
+                    "Using '.spelling.yml' as the default is deprecated. Default config is now '.pyspelling.yml'",
+                    category=DeprecationWarning,
+                    stacklevel=2
+                )
+            with codecs.open(name, 'r', encoding='utf-8') as f:
+                config = yaml_load(f.read())
+            break
     return config

@@ -59,7 +59,7 @@ class TextFilter(filters.Filter):
         return [filters.SourceText(text, source.context, encoding, 'text')]
 
 
-def get_filter():
+def get_plugin():
     """Return the filter."""
 
     return TextFilter

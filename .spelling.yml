@@ -1,4 +1,6 @@
-documents:
+spellchecker: aspell
+
+matrix:
 - name: mkdocs
   sources:
   - site/**/*.html
@@ -11,7 +13,7 @@ documents:
     wordlists:
     - docs/src/dictionary/en-custom.txt
     output: build/dictionary/mkdocs.dic
-  filters:
+  pipeline:
   - pyspelling.filters.html:
       comments: false
       attributes:
@@ -42,7 +44,7 @@ documents:
     wordlists:
     - docs/src/dictionary/en-custom.txt
     output: build/dictionary/mkdocs.dic
-  filters:
+  pipeline:
   - pyspelling.filters.markdown:
   - pyspelling.filters.html:
       comments: false
@@ -66,17 +68,31 @@ documents:
     wordlists:
     - docs/src/dictionary/en-custom.txt
     output: build/dictionary/python.dic
-  filters:
+  pipeline:
   - pyspelling.filters.python:
-      strings: false
-      comments: false
+  - pyspelling.flow_control:
+      allow:
+      - py-comment
+  - pyspelling.filters.context:
+      context_visible_first: true
+      delimiters:
+      # Ignore lint (noqa) and coverage (pragma) as well as shebang (#!)
+      - open: ^(?:(?:noqa|pragma)\b|!)
+        content: .*?
+        close: $
+      # Ignore Python encoding string -*- encoding stuff -*-
+      - open: ^-*-
+        content: .*?
+        close: -*-$
   - pyspelling.filters.context:
       context_visible_first: true
       escapes: \\[\\`~]
       delimiters:
-        - open: (?P<open>`+)
-          content: .*?
-          close: (?P=open)
-        - open: (?s)^(?P<open>\s*~{3,})
-          content: .*?
-          close: ^(?P=open)$
+      # Ignore text between inline back ticks
+      - open: (?P<open>`+)
+        content: .*?
+        close: (?P=open)
+      # Ignore multiline content between fences ~~~ content ~~~
+      - open: (?s)^(?P<open>\s*~{3,})
+        content: .*?
+        close: ^(?P=open)$

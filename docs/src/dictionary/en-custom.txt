@@ -2,6 +2,7 @@ BOM
 BOMs
 BeatifulSoup
 BeautifulSoup
+CSS
 Changelog
 EmojiOne
 GitHub
@@ -15,12 +16,15 @@ Parsers
 PyMdown
 PySpelling
 PyYaml's
+Stylesheets
 UTF
 YAML
 backticks
+blockish
 bool
 builtins
 chainable
+charset
 chunking
 could've
 dicts
@@ -44,4 +48,6 @@ sortable
 squidfunk
 subclassing
 sublicense
+whitespace
 wildcard
+wordlist
