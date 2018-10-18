@@ -1,4 +1,6 @@
-documents:
+spellchecker: aspell
+
+matrix:
 - name: mkdocs
   sources:
   - site/**/*.html
@@ -11,7 +13,7 @@ documents:
     wordlists:
     - docs/src/dictionary/en-custom.txt
     output: build/dictionary/mkdocs.dic
-  filters:
+  pipeline:
   - pyspelling.filters.html:
       comments: false
       attributes:
@@ -42,7 +44,7 @@ documents:
     wordlists:
     - docs/src/dictionary/en-custom.txt
     output: build/dictionary/mkdocs.dic
-  filters:
+  pipeline:
   - pyspelling.filters.markdown:
   - pyspelling.filters.html:
       comments: false
@@ -66,7 +68,7 @@ documents:
     wordlists:
     - docs/src/dictionary/en-custom.txt
     output: build/dictionary/python.dic
-  filters:
+  pipeline:
   - pyspelling.filters.python:
   - pyspelling.flow_control:
       allow:

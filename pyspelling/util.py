@@ -6,9 +6,35 @@ import string
 import random
 import re
 import locale
+from functools import wraps
 from collections import namedtuple
+import warnings
 
 RE_LAST_SPACE_IN_CHUNK = re.compile(rb'(\s+)(?=\S+\Z)')
+
+
+def deprecated(message):  # pragma: no cover
+    """
+    Raise a `DeprecationWarning` when wrapped function/method is called.
+
+    Borrowed from https://stackoverflow.com/a/48632082/866026
+    """
+
+    def deprecated_decorator(func):
+        """Deprecation decorator."""
+
+        @wraps(func)
+        def deprecated_func(*args, **kwargs):
+            """Display deprecation warning."""
+
+            warnings.warn(
+                "'{}' is deprecated. {}".format(func.__name__, message),
+                category=DeprecationWarning,
+                stacklevel=2
+            )
+            return func(*args, **kwargs)
+        return deprecated_func
+    return deprecated_decorator
 
 
 def get_process(cmd):
