@@ -75,8 +75,8 @@ def call_spellchecker(cmd, input_text, encoding=None):
 
     if input_text is not None:
         for line in input_text.splitlines():
-            # Hunspell truncates lines at 0x1fff (at least on Windows this has been observed)
-            # Avoid trunctation by chunking the line on white space and inserting a new line to break it.
+            # Hunspell truncates lines at `0x1fff` (at least on Windows this has been observed)
+            # Avoid truncation by chunking the line on white space and inserting a new line to break it.
             offset = 0
             end = len(line)
             while True:

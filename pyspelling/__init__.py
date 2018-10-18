@@ -5,6 +5,8 @@ import importlib
 from . import util
 from . import __version__
 from . import settings
+from . import flow_control
+from . import filters
 from wcmatch import glob
 
 version = __version__.version
@@ -57,29 +59,40 @@ class SpellChecker(object):
 
         return []
 
-    def _check_source(self, sources, options, personal_dict, filter_index=1):
+    def _filter_pipeline(self, sources, options, personal_dict, filter_index=1, flow_status=flow_control.ALLOW):
         """Recursive check spelling filters."""
+
         for source in sources:
             if source._has_error():
                 yield source
-            elif not source._is_bytes():
-                if filter_index < len(self.filters):
-                    f = self.filters[filter_index]
-                    if source.category not in f._get_disallowed():
-                        yield from self._check_source(
+            elif not source._is_bytes() and filter_index < len(self.filters):
+                f = self.filters[filter_index]
+                if isinstance(f, flow_control.FlowControl):
+                    flow_status = f.adjust_flow(source.category)
+                    if filter_index < len(self.filters):
+                        yield from self._filter_pipeline(
+                            [source], options, personal_dict, filter_index + 1, flow_status
+                        )
+                else:
+                    if flow_status == flow_control.ALLOW:
+                        yield from self._filter_pipeline(
                             f.sfilter(source), options, personal_dict, filter_index + 1
                         )
+                    elif flow_status == flow_control.SKIP:
+                        yield from self._filter_pipeline(
+                            [source], options, personal_dict, filter_index + 1
+                        )
                     else:
+                        # Halted tasks
                         yield source
-                else:
-                    yield source
             else:
+                # Binary content
                 yield source
 
-    def _check_spelling(self, sources, options, personal_dict):
+    def _spelling_pipeline(self, sources, options, personal_dict):
         """Check spelling."""
 
-        for source in self._check_source(sources, options, personal_dict):
+        for source in self._filter_pipeline(sources, options, personal_dict):
             if source._has_error():
                 yield util.Results([], source.context, source.category, source.error)
             else:
@@ -125,10 +138,10 @@ class SpellChecker(object):
         kwargs = {}
         if default_encoding:
             kwargs["default_encoding"] = default_encoding
-        filters = documents.get('filters', [])
-        if not filters:
-            filters.append('pyspelling.filters.text')
-        for f in filters:
+        filter_list = documents.get('filters', [])
+        if not filter_list:
+            filter_list.append('pyspelling.filters.text')
+        for f in filter_list:
             # Retrieve module and module options
             if isinstance(f, dict):
                 name, options = list(f.items())[0]
@@ -138,7 +151,13 @@ class SpellChecker(object):
             if options is None:
                 options = {}
 
-            self.filters.append(self._get_module(name, 'get_filter')(options, **kwargs))
+            module = self._get_module(name, 'get_filter')
+            if issubclass(module, filters.Filter):
+                self.filters.append(module(options, **kwargs))
+            elif issubclass(module, flow_control.FlowControl):
+                self.filters.append(module(options))
+            else:
+                raise ValueError("'%s' is not a valid plugin!" % name)
 
     def _get_module(self, module, accessor):
         """Get module."""
@@ -174,7 +193,7 @@ class SpellChecker(object):
         self._get_filters(documents, encoding)
 
         for sources in self._walk_src(documents.get('sources', []), glob_flags, self.filters[0]):
-            yield from self._check_spelling(sources, options, output)
+            yield from self._spelling_pipeline(sources, options, output)
 
 
 class Aspell(SpellChecker):

@@ -32,7 +32,6 @@ class PythonFilter(filters.Filter):
 
         self.comments = options.get('comments', True) is True
         self.docstrings = options.get('docstrings', True) is True
-        self.strings = options.get('strings', False) is True
         self.bytes = options.get('bytes', False) is True
         self.group_comments = options.get('group_comments', False) is True
         super(PythonFilter, self).__init__(options, default_encoding)
@@ -62,7 +61,6 @@ class PythonFilter(filters.Filter):
 
         docstrings = []
         comments = []
-        strings = []
         prev_token_type = tokenize.NEWLINE
         indent = ''
         name = None
@@ -111,9 +109,9 @@ class PythonFilter(filters.Filter):
                         loc = "%s(%s)" % (stack[0][0], line)
                     comments.append([value[1:], loc, line_num])
             if token_type == tokenize.STRING:
-                # Capture docstrings
-                # If previously we captured an INDENT or NEWLINE previously we probably have a docstring.
-                # NL seems to be a different thing.
+                # Capture docstrings.
+                # If we captured an `INDENT` or `NEWLINE` previously we probably have a docstring.
+                # `NL` seems to be a different thing.
                 if prev_token_type in PREV_DOC_TOKENS:
                     if self.docstrings:
                         value = value.strip()
@@ -121,20 +119,10 @@ class PythonFilter(filters.Filter):
 
                         if not isinstance(string, str):
                             # Since docstrings should be readable and printable,
-                            # if byte string assume 'ascii'.
+                            # if byte string assume `ascii`.
                             string = string.decode('ascii')
                         loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
-                        docstrings.append(filters.SourceText(string, loc, encoding, 'docstring'))
-                elif self.strings:
-                    value = value.strip()
-                    string = textwrap.dedent(eval(value))
-                    if isinstance(string, str) or self.bytes:
-                        string_type = 'string'
-                        if not isinstance(string, str):
-                            string = self.get_ascii(string)
-                            string_type = 'bytes'
-                        loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
-                        strings.append(filters.SourceText(string, loc, encoding, string_type))
+                        docstrings.append(filters.SourceText(string, loc, encoding, 'py-docstring'))
 
             if token_type == tokenize.INDENT:
                 indent = value
@@ -147,9 +135,9 @@ class PythonFilter(filters.Filter):
 
         final_comments = []
         for comment in comments:
-            final_comments.append(filters.SourceText(textwrap.dedent(comment[0]), comment[1], encoding, 'comment'))
+            final_comments.append(filters.SourceText(textwrap.dedent(comment[0]), comment[1], encoding, 'py-comment'))
 
-        return docstrings + final_comments + strings
+        return docstrings + final_comments
 
     def filter(self, source_file, encoding):  # noqa A001
         """Parse Python file returning content."""

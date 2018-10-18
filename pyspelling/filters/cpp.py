@@ -47,7 +47,7 @@ class CppFilter(filters.Filter):
     def evaluate_inline(self, groups):
         """Evaluate inline comments on their own lines."""
 
-        # Cosecutive lines with only comments with same leading whitespace
+        # Consecutive lines with only comments with same leading whitespace
         # will be captured as a single block.
         if self.lines:
             if (

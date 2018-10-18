@@ -68,15 +68,29 @@ documents:
     output: build/dictionary/python.dic
   filters:
   - pyspelling.filters.python:
-      strings: false
-      comments: false
+  - pyspelling.flow_control:
+      allow:
+      - py-comment
+  - pyspelling.filters.context:
+      context_visible_first: true
+      delimiters:
+      # Ignore lint (noqa) and coverage (pragma) as well as shebang (#!)
+      - open: ^(?:(?:noqa|pragma)\b|!)
+        content: .*?
+        close: $
+      # Ignore Python encoding string -*- encoding stuff -*-
+      - open: ^-*-
+        content: .*?
+        close: -*-$
   - pyspelling.filters.context:
       context_visible_first: true
       escapes: \\[\\`~]
       delimiters:
-        - open: (?P<open>`+)
-          content: .*?
-          close: (?P=open)
-        - open: (?s)^(?P<open>\s*~{3,})
-          content: .*?
-          close: ^(?P=open)$
+      # Ignore text between inline back ticks
+      - open: (?P<open>`+)
+        content: .*?
+        close: (?P=open)
+      # Ignore multiline content between fences ~~~ content ~~~
+      - open: (?s)^(?P<open>\s*~{3,})
+        content: .*?
+        close: ^(?P=open)$

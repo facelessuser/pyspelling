@@ -29,6 +29,8 @@ RE_UTF_BOM = re.compile(
     b'))'
 )
 
+RE_CATEGORY_NAME = re.compile(r'^[-a-z0-9_]+$', re.I)
+
 
 class SourceText(namedtuple('SourceText', ['text', 'context', 'encoding', 'category', 'error'])):
     """Source text."""
@@ -50,7 +52,10 @@ class SourceText(namedtuple('SourceText', ['text', 'context', 'encoding', 'categ
         if encoding:
             encoding = codecs.lookup(encoding).name
 
-        return super(SourceText, cls).__new__(cls, text, context, encoding, category, error)
+        if RE_CATEGORY_NAME.match(category) is None and error is None:
+            raise ValueError('Invalid category name in SourceText!')
+
+        return super(SourceText, cls).__new__(cls, text, context, encoding, category.lower(), error)
 
     def _is_bytes(self):
         """Is bytes."""
@@ -126,7 +131,7 @@ class Filter(object):
 
         encoding = None
         with contextlib.closing(mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)) as m:
-            # Check for boms
+            # Check for BOMs
             encoding = self._has_bom(m.read(4))
             m.seek(0)
             # Check file extensions
@@ -138,11 +143,6 @@ class Filter(object):
                 encoding = self._utf_strip_bom(self.content_check(m))
 
         return encoding
-
-    def _get_disallowed(self):
-        """Get disallowed items."""
-
-        return set(self.config.get('disallow', []))
 
     def _detect_encoding(self, source_file):
         """Detect encoding."""
@@ -185,7 +185,7 @@ class Filter(object):
         try:
             file_size = os.path.getsize(filename)
             # If the file is really big, lets just call it binary.
-            # We dont' have time to let Python chug through a massive file.
+            # We don't have time to let Python chug through a massive file.
             if not self._is_very_large(file_size):
                 with open(filename, "rb") as f:
                     if file_size == 0:

@@ -36,12 +36,12 @@ class ContextFilter(filters.Filter):
         with codecs.open(source_file, 'r', encoding=encoding) as f:
             text = f.read()
 
-        return [filters.SourceText(self._filter(text), source_file, encoding, 'text')]
+        return [filters.SourceText(self._filter(text), source_file, encoding, 'context')]
 
     def sfilter(self, source):
         """Filter."""
 
-        return [filters.SourceText(self._filter(source.text), source.context, source.encoding, 'text')]
+        return [filters.SourceText(self._filter(source.text), source.context, source.encoding, 'context')]
 
     def _filter(self, text):
         """Context delimiter filter."""
@@ -51,7 +51,7 @@ class ContextFilter(filters.Filter):
         last = 0
         end = len(text)
         while index < end:
-            m = self.escapes.match(text, pos=index)
+            m = self.escapes.match(text, pos=index) if self.escapes else None
             if m:
                 index = m.end(0)
                 continue
