@@ -72,6 +72,7 @@ class Filter(object):
     """Spelling language."""
 
     MAX_GUESS_SIZE = 31457280
+    CHECK_BOM = True
 
     def __init__(self, config, default_encoding='utf-8'):
         """Initialize."""
@@ -132,7 +133,8 @@ class Filter(object):
         encoding = None
         with contextlib.closing(mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)) as m:
             # Check for BOMs
-            encoding = self._has_bom(m.read(4))
+            if self.CHECK_BOM:
+                encoding = self._has_bom(m.read(4))
             m.seek(0)
             # Check file extensions
             if encoding is None:

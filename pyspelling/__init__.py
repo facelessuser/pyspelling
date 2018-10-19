@@ -8,7 +8,6 @@ from . import settings
 from . import flow_control
 from . import filters
 from wcmatch import glob
-import warnings
 
 version = __version__.version
 version_info = __version__.version_info
@@ -132,21 +131,19 @@ class SpellChecker(object):
 
         return None
 
-    def _get_filters(self, task, default_encoding):
-        """Get filters."""
+    def _build_pipeline(self, task, default_encoding):
+        """Build up the pipeline."""
 
         self.pipeline_steps = []
         kwargs = {}
         if default_encoding:
             kwargs["default_encoding"] = default_encoding
+
         steps = task.get('pipeline', [])
         if not steps:
             steps = task.get('filters', [])
-            warnings.warn(
-                "'filters' key in config is deprecated. 'pipeline' should be used going forward.",
-                category=DeprecationWarning,
-                stacklevel=2
-            )
+            util.warn_deprecated("'filters' key in config is deprecated. 'pipeline' should be used going forward.")
+
         if not steps:
             steps.append('pyspelling.filters.text')
         for step in steps:
@@ -163,7 +160,10 @@ class SpellChecker(object):
             if issubclass(module, filters.Filter):
                 self.pipeline_steps.append(module(options, **kwargs))
             elif issubclass(module, flow_control.FlowControl):
-                self.pipeline_steps.append(module(options))
+                if self.pipeline_steps:
+                    self.pipeline_steps.append(module(options))
+                else:
+                    raise ValueError("Pipeline cannot start with a 'Flow Control' plugin!")
             else:
                 raise ValueError("'%s' is not a valid plugin!" % name)
 
@@ -177,13 +177,9 @@ class SpellChecker(object):
             if attr is not None:
                 break
             if name == 'get_filter':
-                warnings.warn(
-                    "'get_filter' is deprecated. Plugins should use 'get_plugin'.",
-                    category=DeprecationWarning,
-                    stacklevel=2
-                )
+                util.warn_deprecated("'get_filter' is deprecated. Plugins should use 'get_plugin'.")
         if not attr:
-            raise ValueError("Could not find the 'get_plugin' function in module '%d'!" % module)
+            raise ValueError("Could not find the 'get_plugin' function in module '%s'!" % module)
         return attr()
 
     def _to_flags(self, text):
@@ -207,7 +203,7 @@ class SpellChecker(object):
         options = self.setup_spellchecker(task)
         output = self.setup_dictionary(task)
         glob_flags = self._to_flags(task.get('glob_flags', "N|B|G"))
-        self._get_filters(task, encoding)
+        self._build_pipeline(task, encoding)
 
         for sources in self._walk_src(task.get('sources', []), glob_flags, self.pipeline_steps[0]):
             yield from self._spelling_pipeline(sources, options, output)
@@ -232,7 +228,8 @@ class Aspell(SpellChecker):
 
         dictionary_options = task.get('dictionary', {})
         output = os.path.abspath(dictionary_options.get('output', self.dict_bin))
-        lang = dictionary_options.get('lang', 'en')
+        aspell_options = task.get('aspell', {})
+        lang = aspell_options.get('lang', aspell_options.get('l', 'en'))
         wordlists = dictionary_options.get('wordlists', [])
         if lang and wordlists:
             self.compile_dictionary(lang, dictionary_options.get('wordlists', []), output)
@@ -428,11 +425,7 @@ def spellcheck(config_file, name='', binary='', verbose=0, checker=''):
     if not matrix:
         matrix = config.get('documents', [])
         if matrix:
-            warnings.warn(
-                "'documents' key in config is deprecated. 'matrix' should be used going forward.",
-                category=DeprecationWarning,
-                stacklevel=2
-            )
+            util.warn_deprecated("'documents' key in config is deprecated. 'matrix' should be used going forward.")
 
     for task in matrix:
 

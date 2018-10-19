@@ -37,6 +37,16 @@ def deprecated(message):  # pragma: no cover
     return deprecated_decorator
 
 
+def warn_deprecated(message):
+    """Show deprecation warning."""
+
+    warnings.warn(
+        message,
+        category=DeprecationWarning,
+        stacklevel=2
+    )
+
+
 def get_process(cmd):
     """Get a command process."""
 
