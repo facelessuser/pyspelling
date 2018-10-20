@@ -1,7 +1,9 @@
+API
 BOM
 BOMs
 BeatifulSoup
 BeautifulSoup
+CPP
 CSS
 Changelog
 EmojiOne
@@ -15,13 +17,16 @@ NONINFRINGEMENT
 Parsers
 PyMdown
 PySpelling
+PySpelling's
 PyYaml's
 Stylesheets
+Tox
 UTF
 YAML
 backticks
 blockish
 bool
+boolean
 builtin
 builtins
 chainable
@@ -35,6 +40,7 @@ ebeweber
 encodings
 facelessuser
 gforcada
+globbing
 linter
 lxml
 metadata
@@ -47,6 +53,7 @@ regex
 sacrifice
 sortable
 squidfunk
+subclassed
 subclassing
 sublicense
 whitespace

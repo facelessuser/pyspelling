@@ -1,0 +1,20 @@
+# Text
+
+This is a filter that simply retrieves the buffer's text and returns it as Unicode.  It takes a file or file buffer and returns a single `SourceText` object containing all the text in the file.  It is the default is no filter is specified and can be manually included via `pyspelling.filters.text`. When first in the chain, the file's default, assumed encoding is `utf-8` unless otherwise overridden by the user.
+
+Options               | Type          | Default          | Description
+--------------------- | ------------- | ---------------- | -----------
+`disallow`            | [string]      | `#!py3 []`       | `SourceText` names to avoid processing.
+`normalize`           | string        | `#!py3 ''`       | Performs Unicode normalization. Valid values are `NFC`, `NFD`, `NFKC`, and `NFKD`.
+`convert_encoding`    | string        | `#!py3 ''`       | Assuming a valid encoding, the text will be converted to the specified encoding.
+`errors`              | string        | `#!py3 'strict'` | Specifies what to do when converting the encoding, and a character can't be converted. Valid values are `strict`, `ignore`, `replace`, `xmlcharrefreplace`, `backslashreplace`, and `namereplace`.
+
+```yaml
+- name: Text
+  default_encoding: cp1252
+  filters:
+  - pyspelling.filters.text:
+      convert_encoding: utf-8
+  source:
+  - "**/*.txt"
+```

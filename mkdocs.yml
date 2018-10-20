@@ -19,15 +19,31 @@ theme:
   font:
     text: Roboto
     code: Roboto Mono
+  feature:
+    tabs: true
 
 nav:
-  - PySpelling: index.md
-  - Filters: filters.md
-  - Flow Control: flowcontrol.md
-  - Contributing &amp; Support: contributing.md
-  - Development: development.md
-  - Changelog: changelog.md
-  - License: license.md
+  - Usage:
+    - Basic Usage: index.md
+    - Configuration: configuration.md
+    - Spelling Pipeline: pipeline.md
+    - Plugin API: api.md
+  - Filters:
+    - Context: filters/context.md
+    - CPP: filters/cpp.md
+    - HTML: filters/html.md
+    - JavaScript: filters/javascript.md
+    - Markdown: filters/markdown.md
+    - Python: filters/python.md
+    - Stylesheets: filters/stylesheets.md
+    - Text: filters/text.md
+  - Flow Control:
+    - Wildcard: flow_control/wildcard.md
+  - About:
+    - Contributing &amp; Support: about/contributing.md
+    - Development: about/development.md
+    - Changelog: about/changelog.md
+    - License: about/license.md
 
 markdown_extensions:
   - markdown.extensions.toc:
