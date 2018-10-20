@@ -22,6 +22,7 @@ YAML
 backticks
 blockish
 bool
+builtin
 builtins
 chainable
 charset
@@ -51,3 +52,4 @@ sublicense
 whitespace
 wildcard
 wordlist
+wordlists

@@ -23,6 +23,7 @@ theme:
 nav:
   - PySpelling: index.md
   - Filters: filters.md
+  - Flow Control: flowcontrol.md
   - Contributing &amp; Support: contributing.md
   - Development: development.md
   - Changelog: changelog.md
