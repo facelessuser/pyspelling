@@ -64,7 +64,7 @@ To run a specific spelling task in your configuration file by name:
 pyspelling -n my_task
 ```
 
-To run a more verbose output, use the `-v` flag. You can increase verbosity level by including more `v`s: `-vv`.  You can currently go up to three levels.
+To run a more verbose output, use the `-v` flag. You can increase verbosity level by including more `v`s: `-vv`.  You can currently go up to four levels.
 
 ```
 pyspelling -v

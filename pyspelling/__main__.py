@@ -11,6 +11,7 @@ def main():
     parser = argparse.ArgumentParser(prog='spellcheck', description='Spell checking tool.')
     # Flag arguments
     parser.add_argument('--version', action='version', version=('%(prog)s ' + version))
+    parser.add_argument('--debug', action='store_true', default=False, help=argparse.SUPPRESS)
     parser.add_argument('--verbose', '-v', action='count', default=0, help="Verbosity level.")
     parser.add_argument('--name', '-n', action='store', default='', help="Specific spelling task by name to run.")
     parser.add_argument('--binary', '-b', action='store', default='', help="Provide path to spell checker's binary.")
@@ -20,19 +21,19 @@ def main():
     )
     args = parser.parse_args()
 
-    return run(args.config, args.name, args.binary, args.verbose, args.spellchecker)
+    return run(args.config, args.name, args.binary, args.verbose, args.spellchecker, args.debug)
 
 
-def run(config, name='', binary='', verbose=0, spellchecker=''):
+def run(config, name='', binary='', verbose=0, spellchecker='', debug=False):
     """Run."""
 
     fail = False
     count = 0
-    for results in spellcheck(config, name, binary, verbose, spellchecker):
+    for results in spellcheck(config, name, binary, verbose, spellchecker, debug):
         count += 1
         if results.error:
             fail = True
-            print('ERROR: Could not read %s -- %s' % (results.context, results.error))
+            print('ERROR: %s -- %s' % (results.context, results.error))
         elif results.words:
             fail = True
             print('Misspelled words:\n<%s> %s' % (results.category, results.context))
@@ -41,7 +42,7 @@ def run(config, name='', binary='', verbose=0, spellchecker=''):
                 print(word)
             print('-' * 80)
             print('')
-        elif verbose:
+        elif verbose >= 2:
             print('CHECK: %s' % results.context)
 
     return fail

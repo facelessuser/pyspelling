@@ -6,6 +6,7 @@ import contextlib
 import mmap
 import os
 from collections import namedtuple
+import traceback
 
 PYTHON_ENCODING_NAMES = {
     'iso-8859-8-i': 'iso-8859-8',
@@ -156,7 +157,7 @@ class Filter(object):
 
         return encoding
 
-    def _parse(self, source_file):
+    def _parse(self, source_file, debug):
         """Parse the file."""
 
         self.current_encoding = self.default_encoding
@@ -172,9 +173,16 @@ class Filter(object):
                     error = None
                     content = self.filter(source_file, self.default_encoding)
             except Exception as e:
-                error = str(e)
+                if debug:
+                    error = traceback.format_exc()
+                else:
+                    error = str(e)
         except Exception as e:
-            error = str(e)
+            import traceback
+            if debug:
+                error = traceback.format_exc()
+            else:
+                error = str(e)
         if error:
             content = [SourceText('', source_file, '', '', error)]
         return content
