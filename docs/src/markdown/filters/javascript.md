@@ -23,7 +23,7 @@ Options          | Type     | Default       | Description
 `block_comments` | bool     | `#!py3 True`  | Return `SourceText` entries for each block comment.
 `line_comments`  | bool     | `#!py3 True`  | Return `SourceText` entries for each line comment.
 `jsdocs`         | bool     | `#!py3 False` | Return `SourceText` entries for each JSDoc comment.
-`group_comments` | bool     | `#!py3 False` | Group consecutive Python comments as one `SourceText` entry.
+`group_comments` | bool     | `#!py3 False` | Group consecutive inline JavaScript comments as one `SourceText` entry.
 
 ## Categories
 

@@ -19,6 +19,7 @@ PyMdown
 PySpelling
 PySpelling's
 PyYaml's
+SCSS
 Stylesheets
 Tox
 UTF
@@ -53,10 +54,12 @@ regex
 sacrifice
 sortable
 squidfunk
+stylesheet
 subclassed
 subclassing
 sublicense
 substring
+syntaxes
 whitespace
 wildcard
 wordlist

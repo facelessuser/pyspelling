@@ -141,7 +141,7 @@ class SpellChecker(object):
             for f in glob.iglob(patterns, flags=flags):
                 if not os.path.isdir(f):
                     self.log('', 2)
-                    self.log('>>> Checking %s' % f, 1)
+                    self.log('> Processing: %s' % f, 1)
                     yield plugin._parse(f, self.debug)
 
     def setup_spellchecker(self, task):
@@ -219,7 +219,7 @@ class SpellChecker(object):
         """Walk source and initiate spell check."""
 
         # Perform spell check
-        self.log('> Spell Checking %s...' % task.get('name', ''), 1)
+        self.log('Running Task: %s...' % task.get('name', ''), 1)
 
         # Setup filters and variables for the spell check
         encoding = task.get('default_encoding', '')
@@ -280,7 +280,7 @@ class Aspell(SpellChecker):
             if os.path.exists(output):
                 os.remove(output)
 
-            self.log("> Compiling Dictionary...", 1)
+            self.log("Compiling Dictionary...", 1)
             # Read word lists and create a unique set of words
             words = set()
             for wordlist in wordlists:
@@ -387,7 +387,7 @@ class Hunspell(SpellChecker):
             if os.path.exists(output):
                 os.remove(output)
 
-            self.log("> Compiling Dictionary...", 1)
+            self.log("Compiling Dictionary...", 1)
             # Read word lists and create a unique set of words
             words = set()
             for wordlist in wordlists:
@@ -470,6 +470,6 @@ def spellcheck(config_file, name='', binary='', verbose=0, checker='', debug=Fal
         else:
             raise ValueError('%s is not a valid spellchecker!' % checker)
 
-        spellchecker.log('> Using %s to spellcheck %s' % (checker, task.get('name', '')), 1)
+        spellchecker.log('Using %s to spellcheck %s' % (checker, task.get('name', '')), 1)
         yield from spellchecker.run_task(task)
         spellchecker.log("", 1)

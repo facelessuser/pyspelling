@@ -89,7 +89,7 @@ Each spelling task must define a list of sources to search via the `sources` key
 
 You can also have multiple patterns on one line separated with `|`. When multiple patterns are defined like this, they are evaluated simultaneously. This is useful if you'd like to provide an exclusion pattern along with your file pattern. For instance, if we wanted to scan all python files in our folder, but exclude any in the build folder, we could provide the following pattern: `**/*.py|!build/*`.
 
-PySpelling uses [Wildcard Match's `glob` library](https://facelessuser.github.io/wcmatch/glob/) to perform the file globbing.  By default, it uses the `NEGATE`, `GLOBSTAR`, and `BRACE` flags, but you can override the flag options with the `glob_flags` option. You can specify the flags by either their long name `GLOBSTAR` or their short name `G`. See [Wildcard Match's documentation](https://facelessuser.github.io/wcmatch/glob/) for more information on the available flags and what they do.
+PySpelling uses [Wildcard Match's `glob` library][glob] to perform the file globbing.  By default, it uses the `NEGATE`, `GLOBSTAR`, and `BRACE` flags, but you can override the flag options with the `glob_flags` option. You can specify the flags by either their long name `GLOBSTAR` or their short name `G`. See [Wildcard Match's documentation][glob] for more information on the available flags and what they do.
 
 ```yaml
 matrix:
@@ -219,3 +219,5 @@ The above options would be equivalent to doing this from the command line:
 ```
 aspell --add-extra-dicts my-dictionary.doc --add-extra-dicts my-other-dictionary.dic
 ```
+
+--8<-- "refs.txt"

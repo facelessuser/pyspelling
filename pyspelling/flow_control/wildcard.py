@@ -15,18 +15,23 @@ class WildcardFlowControl(flow_control.FlowControl):
         self.halt = config.get('halt', [])
         self.skip = config.get('skip', [])
 
+    def match(self, category, pattern):
+        """Match the category."""
+
+        return fnmatch.fnmatch(category, fnmatch.fnsplit(pattern, flags=self.FNMATCH_FLAGS), flags=self.FNMATCH_FLAGS)
+
     def adjust_flow(self, category):
         """Adjust the flow of source control objects."""
 
         status = flow_control.SKIP
         for allow in self.allow:
-            if fnmatch.fnmatch(category, allow, flags=self.FNMATCH_FLAGS):
+            if self.match(category, allow):
                 status = flow_control.ALLOW
                 for skip in self.skip:
-                    if fnmatch.fnmatch(category, skip, flags=self.FNMATCH_FLAGS):
+                    if self.match(category, skip):
                         status = flow_control.SKIP
                 for halt in self.halt:
-                    if fnmatch.fnmatch(category, halt, flags=self.FNMATCH_FLAGS):
+                    if self.match(category, halt):
                         status = flow_control.HALT
                 if status != flow_control.ALLOW:
                     break

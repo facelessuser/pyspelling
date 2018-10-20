@@ -29,9 +29,9 @@ Name                                     | Include\ Path
 
 `FlowControl` plugins are responsible for controlling the flow of the text down the pipeline. The category of a text chunk is passed to the plugin, and it will return one of three directives:
 
-- `HALT`: halts the progress of the text chunk(s) down the pipeline and sends it directly to the spell checker.
-- `SKIP`: the chunk(s) of text should skip the next filter.
 - `ALLOW`: the chunk(s) of text is allowed to be evaluated by the next filter.
+- `SKIP`: the chunk(s) of text should skip the next filter.
+- `HALT`: halts the progress of the text chunk(s) down the pipeline and sends it directly to the spell checker.
 
 The following `FlowControl` plugins are included:
 
