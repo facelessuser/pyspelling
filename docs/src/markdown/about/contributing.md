@@ -4,7 +4,7 @@
 
 1. Please **read the documentation** and **search the issue tracker** to try and find the answer to your question **before** posting an issue.
 
-2. When creating an issue on the repository, please provide as much info as possible:
+2. When creating an issue on the repository, please provide as much information as possible:
 
     - Version being used.
     - Operating system.
@@ -27,8 +27,8 @@ Take time and answer questions and offer suggestions to people who've created is
 
 ## Pull Requests
 
-Pull requests are welcome, and a great way to help fix bugs and add new features. If you you are interested in directly contributing to the code, please check out [Development](./development.md) for more info on the environment and process.
+Pull requests are welcome, and a great way to help fix bugs and add new features. If you you are interested in directly contributing to the code, please check out [Development](./development.md) for more information on the environment and processes.
 
 ## Documentation Improvements
 
-A ton of time has been spent not only creating and supporting this tool and related extensions, but also spent making this documentation.  If you feel it is still lacking, show your appreciation for the tool and/or extensions by helping to improve the documentation. Check out [Development](./development.md) for more info on documentation.
+A ton of time has been spent not only creating and supporting this tool and related extensions, but also spent making this documentation.  If you feel it is still lacking, show your appreciation for the tool by helping to improve the documentation. Check out [Development](./development.md) for more info on documentation.

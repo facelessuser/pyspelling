@@ -55,7 +55,7 @@ class SourceText(namedtuple('SourceText', ['text', 'context', 'encoding', 'categ
         if RE_CATEGORY_NAME.match(category) is None and error is None:
             raise ValueError('Invalid category name in SourceText!')
 
-        return super(SourceText, cls).__new__(cls, text, context, encoding, category.lower(), error)
+        return super(SourceText, cls).__new__(cls, text, context, encoding, category, error)
 
     def _is_bytes(self):
         """Is bytes."""
@@ -72,6 +72,7 @@ class Filter(object):
     """Spelling language."""
 
     MAX_GUESS_SIZE = 31457280
+    CHECK_BOM = True
 
     def __init__(self, config, default_encoding='utf-8'):
         """Initialize."""
@@ -132,7 +133,8 @@ class Filter(object):
         encoding = None
         with contextlib.closing(mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)) as m:
             # Check for BOMs
-            encoding = self._has_bom(m.read(4))
+            if self.CHECK_BOM:
+                encoding = self._has_bom(m.read(4))
             m.seek(0)
             # Check file extensions
             if encoding is None:
@@ -158,23 +160,15 @@ class Filter(object):
         """Parse the file."""
 
         self.current_encoding = self.default_encoding
-        error = None
         encoding = None
         try:
             encoding = self._detect_encoding(source_file)
             content = self.filter(source_file, encoding)
         except UnicodeDecodeError as e:
-            error = str(e)
-            try:
-                if not encoding or encoding != self.default_encoding:
-                    error = None
-                    content = self.filter(source_file, self.default_encoding)
-            except Exception as e:
-                error = str(e)
-        except Exception as e:
-            error = str(e)
-        if error:
-            content = [SourceText('', source_file, '', '', error)]
+            if not encoding or encoding != self.default_encoding:
+                content = self.filter(source_file, self.default_encoding)
+            else:
+                raise
         return content
 
     def _guess(self, filename):

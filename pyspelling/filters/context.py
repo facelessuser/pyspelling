@@ -5,6 +5,8 @@ from .. import util
 import codecs
 import re
 
+DEFAULT_CONTENT = '.*?'
+
 
 class ContextFilter(filters.Filter):
     """Context filter."""
@@ -20,9 +22,19 @@ class ContextFilter(filters.Filter):
             if not isinstance(delimiter, dict):
                 continue
             group = util.random_name_gen()
-            while group in delimiter['open'] or group in delimiter['close']:
+            while (
+                group in delimiter['open'] or
+                group in delimiter['close'] or
+                group in delimiter.get('content', DEFAULT_CONTENT)
+            ):
                 group = util.random_name_gen()
-            pattern = r'%s(?P<%s>%s)(?:%s|\Z)' % (delimiter['open'], group, delimiter['content'], delimiter['close'])
+
+            pattern = r'%s(?P<%s>%s)(?:%s|\Z)' % (
+                delimiter['open'],
+                group,
+                delimiter.get('content', DEFAULT_CONTENT),
+                delimiter['close']
+            )
             self.delimiters.append((re.compile(pattern, re.M), group))
         escapes = options.get('escapes', None)
         if escapes:

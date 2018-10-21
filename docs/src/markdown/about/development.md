@@ -6,19 +6,24 @@ There are a number of files for build, test, and continuous integration in the r
 
 ```
 ├── docs
+│   └── src
+│       ├── dictionary
+│       └── markdown
 ├── pyspelling
 └── requirements
+
 ```
 
-Directory      | Description
--------------- | -----------
-`docs`         | This contains the source files for the documentation.
-`pyspelling`   | This contains the source code for the project.
-`requirements` | This contains files with lists of dependencies required dependencies for continuous integration.
+Directory             | Description
+--------------------- | -----------
+`docs/src/dictionary` | This contains the spell check wordlist(s) for the project.
+`docs/src/markdown`   | This contains the content for the documentation.
+`pyspelling`          | This contains the source code for the project.
+`requirements`        | This contains files with lists of dependencies required dependencies for continuous integration.
 
 ## Coding Standards
 
-When writing code, the code should roughly conform to PEP8 and PEP257 suggestions.  The PyMdown Extensions project utilizes the Flake8 linter (with some additional plugins) to ensure code conforms (give or take some of the rules).  When in doubt follow the formatting hints of existing code when adding or modifying files. existing files.  Listed below are the modules used:
+When writing code, the code should roughly conform to PEP8 and PEP257 suggestions.  The project utilizes the Flake8 linter (with some additional plugins) to ensure code conforms (give or take some of the rules).  When in doubt, follow the formatting hints of existing code when adding or modifying files. existing files.  Listed below are the modules used:
 
 - @gitlab:pycqa/flake8
 - @gitlab:pycqa/flake8-docstrings
@@ -26,15 +31,11 @@ When writing code, the code should roughly conform to PEP8 and PEP257 suggestion
 - @ebeweber/flake8-mutable
 - @gforcada/flake8-builtins
 
-Flake8 can be run directly via the command line from the root of the project.
-
-```
-flake8
-```
+Usually this can be automated with Tox (assuming it is installed): `tox -elint`.
 
 ## Building and Editing Documents
 
-Documents are in Markdown (with with some additional syntax) and converted to HTML via Python Markdown. If you would like to build and preview the documentation, you must have these packages installed:
+Documents are in Markdown (with with some additional syntax provided by extensions) and are converted to HTML via Python Markdown. If you would like to build and preview the documentation, you must have these packages installed:
 
 - @Python-Markdown/markdown: the Markdown parser.
 - @mkdocs/mkdocs: the document site generator.
@@ -49,7 +50,17 @@ mkdocs serve
 
 ## Spell Checking Documents
 
-During validation we build the docs and spell check them along with the source code docstrings. This project is used to spell check itself, but [Aspell][aspell] must be installed.  Currently this project uses the latest Aspell.  Since the latest Aspell is not available on Windows, and this has not been tested with older versions, it is not expected that everyone will install and run Aspell locally.  In order to perform the spell check, it is expected you are setup to build the documents, and that you have Aspell installed in the your system path. To initiate the spell check, run the following command from the root of the project:
+During validation we build the docs and spell check various files in the project. This project is used to spell check itself, but [Aspell][aspell] must be installed.  Currently this project uses one of the more recent versions of Aspell.  Since the latest Aspell is not available on Windows, and this has not been tested with older versions, it is not expected that everyone will install and run Aspell locally, but it will be run in CI tests for pull requests.
+
+In order to perform the spell check, it is expected you are setup to build the documents, and that you have Aspell installed in your system path (if needed you can use the `--binary` option to point to the location of your Aspell binary). It is also expected that you have the `en` dictionary installed as well. To initiate the spell check, run the following command from the root of the project.
+
+You will need to make sure the documents are built first:
+
+```
+mkdocs build --clean
+```
+
+And then run the spell checker. Using `python -m` from the project root will load your checked out version of PySpelling instead of your system installed version:
 
 ```
 python -m pyspelling
@@ -83,16 +94,16 @@ tox
 
 If you don't have all the Python versions needed to test all the environments, those entries will fail.  You can ignore those.  Spelling will also fail if you don't have the correct version of Aspell.
 
-To target a specific environment to test, you use the `-e` option to select the environment of interest.  To select lint:
+As most people will not have all the Python versions on their machine, it makes more sense to target specific environments. To target a specific environment to test, you use the `-e` option to select the environment of interest.  To select lint:
 
 ```
 tox -elint
 ```
 
-<!-- To select PY27 unit tests (or other versions -- change accordingly):
+<!-- To select PY37 unit tests (or other versions -- change accordingly):
 
 ```
-tox -epy27-unittests
+tox -epy37
 ``` -->
 
 To select spelling and document building:

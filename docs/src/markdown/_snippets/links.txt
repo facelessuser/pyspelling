@@ -1,2 +1,5 @@
 [aspell]: http://aspell.net/
+[fnmatch]: https://facelessuser.github.io/wcmatch/fnmatch
+[glob]: https://facelessuser.github.io/wcmatch/glob/
 [hunspell]: http://hunspell.github.io/
+[win-unicode-console]: https://github.com/Drekin/win-unicode-console

@@ -3,17 +3,16 @@ from __future__ import unicode_literals
 import os
 import importlib
 from . import util
-from . import __version__
+from . import __meta__
 from . import settings
 from . import flow_control
 from . import filters
 from wcmatch import glob
-import warnings
 
-version = __version__.version
-version_info = __version__.version_info
+__version__ = __meta__.version
+__version_info__ = __meta__.version_info
 
-__all__ = ("version", "version_info", "spellcheck")
+__all__ = ("__version__", "__version_info__", "spellcheck")
 
 
 class SpellChecker(object):
@@ -42,18 +41,26 @@ class SpellChecker(object):
         "B": glob.B
     }
 
-    def __init__(self, config, binary='', verbose=0):
+    def __init__(self, config, binary='', verbose=0, debug=False):
         """Initialize."""
 
         # General options
         self.binary = binary if binary else 'aspell'
         self.verbose = verbose
         self.dict_bin = os.path.abspath(self.DICTIONARY)
+        self.debug = debug
 
     def log(self, text, level):
         """Log level."""
         if self.verbose >= level:
             print(text)
+
+    def get_error(self, e):
+        """Get the error."""
+
+        import traceback
+
+        return traceback.format_exc() if self.debug else str(e)
 
     def setup_command(self, encoding, options, personal_dict):
         """Setup the command."""
@@ -69,16 +76,29 @@ class SpellChecker(object):
             elif not source._is_bytes() and filter_index < len(self.pipeline_steps):
                 f = self.pipeline_steps[filter_index]
                 if isinstance(f, flow_control.FlowControl):
-                    flow_status = f.adjust_flow(source.category)
-                    if filter_index < len(self.pipeline_steps):
-                        yield from self._pipeline_step(
-                            [source], options, personal_dict, filter_index + 1, flow_status
-                        )
+                    err = ''
+                    try:
+                        status = f.adjust_flow(source.category)
+                    except Exception as e:
+                        err = self.get_error(e)
+                        yield filters.SourceText('', source.context, '', '', err)
+                    if not err:
+                        if filter_index < len(self.pipeline_steps):
+                            yield from self._pipeline_step(
+                                [source], options, personal_dict, filter_index + 1, status
+                            )
                 else:
                     if flow_status == flow_control.ALLOW:
-                        yield from self._pipeline_step(
-                            f.sfilter(source), options, personal_dict, filter_index + 1
-                        )
+                        err = ''
+                        try:
+                            srcs = f.sfilter(source)
+                        except Exception as e:
+                            err = self.get_error(e)
+                            yield filters.SourceText('', source.context, '', '', err)
+                        if not err:
+                            yield from self._pipeline_step(
+                                srcs, options, personal_dict, filter_index + 1
+                            )
                     elif flow_status == flow_control.SKIP:
                         yield from self._pipeline_step(
                             [source], options, personal_dict, filter_index + 1
@@ -102,10 +122,10 @@ class SpellChecker(object):
                     text = source.text
                 else:
                     text = source.text.encode(encoding)
-                self.log('', 2)
-                self.log(text, 2)
+                self.log('', 3)
+                self.log(text, 3)
                 cmd = self.setup_command(encoding, options, personal_dict)
-                self.log(str(cmd), 3)
+                self.log("Command: " + str(cmd), 4)
 
                 wordlist = util.call_spellchecker(cmd, input_text=text, encoding=encoding)
                 yield util.Results([w for w in sorted(set(wordlist.split('\n'))) if w], source.context, source.category)
@@ -120,7 +140,13 @@ class SpellChecker(object):
             patterns = glob.globsplit(target, flags=flags)
             for f in glob.iglob(patterns, flags=flags):
                 if not os.path.isdir(f):
-                    yield plugin._parse(f)
+                    self.log('', 2)
+                    self.log('> Processing: %s' % f, 1)
+                    try:
+                        yield plugin._parse(f)
+                    except Exception as e:
+                        err = self.get_error(e)
+                        yield filters.SourceText('', f, '', '', err)
 
     def setup_spellchecker(self, task):
         """Setup spell checker."""
@@ -132,21 +158,19 @@ class SpellChecker(object):
 
         return None
 
-    def _get_filters(self, task, default_encoding):
-        """Get filters."""
+    def _build_pipeline(self, task, default_encoding):
+        """Build up the pipeline."""
 
         self.pipeline_steps = []
         kwargs = {}
         if default_encoding:
             kwargs["default_encoding"] = default_encoding
+
         steps = task.get('pipeline', [])
         if not steps:
             steps = task.get('filters', [])
-            warnings.warn(
-                "'filters' key in config is deprecated. 'pipeline' should be used going forward.",
-                category=DeprecationWarning,
-                stacklevel=2
-            )
+            util.warn_deprecated("'filters' key in config is deprecated. 'pipeline' should be used going forward.")
+
         if not steps:
             steps.append('pyspelling.filters.text')
         for step in steps:
@@ -163,7 +187,10 @@ class SpellChecker(object):
             if issubclass(module, filters.Filter):
                 self.pipeline_steps.append(module(options, **kwargs))
             elif issubclass(module, flow_control.FlowControl):
-                self.pipeline_steps.append(module(options))
+                if self.pipeline_steps:
+                    self.pipeline_steps.append(module(options))
+                else:
+                    raise ValueError("Pipeline cannot start with a 'Flow Control' plugin!")
             else:
                 raise ValueError("'%s' is not a valid plugin!" % name)
 
@@ -177,13 +204,9 @@ class SpellChecker(object):
             if attr is not None:
                 break
             if name == 'get_filter':
-                warnings.warn(
-                    "'get_filter' is deprecated. Plugins should use 'get_plugin'.",
-                    category=DeprecationWarning,
-                    stacklevel=2
-                )
+                util.warn_deprecated("'get_filter' is deprecated. Plugins should use 'get_plugin'.")
         if not attr:
-            raise ValueError("Could not find the 'get_plugin' function in module '%d'!" % module)
+            raise ValueError("Could not find the 'get_plugin' function in module '%s'!" % module)
         return attr()
 
     def _to_flags(self, text):
@@ -200,14 +223,14 @@ class SpellChecker(object):
         """Walk source and initiate spell check."""
 
         # Perform spell check
-        self.log('Spell Checking %s...' % task.get('name', ''), 1)
+        self.log('Running Task: %s...' % task.get('name', ''), 1)
 
         # Setup filters and variables for the spell check
         encoding = task.get('default_encoding', '')
         options = self.setup_spellchecker(task)
         output = self.setup_dictionary(task)
         glob_flags = self._to_flags(task.get('glob_flags', "N|B|G"))
-        self._get_filters(task, encoding)
+        self._build_pipeline(task, encoding)
 
         for sources in self._walk_src(task.get('sources', []), glob_flags, self.pipeline_steps[0]):
             yield from self._spelling_pipeline(sources, options, output)
@@ -216,10 +239,10 @@ class SpellChecker(object):
 class Aspell(SpellChecker):
     """Aspell spell check class."""
 
-    def __init__(self, config, binary='', verbose=0):
+    def __init__(self, config, binary='', verbose=0, debug=False):
         """Initialize."""
 
-        super(Aspell, self).__init__(config, binary, verbose)
+        super(Aspell, self).__init__(config, binary, verbose, debug)
         self.binary = binary if binary else 'aspell'
 
     def setup_spellchecker(self, task):
@@ -232,7 +255,8 @@ class Aspell(SpellChecker):
 
         dictionary_options = task.get('dictionary', {})
         output = os.path.abspath(dictionary_options.get('output', self.dict_bin))
-        lang = dictionary_options.get('lang', 'en')
+        aspell_options = task.get('aspell', {})
+        lang = aspell_options.get('lang', aspell_options.get('l', 'en'))
         wordlists = dictionary_options.get('wordlists', [])
         if lang and wordlists:
             self.compile_dictionary(lang, dictionary_options.get('wordlists', []), output)
@@ -332,7 +356,7 @@ class Aspell(SpellChecker):
 class Hunspell(SpellChecker):
     """Hunspell spell check class."""
 
-    def __init__(self, config, binary='', verbose=0):
+    def __init__(self, config, binary='', verbose=0, debug=False):
         """Initialize."""
 
         super(Hunspell, self).__init__(config, binary, verbose)
@@ -415,7 +439,7 @@ class Hunspell(SpellChecker):
         return cmd
 
 
-def spellcheck(config_file, name='', binary='', verbose=0, checker=''):
+def spellcheck(config_file, name='', binary='', verbose=0, checker='', debug=False):
     """Spell check."""
 
     hunspell = None
@@ -428,11 +452,7 @@ def spellcheck(config_file, name='', binary='', verbose=0, checker=''):
     if not matrix:
         matrix = config.get('documents', [])
         if matrix:
-            warnings.warn(
-                "'documents' key in config is deprecated. 'matrix' should be used going forward.",
-                category=DeprecationWarning,
-                stacklevel=2
-            )
+            util.warn_deprecated("'documents' key in config is deprecated. 'matrix' should be used going forward.")
 
     for task in matrix:
 
@@ -444,16 +464,18 @@ def spellcheck(config_file, name='', binary='', verbose=0, checker=''):
 
         if checker == "hunspell":
             if hunspell is None:
-                hunspell = Hunspell(config, binary, verbose)
+                hunspell = Hunspell(config, binary, verbose, debug)
             spellchecker = hunspell
 
         elif checker == "aspell":
             if aspell is None:
-                aspell = Aspell(config, binary, verbose)
+                aspell = Aspell(config, binary, verbose, debug)
             spellchecker = aspell
         else:
             raise ValueError('%s is not a valid spellchecker!' % checker)
 
-        spellchecker.log('==> Using %s to spellcheck %s' % (checker, task.get('name', '')), 1)
-        yield from spellchecker.run_task(task)
+        spellchecker.log('Using %s to spellcheck %s' % (checker, task.get('name', '')), 1)
+        for result in spellchecker.run_task(task):
+            spellchecker.log('Context: %s' % result.context, 2)
+            yield result
         spellchecker.log("", 1)
