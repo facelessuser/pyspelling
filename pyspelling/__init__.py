@@ -125,7 +125,7 @@ class SpellChecker(object):
                 self.log('', 3)
                 self.log(text, 3)
                 cmd = self.setup_command(encoding, options, personal_dict)
-                self.log(str(cmd), 4)
+                self.log("Command: " + str(cmd), 4)
 
                 wordlist = util.call_spellchecker(cmd, input_text=text, encoding=encoding)
                 yield util.Results([w for w in sorted(set(wordlist.split('\n'))) if w], source.context, source.category)
@@ -142,7 +142,11 @@ class SpellChecker(object):
                 if not os.path.isdir(f):
                     self.log('', 2)
                     self.log('> Processing: %s' % f, 1)
-                    yield plugin._parse(f, self.debug)
+                    try:
+                        yield plugin._parse(f)
+                    except Exception as e:
+                        err = self.get_error(e)
+                        yield filters.SourceText('', source.context, '', '', err)
 
     def setup_spellchecker(self, task):
         """Setup spell checker."""
@@ -471,5 +475,7 @@ def spellcheck(config_file, name='', binary='', verbose=0, checker='', debug=Fal
             raise ValueError('%s is not a valid spellchecker!' % checker)
 
         spellchecker.log('Using %s to spellcheck %s' % (checker, task.get('name', '')), 1)
-        yield from spellchecker.run_task(task)
+        for result in spellchecker.run_task(task):
+            spellchecker.log('Context: %s' % result.context, 2)
+            yield result
         spellchecker.log("", 1)

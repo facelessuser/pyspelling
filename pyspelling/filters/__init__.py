@@ -56,7 +56,7 @@ class SourceText(namedtuple('SourceText', ['text', 'context', 'encoding', 'categ
         if RE_CATEGORY_NAME.match(category) is None and error is None:
             raise ValueError('Invalid category name in SourceText!')
 
-        return super(SourceText, cls).__new__(cls, text, context, encoding, category.lower(), error)
+        return super(SourceText, cls).__new__(cls, text, context, encoding, category, error)
 
     def _is_bytes(self):
         """Is bytes."""
@@ -157,7 +157,7 @@ class Filter(object):
 
         return encoding
 
-    def _parse(self, source_file, debug):
+    def _parse(self, source_file):
         """Parse the file."""
 
         self.current_encoding = self.default_encoding
@@ -167,24 +167,10 @@ class Filter(object):
             encoding = self._detect_encoding(source_file)
             content = self.filter(source_file, encoding)
         except UnicodeDecodeError as e:
-            error = str(e)
-            try:
-                if not encoding or encoding != self.default_encoding:
-                    error = None
-                    content = self.filter(source_file, self.default_encoding)
-            except Exception as e:
-                if debug:
-                    error = traceback.format_exc()
-                else:
-                    error = str(e)
-        except Exception as e:
-            import traceback
-            if debug:
-                error = traceback.format_exc()
+            if not encoding or encoding != self.default_encoding:
+                content = self.filter(source_file, self.default_encoding)
             else:
-                error = str(e)
-        if error:
-            content = [SourceText('', source_file, '', '', error)]
+                raise
         return content
 
     def _guess(self, filename):

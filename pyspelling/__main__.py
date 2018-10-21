@@ -42,8 +42,11 @@ def run(config, name='', binary='', verbose=0, spellchecker='', debug=False):
                 print(word)
             print('-' * 80)
             print('')
-        elif verbose >= 2:
-            print('CHECK: %s' % results.context)
+
+    if fail:
+        print('!!!Spelling check failed!!!')
+    else:
+        print('Spelling check passed :)')
 
     return fail
 
