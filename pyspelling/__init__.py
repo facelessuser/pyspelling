@@ -146,7 +146,7 @@ class SpellChecker(object):
                         yield plugin._parse(f)
                     except Exception as e:
                         err = self.get_error(e)
-                        yield filters.SourceText('', source.context, '', '', err)
+                        yield filters.SourceText('', f, '', '', err)
 
     def setup_spellchecker(self, task):
         """Setup spell checker."""

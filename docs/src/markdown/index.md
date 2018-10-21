@@ -82,4 +82,8 @@ You can specify the spell checker type by specifying it on the command line. PyS
 pyspelling -s hunspell
 ```
 
+## Windows Unicode Console
+
+If you are dealing with Unicode text, Windows often has difficulty showing it in the console. Using [Windows Unicode Console][win-unicode-console] to patch your Windows install can help. On Python 3.6+ it might not be needed at all.
+
 --8<-- "refs.txt"
