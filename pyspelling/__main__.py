@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 import sys
 import argparse
-from pyspelling import spellcheck, version
+from pyspelling import spellcheck, __version__
 
 
 def main():
@@ -10,7 +10,7 @@ def main():
 
     parser = argparse.ArgumentParser(prog='spellcheck', description='Spell checking tool.')
     # Flag arguments
-    parser.add_argument('--version', action='version', version=('%(prog)s ' + version))
+    parser.add_argument('--version', action='version', version=('%(prog)s ' + __version__))
     parser.add_argument('--debug', action='store_true', default=False, help=argparse.SUPPRESS)
     parser.add_argument('--verbose', '-v', action='count', default=0, help="Verbosity level.")
     parser.add_argument('--name', '-n', action='store', default='', help="Specific spelling task by name to run.")
