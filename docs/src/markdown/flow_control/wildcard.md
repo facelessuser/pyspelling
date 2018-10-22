@@ -38,23 +38,19 @@ matrix:
       delimiters:
       # Ignore lint (noqa) and coverage (pragma) as well as shebang (#!)
       - open: ^(?:(?:noqa|pragma)\b|!)
-        content: .*?
         close: $
       # Ignore Python encoding string -*- encoding stuff -*-
-      - open: ^-*-
-        content: .*?
-        close: -*-$
+      - open: ^ *-\*-
+        close: -\*-$
   - pyspelling.filters.context:
       context_visible_first: true
       escapes: \\[\\`~]
       delimiters:
       # Ignore text between inline back ticks
       - open: (?P<open>`+)
-        content: .*?
         close: (?P=open)
       # Ignore multiline content between fences ~~~ content ~~~
       - open: (?s)^(?P<open>\s*~{3,})
-        content: .*?
         close: ^(?P=open)$
 ```
 
