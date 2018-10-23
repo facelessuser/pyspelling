@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0b2
+
+- **FIX**: Fix CPP comment regular expression.
+
 ## 1.0.0b1
 
 - **NEW**: Better context for HTML elements. HTML is now returned by block level elements, and the elements selector is given as context. Attributes also return a selector as context and are returned individually. HTML comments are returned as individual hunks.

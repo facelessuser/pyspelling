@@ -7,13 +7,13 @@ import textwrap
 RE_COMMENT = re.compile(
     r'''(?x)
         (?P<comments>
-            (?P<block>/\*[^*]*\*+(?:[^/*][^*]*\*+)*/)                        # multi-line comments
-          | (?P<start>^)?(?P<leading_space>[ \t]*)?(?P<line>//(?:[^\r\n])*)  # single line comments
-        )
-      | (?P<code>
-            "(?:\\.|[^"\\])*"                                                # double quotes
-            '(?:\\.|[^'\\])*'                                                # single quotes
-          | .[^/"']*?                                                        # everything else
+            (?P<block>/\*[^*]*\*+(?:[^/*][^*]*\*+)*/) |                      # multi-line comments
+            (?P<start>^)?(?P<leading_space>[ \t]*)?(?P<line>//(?:[^\r\n])*)  # single line comments
+        ) |
+        (?P<code>
+            "(?:\\.|[^"\\])*" |                                              # double quotes
+            '(?:\\.|[^'\\])*' |                                              # single quotes
+            .[^/"']*?                                                        # everything else
         )
     ''',
     re.DOTALL | re.MULTILINE
