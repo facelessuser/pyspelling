@@ -6,11 +6,11 @@ RE_CSS_COMMENT = re.compile(
     r'''(?x)
         (?P<comments>
             (?P<block>/\*[^*]*\*+(?:[^/*][^*]*\*+)*/)                        # multi-line comments
-        )
-      | (?P<code>
-            "(?:\\.|[^"\\])*"                                                # double quotes
-            '(?:\\.|[^'\\])*'                                                # single quotes
-          | .[^/"']*?                                                        # everything else
+        ) |
+        (?P<code>
+            "(?:\\.|[^"\\])*" |                                              # double quotes
+            '(?:\\.|[^'\\])*' |                                              # single quotes
+            .[^/"']*?                                                        # everything else
         )
     ''',
     re.DOTALL | re.MULTILINE

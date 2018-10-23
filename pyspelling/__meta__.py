@@ -1,7 +1,7 @@
 """`PySpelling` package."""
 
 #   (major, minor, micro, release type, pre-release build, post-release build, development-release)
-version_info = (1, 0, 0, 'beta', 1, 0)
+version_info = (1, 0, 0, 'beta', 2, 0)
 
 
 def pep440_version(vi):
