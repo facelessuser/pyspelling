@@ -58,10 +58,10 @@ To specify a specific configuration other than the default, or even point to a d
 pyspelling -c myconfig.yml
 ```
 
-To run a specific spelling task in your configuration file by name:
+To run a specific spelling task in your configuration file by name, you can use the `name` option. You can even specify multiple names if desired:
 
 ```
-pyspelling -n my_task
+pyspelling -n my_task -n my_task2
 ```
 
 To run a more verbose output, use the `-v` flag. You can increase verbosity level by including more `v`s: `-vv`.  You can currently go up to four levels.

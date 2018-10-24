@@ -439,7 +439,7 @@ class Hunspell(SpellChecker):
         return cmd
 
 
-def spellcheck(config_file, name='', binary='', verbose=0, checker='', debug=False):
+def spellcheck(config_file, name=None, binary='', verbose=0, checker='', debug=False):
     """Spell check."""
 
     hunspell = None
@@ -454,9 +454,11 @@ def spellcheck(config_file, name='', binary='', verbose=0, checker='', debug=Fal
         if matrix:
             util.warn_deprecated("'documents' key in config is deprecated. 'matrix' should be used going forward.")
 
+    name = set() if name is None else set(name)
+
     for task in matrix:
 
-        if name and name != task.get('name', ''):
+        if name and task.get('name', '') not in name:
             continue
 
         if not checker:
