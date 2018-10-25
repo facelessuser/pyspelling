@@ -49,7 +49,7 @@ matrix:
       # ```
       # content
       # ```
-      - open: '(?s)^(?P<open>\s*`{3,})$'
+      - open: '(?s)^(?P<open> *`{3,})$'
         close: '^(?P=open)$'
       # Ignore text between inline back ticks
       - open: '(?P<open>`+)'
