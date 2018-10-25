@@ -45,12 +45,15 @@ matrix:
       context_visible_first: true
       escapes: \\[\\`~]
       delimiters:
-      - open: (?P<open>`+)
-        content: .*?
-        close: (?P=open)
-      - open: (?s)^(?P<open>\s*~{3,})
-        content: .*?
-        close: ^(?P=open)
+      # Ignore multiline content between fences (fences can have 3 or more back ticks)
+      # ```
+      # content
+      # ```
+      - open: '(?s)^(?P<open> *`{3,})$'
+        close: '^(?P=open)$'
+      # Ignore text between inline back ticks
+      - open: '(?P<open>`+)'
+        close: '(?P=open)'
 ```
 
 ### Name

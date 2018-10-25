@@ -164,7 +164,7 @@ class Filter(object):
         try:
             encoding = self._detect_encoding(source_file)
             content = self.filter(source_file, encoding)
-        except UnicodeDecodeError as e:
+        except UnicodeDecodeError:
             if not encoding or encoding != self.default_encoding:
                 content = self.filter(source_file, self.default_encoding)
             else:
