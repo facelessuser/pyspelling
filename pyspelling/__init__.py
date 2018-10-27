@@ -3,16 +3,13 @@ from __future__ import unicode_literals
 import os
 import importlib
 from . import util
-from . import __meta__
+from .__meta__ import __version__, __version_info__  # noqa: F401
 from . import settings
 from . import flow_control
 from . import filters
 from wcmatch import glob
 
-__version__ = __meta__.version
-__version_info__ = __meta__.version_info
-
-__all__ = ("__version__", "__version_info__", "spellcheck")
+__all__ = ("spellcheck",)
 
 
 class SpellChecker(object):

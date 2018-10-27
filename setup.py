@@ -11,20 +11,11 @@ import sys
 def get_version():
     """Get version and version_info without importing the entire module."""
 
-    devstatus = {
-        'alpha': '3 - Alpha',
-        'beta': '4 - Beta',
-        'candidate': '4 - Beta',
-        'final': '5 - Production/Stable'
-    }
     path = os.path.join(os.path.dirname(__file__), 'pyspelling')
     fp, pathname, desc = imp.find_module('__meta__', [path])
     try:
-        v = imp.load_module('__meta__', fp, pathname, desc)
-        if v.version_info[3].startswith('.dev-'):
-            return v.version, '2 - Pre-Alpha'
-        else:
-            return v.version, devstatus[v.version_info[3]]
+        meta = imp.load_module('__meta__', fp, pathname, desc)
+        return meta.__version__, meta.__version_info__._get_dev_status()
     finally:
         fp.close()
 
