@@ -49,6 +49,8 @@ mkdocs
 overridable
 parsers
 pre
+prerelease
+prereleases
 pycqa
 pymdown
 regex
