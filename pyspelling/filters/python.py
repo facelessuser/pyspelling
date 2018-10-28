@@ -32,7 +32,6 @@ class PythonFilter(filters.Filter):
 
         self.comments = options.get('comments', True) is True
         self.docstrings = options.get('docstrings', True) is True
-        self.bytes = options.get('bytes', False) is True
         self.group_comments = options.get('group_comments', False) is True
         super(PythonFilter, self).__init__(options, default_encoding)
 

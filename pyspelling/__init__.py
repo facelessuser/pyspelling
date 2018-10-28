@@ -166,7 +166,8 @@ class SpellChecker(object):
         steps = task.get('pipeline', [])
         if not steps:
             steps = task.get('filters', [])
-            util.warn_deprecated("'filters' key in config is deprecated. 'pipeline' should be used going forward.")
+            if steps:
+                util.warn_deprecated("'filters' key in config is deprecated. 'pipeline' should be used going forward.")
 
         if not steps:
             steps.append('pyspelling.filters.text')

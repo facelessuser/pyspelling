@@ -5,7 +5,7 @@ SKIP = 1
 HALT = 2
 
 
-class FlowControl:
+class FlowControl(object):
     """Control flow of objects in the pipeline."""
 
     def __init__(self, config):

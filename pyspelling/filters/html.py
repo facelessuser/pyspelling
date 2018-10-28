@@ -8,8 +8,8 @@ from .. import filters
 import re
 import codecs
 import bs4
+import html
 from collections import namedtuple
-from html.parser import HTMLParser
 
 RE_XML_START = re.compile(
     b'^(?:(' +
@@ -62,7 +62,6 @@ class HtmlFilter(filters.Filter):
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
-        self.html_parser = HTMLParser()
         self.comments = options.get('comments', True) is True
         self.attributes = set(options.get('attributes', []))
         self.selectors = self.process_selectors(*options.get('ignores', []))
@@ -279,7 +278,7 @@ class HtmlFilter(filters.Filter):
             if self.comments:
                 string = str(tree).strip()
                 if string:
-                    comments.append(self.html_parser.unescape(string))
+                    comments.append(html.unescape(string))
         elif root or not self.skip_tag(tree):
             # Check attributes for normal tags
             if not root:
@@ -287,17 +286,16 @@ class HtmlFilter(filters.Filter):
                     value = tree.attrs.get(attr, '').strip()
                     if value:
                         sel = self.construct_selector(tree, attr=attr)
-                        attributes.append((self.html_parser.unescape(value), sel))
+                        attributes.append((html.unescape(value), sel))
 
             # Walk children
             for child in tree:
                 if isinstance(child, bs4.element.Tag):
-                    if child.contents:
-                        t, b, a, c = (self.html_to_text(child))
-                        text.extend(t)
-                        attributes.extend(a)
-                        comments.extend(c)
-                        blocks.extend(b)
+                    t, b, a, c = (self.html_to_text(child))
+                    text.extend(t)
+                    attributes.extend(a)
+                    comments.extend(c)
+                    blocks.extend(b)
                 # Get content if not the root and not a comment (unless we want comments).
                 elif not root and (not isinstance(child, bs4.Comment) or self.comments):
                     string = str(child).strip()
@@ -306,17 +304,13 @@ class HtmlFilter(filters.Filter):
                         text.append(' ')
 
         if root or self.is_block(tree):
-            content = self.html_parser.unescape(''.join(text))
+            content = html.unescape(''.join(text))
             if content:
                 blocks.append((content, self.construct_selector(tree)))
             text = []
 
         if root:
-            return (
-                blocks,
-                attributes,
-                comments
-            )
+            return blocks, attributes, comments
         else:
             return text, blocks, attributes, comments
 
