@@ -350,7 +350,7 @@ class Aspell(SpellChecker):
         return cmd
 
 
-class Hunspell(SpellChecker):
+class Hunspell(SpellChecker):  # pragma: no cover
     """Hunspell spell check class."""
 
     def __init__(self, config, binary='', verbose=0, debug=False):
@@ -461,7 +461,7 @@ def spellcheck(config_file, name=None, binary='', verbose=0, checker='', debug=F
         if not checker:
             checker = preferred_checker
 
-        if checker == "hunspell":
+        if checker == "hunspell":  # pragma: no cover
             if hunspell is None:
                 hunspell = Hunspell(config, binary, verbose, debug)
             spellchecker = hunspell
