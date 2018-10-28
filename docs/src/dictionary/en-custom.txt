@@ -1,4 +1,5 @@
 API
+Accessors
 BOM
 BOMs
 BeatifulSoup
@@ -24,6 +25,7 @@ Stylesheets
 Tox
 UTF
 YAML
+accessor
 backticks
 blockish
 bool
@@ -63,6 +65,7 @@ subclassing
 sublicense
 substring
 syntaxes
+tuple
 whitespace
 wildcard
 wordlist

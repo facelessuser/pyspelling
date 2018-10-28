@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0
+
+- **NEW**: Allow multiple names on command line via: `pyspelling -n name1 -n name2`.
+
 ## 1.0.0b2
 
 - **FIX**: Fix CPP comment regular expression.
