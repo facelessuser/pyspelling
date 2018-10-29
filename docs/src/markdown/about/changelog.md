@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0
+
+- **NEW**: Allow multiple names on command line via: `pyspelling -n name1 -n name2`.
+- **FIX**: Fix empty HTML tags not properly having their attributes evaluated.
+- **FIX**: Fix case where a deprecation warning for `filters` is shown when it shouldn't.
+- **FIX**: Better docstring recognition in Python filter.
+- **FIX**: Catch comments outside of the `<HTML>` tag.
+- **FIX**: Filter out `Doctype`, `CData`, and other XML or non-content type information.
+
 ## 1.0.0b2
 
 - **FIX**: Fix CPP comment regular expression.

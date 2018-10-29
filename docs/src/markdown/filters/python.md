@@ -21,11 +21,8 @@ matrix:
 
 Options          | Type     | Default       | Description
 ---------------- | -------- | ------------- | -----------
-`disallow`       | [string] | `#!py3 []`    | `SourceText` names to avoid processing.
 `comments`       | bool     | `#!py3 True`  | Return `SourceText` entries for each comment.
 `docstrings`     | bool     | `#!py3 True`  | Return `SourceText` entries for each docstrings.
-`strings`        | bool     | `#!py3 False` | Return `SourceText` entries for each string.
-`bytes`          | bool     | `#!py3 False` | Return `SourceText` entries for each byte string. Only ASCII content will be included, and encoding will be returned as ASCII.
 `group_comments` | bool     | `#!py3 False` | Group consecutive Python comments as one `SourceText` entry.
 
 ## Categories

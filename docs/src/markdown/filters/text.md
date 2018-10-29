@@ -21,7 +21,6 @@ matrix:
 
 Options               | Type          | Default          | Description
 --------------------- | ------------- | ---------------- | -----------
-`disallow`            | [string]      | `#!py3 []`       | `SourceText` names to avoid processing.
 `normalize`           | string        | `#!py3 ''`       | Performs Unicode normalization. Valid values are `NFC`, `NFD`, `NFKC`, and `NFKD`.
 `convert_encoding`    | string        | `#!py3 ''`       | Assuming a valid encoding, the text will be converted to the specified encoding.
 `errors`              | string        | `#!py3 'strict'` | Specifies what to do when converting the encoding, and a character can't be converted. Valid values are `strict`, `ignore`, `replace`, `xmlcharrefreplace`, `backslashreplace`, and `namereplace`.

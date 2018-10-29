@@ -32,7 +32,6 @@ class PythonFilter(filters.Filter):
 
         self.comments = options.get('comments', True) is True
         self.docstrings = options.get('docstrings', True) is True
-        self.bytes = options.get('bytes', False) is True
         self.group_comments = options.get('group_comments', False) is True
         super(PythonFilter, self).__init__(options, default_encoding)
 
@@ -65,6 +64,7 @@ class PythonFilter(filters.Filter):
         indent = ''
         name = None
         stack = [(context, 0, self.MODULE)]
+        last_comment = False
 
         src = io.StringIO(text)
 
@@ -96,7 +96,7 @@ class PythonFilter(filters.Filter):
                 # Capture comments
                 if (
                     self.group_comments and
-                    prev_token_type == tokenize.NL and
+                    last_comment and
                     comments and (comments[-1][2] + 1) == line_num
                 ):
                     # Group multiple consecutive comments
@@ -111,7 +111,7 @@ class PythonFilter(filters.Filter):
             if token_type == tokenize.STRING:
                 # Capture docstrings.
                 # If we captured an `INDENT` or `NEWLINE` previously we probably have a docstring.
-                # `NL` seems to be a different thing.
+                # `NL` means end of line, but not the end of the Python code line (line continuation).
                 if prev_token_type in PREV_DOC_TOKENS:
                     if self.docstrings:
                         value = value.strip()
@@ -131,7 +131,15 @@ class PythonFilter(filters.Filter):
                 if len(stack) > 1 and len(indent) <= stack[-1][1]:
                     stack.pop()
 
-            prev_token_type = token_type
+            # We purposefully avoid storing comments as comments can come before docstrings,
+            # and that can mess up our logic. So if the token is a comment we won't track it,
+            # and comments are always followed with `NL` so we ignore that as well.
+            # We only care that docstrings are preceded by `NEWLINE`.
+            if token_type != tokenize.COMMENT and not (last_comment and token_type == tokenize.NL):
+                prev_token_type = token_type
+                last_comment = False
+            else:
+                last_comment = True
 
         final_comments = []
         for comment in comments:

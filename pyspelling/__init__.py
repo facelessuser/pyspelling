@@ -166,7 +166,8 @@ class SpellChecker(object):
         steps = task.get('pipeline', [])
         if not steps:
             steps = task.get('filters', [])
-            util.warn_deprecated("'filters' key in config is deprecated. 'pipeline' should be used going forward.")
+            if steps:
+                util.warn_deprecated("'filters' key in config is deprecated. 'pipeline' should be used going forward.")
 
         if not steps:
             steps.append('pyspelling.filters.text')
@@ -350,7 +351,7 @@ class Aspell(SpellChecker):
         return cmd
 
 
-class Hunspell(SpellChecker):
+class Hunspell(SpellChecker):  # pragma: no cover
     """Hunspell spell check class."""
 
     def __init__(self, config, binary='', verbose=0, debug=False):
@@ -461,7 +462,7 @@ def spellcheck(config_file, name=None, binary='', verbose=0, checker='', debug=F
         if not checker:
             checker = preferred_checker
 
-        if checker == "hunspell":
+        if checker == "hunspell":  # pragma: no cover
             if hunspell is None:
                 hunspell = Hunspell(config, binary, verbose, debug)
             spellchecker = hunspell

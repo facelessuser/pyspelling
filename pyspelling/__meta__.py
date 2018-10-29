@@ -1,6 +1,16 @@
 """Meta related things."""
 from __future__ import unicode_literals
 from collections import namedtuple
+import re
+
+RE_VER = re.compile(
+    r'''(?x)
+    (?P<major>\d+)(?:\.(?P<minor>\d+))?(?:\.(?P<micro>\d+))?
+    (?:(?P<type>a|b|rc)(?P<pre>\d+))?
+    (?:\.post(?P<post>\d+))?
+    (?:\.dev(?P<dev>\d+))?
+    '''
+)
 
 REL_MAP = {
     ".dev": "",
@@ -24,16 +34,22 @@ DEV_STATUS = {
     "final": "5 - Production/Stable"
 }
 
+PRE_REL_MAP = {"a": 'alpha', "b": 'beta', "rc": 'candidate'}
+
 
 class Pep440Version(namedtuple("Pep440Version", ["major", "minor", "micro", "release", "pre", "post", "dev"])):
     """
     Get the version (PEP 440).
 
-    Some additional rules are imposed on how we create our versions.
+    A biased approach to the PEP 440 semantic version.
 
-    Version structure which is sorted for comparisons `v1 > v2` etc.
-      (major, minor, micro, release type, pre-release build, post-release build)
-    Release types are named is such a way they are comparable with ease.
+    Provides a tuple structure which is sorted for comparisons `v1 > v2` etc.
+      (major, minor, micro, release type, pre-release build, post-release build, development release build)
+    Release types are named in is such a way they are comparable with ease.
+    Accessors to check if a development, pre-release, or post-release build. Also provides accessor to get
+    development status for setup files.
+
+    How it works (currently):
 
     - You must specify a release type as either `final`, `alpha`, `beta`, or `candidate`.
     - To define a development release, you can use either `.dev`, `.dev-alpha`, `.dev-beta`, or `.dev-candidate`.
@@ -42,7 +58,7 @@ class Pep440Version(namedtuple("Pep440Version", ["major", "minor", "micro", "rel
       are allowed.
     - You must specify a `pre` value greater than zero if using a prerelease as this project (not PEP 440) does not
       allow implicit prereleases.
-    - You can optionally set `post` to value greater zero to make the build a post release. While post releases
+    - You can optionally set `post` to a value greater than zero to make the build a post release. While post releases
       are technically allowed in prereleases, it is strongly discouraged, so we are rejecting them. It should be
       noted that we do not allow `post0` even though PEP 440 does not restrict this. This project specifically
       does not allow implicit post releases.
@@ -64,7 +80,7 @@ class Pep440Version(namedtuple("Pep440Version", ["major", "minor", "micro", "rel
 
     """
 
-    def __new__(cls, major, minor, micro, release, pre=0, post=0, dev=0):  # pragma: no cover
+    def __new__(cls, major, minor, micro, release="final", pre=0, post=0, dev=0):
         """Validate version info."""
 
         # Ensure all parts are positive integers.
@@ -120,7 +136,7 @@ class Pep440Version(namedtuple("Pep440Version", ["major", "minor", "micro", "rel
 
         return DEV_STATUS[self.release]
 
-    def _get_canonical(self):  # pragma: no cover
+    def _get_canonical(self):
         """Get the canonical output string."""
 
         # Assemble major, minor, micro version and append `pre`, `post`, or `dev` if needed..
@@ -138,25 +154,37 @@ class Pep440Version(namedtuple("Pep440Version", ["major", "minor", "micro", "rel
         return ver
 
 
-__version_info__ = Pep440Version(1, 0, 0, "beta", 2)
+def parse_version(ver, pre=False):
+    """Parse version into a comparable Pep440Version tuple."""
+
+    m = RE_VER.match(ver)
+
+    # Handle major, minor, micro
+    major = int(m.group('major'))
+    minor = int(m.group('minor')) if m.group('minor') else 0
+    micro = int(m.group('micro')) if m.group('micro') else 0
+
+    # Handle pre releases
+    if m.group('type'):
+        release = PRE_REL_MAP[m.group('type')]
+        pre = int(m.group('pre'))
+    else:
+        release = "final"
+        pre = 0
+
+    # Handle development releases
+    dev = m.group('dev') if m.group('dev') else 0
+    if m.group('dev'):
+        dev = int(m.group('dev'))
+        release = '.dev-' + release if pre else '.dev'
+    else:
+        dev = 0
+
+    # Handle post
+    post = int(m.group('post')) if m.group('post') else 0
+
+    return Pep440Version(major, minor, micro, release, pre, post, dev)
+
+
+__version_info__ = Pep440Version(1, 0, 0, "final")
 __version__ = __version_info__._get_canonical()
-
-
-if __name__ == "__main__":  # pragma: no cover
-    assert Pep440Version(1, 0, 0, "final")._get_canonical() == "1.0"
-    assert Pep440Version(1, 2, 0, "final")._get_canonical() == "1.2"
-    assert Pep440Version(1, 2, 3, "final")._get_canonical() == "1.2.3"
-    assert Pep440Version(1, 2, 0, "alpha", pre=4)._get_canonical() == "1.2a4"
-    assert Pep440Version(1, 2, 0, "beta", pre=4)._get_canonical() == "1.2b4"
-    assert Pep440Version(1, 2, 0, "candidate", pre=4)._get_canonical() == "1.2rc4"
-    assert Pep440Version(1, 2, 0, "final", post=1)._get_canonical() == "1.2.post1"
-    assert Pep440Version(1, 2, 3, ".dev-alpha", pre=1)._get_canonical() == "1.2.3a1.dev0"
-    assert Pep440Version(1, 2, 3, ".dev")._get_canonical() == "1.2.3.dev0"
-    assert Pep440Version(1, 2, 3, ".dev", dev=1)._get_canonical() == "1.2.3.dev1"
-
-    assert Pep440Version(1, 0, 0, "final") < Pep440Version(1, 2, 0, "final")
-    assert Pep440Version(1, 2, 0, "alpha", pre=4) < Pep440Version(1, 2, 0, "final")
-    assert Pep440Version(1, 2, 0, "final") < Pep440Version(1, 2, 0, "final", post=1)
-    assert Pep440Version(1, 2, 3, ".dev-beta", pre=2) < Pep440Version(1, 2, 3, "beta", pre=2)
-    assert Pep440Version(1, 2, 3, ".dev") < Pep440Version(1, 2, 3, ".dev-beta", pre=2)
-    assert Pep440Version(1, 2, 3, ".dev") < Pep440Version(1, 2, 3, ".dev", dev=1)

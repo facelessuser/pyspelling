@@ -8,8 +8,10 @@ from .. import filters
 import re
 import codecs
 import bs4
+import html
 from collections import namedtuple
-from html.parser import HTMLParser
+
+NON_CONTENT = (bs4.Doctype, bs4.Declaration, bs4.CData, bs4.ProcessingInstruction)
 
 RE_XML_START = re.compile(
     b'^(?:(' +
@@ -62,7 +64,6 @@ class HtmlFilter(filters.Filter):
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
-        self.html_parser = HTMLParser()
         self.comments = options.get('comments', True) is True
         self.attributes = set(options.get('attributes', []))
         self.selectors = self.process_selectors(*options.get('ignores', []))
@@ -275,11 +276,13 @@ class HtmlFilter(filters.Filter):
         root = tree.name == '[document]'
 
         # Handle comments
-        if isinstance(tree, bs4.Comment):
+        # TODO: This might not be needed as comment objects may never get fed in this way.
+        if isinstance(tree, bs4.Comment):  # pragma: no cover
             if self.comments:
                 string = str(tree).strip()
                 if string:
-                    comments.append(self.html_parser.unescape(string))
+                    sel = self.construct_selector(tree) + '<!--comment-->'
+                    comments.append((html.unescape(string), sel))
         elif root or not self.skip_tag(tree):
             # Check attributes for normal tags
             if not root:
@@ -287,36 +290,36 @@ class HtmlFilter(filters.Filter):
                     value = tree.attrs.get(attr, '').strip()
                     if value:
                         sel = self.construct_selector(tree, attr=attr)
-                        attributes.append((self.html_parser.unescape(value), sel))
+                        attributes.append((html.unescape(value), sel))
 
             # Walk children
             for child in tree:
+                is_comment = isinstance(child, bs4.Comment)
                 if isinstance(child, bs4.element.Tag):
-                    if child.contents:
-                        t, b, a, c = (self.html_to_text(child))
-                        text.extend(t)
-                        attributes.extend(a)
-                        comments.extend(c)
-                        blocks.extend(b)
+                    t, b, a, c = (self.html_to_text(child))
+                    text.extend(t)
+                    attributes.extend(a)
+                    comments.extend(c)
+                    blocks.extend(b)
                 # Get content if not the root and not a comment (unless we want comments).
-                elif not root and (not isinstance(child, bs4.Comment) or self.comments):
+                elif not isinstance(child, NON_CONTENT) and (not is_comment or self.comments):
                     string = str(child).strip()
                     if string:
-                        text.append(string)
-                        text.append(' ')
+                        if is_comment:
+                            sel = self.construct_selector(tree) + '<!--comment-->'
+                            comments.append((html.unescape(string), sel))
+                        else:
+                            text.append(string)
+                            text.append(' ')
 
         if root or self.is_block(tree):
-            content = self.html_parser.unescape(''.join(text))
+            content = html.unescape(''.join(text))
             if content:
                 blocks.append((content, self.construct_selector(tree)))
             text = []
 
         if root:
-            return (
-                blocks,
-                attributes,
-                comments
-            )
+            return blocks, attributes, comments
         else:
             return text, blocks, attributes, comments
 
@@ -326,8 +329,8 @@ class HtmlFilter(filters.Filter):
         content = []
         blocks, attributes, comments = self.html_to_text(bs4.BeautifulSoup(text, "html5lib"))
         if self.comments:
-            for c in comments:
-                content.append(filters.SourceText(c, context + ': <!-- comment -->', encoding, 'html-comment'))
+            for c, desc in comments:
+                content.append(filters.SourceText(c, context + ': ' + desc, encoding, 'html-comment'))
         if self.attributes:
             for a, desc in attributes:
                 content.append(filters.SourceText(a, context + ': ' + desc, encoding, 'html-attribute'))
