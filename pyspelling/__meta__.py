@@ -37,7 +37,7 @@ DEV_STATUS = {
 PRE_REL_MAP = {"a": 'alpha', "b": 'beta', "rc": 'candidate'}
 
 
-class Pep440Version(namedtuple("Pep440Version", ["major", "minor", "micro", "release", "pre", "post", "dev"])):
+class Version(namedtuple("Version", ["major", "minor", "micro", "release", "pre", "post", "dev"])):
     """
     Get the version (PEP 440).
 
@@ -67,15 +67,15 @@ class Pep440Version(namedtuple("Pep440Version", ["major", "minor", "micro", "rel
     Acceptable version releases:
 
     ```
-    Pep440Version(1, 0, 0, "final")                    1.0
-    Pep440Version(1, 2, 0, "final")                    1.2
-    Pep440Version(1, 2, 3, "final")                    1.2.3
-    Pep440Version(1, 2, 0, ".dev-alpha", pre=4)        1.2a4
-    Pep440Version(1, 2, 0, ".dev-beta", pre=4)         1.2b4
-    Pep440Version(1, 2, 0, ".dev-candidate", pre=4)    1.2rc4
-    Pep440Version(1, 2, 0, "final", post=1)            1.2.post1
-    Pep440Version(1, 2, 3, ".dev")                     1.2.3.dev0
-    Pep440Version(1, 2, 3, ".dev", dev=1)              1.2.3.dev1
+    Version(1, 0, 0, "final")                    1.0
+    Version(1, 2, 0, "final")                    1.2
+    Version(1, 2, 3, "final")                    1.2.3
+    Version(1, 2, 0, ".dev-alpha", pre=4)        1.2a4
+    Version(1, 2, 0, ".dev-beta", pre=4)         1.2b4
+    Version(1, 2, 0, ".dev-candidate", pre=4)    1.2rc4
+    Version(1, 2, 0, "final", post=1)            1.2.post1
+    Version(1, 2, 3, ".dev")                     1.2.3.dev0
+    Version(1, 2, 3, ".dev", dev=1)              1.2.3.dev1
     ```
 
     """
@@ -114,7 +114,7 @@ class Pep440Version(namedtuple("Pep440Version", ["major", "minor", "micro", "rel
             elif dev:
                 raise ValueError("Version is not a development release.")
 
-        return super(Pep440Version, cls).__new__(cls, major, minor, micro, release, pre, post, dev)
+        return super(Version, cls).__new__(cls, major, minor, micro, release, pre, post, dev)
 
     def _is_pre(self):
         """Is prerelease."""
@@ -155,7 +155,7 @@ class Pep440Version(namedtuple("Pep440Version", ["major", "minor", "micro", "rel
 
 
 def parse_version(ver, pre=False):
-    """Parse version into a comparable Pep440Version tuple."""
+    """Parse version into a comparable Version tuple."""
 
     m = RE_VER.match(ver)
 
@@ -183,8 +183,8 @@ def parse_version(ver, pre=False):
     # Handle post
     post = int(m.group('post')) if m.group('post') else 0
 
-    return Pep440Version(major, minor, micro, release, pre, post, dev)
+    return Version(major, minor, micro, release, pre, post, dev)
 
 
-__version_info__ = Pep440Version(1, 0, 0, "final")
+__version_info__ = Version(1, 0, 0, "final")
 __version__ = __version_info__._get_canonical()
