@@ -1,6 +1,6 @@
 [![Unix Build Status][travis-image]][travis-link]
 [![Requirements Status][requires-image]][requires-link]
-[![pypi-version][pypi-image]][pypi-link]
+[![PyPI Version][pypi-image]][pypi-link]
 ![License][license-image-mit]
 
 # PySpelling

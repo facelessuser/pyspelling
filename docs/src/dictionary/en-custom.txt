@@ -17,6 +17,7 @@ MkDocs
 NONINFRINGEMENT
 Parsers
 PyMdown
+PyPI
 PySpelling
 PySpelling's
 PyYaml's

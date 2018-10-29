@@ -5,6 +5,7 @@
 - **NEW**: Allow multiple names on command line via: `pyspelling -n name1 -n name2`.
 - **FIX**: Fix empty HTML tags not properly having their attributes evaluated.
 - **FIX**: Fix case where a deprecation warning for `filters` is shown when it shouldn't.
+- **FIX**: Better docstring recognition in Python filter.
 
 ## 1.0.0b2
 

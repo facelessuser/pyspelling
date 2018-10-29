@@ -46,7 +46,6 @@ class TestWildcard(util.PluginTestCase):
                     close: '(?P=open)'
             """
         ).format(self.tempdir)
-        print(config)
         self.mktemp('.wildcard.yml', config, 'utf-8')
 
     def test_wildcard(self):
@@ -72,4 +71,4 @@ class TestWildcard(util.PluginTestCase):
         )
         self.mktemp('test.txt', template, 'utf-8')
         words = self.spellcheck('.wildcard.yml')
-        # self.assertEqual(sorted(bad_words), words)
+        self.assertEqual(sorted(bad_words), words)
