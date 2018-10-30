@@ -171,9 +171,6 @@ class SpellChecker(object):
 
         return None
 
-    def direct_check(self, file_name):
-        """Handle direct files."""
-
     def _build_pipeline(self, task):
         """Build up the pipeline."""
 
