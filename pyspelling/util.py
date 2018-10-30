@@ -78,16 +78,16 @@ def get_process_output(process, encoding=None):
     output = process.communicate()
     returncode = process.returncode
 
-    if encoding is None:
+    if not encoding:
         try:
             encoding = sys.stdout.encoding
         except Exception:
             encoding = locale.getpreferredencoding()
 
     if returncode != 0:
-        raise RuntimeError("Runtime Error: %s" % (output[0].rstrip().decode(encoding)))
+        raise RuntimeError("Runtime Error: %s" % (output[0].rstrip().decode(encoding, errors='replace')))
 
-    return output[0].decode(encoding)
+    return output[0].decode(encoding, errors='replace')
 
 
 def call(cmd, input_file=None, input_text=None, encoding=None):
@@ -104,7 +104,7 @@ def call(cmd, input_file=None, input_text=None, encoding=None):
     return get_process_output(process, encoding)
 
 
-def call_spellchecker(cmd, input_text, encoding=None):
+def call_spellchecker(cmd, input_text=None, encoding=None):
     """Call spell checker with arguments."""
 
     process = get_process(cmd)
