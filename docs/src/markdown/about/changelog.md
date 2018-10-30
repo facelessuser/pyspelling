@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.0
+
+- **NEW**: Add URL/email address filter. (#30)
+- **NEW**: If `pipeline` configuration key is set to `null`, do not use any filters, and send the filename, not the content, to the spell checker.
+- **NEW**: Add `encoding` option to `dictionary` configuration for the purpose of communicating what encoding the main dictionary is when compiling wordlists (only Aspell takes advantage of this).
+- **FIX**: Fix Hunspell `-O` option which was mistakenly `-o`. (#31)
+
 ## 1.0.0
 
 - **NEW**: Allow multiple names on command line via: `pyspelling -n name1 -n name2`.

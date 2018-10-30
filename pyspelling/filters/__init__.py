@@ -192,7 +192,6 @@ class Filter(object):
                 raise UnicodeDecodeError('Unicode detection is not applied to very large files!')
         except Exception:  # pragma: no cover
             raise UnicodeDecodeError('Cannot resolve encoding!')
-            pass
 
         return encoding
 

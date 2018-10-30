@@ -130,6 +130,21 @@ matrix:
 
 If needed, you can also insert flow control steps before certain filter steps. Each text chunk that is passed between filters has a category assigned to it from the previous filter. Flow control steps allow you to restrict the next filter to specific categories, or exclude specific categories from the next step. This is covered in more depth in [Flow Control](./pipeline.md#flow-control).
 
+If for some reason you need to send the file directly to the spell checker without using PySpelling's pipeline, simply set `pipeline` to `null`. This sends the file name to the filename to the spell checker instead of piping the content to it.
+
+Below is an example where we send an OpenOffice ODF file directly to Hunspell in order to use Hunspell's `-O` option to parse the ODF file (piping the data to Hunspell will not properly work with `-O` option). Keep in mind that when doing this, no encoding is sent to the spell checker unless you define `default_encoding`. If `default_encoding` is not defined, PySpelling will decode the returned content with the terminal's encoding (or what it thinks the terminal's encoding is).
+
+```
+matrix:
+- name: openoffice_ODF
+  sources:
+  - file.odt
+  hunspell:
+    d: en_US
+    O: true
+  pipeline: null
+```
+
 ### Dictionaries and Personal Wordlists
 
 By default, PySpelling sets your main dictionary to `en` for Aspell and `en_US` for Hunspell. If you do not desire an American English dictionary, or these dictionaries are not installed in their expected default locations, you will need to configure PySpelling so it can find your preferred dictionary. Since dictionary configuring varies for each spell checker, the main dictionary is configuration (and virtually any spell checker specific option) is performed via [Spell Checker Options](#spell-checker-options).
@@ -152,7 +167,11 @@ matrix:
     d: en_US
 ```
 
-While the dictionaries cover a number of commonly used words, they are usually not sufficient. Luckily, both Aspell and Hunspell allow for adding custom wordlists. You can have as many wordlists as you like, and they can be included in a list under the key `wordlists` which is also found under the key `dictionary`. While Hunspell doesn't directly compile the wordlists, Aspell does, and it uses the main dictionary that you have specified to accomplish this. All the wordlists are combined into one custom dictionary file whose output name and location is defined via the `output` key which is also found under the `dictionary` key.
+While the dictionaries cover a number of commonly used words, they are usually not sufficient. Luckily, both Aspell and Hunspell allow for adding custom wordlists. You can have as many wordlists as you like, and they can be included in a list under the key `wordlists` which is also found under the key `dictionary`. While Hunspell doesn't directly compile the wordlists, Aspell does, and it uses the main dictionary that you have specified to accomplish this.
+
+All the wordlists are combined into one custom dictionary file whose output name and location is defined via the `output` key which is also found under the `dictionary` key.
+
+Lastly, you can set the encoding to be used during compilation via the `encoding` under `dictionary`. The encoding should generally match the encoding of your main dictionary. The default encoding is `utf-8`, and only Aspell uses this option.
 
 ```yaml
 matrix:
@@ -165,6 +184,7 @@ matrix:
     wordlists:
     - docs/src/dictionary/en-custom.txt
     output: build/dictionary/python.dic
+    encoding: utf-8
   pipeline:
   - pyspelling.filters.python:
       comments: false

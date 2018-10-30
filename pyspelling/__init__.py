@@ -8,6 +8,7 @@ from . import settings
 from . import flow_control
 from . import filters
 from wcmatch import glob
+import codecs
 
 __all__ = ("spellcheck",)
 
@@ -59,7 +60,7 @@ class SpellChecker(object):
 
         return traceback.format_exc() if self.debug else str(e)
 
-    def setup_command(self, encoding, options, personal_dict):
+    def setup_command(self, encoding, options, personal_dict, file_name=None):
         """Setup the command."""
 
         return []
@@ -130,7 +131,7 @@ class SpellChecker(object):
     def compile_dictionary(self, lang, wordlists, output):
         """Compile user dictionary."""
 
-    def _walk_src(self, targets, flags, plugin):
+    def _walk_src(self, targets, flags, pipeline):
         """Walk source and parse files."""
 
         for target in targets:
@@ -139,11 +140,14 @@ class SpellChecker(object):
                 if not os.path.isdir(f):
                     self.log('', 2)
                     self.log('> Processing: %s' % f, 1)
-                    try:
-                        yield plugin._parse(f)
-                    except Exception as e:
-                        err = self.get_error(e)
-                        yield filters.SourceText('', f, '', '', err)
+                    if pipeline:
+                        try:
+                            yield pipeline[0]._parse(f)
+                        except Exception as e:
+                            err = self.get_error(e)
+                            yield filters.SourceText('', f, '', '', err)
+                    else:
+                        yield filters.SourceText('', f, '', 'file')
 
     def setup_spellchecker(self, task):
         """Setup spell checker."""
@@ -164,33 +168,39 @@ class SpellChecker(object):
             kwargs["default_encoding"] = default_encoding
 
         steps = task.get('pipeline', [])
-        if not steps:
-            steps = task.get('filters', [])
-            if steps:
-                util.warn_deprecated("'filters' key in config is deprecated. 'pipeline' should be used going forward.")
+        if steps is None:
+            self.pipeline_steps = None
+        else:
+            if not steps:
+                steps = task.get('filters', [])
+                if steps:
+                    util.warn_deprecated(
+                        "'filters' key in config is deprecated. 'pipeline' should be used going forward."
+                    )
 
-        if not steps:
-            steps.append('pyspelling.filters.text')
-        for step in steps:
-            # Retrieve module and module options
-            if isinstance(step, dict):
-                name, options = list(step.items())[0]
-            else:
-                name = step
-                options = {}
-            if options is None:
-                options = {}
+            if not steps:
+                steps.append('pyspelling.filters.text')
 
-            module = self._get_module(name)
-            if issubclass(module, filters.Filter):
-                self.pipeline_steps.append(module(options, **kwargs))
-            elif issubclass(module, flow_control.FlowControl):
-                if self.pipeline_steps:
-                    self.pipeline_steps.append(module(options))
+            for step in steps:
+                # Retrieve module and module options
+                if isinstance(step, dict):
+                    name, options = list(step.items())[0]
                 else:
-                    raise ValueError("Pipeline cannot start with a 'Flow Control' plugin!")
-            else:
-                raise ValueError("'%s' is not a valid plugin!" % name)
+                    name = step
+                    options = {}
+                if options is None:
+                    options = {}
+
+                module = self._get_module(name)
+                if issubclass(module, filters.Filter):
+                    self.pipeline_steps.append(module(options, **kwargs))
+                elif issubclass(module, flow_control.FlowControl):
+                    if self.pipeline_steps:
+                        self.pipeline_steps.append(module(options))
+                    else:
+                        raise ValueError("Pipeline cannot start with a 'Flow Control' plugin!")
+                else:
+                    raise ValueError("'%s' is not a valid plugin!" % name)
 
     def _get_module(self, module):
         """Get module."""
@@ -230,8 +240,18 @@ class SpellChecker(object):
         glob_flags = self._to_flags(task.get('glob_flags', "N|B|G"))
         self._build_pipeline(task, encoding)
 
-        for sources in self._walk_src(task.get('sources', []), glob_flags, self.pipeline_steps[0]):
-            yield from self._spelling_pipeline(sources, options, output)
+        for sources in self._walk_src(task.get('sources', []), glob_flags, self.pipeline_steps):
+            if self.pipeline_steps is not None:
+                yield from self._spelling_pipeline(sources, options, output)
+            else:
+                if encoding:
+                    encoding = filters.PYTHON_ENCODING_NAMES.get(encoding, encoding).lower()
+                    encoding = codecs.lookup(encoding).name
+                cmd = self.setup_command(encoding, options, output, sources.context)
+                wordlist = util.call_spellchecker(cmd, input_text=None, encoding=encoding)
+                yield util.Results(
+                    [w for w in sorted(set(wordlist.split('\n'))) if w], sources.context, sources.category
+                )
 
 
 class Aspell(SpellChecker):
@@ -257,18 +277,23 @@ class Aspell(SpellChecker):
         lang = aspell_options.get('lang', aspell_options.get('l', 'en'))
         wordlists = dictionary_options.get('wordlists', [])
         if lang and wordlists:
-            self.compile_dictionary(lang, dictionary_options.get('wordlists', []), output)
+            self.compile_dictionary(
+                lang,
+                dictionary_options.get('wordlists', []),
+                dictionary_options.get('encoding', 'utf-8'),
+                output
+            )
         else:
             output = None
         return output
 
-    def compile_dictionary(self, lang, wordlists, output):
+    def compile_dictionary(self, lang, wordlists, encoding, output):
         """Compile user dictionary."""
 
         cmd = [
             self.binary,
             '--lang', lang,
-            '--encoding=utf-8',
+            '--encoding', codecs.lookup(filters.PYTHON_ENCODING_NAMES.get(encoding, encoding).lower()).name,
             'create',
             'master', output
         ]
@@ -307,7 +332,7 @@ class Aspell(SpellChecker):
             self.log("Problem compiling dictionary. Check the binary path and options.", 0)
             raise
 
-    def setup_command(self, encoding, options, personal_dict):
+    def setup_command(self, encoding, options, personal_dict, file_name=None):
         """Setup the command."""
 
         cmd = [
@@ -348,6 +373,10 @@ class Aspell(SpellChecker):
                 elif isinstance(v, list):
                     for value in v:
                         cmd.extend([key, str(value)])
+
+        if file_name is not None:
+            cmd.append(file_name)
+
         return cmd
 
 
@@ -373,12 +402,12 @@ class Hunspell(SpellChecker):  # pragma: no cover
         lang = dictionary_options.get('lang', 'en_US')
         wordlists = dictionary_options.get('wordlists', [])
         if lang and wordlists:
-            self.compile_dictionary(lang, dictionary_options.get('wordlists', []), output)
+            self.compile_dictionary(lang, dictionary_options.get('wordlists', []), None, output)
         else:
             output = None
         return output
 
-    def compile_dictionary(self, lang, wordlists, output):
+    def compile_dictionary(self, lang, wordlists, encoding, output):
         """Compile user dictionary."""
         wordlist = ''
 
@@ -405,7 +434,7 @@ class Hunspell(SpellChecker):  # pragma: no cover
             self.log("Current wordlist '%s'" % wordlist)
             raise
 
-    def setup_command(self, encoding, options, personal_dict):
+    def setup_command(self, encoding, options, personal_dict, file_name=None):
         """Setup command."""
 
         cmd = [
@@ -419,7 +448,7 @@ class Hunspell(SpellChecker):  # pragma: no cover
 
         allowed = {
             'check-apostrophe', 'check-url',
-            'd', 'H', 'n', 'o', 'r', 't', 'X'
+            'd', 'H', 'i', 'n', 'O', 'r', 't', 'X'
         }
 
         for k, v in options.items():
@@ -434,6 +463,10 @@ class Hunspell(SpellChecker):  # pragma: no cover
                 elif isinstance(v, list):
                     for value in v:
                         cmd.extend([key, str(value)])
+
+        if file_name is not None:
+            cmd.append(file_name)
+
         return cmd
 
 
