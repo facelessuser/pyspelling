@@ -129,6 +129,9 @@ class SpellChecker(object):
                 wordlist = util.call_spellchecker(cmd, input_text=text, encoding=encoding)
                 yield util.Results([w for w in sorted(set(wordlist.split('\n'))) if w], source.context, source.category)
 
+    def spell_check_no_pipeline(self, source, options, personal_dict):
+        """Spell check without the pipeline."""
+
     def compile_dictionary(self, lang, wordlists, output):
         """Compile user dictionary."""
 
@@ -248,15 +251,15 @@ class SpellChecker(object):
         # Setup filters and variables for the spell check
         self.default_encoding = task.get('default_encoding', '')
         options = self.setup_spellchecker(task)
-        output = self.setup_dictionary(task)
+        personal_dict = self.setup_dictionary(task)
         glob_flags = self._to_flags(task.get('glob_flags', "N|B|G"))
         self._build_pipeline(task)
 
         for sources in self._walk_src(task.get('sources', []), glob_flags, self.pipeline_steps):
             if self.pipeline_steps is not None:
-                yield from self._spelling_pipeline(sources, options, output)
+                yield from self._spelling_pipeline(sources, personal_dict, output)
             else:
-                yield self.spell_check_no_pipeline(sources, options, output)
+                yield self.spell_check_no_pipeline(sources, personal_dict, output)
 
 
 class Aspell(SpellChecker):
@@ -337,13 +340,13 @@ class Aspell(SpellChecker):
             self.log("Problem compiling dictionary. Check the binary path and options.", 0)
             raise
 
-    def spell_check_no_pipeline(self, source, options, output):
+    def spell_check_no_pipeline(self, source, options, personal_dict):
         """Spell check without the pipeline."""
 
         with open(source.context, 'rb') as f:
             content = f.read()
 
-        cmd = self.setup_command(source.encoding, options, output, source.context)
+        cmd = self.setup_command(source.encoding, options, personal_dict, source.context)
         wordlist = util.call_spellchecker(cmd, input_text=content, encoding=source.encoding)
         return util.Results(
             [w for w in sorted(set(wordlist.split('\n'))) if w], source.context, source.category
@@ -453,10 +456,10 @@ class Hunspell(SpellChecker):  # pragma: no cover
             self.log("Current wordlist '%s'" % wordlist)
             raise
 
-    def spell_check_no_pipeline(self, source, options, output):
+    def spell_check_no_pipeline(self, source, options, personal_dict):
         """Spell check without the pipeline."""
 
-        cmd = self.setup_command(source.encoding, options, output, source.context)
+        cmd = self.setup_command(source.encoding, options, personal_dict, source.context)
         wordlist = util.call_spellchecker(cmd, input_text=None, encoding=source.encoding)
         return util.Results(
             [w for w in sorted(set(wordlist.split('\n'))) if w], source.context, source.category
