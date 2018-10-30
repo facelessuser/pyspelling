@@ -8,7 +8,7 @@ The Text filter can also be used convert from one encoding to another.
 
 ```yaml
 matrix:
-- name: Text
+- name: text
   default_encoding: cp1252
   pipeline:
   - pyspelling.filters.text:

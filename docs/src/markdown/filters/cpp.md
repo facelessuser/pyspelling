@@ -8,7 +8,7 @@ As C++ style comments are fairly common convention in other languages, this can 
 
 ```yaml
 matrix:
-- name: javascript
+- name: cpp
   pipeline:
   - pyspelling.filters.cpp
       line_comments: false

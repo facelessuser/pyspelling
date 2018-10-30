@@ -37,6 +37,7 @@ nav:
     - Python: filters/python.md
     - Stylesheets: filters/stylesheets.md
     - Text: filters/text.md
+    - URL: filters/url.md
   - Flow Control:
     - Wildcard: flow_control/wildcard.md
   - About:
