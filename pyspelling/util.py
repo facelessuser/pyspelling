@@ -104,7 +104,7 @@ def call(cmd, input_file=None, input_text=None, encoding=None):
     return get_process_output(process, encoding)
 
 
-def call_spellchecker(cmd, input_text, encoding=None):
+def call_spellchecker(cmd, input_text=None, encoding=None):
     """Call spell checker with arguments."""
 
     process = get_process(cmd)

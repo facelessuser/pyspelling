@@ -47,6 +47,7 @@ class SpellChecker(object):
         self.verbose = verbose
         self.dict_bin = os.path.abspath(self.DICTIONARY)
         self.debug = debug
+        self.default_encoding = ''
 
     def log(self, text, level):
         """Log level."""
@@ -147,7 +148,18 @@ class SpellChecker(object):
                             err = self.get_error(e)
                             yield filters.SourceText('', f, '', '', err)
                     else:
-                        yield filters.SourceText('', f, '', 'file')
+                        try:
+                            if self.default_encoding:
+                                encoding = filters.PYTHON_ENCODING_NAMES.get(
+                                    self.default_encoding, self.default_encoding
+                                ).lower()
+                                encoding = codecs.lookup(encoding).name
+                            else:
+                                encoding = self.default_encoding
+                            yield filters.SourceText('', f, encoding, 'file')
+                        except Exception as e:
+                            err = self.get_error(e)
+                            yield filters.SourceText('', f, '', '', err)
 
     def setup_spellchecker(self, task):
         """Setup spell checker."""
@@ -159,13 +171,16 @@ class SpellChecker(object):
 
         return None
 
-    def _build_pipeline(self, task, default_encoding):
+    def direct_check(self, file_name):
+        """Handle direct files."""
+
+    def _build_pipeline(self, task):
         """Build up the pipeline."""
 
         self.pipeline_steps = []
         kwargs = {}
-        if default_encoding:
-            kwargs["default_encoding"] = default_encoding
+        if self.default_encoding:
+            kwargs["default_encoding"] = self.default_encoding
 
         steps = task.get('pipeline', [])
         if steps is None:
@@ -234,24 +249,17 @@ class SpellChecker(object):
         self.log('Running Task: %s...' % task.get('name', ''), 1)
 
         # Setup filters and variables for the spell check
-        encoding = task.get('default_encoding', '')
+        self.default_encoding = task.get('default_encoding', '')
         options = self.setup_spellchecker(task)
         output = self.setup_dictionary(task)
         glob_flags = self._to_flags(task.get('glob_flags', "N|B|G"))
-        self._build_pipeline(task, encoding)
+        self._build_pipeline(task)
 
         for sources in self._walk_src(task.get('sources', []), glob_flags, self.pipeline_steps):
             if self.pipeline_steps is not None:
                 yield from self._spelling_pipeline(sources, options, output)
             else:
-                if encoding:
-                    encoding = filters.PYTHON_ENCODING_NAMES.get(encoding, encoding).lower()
-                    encoding = codecs.lookup(encoding).name
-                cmd = self.setup_command(encoding, options, output, sources.context)
-                wordlist = util.call_spellchecker(cmd, input_text=None, encoding=encoding)
-                yield util.Results(
-                    [w for w in sorted(set(wordlist.split('\n'))) if w], sources.context, sources.category
-                )
+                yield self.spell_check_no_pipeline(sources, options, output)
 
 
 class Aspell(SpellChecker):
@@ -332,14 +340,28 @@ class Aspell(SpellChecker):
             self.log("Problem compiling dictionary. Check the binary path and options.", 0)
             raise
 
+    def spell_check_no_pipeline(self, source, options, output):
+        """Spell check without the pipeline."""
+
+        with open(source.context, 'rb') as f:
+            content = f.read()
+
+        cmd = self.setup_command(source.encoding, options, output, source.context)
+        wordlist = util.call_spellchecker(cmd, input_text=content, encoding=source.encoding)
+        return util.Results(
+            [w for w in sorted(set(wordlist.split('\n'))) if w], source.context, source.category
+        )
+
     def setup_command(self, encoding, options, personal_dict, file_name=None):
         """Setup the command."""
 
         cmd = [
             self.binary,
-            'list',
-            '--encoding', encoding
+            'list'
         ]
+
+        if encoding:
+            cmd.extend(['--encoding', encoding])
 
         if personal_dict:
             cmd.extend(['--add-extra-dicts', personal_dict])
@@ -434,14 +456,25 @@ class Hunspell(SpellChecker):  # pragma: no cover
             self.log("Current wordlist '%s'" % wordlist)
             raise
 
+    def spell_check_no_pipeline(self, source, options, output):
+        """Spell check without the pipeline."""
+
+        cmd = self.setup_command(source.encoding, options, output, source.context)
+        wordlist = util.call_spellchecker(cmd, input_text=None, encoding=source.encoding)
+        return util.Results(
+            [w for w in sorted(set(wordlist.split('\n'))) if w], source.context, source.category
+        )
+
     def setup_command(self, encoding, options, personal_dict, file_name=None):
         """Setup command."""
 
         cmd = [
             self.binary,
-            '-l',
-            '-i', encoding
+            '-l'
         ]
+
+        if encoding:
+            cmd.extend(['-i', encoding])
 
         if personal_dict:
             cmd.extend(['-p', personal_dict])

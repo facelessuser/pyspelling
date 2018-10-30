@@ -16,6 +16,7 @@ MULTILINE
 MkDocs
 NONINFRINGEMENT
 ODF
+OpenOffice
 Parsers
 PyMdown
 PyPI
@@ -45,6 +46,7 @@ docstrings
 ebeweber
 encodings
 facelessuser
+filename
 gforcada
 globbing
 linter

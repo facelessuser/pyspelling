@@ -130,9 +130,9 @@ matrix:
 
 If needed, you can also insert flow control steps before certain filter steps. Each text chunk that is passed between filters has a category assigned to it from the previous filter. Flow control steps allow you to restrict the next filter to specific categories, or exclude specific categories from the next step. This is covered in more depth in [Flow Control](./pipeline.md#flow-control).
 
-If for some reason you need to send the file directly to the spell checker without using PySpelling's pipeline, simply set `pipeline` to `null`. This sends the file name to the filename to the spell checker instead of piping the content to it.
+If for some reason you need to send the file directly to the spell checker without using PySpelling's pipeline, simply set `pipeline` to `null`. This sends file directly to the spell checker without evaluating the encoding or passing through any filters. Specifically with Hunspell, it also sends the spell checker the filename instead of piping the content as Hunspell has certain features that don't work when piping the data, such as OpenOffice ODF input. 
 
-Below is an example where we send an OpenOffice ODF file directly to Hunspell in order to use Hunspell's `-O` option to parse the ODF file (piping the data to Hunspell will not properly work with `-O` option). Keep in mind that when doing this, no encoding is sent to the spell checker unless you define `default_encoding`. If `default_encoding` is not defined, PySpelling will decode the returned content with the terminal's encoding (or what it thinks the terminal's encoding is).
+Below is an example where we send an OpenOffice ODF file directly to Hunspell in order to use Hunspell's `-O` option to parse the ODF file. Keep in mind that when doing this, no encoding is sent to the spell checker unless you define `default_encoding`. If `default_encoding` is not defined, PySpelling will decode the returned content with the terminal's encoding (or what it thinks the terminal's encoding is).
 
 ```
 matrix:
