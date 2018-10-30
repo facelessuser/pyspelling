@@ -6,7 +6,7 @@ The Markdown filter converts a text file's buffer using Python Markdown and retu
 
 ```yaml
 matrix:
-- name: Markdown
+- name: markdown
   pipeline:
   - pyspelling.parsers.markdown_parser:
       markdown_extensions:

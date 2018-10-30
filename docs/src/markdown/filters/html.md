@@ -29,7 +29,7 @@ Selector             | Example               | Description
 
 ```yaml
 matrix:
-- name: mkdocs
+- name: html
   pipeline:
   - pyspelling.filters.html:
       comments: false
