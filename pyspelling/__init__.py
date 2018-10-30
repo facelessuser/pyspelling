@@ -257,9 +257,9 @@ class SpellChecker(object):
 
         for sources in self._walk_src(task.get('sources', []), glob_flags, self.pipeline_steps):
             if self.pipeline_steps is not None:
-                yield from self._spelling_pipeline(sources, personal_dict, output)
+                yield from self._spelling_pipeline(sources, options, personal_dict)
             else:
-                yield self.spell_check_no_pipeline(sources, personal_dict, output)
+                yield self.spell_check_no_pipeline(sources, options, personal_dict)
 
 
 class Aspell(SpellChecker):
