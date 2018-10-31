@@ -1,7 +1,7 @@
 """
-HTML filter.
+XML filter.
 
-Detect encoding from HTML header.
+Detect encoding from XML header.
 """
 from __future__ import unicode_literals
 from .. import filters
@@ -27,28 +27,19 @@ RE_XML_START = re.compile(
     b'))'
 )
 
-RE_HTML_ENCODE = re.compile(
-    br'''(?xi)
-    <\s*meta(?!\s*(?:name|value)\s*=)(?:[^>]*?content\s*=[\s"']*)?(?:[^>]*?)[\s"';]*charset\s*=[\s"']*([^\s"'/>]*)
-    '''
-)
-
 RE_XML_ENCODE = re.compile(br'''(?i)^<\?xml[^>]*encoding=(['"])(.*?)\1[^>]*\?>''')
 RE_XML_ENCODE_U = re.compile(r'''(?i)^<\?xml[^>]*encoding=(['"])(.*?)\1[^>]*\?>''')
 
 RE_SELECTOR = re.compile(
     r'''(?x)
-    ((?:\#|\.)[-\w]+) |                                           # .class and #id
-    ((?:(?:[-\w\d]+|\*)\|)?(?:[-\w\d:]+|\*)|\|\*) |               # namespace:tag
+    (?:(?:[-\w\d.]+|\*)\|)?(?:[-\w\d:.]+|\*)|\|\* |               # namespace:tag
     \[([\w\-:]+)(?:([~^|*$]?=)(\"[^"]+\"|'[^']'|[^'"\[\]]+))?\] | # attributes
-    .+
+    .*
     '''
 )
 
-MODE = {'html': 'lxml', 'xhtml': 'xml', 'html5lib': 'html5lib'}
 
-
-class Selector(namedtuple('IgnoreRule', ['tag', 'namespace', 'id', 'classes', 'attributes'])):
+class Selector(namedtuple('IgnoreRule', ['tag', 'namespace', 'attributes'])):
     """Ignore rule."""
 
 
@@ -56,31 +47,18 @@ class SelectorAttribute(namedtuple('AttrRule', ['attribute', 'pattern'])):
     """Selector attribute rule."""
 
 
-class HtmlFilter(filters.Filter):
+class XmlFilter(filters.Filter):
     """Spelling Python."""
-
-    block_tags = [
-        # Block level elements (and other blockish elements)
-        'address', 'article', 'aside', 'blockquote', 'details', 'dialog', 'dd',
-        'div', 'dl', 'dt'
-        'fieldset', 'figcaption', 'figure', 'footer', 'form', 'h1', 'h2', 'h3',
-        'h4', 'h5', 'h6', 'header', 'hgroup', 'hr', 'li', 'main', 'menu', 'nav', 'ol', 'p', 'pre',
-        'section', 'table', 'ul',
-        'canvas', 'group', 'iframe', 'math', 'noscript', 'output',
-        'script', 'style', 'table', 'video', 'body', 'head'
-    ]
 
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
         self.comments = options.get('comments', True) is True
         self.attributes = set(options.get('attributes', []))
-        self.mode = MODE.get(options.get('mode', 'html'), 'lxml')
-        self.prefix = 'html' if self.mode != 'xml' else 'xhtml'
         self.selectors = self.process_selectors(*options.get('ignores', []))
-        super(HtmlFilter, self).__init__(options, default_encoding)
+        super(XmlFilter, self).__init__(options, default_encoding)
 
-    def _has_xml_encode(self, content):
+    def header_check(self, content):
         """Check XML encoding."""
 
         encode = None
@@ -127,30 +105,6 @@ class HtmlFilter(filters.Filter):
 
         return encode
 
-    def header_check(self, content):
-        """Special HTML encoding check."""
-
-        encode = None
-
-        # Look for meta charset
-        m = RE_HTML_ENCODE.search(content)
-        if m:
-            enc = m.group(1).decode('ascii')
-
-            try:
-                codecs.getencoder(enc)
-                encode = enc
-            except LookupError:
-                pass
-        else:
-            encode = self._has_xml_encode(content)
-        return encode
-
-    def is_block(self, el):
-        """Check if tag is a block element."""
-
-        return el.name.lower() in self.block_tags
-
     def process_selectors(self, *args):
         """
         Process selectors.
@@ -160,25 +114,19 @@ class HtmlFilter(filters.Filter):
         descendants etc.
         """
 
-        selectors = [
-            Selector('style', None, None, tuple(), tuple()),
-            Selector('script', None, None, tuple(), tuple()),
-        ]
+        selectors = []
 
         for selector in args:
             tag = None
-            tag_id = None
-            namespace = None
-            classes = set()
             attributes = []
-            is_xml = self.mode != 'xml'
+            namespace = None
 
             for m in RE_SELECTOR.finditer(selector):
-                if m.group(3):
-                    attr = m.group(3).lower() if not is_xml else m.group(3)
-                    op = m.group(4)
+                if m.group(2):
+                    attr = m.group(2)
+                    op = m.group(3)
                     if op:
-                        value = m.group(5)[1:-1] if m.group(5).startswith('"') else m.group(5)
+                        value = m.group(4)[1:-1] if m.group(4).startswith('"') else m.group(4)
                     else:
                         value = None
                     if not op:
@@ -203,13 +151,7 @@ class HtmlFilter(filters.Filter):
                         # Value matches
                         pattern = re.compile(r'^%s$' % re.escape(value))
                     attributes.append(SelectorAttribute(attr, pattern))
-                elif m.group(1):
-                    selector = m.group(0).lower()
-                    if selector.startswith('.'):
-                        classes.add(selector[1:].lower())
-                    elif selector.startswith('#') and tag_id is None:
-                        tag_id = selector[1:]
-                elif m.group(2):
+                else:
                     selector = m.group(0)
                     parts = selector.split('|')
                     if tag is None:
@@ -220,21 +162,11 @@ class HtmlFilter(filters.Filter):
                             tag = parts[0]
                     else:
                         raise ValueError('Bad selector!')
-                else:
-                    raise ValueError('Bad selector!')
 
-            if tag or tag_id or classes:
-                selectors.append(Selector(tag, namespace, tag_id, tuple(classes), tuple(attributes)))
+            if tag:
+                selectors.append(Selector(tag, namespace, tuple(attributes)))
 
         return selectors
-
-    def get_classes(self, el):
-        """Get classes."""
-
-        if self.mode != 'xml':
-            return el.attrs.get('class', [])
-        else:
-            return [c for c in el.attrs.get('class', '').strip().split(' ') if c]
 
     def skip_tag(self, el):
         """Determine if tag should be skipped."""
@@ -249,25 +181,9 @@ class HtmlFilter(filters.Filter):
                     (el.namespace is not None and el.namespace != selector.namespace)
                 )
             ):
-                print('really?')
                 continue
-            if selector.tag and selector.tag not in ((el.name.lower() if self.mode != 'xml' else el.name), '*'):
-                print(el.name, selector.tag)
-                print('really 2?')
+            if selector.tag and selector.tag not in (el.name, '*'):
                 continue
-            if selector.id and selector.id != el.attrs.get('id', '').lower():
-                print('really 3?')
-                continue
-            if selector.classes:
-                current_classes = [c.lower() for c in self.get_classes(el)]
-                found = True
-                for c in selector.classes:
-                    if c not in current_classes:
-                        found = False
-                        break
-                if not found:
-                    print('really 4?')
-                    continue
             if selector.attributes:
                 found = True
                 for a in selector.attributes:
@@ -283,7 +199,6 @@ class HtmlFilter(filters.Filter):
                         found = False
                         break
                 if not found:
-                    print('really 5?')
                     continue
             skip = True
             break
@@ -294,23 +209,17 @@ class HtmlFilter(filters.Filter):
 
         tag = el.name
         prefix = el.prefix
-        classes = self.get_classes(el)
-        tag_id = el.attrs.get('id', '').strip()
         sel = ''
         if prefix:
             sel += prefix + '|'
-        sel += tag
-        if tag_id:
-            sel += '#' + tag_id
-        if classes:
-            sel += '.' + '.'.join(classes)
+        sel = tag
         if attr:
             sel += '[%s]' % attr
         return sel
 
-    def html_to_text(self, tree):
+    def xml_to_text(self, tree):
         """
-        Parse the HTML creating a buffer with each tags content.
+        Parse the XML creating a buffer with each tags content.
 
         Skip any selectors specified and include attributes if specified.
         Ignored tags will not have their attributes scanned either.
@@ -343,7 +252,7 @@ class HtmlFilter(filters.Filter):
             for child in tree:
                 is_comment = isinstance(child, bs4.Comment)
                 if isinstance(child, bs4.element.Tag):
-                    t, b, a, c = (self.html_to_text(child))
+                    t, b, a, c = (self.xml_to_text(child))
                     text.extend(t)
                     attributes.extend(a)
                     comments.extend(c)
@@ -359,7 +268,7 @@ class HtmlFilter(filters.Filter):
                             text.append(string)
                             text.append(' ')
 
-        if root or self.is_block(tree):
+        if root:
             content = html.unescape(''.join(text))
             if content:
                 blocks.append((content, self.construct_selector(tree)))
@@ -374,19 +283,19 @@ class HtmlFilter(filters.Filter):
         """Filter the source text."""
 
         content = []
-        blocks, attributes, comments = self.html_to_text(bs4.BeautifulSoup(text, self.mode))
+        blocks, attributes, comments = self.xml_to_text(bs4.BeautifulSoup(text, 'xml'))
         if self.comments:
             for c, desc in comments:
-                content.append(filters.SourceText(c, context + ': ' + desc, encoding, self.prefix + 'comment'))
+                content.append(filters.SourceText(c, context + ': ' + desc, encoding, 'xml-comment'))
         if self.attributes:
             for a, desc in attributes:
-                content.append(filters.SourceText(a, context + ': ' + desc, encoding, self.prefix + 'attribute'))
+                content.append(filters.SourceText(a, context + ': ' + desc, encoding, 'xml-attribute'))
         for b, desc in blocks:
-            content.append(filters.SourceText(b, context + ': ' + desc, encoding, self.prefix + 'content'))
+            content.append(filters.SourceText(b, context + ': ' + desc, encoding, 'xml-content'))
         return content
 
     def filter(self, source_file, encoding):  # noqa A001
-        """Parse HTML file."""
+        """Parse XML file."""
 
         with codecs.open(source_file, 'r', encoding=encoding) as f:
             text = f.read()
@@ -401,4 +310,4 @@ class HtmlFilter(filters.Filter):
 def get_plugin():
     """Return the filter."""
 
-    return HtmlFilter
+    return XMLFilter
