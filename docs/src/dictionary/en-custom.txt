@@ -28,6 +28,7 @@ Stylesheets
 TODO
 Tox
 UTF
+XHTML
 YAML
 accessor
 backticks

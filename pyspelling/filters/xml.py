@@ -30,14 +30,6 @@ RE_XML_START = re.compile(
 RE_XML_ENCODE = re.compile(br'''(?i)^<\?xml[^>]*encoding=(['"])(.*?)\1[^>]*\?>''')
 RE_XML_ENCODE_U = re.compile(r'''(?i)^<\?xml[^>]*encoding=(['"])(.*?)\1[^>]*\?>''')
 
-RE_SELECTOR = re.compile(
-    r'''(?x)
-    (?:(?:[-\w\d.]+|\*)\|)?(?:[-\w\d:.]+|\*)|\|\* |               # namespace:tag
-    \[([\w\-:]+)(?:([~^|*$]?=)(\"[^"]+\"|'[^']'|[^'"\[\]]+))?\] | # attributes
-    .*
-    '''
-)
-
 
 class Selector(namedtuple('IgnoreRule', ['tag', 'namespace', 'attributes'])):
     """Ignore rule."""
@@ -50,15 +42,29 @@ class SelectorAttribute(namedtuple('AttrRule', ['attribute', 'pattern'])):
 class XmlFilter(filters.Filter):
     """Spelling Python."""
 
+    re_sel = re.compile(
+        r'''(?x)
+        (?P<ns_tag>(?:(?:[-\w.]+|\*)\|)?(?:[-\w:.]+|\*)|\|\*) | # namespace:tag
+        \[(?P<attr>[\w\-:.]+)                                   # attributes
+            (?:(?P<cmp>[~^|*$]?=)                               # compare
+            (?P<value>\"[^"]+\"|'[^']'|[^'"\[\] \t\r\n]+))?     # attribute value
+            (?P<i>[ ]+i)?                                       # case insensitive
+        \] |
+        .+
+        '''
+    )
+
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
         self.comments = options.get('comments', True) is True
         self.attributes = set(options.get('attributes', []))
+        self.mode = 'lxml'
+        self.prefix = 'xml'
         self.selectors = self.process_selectors(*options.get('ignores', []))
         super(XmlFilter, self).__init__(options, default_encoding)
 
-    def header_check(self, content):
+    def _has_xml_encode(self, content):
         """Check XML encoding."""
 
         encode = None
@@ -105,6 +111,11 @@ class XmlFilter(filters.Filter):
 
         return encode
 
+    def header_check(self, content):
+        """Special HTML encoding check."""
+
+        return self._has_xml_encode(content)
+
     def process_selectors(self, *args):
         """
         Process selectors.
@@ -117,16 +128,18 @@ class XmlFilter(filters.Filter):
         selectors = []
 
         for selector in args:
+            has_selector = False
             tag = None
             attributes = []
             namespace = None
 
-            for m in RE_SELECTOR.finditer(selector):
-                if m.group(2):
-                    attr = m.group(2)
-                    op = m.group(3)
+            for m in self.re_sel.finditer(selector):
+                flags = re.I if m.group('i') else 0
+                if m.group('attr'):
+                    attr = m.group('attr')
+                    op = m.group('cmp')
                     if op:
-                        value = m.group(4)[1:-1] if m.group(4).startswith('"') else m.group(4)
+                        value = m.group('value')[1:-1] if m.group('value').startswith('"') else m.group('value')
                     else:
                         value = None
                     if not op:
@@ -134,25 +147,26 @@ class XmlFilter(filters.Filter):
                         pattern = None
                     elif op.startswith('^'):
                         # Value start with
-                        pattern = re.compile(r'^%s.*' % re.escape(value))
+                        pattern = re.compile(r'^%s.*' % re.escape(value), flags)
                     elif op.startswith('$'):
                         # Value ends with
-                        pattern = re.compile(r'.*?%s$' % re.escape(value))
+                        pattern = re.compile(r'.*?%s$' % re.escape(value), flags)
                     elif op.startswith('*'):
                         # Value contains
-                        pattern = re.compile(r'.*?%s.*' % re.escape(value))
+                        pattern = re.compile(r'.*?%s.*' % re.escape(value), flags)
                     elif op.startswith('~'):
                         # Value contains word within space separated list
-                        pattern = re.compile(r'.*?(?:(?<=^)|(?<= ))%s(?=(?:[ ]|$)).*' % re.escape(value))
+                        pattern = re.compile(r'.*?(?:(?<=^)|(?<= ))%s(?=(?:[ ]|$)).*' % re.escape(value), flags)
                     elif op.startswith('|'):
                         # Value starts with word in dash separated list
-                        pattern = re.compile(r'^%s(?=-).*' % re.escape(value))
+                        pattern = re.compile(r'^%s(?=-).*' % re.escape(value), flags)
                     else:
                         # Value matches
-                        pattern = re.compile(r'^%s$' % re.escape(value))
+                        pattern = re.compile(r'^%s$' % re.escape(value), flags)
                     attributes.append(SelectorAttribute(attr, pattern))
-                else:
-                    selector = m.group(0)
+                    has_selector = True
+                elif m.group('ns_tag'):
+                    selector = m.group('ns_tag')
                     parts = selector.split('|')
                     if tag is None:
                         if len(parts) > 1:
@@ -160,10 +174,13 @@ class XmlFilter(filters.Filter):
                             tag = parts[1]
                         else:
                             tag = parts[0]
+                        has_selector = True
                     else:
                         raise ValueError('Bad selector!')
+                else:
+                    raise ValueError('Bad selector!')
 
-            if tag:
+            if has_selector:
                 selectors.append(Selector(tag, namespace, tuple(attributes)))
 
         return selectors
@@ -204,6 +221,16 @@ class XmlFilter(filters.Filter):
             break
         return skip
 
+    def store_blocks(self, el, blocks, text, is_root):
+        """Store the text as desired."""
+
+        if is_root:
+            content = html.unescape(''.join(text))
+            if content:
+                blocks.append((content, self.construct_selector(el)))
+            text = []
+        return text
+
     def construct_selector(self, el, attr=''):
         """Construct an selector for context."""
 
@@ -217,9 +244,9 @@ class XmlFilter(filters.Filter):
             sel += '[%s]' % attr
         return sel
 
-    def xml_to_text(self, tree):
+    def to_text(self, tree):
         """
-        Parse the XML creating a buffer with each tags content.
+        Extract text from tags.
 
         Skip any selectors specified and include attributes if specified.
         Ignored tags will not have their attributes scanned either.
@@ -231,15 +258,7 @@ class XmlFilter(filters.Filter):
         blocks = []
         root = tree.name == '[document]'
 
-        # Handle comments
-        # TODO: This might not be needed as comment objects may never get fed in this way.
-        if isinstance(tree, bs4.Comment):  # pragma: no cover
-            if self.comments:
-                string = str(tree).strip()
-                if string:
-                    sel = self.construct_selector(tree) + '<!--comment-->'
-                    comments.append((html.unescape(string), sel))
-        elif root or not self.skip_tag(tree):
+        if root or not self.skip_tag(tree):
             # Check attributes for normal tags
             if not root:
                 for attr in self.attributes:
@@ -252,7 +271,7 @@ class XmlFilter(filters.Filter):
             for child in tree:
                 is_comment = isinstance(child, bs4.Comment)
                 if isinstance(child, bs4.element.Tag):
-                    t, b, a, c = (self.xml_to_text(child))
+                    t, b, a, c = (self.to_text(child))
                     text.extend(t)
                     attributes.extend(a)
                     comments.extend(c)
@@ -268,11 +287,7 @@ class XmlFilter(filters.Filter):
                             text.append(string)
                             text.append(' ')
 
-        if root:
-            content = html.unescape(''.join(text))
-            if content:
-                blocks.append((content, self.construct_selector(tree)))
-            text = []
+        text = self.store_blocks(tree, blocks, text, root)
 
         if root:
             return blocks, attributes, comments
@@ -283,15 +298,15 @@ class XmlFilter(filters.Filter):
         """Filter the source text."""
 
         content = []
-        blocks, attributes, comments = self.xml_to_text(bs4.BeautifulSoup(text, 'xml'))
+        blocks, attributes, comments = self.to_text(bs4.BeautifulSoup(text, self.mode))
         if self.comments:
             for c, desc in comments:
-                content.append(filters.SourceText(c, context + ': ' + desc, encoding, 'xml-comment'))
+                content.append(filters.SourceText(c, context + ': ' + desc, encoding, self.prefix + 'comment'))
         if self.attributes:
             for a, desc in attributes:
-                content.append(filters.SourceText(a, context + ': ' + desc, encoding, 'xml-attribute'))
+                content.append(filters.SourceText(a, context + ': ' + desc, encoding, self.prefix + 'attribute'))
         for b, desc in blocks:
-            content.append(filters.SourceText(b, context + ': ' + desc, encoding, 'xml-content'))
+            content.append(filters.SourceText(b, context + ': ' + desc, encoding, self.prefix + 'content'))
         return content
 
     def filter(self, source_file, encoding):  # noqa A001
@@ -310,4 +325,4 @@ class XmlFilter(filters.Filter):
 def get_plugin():
     """Return the filter."""
 
-    return XMLFilter
+    return XmlFilter

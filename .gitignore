@@ -100,3 +100,6 @@ ENV/
 
 docs/src/dictionary/hunspell
 *.patch
+
+# pytest
+.pytest_cache/
