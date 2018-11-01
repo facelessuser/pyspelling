@@ -198,8 +198,8 @@ class HtmlFilter(xml.XmlFilter):
                 selector.namespace is not None and
                 selector.namespace is not '*' and
                 (
-                    (el.namespace is None and selector.namespace) or
-                    (el.namespace is not None and el.namespace != selector.namespace)
+                    (el.prefix is None and selector.namespace) or
+                    (el.prefix is not None and el.prefix != selector.namespace)
                 )
             ):
                 continue
