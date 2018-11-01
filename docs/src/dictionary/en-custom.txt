@@ -54,6 +54,7 @@ linter
 lxml
 metadata
 mkdocs
+namespace
 overridable
 parsers
 pre

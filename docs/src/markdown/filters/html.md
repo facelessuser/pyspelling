@@ -11,10 +11,16 @@ Tags can be ignored with basic CSS selectors.
 
 Selector             | Example               | Description
 -------------------- | --------------------- | -----------
-`Element`            | `div`                 | Select the `<div>` element.
+`Element`            | `div`                 | Select the `<div>` element (under the default namespace for XHTML).
+`namespace|Element`  | `namespace|div`       | Select the `<div>` element which also has the namespace `namespace` (XHTML).
+`*|Element`          | `*|div`               | Select the any `<div` element with or without a namespace (XHTML).
+`namespace|*`        | `namespace|*`         | Select any element with the namespace `namespace` (XHTML).
+`|Element`           | `|div`                | Select `<div>` elements without a namespace (or basically under the default namespace which is XHTML).
+`|*`                 | `|*`                  | Select any element without a namespace (or basically under the default namespace which is XHTML).
+`*|*`                | `*|*`                 | Select all elements with any or no namespace.
+`*`                  | `*`                   | Select all elements (under the default namespace for XHTML).
 `.class`             | `.some-class`         | Select all elements with the class `some-class`.
 `#id`                | `#some-id`            | Select the element with the ID `some-id`.
-`*`                  | `*`                   | Select all elements.
 `[attribute]`        | `[target]`            | Selects all elements with a `target` attribute.
 `[attribute=value]`  | `[target=_blank]`     | Selects all elements with `target="_blank"`.
 `[attribute~=value]` | `[title~=flower]`     | Selects all elements with a title attribute containing the word `flower`.
