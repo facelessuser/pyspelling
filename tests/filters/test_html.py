@@ -63,6 +63,66 @@ class TestHTML(util.PluginTestCase):
         self.assertEqual(sorted(bad_words), words)
 
 
+class TestHtml5AttrNamespace(util.PluginTestCase):
+    """Test HTML plugin HTML5 namespace logic."""
+
+    def setup_fs(self):
+        """Setup file system."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: html5_attr_ns
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              pipeline:
+              - pyspelling.filters.html:
+                  mode: html5
+                  namespaces:
+                    xlink: http://www.w3.org/1999/xlink
+                  ignores:
+                  - '[xlink|href$=undo]'
+                  - '[xlink|href^=other]'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.html5.yml', config, 'utf-8')
+
+    def test_html_attr_namespace(self):
+        """Test HTML."""
+
+        template = self.dedent(
+            """
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+            </head>
+            <body>
+              <h1>A contrived example</h1>
+              <svg viewBox="0 0 32 32" class="icon icon-1">
+                <use xlink:href="images/sprites.svg#icon-undo">aaaa</use>
+              </svg>
+              <svg viewBox="0 0 32 32" class="icon icon-2">
+                <use xlink:href="images/sprites.svg#icon-redo">bbbb</use>
+              </svg>
+              <svg viewBox="0 0 32 32" class="icon icon-3">
+                <use xlink:href="images/sprites.svg#icon-forward">cccc</use>
+              </svg>
+              <svg viewBox="0 0 32 32" class="icon icon-4">
+                <use xlink:href="other/sprites.svg#icon-reply">dddd</use>
+              </svg>
+            </body>
+            </html>
+            """
+        )
+
+        self.mktemp('test.txt', template, 'utf-8')
+        words = self.spellcheck('.html5.yml')
+        self.assertEqual(sorted(['bbbb', 'cccc']), words)
+
+
 class TestHTML5LIB(util.PluginTestCase):
     """Test HTML plugin with `html5lib`."""
 
@@ -79,7 +139,7 @@ class TestHTML5LIB(util.PluginTestCase):
                 lang: en
               pipeline:
               - pyspelling.filters.html:
-                  mode: html5lib
+                  mode: html5
                   attributes:
                   - alt
                   ignores:

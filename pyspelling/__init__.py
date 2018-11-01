@@ -127,7 +127,11 @@ class SpellChecker(object):
                 self.log("Command: " + str(cmd), 4)
 
                 wordlist = util.call_spellchecker(cmd, input_text=text, encoding=encoding)
-                yield util.Results([w for w in sorted(set(wordlist.split('\n'))) if w], source.context, source.category)
+                yield util.Results(
+                    [w for w in sorted(set(wordlist.replace('\r', '').split('\n'))) if w],
+                    source.context,
+                    source.category
+                )
 
     def spell_check_no_pipeline(self, source, options, personal_dict):
         """Spell check without the pipeline."""

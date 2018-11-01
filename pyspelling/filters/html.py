@@ -16,10 +16,12 @@ RE_HTML_ENCODE = re.compile(
     '''
 )
 
-MODE = {'html': 'lxml', 'xhtml': 'xml', 'html5lib': 'html5lib'}
+MODE = {'html': 'lxml', 'xhtml': 'xml', 'html5': 'html5lib'}
+
+XHTML_NAMESPACE = ('http://www.w3.org/1999/xhtml',)
 
 
-class HtmlSelector(namedtuple('IgnoreRule', ['tag', 'namespace', 'id', 'classes', 'attributes'])):
+class HtmlSelector(namedtuple('IgnoreRule', ['tag', 'prefix', 'id', 'classes', 'attributes'])):
     """Ignore rule."""
 
 
@@ -28,14 +30,14 @@ class HtmlFilter(xml.XmlFilter):
 
     re_sel = re.compile(
         r'''(?x)
-        (?P<class_id>(?:\#|\.)[-\w]+) |                         #.class and #id
-        (?P<ns_tag>(?:(?:[-\w]+|\*)\|)?(?:[-\w:]+|\*)|\|\*) |   # namespace:tag
-        \[(?P<attr>[\w\-:]+)                                    # attributes
-            (?:(?P<cmp>[~^|*$]?=)                               # compare
-            (?P<value>\"[^"]+\"|'[^']'|[^'"\[\] \t\r\n]+))?     # attribute value
-            (?P<i>[ ]+i)?                                       # case insensitive
+        (?P<class_id>(?:\#|\.)[-\w]+) |                                         #.class and #id
+        (?P<ns_tag>(?:(?:[-\w]+|\*)?\|)?(?:[-\w:]+|\*)) |                       # namespace:tag
+        \[(?P<ns_attr>(?:(?:[-\w]+|\*)?\|)?[-\w:]+)                             # namespace:attributes
+            (?:(?P<cmp>[~^|*$]?=)                                               # compare
+            (?P<value>"(\\.|[^\\"]+)*?"|'(\\.|[^\\']+)*?'|[^'"\[\] \t\r\n]+))?  # attribute value
+            (?P<i>[ ]+i)?                                                       # case insensitive
         \] |
-        .+
+        .+                                                                      # not proper syntax
         '''
     )
 
@@ -55,8 +57,10 @@ class HtmlFilter(xml.XmlFilter):
 
         super(HtmlFilter, self).__init__(options, default_encoding)
 
-        self.mode = MODE.get(options.get('mode', 'html'), 'lxml')
-        self.prefix = 'html' if self.mode != 'xml' else 'xhtml'
+        self.type = options.get('mode', 'html')
+        if self.type not in MODE:
+            self.type = 'html'
+        self.parser = MODE[self.type]
 
     def header_check(self, content):
         """Special HTML encoding check."""
@@ -100,41 +104,16 @@ class HtmlFilter(xml.XmlFilter):
             has_selector = False
             tag = None
             attributes = []
-            namespace = None
+            prefix = None
             tag_id = None
             classes = set()
 
             for m in self.re_sel.finditer(selector):
-                flags = re.I if m.group('i') else 0
-                if m.group('attr'):
-                    attr = m.group('attr')
-                    op = m.group('cmp')
-                    if op:
-                        value = m.group('value')[1:-1] if m.group('value').startswith('"') else m.group('value')
-                    else:
-                        value = None
-                    if not op:
-                        # Attribute name
-                        pattern = None
-                    elif op.startswith('^'):
-                        # Value start with
-                        pattern = re.compile(r'^%s.*' % re.escape(value), flags)
-                    elif op.startswith('$'):
-                        # Value ends with
-                        pattern = re.compile(r'.*?%s$' % re.escape(value), flags)
-                    elif op.startswith('*'):
-                        # Value contains
-                        pattern = re.compile(r'.*?%s.*' % re.escape(value), flags)
-                    elif op.startswith('~'):
-                        # Value contains word within space separated list
-                        pattern = re.compile(r'.*?(?:(?<=^)|(?<= ))%s(?=(?:[ ]|$)).*' % re.escape(value), flags)
-                    elif op.startswith('|'):
-                        # Value starts with word in dash separated list
-                        pattern = re.compile(r'^%s(?=-).*' % re.escape(value), flags)
-                    else:
-                        # Value matches
-                        pattern = re.compile(r'^%s$' % re.escape(value), flags)
-                    attributes.append(xml.SelectorAttribute(attr, pattern))
+                if m.group('ns_attr'):
+                    attributes.append(self.create_attribute_selector(m))
+                    has_selector = True
+                elif m.group('ns_tag') and tag is None:
+                    prefix, tag = self.parse_tag_pattern(m)
                     has_selector = True
                 elif m.group('class_id'):
                     selector = m.group('class_id')
@@ -144,49 +123,71 @@ class HtmlFilter(xml.XmlFilter):
                     elif tag_id is None:
                         tag_id = selector[1:]
                         has_selector = True
-                elif m.group('ns_tag'):
-                    selector = m.group('ns_tag')
-                    parts = selector.split('|')
-                    if tag is None:
-                        if len(parts) > 1:
-                            namespace = parts[0]
-                            tag = parts[1]
-                        else:
-                            tag = parts[0]
-                        has_selector = True
-                    else:
-                        raise ValueError('Bad selector!')
                 else:
                     raise ValueError('Bad selector!')
 
             if has_selector:
-                selectors.append(HtmlSelector(tag, namespace, tag_id, tuple(classes), tuple(attributes)))
+                selectors.append(HtmlSelector(tag, prefix, tag_id, tuple(classes), tuple(attributes)))
 
         return selectors
 
     def get_classes(self, el):
         """Get classes."""
 
-        if self.mode != 'xml':
+        if self.type != 'xhtml':
             return el.attrs.get('class', [])
         else:
             return [c for c in el.attrs.get('class', '').strip().split(' ') if c]
 
-    def get_attribute(self, el, attr):
+    def supports_namespaces(self):
+        """Check if namespaces are supported in the HTML type."""
+
+        return self.type in ('html5', 'xhtml')
+
+    def get_attribute(self, el, attr, prefix):
         """Get attribute from element if it exists."""
 
-        if self.mode != 'xml':
-            # Case insensitive
+        value = None
+        if self.type == 'xhtml':
+            value = super(HtmlFilter, self).get_attribute(el, attr, prefix)
+        elif self.supports_namespaces():
             value = None
+            # If we have not defined namespaces, we can't very well find them, so don't bother trying.
+            if prefix and prefix not in self.namespaces and prefix != '*':
+                return None
+
             for k, v in el.attrs.items():
-                if attr.lower() == k.lower():
-                    value = v
-                    break
+                parts = k.split(':', 1)
+                if len(parts) > 1:
+                    if not parts[0]:
+                        a = k
+                        p = ''
+                    else:
+                        p = parts[0]
+                        a = parts[1]
+                else:
+                    p = ''
+                    a = k
+                # Can't match a prefix attribute as we haven't specified one to match
+                if not prefix and p:
+                    continue
+                # We can't match our desired prefix attribute as the attribute doesn't have a prefix
+                if prefix and not p and prefix != '*':
+                    continue
+                # The prefix doesn't match
+                if prefix and prefix != '*' and prefix.lower() != p.lower():
+                    continue
+                # The attribute doesn't match.
+                if attr.lower() != a.lower():
+                    continue
+                value = v
+                break
         else:
-            value = el.attrs.get(attr)
-            # Normalize class for XHTML like HTML
-            if attr.lower() == 'class' and isinstance(value, str):
-                value = [c for c in value.strip().split(' ') if c]
+            for k, v in el.attrs.items():
+                if attr.lower() != k.lower():
+                    continue
+                value = v
+                break
         return value
 
     def match_selectors(self, el, selectors):
@@ -194,19 +195,17 @@ class HtmlFilter(xml.XmlFilter):
 
         match = False
         for selector in selectors:
-            if (
-                selector.namespace is not None and
-                selector.namespace is not '*' and
-                (
-                    (el.prefix is None and selector.namespace) or
-                    (el.prefix is not None and el.prefix != selector.namespace)
-                )
-            ):
+            has_ns = self.supports_namespaces()
+            # Verify namespace
+            if has_ns and not self.match_namespace(el, selector.prefix):
                 continue
-            if selector.tag and selector.tag not in ((el.name.lower() if self.mode != 'xml' else el.name), '*'):
+            # Verify tag matches
+            if selector.tag and selector.tag not in ((el.name.lower() if not has_ns else el.name), '*'):
                 continue
+            # Verify id matches
             if selector.id and selector.id != el.attrs.get('id', ''):
                 continue
+            # Verify classes match
             if selector.classes:
                 current_classes = self.get_classes(el)
                 found = True
@@ -216,22 +215,9 @@ class HtmlFilter(xml.XmlFilter):
                         break
                 if not found:
                     continue
-            if selector.attributes:
-                found = True
-                for a in selector.attributes:
-                    value = self.get_attribute(el, a.attribute)
-                    if isinstance(value, list):
-                        value = ' '.join(value)
-                    if not value:
-                        found = False
-                        break
-                    elif a.pattern is None:
-                        continue
-                    elif a.pattern.match(value) is None:
-                        found = False
-                        break
-                if not found:
-                    continue
+            # Verify attribute(s) match
+            if not self.match_attributes(el, selector.attributes):
+                continue
             match = True
             break
         return match

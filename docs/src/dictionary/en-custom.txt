@@ -24,6 +24,7 @@ PySpelling
 PySpelling's
 PyYaml's
 SCSS
+SVG
 Stylesheets
 TODO
 Tox
@@ -55,6 +56,7 @@ lxml
 metadata
 mkdocs
 namespace
+namespaces
 overridable
 parsers
 pre

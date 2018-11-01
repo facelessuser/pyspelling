@@ -88,7 +88,7 @@ class PluginTestCase(unittest.TestCase):
             except Exception:
                 retry -= 1
 
-    def spellcheck(self, config_file, name=None, binary='', verbose=0, checker='', debug=False):
+    def spellcheck(self, config_file, name=None, binary='', verbose=0, checker='', debug=True):
         """Spell check."""
 
         words = set()

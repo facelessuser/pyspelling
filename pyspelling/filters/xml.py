@@ -31,11 +31,11 @@ RE_XML_ENCODE = re.compile(br'''(?i)^<\?xml[^>]*encoding=(['"])(.*?)\1[^>]*\?>''
 RE_XML_ENCODE_U = re.compile(r'''(?i)^<\?xml[^>]*encoding=(['"])(.*?)\1[^>]*\?>''')
 
 
-class Selector(namedtuple('IgnoreRule', ['tag', 'namespace', 'attributes'])):
+class Selector(namedtuple('IgnoreRule', ['tag', 'prefix', 'attributes'])):
     """Ignore rule."""
 
 
-class SelectorAttribute(namedtuple('AttrRule', ['attribute', 'pattern'])):
+class SelectorAttribute(namedtuple('AttrRule', ['attribute', 'prefix', 'pattern'])):
     """Selector attribute rule."""
 
 
@@ -44,13 +44,13 @@ class XmlFilter(filters.Filter):
 
     re_sel = re.compile(
         r'''(?x)
-        (?P<ns_tag>(?:(?:[-\w.]+|\*)\|)?(?:[-\w:.]+|\*)|\|\*) | # namespace:tag
-        \[(?P<attr>[\w\-:.]+)                                   # attributes
-            (?:(?P<cmp>[~^|*$]?=)                               # compare
-            (?P<value>\"[^"]+\"|'[^']'|[^'"\[\] \t\r\n]+))?     # attribute value
-            (?P<i>[ ]+i)?                                       # case insensitive
+        (?P<ns_tag>(?:(?:[-\w.]+|\*)?\|)?(?:[-\w:.]+|\*)) |                       # namespace:tag
+        \[(?P<ns_attr>(?:(?:[-\w]+|\*)\|)?[-\w:.]+)                               # namespace:attributes
+            (?:(?P<cmp>[~^|*$]?=)                                                 # compare
+            (?P<value>"(\\.|[^\\"]+)*?"|'(?:\\.|[^\\']+)*?'|[^'"\[\] \t\r\n]+))?  # attribute value
+            (?P<i>[ ]+i)?                                                         # case insensitive
         \] |
-        .+
+        .+                                                                        # not proper syntax
         '''
     )
 
@@ -59,10 +59,11 @@ class XmlFilter(filters.Filter):
 
         self.comments = options.get('comments', True) is True
         self.attributes = set(options.get('attributes', []))
-        self.mode = 'lxml'
-        self.prefix = 'xml'
+        self.parser = 'xml'
+        self.type = 'xml'
         self.ignores = self.process_selectors(*options.get('ignores', []))
         self.captures = self.process_selectors(*options.get('captures', ['*|*']))
+        self.namespaces = options.get('namespaces', {})
         super(XmlFilter, self).__init__(options, default_encoding)
 
     def _has_xml_encode(self, content):
@@ -117,6 +118,66 @@ class XmlFilter(filters.Filter):
 
         return self._has_xml_encode(content)
 
+    def get_namespace(self, el):
+        """Get the namespace for the element."""
+
+        namespace = ''
+        ns = el.namespace
+        if ns:
+            namespace = ns
+        return namespace
+
+    def create_attribute_selector(self, m):
+        """Create attribute selector from the returned regex match."""
+
+        flags = re.I if m.group('i') else 0
+        parts = [a.strip() for a in m.group('ns_attr').split('|')]
+        ns = ''
+        if len(parts) > 1:
+            ns = parts[0]
+            attr = parts[1]
+        else:
+            attr = parts[0]
+        op = m.group('cmp')
+        if op:
+            value = m.group('value')[1:-1] if m.group('value').startswith('"') else m.group('value')
+        else:
+            value = None
+        if not op:
+            # Attribute name
+            pattern = None
+        elif op.startswith('^'):
+            # Value start with
+            pattern = re.compile(r'^%s.*' % re.escape(value), flags)
+        elif op.startswith('$'):
+            # Value ends with
+            pattern = re.compile(r'.*?%s$' % re.escape(value), flags)
+        elif op.startswith('*'):
+            # Value contains
+            pattern = re.compile(r'.*?%s.*' % re.escape(value), flags)
+        elif op.startswith('~'):
+            # Value contains word within space separated list
+            pattern = re.compile(r'.*?(?:(?<=^)|(?<= ))%s(?=(?:[ ]|$)).*' % re.escape(value), flags)
+        elif op.startswith('|'):
+            # Value starts with word in dash separated list
+            pattern = re.compile(r'^%s(?=-).*' % re.escape(value), flags)
+        else:
+            # Value matches
+            pattern = re.compile(r'^%s$' % re.escape(value), flags)
+        return SelectorAttribute(attr, ns, pattern)
+
+    def parse_tag_pattern(self, m):
+        """Parse tag pattern from regex match."""
+
+        parts = m.group('ns_tag').split('|')
+        if len(parts) > 1:
+            prefix = parts[0]
+            tag = parts[1]
+        else:
+            tag = parts[0]
+            prefix = None
+        return prefix, tag
+
     def process_selectors(self, *args):
         """
         Process selectors.
@@ -132,92 +193,109 @@ class XmlFilter(filters.Filter):
             has_selector = False
             tag = None
             attributes = []
-            namespace = None
+            prefix = None
 
             for m in self.re_sel.finditer(selector):
-                flags = re.I if m.group('i') else 0
-                if m.group('attr'):
-                    attr = m.group('attr')
-                    op = m.group('cmp')
-                    if op:
-                        value = m.group('value')[1:-1] if m.group('value').startswith('"') else m.group('value')
-                    else:
-                        value = None
-                    if not op:
-                        # Attribute name
-                        pattern = None
-                    elif op.startswith('^'):
-                        # Value start with
-                        pattern = re.compile(r'^%s.*' % re.escape(value), flags)
-                    elif op.startswith('$'):
-                        # Value ends with
-                        pattern = re.compile(r'.*?%s$' % re.escape(value), flags)
-                    elif op.startswith('*'):
-                        # Value contains
-                        pattern = re.compile(r'.*?%s.*' % re.escape(value), flags)
-                    elif op.startswith('~'):
-                        # Value contains word within space separated list
-                        pattern = re.compile(r'.*?(?:(?<=^)|(?<= ))%s(?=(?:[ ]|$)).*' % re.escape(value), flags)
-                    elif op.startswith('|'):
-                        # Value starts with word in dash separated list
-                        pattern = re.compile(r'^%s(?=-).*' % re.escape(value), flags)
-                    else:
-                        # Value matches
-                        pattern = re.compile(r'^%s$' % re.escape(value), flags)
-                    attributes.append(SelectorAttribute(attr, pattern))
+                if m.group('ns_attr'):
+                    attributes.append(self.create_attribute_selector(m))
                     has_selector = True
-                elif m.group('ns_tag'):
-                    selector = m.group('ns_tag')
-                    parts = selector.split('|')
-                    if tag is None:
-                        if len(parts) > 1:
-                            namespace = parts[0]
-                            tag = parts[1]
-                        else:
-                            tag = parts[0]
-                        has_selector = True
-                    else:
-                        raise ValueError('Bad selector!')
+                elif m.group('ns_tag') and tag is None:
+                    prefix, tag = self.parse_tag_pattern(m)
+                    has_selector = True
                 else:
-                    raise ValueError('Bad selector!')
+                    raise ValueError("Bad selector '{}'".format(m.group(0)))
 
             if has_selector:
-                selectors.append(Selector(tag, namespace, tuple(attributes)))
+                selectors.append(Selector(tag, prefix, tuple(attributes)))
 
         return selectors
+
+    def get_attribute(self, el, attr, prefix):
+        """Get attribute from element if it exists."""
+
+        value = None
+        # If we have not defined namespaces, we can't very well find them, so don't bother trying.
+        if prefix and prefix not in self.namespaces and prefix != '*':
+            return None
+
+        for k, v in el.attrs.items():
+            parts = k.split(':', 1)
+            if len(parts) > 1:
+                if not parts[0]:
+                    a = k
+                    p = ''
+                else:
+                    p = parts[0]
+                    a = parts[1]
+            else:
+                p = ''
+                a = k
+            # Can't match a prefix attribute as we haven't specified one to match
+            if not prefix and p:
+                continue
+            # We can't match our desired prefix attribute as the attribute doesn't have a prefix
+            if prefix and not p and prefix != '*':
+                continue
+            # The prefix doesn't match
+            if prefix and prefix != '*' and prefix != p:
+                continue
+            # The attribute doesn't match.
+            if attr != a:
+                continue
+            value = v
+            break
+        return value
+
+    def match_namespace(self, el, p):
+        """Match the namespace of the element."""
+
+        match = True
+        namespace = self.get_namespace(el)
+        default_namespace = self.namespaces.get('')
+        # We must match the default namespace if one is not provided
+        if p is None and (default_namespace is not None and namespace != default_namespace):
+            match = False
+        # If we specified `|tag`, we must not have a namespace.
+        elif (p is not None and p == '' and namespace):
+            match = False
+        # Verify prefix matches
+        elif p and p != '*' and namespace != self.namespaces.get(p, ''):
+            match = False
+        return match
+
+    def match_attributes(self, el, attributes):
+        """Match attributes."""
+
+        match = True
+        if attributes:
+            for a in attributes:
+                value = self.get_attribute(el, a.attribute, a.prefix)
+                if isinstance(value, list):
+                    value = ' '.join(value)
+                if not value:
+                    match = False
+                    break
+                elif a.pattern is None:
+                    continue
+                elif a.pattern.match(value) is None:
+                    match = False
+                    break
+        return match
 
     def match_selectors(self, el, selectors):
         """Check if element matches one of the selectors."""
 
         match = False
         for selector in selectors:
-            if (
-                selector.namespace is not None and
-                selector.namespace is not '*' and
-                (
-                    (el.prefix is None and selector.namespace) or
-                    (el.prefix is not None and el.prefix != selector.namespace)
-                )
-            ):
+            # Verify namespace
+            if not self.match_namespace(el, selector.prefix):
                 continue
+            # Verify tag matches
             if selector.tag and selector.tag not in (el.name, '*'):
                 continue
-            if selector.attributes:
-                found = True
-                for a in selector.attributes:
-                    value = el.attrs.get(a.attribute)
-                    if isinstance(value, list):
-                        value = ' '.join(value)
-                    if not value:
-                        found = False
-                        break
-                    elif a.pattern is None:
-                        continue
-                    elif a.pattern.match(value) is None:
-                        found = False
-                        break
-                if not found:
-                    continue
+            # Verify attribute(s) match
+            if not self.match_attributes(el, selector.attributes):
+                continue
             match = True
             break
         return match
@@ -270,10 +348,11 @@ class XmlFilter(filters.Filter):
                         attributes.append((html.unescape(value), sel))
 
             # Walk children
-            for child in tree:
+            for child in list(tree):
+                string = str(child).strip()
                 is_comment = isinstance(child, bs4.Comment)
                 if isinstance(child, bs4.element.Tag):
-                    t, b, a, c = (self.to_text(child))
+                    t, b, a, c = self.to_text(child)
                     text.extend(t)
                     attributes.extend(a)
                     comments.extend(c)
@@ -300,15 +379,15 @@ class XmlFilter(filters.Filter):
         """Filter the source text."""
 
         content = []
-        blocks, attributes, comments = self.to_text(bs4.BeautifulSoup(text, self.mode))
+        blocks, attributes, comments = self.to_text(bs4.BeautifulSoup(text, self.parser))
         if self.comments:
             for c, desc in comments:
-                content.append(filters.SourceText(c, context + ': ' + desc, encoding, self.prefix + 'comment'))
+                content.append(filters.SourceText(c, context + ': ' + desc, encoding, self.type + 'comment'))
         if self.attributes:
             for a, desc in attributes:
-                content.append(filters.SourceText(a, context + ': ' + desc, encoding, self.prefix + 'attribute'))
+                content.append(filters.SourceText(a, context + ': ' + desc, encoding, self.type + 'attribute'))
         for b, desc in blocks:
-            content.append(filters.SourceText(b, context + ': ' + desc, encoding, self.prefix + 'content'))
+            content.append(filters.SourceText(b, context + ': ' + desc, encoding, self.type + 'content'))
         return content
 
     def filter(self, source_file, encoding):  # noqa A001

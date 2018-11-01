@@ -3,3 +3,4 @@ markdown
 pyyaml
 wcmatch>=2.0.3
 lxml
+html5lib
