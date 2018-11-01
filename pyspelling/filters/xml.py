@@ -61,7 +61,8 @@ class XmlFilter(filters.Filter):
         self.attributes = set(options.get('attributes', []))
         self.mode = 'lxml'
         self.prefix = 'xml'
-        self.selectors = self.process_selectors(*options.get('ignores', []))
+        self.ignores = self.process_selectors(*options.get('ignores', []))
+        self.captures = self.process_selectors(*options.get('captures', ['*|*']))
         super(XmlFilter, self).__init__(options, default_encoding)
 
     def _has_xml_encode(self, content):
@@ -185,11 +186,11 @@ class XmlFilter(filters.Filter):
 
         return selectors
 
-    def skip_tag(self, el):
-        """Determine if tag should be skipped."""
+    def match_selectors(self, el, selectors):
+        """Check if element matches one of the selectors."""
 
-        skip = False
-        for selector in self.selectors:
+        match = False
+        for selector in selectors:
             if (
                 selector.namespace is not None and
                 selector.namespace is not '*' and
@@ -217,9 +218,9 @@ class XmlFilter(filters.Filter):
                         break
                 if not found:
                     continue
-            skip = True
+            match = True
             break
-        return skip
+        return match
 
     def store_blocks(self, el, blocks, text, is_root):
         """Store the text as desired."""
@@ -258,9 +259,10 @@ class XmlFilter(filters.Filter):
         blocks = []
         root = tree.name == '[document]'
 
-        if root or not self.skip_tag(tree):
+        if root or not self.match_selectors(tree, self.ignores):
+            capture = self.match_selectors(tree, self.captures)
             # Check attributes for normal tags
-            if not root:
+            if not root and capture:
                 for attr in self.attributes:
                     value = tree.attrs.get(attr, '').strip()
                     if value:
@@ -283,7 +285,7 @@ class XmlFilter(filters.Filter):
                         if is_comment:
                             sel = self.construct_selector(tree) + '<!--comment-->'
                             comments.append((html.unescape(string), sel))
-                        else:
+                        elif capture:
                             text.append(string)
                             text.append(' ')
 

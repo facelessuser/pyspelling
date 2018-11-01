@@ -189,11 +189,11 @@ class HtmlFilter(xml.XmlFilter):
                 value = [c for c in value.strip().split(' ') if c]
         return value
 
-    def skip_tag(self, el):
-        """Determine if tag should be skipped."""
+    def match_selectors(self, el, selectors):
+        """Check if element matches one of the selectors."""
 
-        skip = False
-        for selector in self.selectors:
+        match = False
+        for selector in selectors:
             if (
                 selector.namespace is not None and
                 selector.namespace is not '*' and
@@ -232,9 +232,9 @@ class HtmlFilter(xml.XmlFilter):
                         break
                 if not found:
                     continue
-            skip = True
+            match = True
             break
-        return skip
+        return match
 
     def store_blocks(self, el, blocks, text, is_root):
         """Store the text as desired."""
