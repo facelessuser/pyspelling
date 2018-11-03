@@ -8,10 +8,13 @@ import zipfile
 import io
 import html
 from . import xml
+from wcmatch import glob
 
 
 class OdfFilter(xml.XmlFilter):
     """Spelling Python."""
+
+    FLAGS = glob.G | glob.N | glob.B
 
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
@@ -22,6 +25,7 @@ class OdfFilter(xml.XmlFilter):
         self.attributes = []
         self.parser = 'xml'
         self.type = 'odf'
+        self.filepattern = 'content.xml'
         self.ignores = []
         self.captures = self.process_selectors(*['text|*'])
         self.namespaces = {'text': 'urn:oasis:names:tc:opendocument:xmlns:text:1.0'}
@@ -31,32 +35,36 @@ class OdfFilter(xml.XmlFilter):
 
         return ''
 
-    def get_content(self, odf):
+    def get_zip_content(self, filename):
+        """Get zip content."""
+
+        with zipfile.ZipFile(filename, 'r') as z:
+            for item in z.infolist():
+                if glob.globmatch(item.filename, self.filepattern, flags=self.FLAGS):
+                    yield z.read(item.filename), item.filename
+
+    def get_content(self, zipbundle):
         """Get content."""
 
-        with zipfile.ZipFile(odf, 'r') as z:
-            content = z.read('content.xml')
+        for content, filename in self.get_zip_content(zipbundle):
+            with io.BytesIO(content) as b:
+                encoding = self._analyze_file(b)
+                if encoding is None:
+                    encoding = self.default_encoding
+                b.seek(0)
+                text = b.read().decode(encoding)
+            yield text, filename, encoding
 
-        with io.BytesIO(content) as b:
-            encoding = self._analyze_file(b)
-            if encoding is None:
-                encoding = self.default_encoding
-            b.seek(0)
-            content = b.read().decode(encoding)
+    def content_break(self, el):
+        """Break on specified boundaries."""
 
-        self.odf_encoding = encoding
-
-        return content
-
-    def is_paragraph(self, el):
-        """Check if paragraph."""
-
+        # Break for each paragraph.
         return el.name == 'p' and el.namespace and el.namespace == self.namespaces["text"]
 
     def store_blocks(self, el, blocks, text, is_root):
         """Store the text as desired."""
 
-        if is_root or self.is_paragraph(el):
+        if is_root or self.content_break(el):
             content = html.unescape(''.join(text))
             if content:
                 blocks.append((content, self.construct_selector(el)))
@@ -66,16 +74,18 @@ class OdfFilter(xml.XmlFilter):
     def filter(self, source_file, encoding):  # noqa A001
         """Parse XML file."""
 
-        return self._filter(self.get_content(source_file), source_file, self.odf_encoding)
+        sources = []
+        for content, filename, enc in self.get_content(source_file):
+            sources.extend(self._filter(content, source_file, enc))
+        return sources
 
     def sfilter(self, source):
         """Filter."""
 
-        return self._filter(
-            self.get_content(io.BytesIO(source.text.encode(source.encoding))),
-            source.context,
-            self.odf_encoding
-        )
+        sources = []
+        for content, filename, enc in self.get_content(io.BytesIO(source.text.encode(source.encoding))):
+            self.extend(self._filter(content, source.context, enc))
+        return sources
 
 
 def get_plugin():
