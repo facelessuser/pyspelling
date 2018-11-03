@@ -132,17 +132,23 @@ class Filter(object):
 
         encoding = None
         with contextlib.closing(mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)) as m:
-            # Check for BOMs
-            if self.CHECK_BOM:
-                encoding = self._has_bom(m.read(4))
-            m.seek(0)
-            # Check file extensions
-            if encoding is None:
-                encoding = self._utf_strip_bom(self.header_check(m.read(1024)))
-                m.seek(0)
-            if encoding is None:
-                m.seek(0)
-                encoding = self._utf_strip_bom(self.content_check(m))
+            encoding = self._analyze_file(m)
+        return encoding
+
+    def _analyze_file(self, f):
+        """Analyze the file."""
+
+        # Check for BOMs
+        if self.CHECK_BOM:
+            encoding = self._has_bom(f.read(4))
+        f.seek(0)
+        # Check file extensions
+        if encoding is None:
+            encoding = self._utf_strip_bom(self.header_check(f.read(1024)))
+            f.seek(0)
+        if encoding is None:
+            f.seek(0)
+            encoding = self._utf_strip_bom(self.content_check(f))
 
         return encoding
 
