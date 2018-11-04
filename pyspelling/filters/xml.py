@@ -323,6 +323,9 @@ class XmlFilter(filters.Filter):
             sel += '[%s]' % attr
         return sel
 
+    def extract_tag_metadata(self, el):
+        """Extract meta data."""
+
     def to_text(self, tree):
         """
         Extract text from tags.
@@ -330,6 +333,8 @@ class XmlFilter(filters.Filter):
         Skip any selectors specified and include attributes if specified.
         Ignored tags will not have their attributes scanned either.
         """
+
+        self.extract_tag_metadata(tree)
 
         text = []
         attributes = []

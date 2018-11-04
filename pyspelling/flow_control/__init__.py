@@ -11,6 +11,14 @@ class FlowControl(object):
     def __init__(self, config):
         """Initialization."""
 
+    def reset(self):
+        """Reset anything needed on each iteration."""
+
+    def _run(self, category):
+        """Run as chained plugin."""
+
+        return self.adjust_flow(category)
+
     def adjust_flow(self, category):
         """Adjust the flow of source control objects."""
 

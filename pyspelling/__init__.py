@@ -77,7 +77,7 @@ class SpellChecker(object):
                 if isinstance(f, flow_control.FlowControl):
                     err = ''
                     try:
-                        status = f.adjust_flow(source.category)
+                        status = f._run(source.category)
                     except Exception as e:
                         err = self.get_error(e)
                         yield filters.SourceText('', source.context, '', '', err)
@@ -90,7 +90,7 @@ class SpellChecker(object):
                     if flow_status == flow_control.ALLOW:
                         err = ''
                         try:
-                            srcs = f.sfilter(source)
+                            srcs = f._run(source)
                         except Exception as e:
                             err = self.get_error(e)
                             yield filters.SourceText('', source.context, '', '', err)
@@ -150,10 +150,10 @@ class SpellChecker(object):
                     self.log('> Processing: %s' % f, 1)
                     if pipeline:
                         try:
-                            yield pipeline[0]._parse(f)
+                            yield pipeline[0]._run_first(f)
                         except Exception as e:
                             err = self.get_error(e)
-                            yield filters.SourceText('', f, '', '', err)
+                            yield [filters.SourceText('', f, '', '', err)]
                     else:
                         try:
                             if self.default_encoding:
@@ -163,10 +163,10 @@ class SpellChecker(object):
                                 encoding = codecs.lookup(encoding).name
                             else:
                                 encoding = self.default_encoding
-                            yield filters.SourceText('', f, encoding, 'file')
+                            yield [filters.SourceText('', f, encoding, 'file')]
                         except Exception as e:
                             err = self.get_error(e)
-                            yield filters.SourceText('', f, '', '', err)
+                            yield [filters.SourceText('', f, '', '', err)]
 
     def setup_spellchecker(self, task):
         """Setup spell checker."""

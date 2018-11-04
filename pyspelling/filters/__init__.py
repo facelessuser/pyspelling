@@ -80,6 +80,9 @@ class Filter(object):
         self.config = config
         self.default_encoding = PYTHON_ENCODING_NAMES.get(default_encoding, default_encoding).lower()
 
+    def reset(self):
+        """Reset anything needed on each iteration."""
+
     def _is_very_large(self, size):
         """Check if content is very large."""
 
@@ -162,9 +165,10 @@ class Filter(object):
 
         return encoding
 
-    def _parse(self, source_file):
-        """Parse the file."""
+    def _run_first(self, source_file):
+        """Run on as first in chain."""
 
+        self.reset()
         self.current_encoding = self.default_encoding
         encoding = None
         try:
@@ -176,6 +180,12 @@ class Filter(object):
             else:
                 raise
         return content
+
+    def _run(self, source):
+        """Run chained."""
+
+        self.reset()
+        return self.sfilter(source)
 
     def _guess(self, filename):
         """Guess the encoding and decode the content of the file."""

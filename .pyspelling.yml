@@ -32,6 +32,99 @@ matrix:
       - .md-icon
   - pyspelling.filters.url:
 
+- name: odt
+  sources:
+  - '**/*.odt'
+  hunspell:
+    d: docs/src/dictionary/hunspell/en_US
+  aspell:
+    lang: en
+  dictionary:
+    wordlists:
+    - docs/src/dictionary/en-custom.txt
+    output: build/dictionary/mkdocs.dic
+  pipeline:
+  - pyspelling.filters.odf:
+  - pyspelling.filters.url:
+
+- name: odp
+  sources:
+  - '**/*.odp'
+  hunspell:
+    d: docs/src/dictionary/hunspell/en_US
+  aspell:
+    lang: en
+  dictionary:
+    wordlists:
+    - docs/src/dictionary/en-custom.txt
+    output: build/dictionary/mkdocs.dic
+  pipeline:
+  - pyspelling.filters.odf:
+  - pyspelling.filters.url:
+
+- name: ods
+  sources:
+  - '**/*.ods'
+  hunspell:
+    d: docs/src/dictionary/hunspell/en_US
+  aspell:
+    lang: en
+  dictionary:
+    wordlists:
+    - docs/src/dictionary/en-custom.txt
+    output: build/dictionary/mkdocs.dic
+  pipeline:
+  - pyspelling.filters.odf:
+  - pyspelling.filters.url:
+
+- name: docx
+  sources:
+  - '**/*.docx'
+  hunspell:
+    d: docs/src/dictionary/hunspell/en_US
+  aspell:
+    lang: en
+  dictionary:
+    wordlists:
+    - docs/src/dictionary/en-custom.txt
+    output: build/dictionary/mkdocs.dic
+  pipeline:
+  - pyspelling.filters.ooxml:
+      mode: documents
+  - pyspelling.filters.url:
+
+- name: pptx
+  sources:
+  - '**/*.pptx'
+  hunspell:
+    d: docs/src/dictionary/hunspell/en_US
+  aspell:
+    lang: en
+  dictionary:
+    wordlists:
+    - docs/src/dictionary/en-custom.txt
+    output: build/dictionary/mkdocs.dic
+  pipeline:
+  - pyspelling.filters.ooxml:
+      mode: presentation
+  - pyspelling.filters.url:
+
+- name: xlsx
+  sources:
+  - '**/*.xlsx'
+  hunspell:
+    d: docs/src/dictionary/hunspell/en_US
+  aspell:
+    lang: en
+  dictionary:
+    wordlists:
+    - docs/src/dictionary/en-custom.txt
+    output: build/dictionary/mkdocs.dic
+  pipeline:
+  - pyspelling.filters.ooxml:
+      mode: spreadsheet
+  - pyspelling.filters.url:
+
 - name: markdown
   sources:
   - README.md
