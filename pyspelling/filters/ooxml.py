@@ -56,6 +56,11 @@ class OoxmlFilter(odf.OdfFilter):
         self.captures = []
         self.namespaces = {}
 
+    def _detect_encoding(self, source_file):
+        """Detect encoding."""
+
+        return ''
+
     def determine_file_type(self, z):
         """Determine file type."""
 
@@ -108,6 +113,11 @@ class OoxmlFilter(odf.OdfFilter):
         else:
             context = ''
         return context
+
+    def get_sub_node(self, node):
+        """Extract node from document if desired."""
+
+        return node
 
     def filter(self, source_file, encoding):  # noqa A001
         """Parse XML file."""

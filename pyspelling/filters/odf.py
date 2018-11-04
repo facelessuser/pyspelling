@@ -7,6 +7,9 @@ from __future__ import unicode_literals
 import zipfile
 import io
 import html
+import bs4
+import codecs
+from .. import filters
 from . import xml
 from wcmatch import glob
 
@@ -44,7 +47,10 @@ class OdfFilter(xml.XmlFilter):
     def _detect_encoding(self, source_file):
         """Detect encoding."""
 
-        return ''
+        with open(source_file, 'rb') as f:
+            if f.read(2) == b'PK':
+                return ''
+        return super(OdfFilter, self)._detect_encoding(source_file)
 
     def determine_file_type(self, z):
         """Determine file type."""
@@ -113,20 +119,55 @@ class OdfFilter(xml.XmlFilter):
 
         self.additional_context = ""
 
+    def get_sub_node(self, node):
+        """Extract node from document if desired."""
+
+        subnode = node.find('office:document')
+        if subnode:
+            mimetype = subnode.attrs['office:mimetype']
+            self.type = MIMEMAP[mimetype]
+            node = node.find('office:body')
+        return node
+
+    def _filter(self, text, context, encoding):
+        """Filter the source text."""
+
+        content = []
+        soup = bs4.BeautifulSoup(text, self.parser)
+        soup = self.get_sub_node(soup)
+        blocks, attributes, comments = self.to_text(soup, True)
+        if self.comments:
+            for c, desc in comments:
+                content.append(filters.SourceText(c, context + ': ' + desc, encoding, self.type + 'comment'))
+        if self.attributes:
+            for a, desc in attributes:
+                content.append(filters.SourceText(a, context + ': ' + desc, encoding, self.type + 'attribute'))
+        for b, desc in blocks:
+            content.append(filters.SourceText(b, context + ': ' + desc, encoding, self.type + 'content'))
+        return content
+
     def filter(self, source_file, encoding):  # noqa A001
         """Parse XML file."""
 
         sources = []
-        for content, filename, enc in self.get_content(source_file):
-            sources.extend(self._filter(content, source_file, enc))
+        if encoding:
+            with codecs.open(source_file, 'r', encoding=encoding) as f:
+                src = f.read()
+            sources.extend(self._filter(src, source_file, encoding))
+        else:
+            for content, filename, enc in self.get_content(source_file):
+                sources.extend(self._filter(content, source_file, enc))
         return sources
 
     def sfilter(self, source):
         """Filter."""
 
         sources = []
-        for content, filename, enc in self.get_content(io.BytesIO(source.text.encode(source.encoding))):
-            self.extend(self._filter(content, source.context, enc))
+        if source[:2] != 'PK':
+            sources.extend(self._filter(source.text, source.context, source.encoding))
+        else:
+            for content, filename, enc in self.get_content(content, encoding):
+                sources.extend(self._filter(content, source.context, enc))
         return sources
 
 
