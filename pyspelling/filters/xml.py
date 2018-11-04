@@ -326,7 +326,7 @@ class XmlFilter(filters.Filter):
     def extract_tag_metadata(self, el):
         """Extract meta data."""
 
-    def to_text(self, tree):
+    def to_text(self, tree, root=False):
         """
         Extract text from tags.
 
@@ -340,7 +340,6 @@ class XmlFilter(filters.Filter):
         attributes = []
         comments = []
         blocks = []
-        root = tree.name == '[document]'
 
         if root or not self.match_selectors(tree, self.ignores):
             capture = self.match_selectors(tree, self.captures)
@@ -384,7 +383,7 @@ class XmlFilter(filters.Filter):
         """Filter the source text."""
 
         content = []
-        blocks, attributes, comments = self.to_text(bs4.BeautifulSoup(text, self.parser))
+        blocks, attributes, comments = self.to_text(bs4.BeautifulSoup(text, self.parser), True)
         if self.comments:
             for c, desc in comments:
                 content.append(filters.SourceText(c, context + ': ' + desc, encoding, self.type + 'comment'))
