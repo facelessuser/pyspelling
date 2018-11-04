@@ -166,7 +166,7 @@ class OdfFilter(xml.XmlFilter):
         if source[:2] != 'PK':
             sources.extend(self._filter(source.text, source.context, source.encoding))
         else:
-            for content, filename, enc in self.get_content(content, encoding):
+            for content, filename, enc in self.get_content(io.BytesIO(source.text.encode(source.encoding))):
                 sources.extend(self._filter(content, source.context, enc))
         return sources
 
