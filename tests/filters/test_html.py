@@ -21,10 +21,8 @@ class TestHTML(util.PluginTestCase):
                   attributes:
                   - alt
                   ignores:
-                  - code
-                  - pre
-                  - span.some-class
-                  - span#some-id
+                  - ':matches(code, pre)'
+                  - 'span:matches(.some-class, #some-id)'
             """
         ).format(self.tempdir)
         self.mktemp('.html.yml', config, 'utf-8')

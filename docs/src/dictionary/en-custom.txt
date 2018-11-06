@@ -53,6 +53,7 @@ gforcada
 globbing
 linter
 lxml
+matcher
 metadata
 mkdocs
 namespace

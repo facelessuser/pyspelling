@@ -10,6 +10,7 @@ import io
 import bs4
 from . import odf
 import re
+from ..util.css_selectors import SelectorMatcher
 
 DOC_PARAMS = {
     'docx': {
@@ -47,14 +48,18 @@ class OoxmlFilter(odf.OdfFilter):
 
         super(OoxmlFilter, self).__init__(options, default_encoding)
 
+    def setup(self):
+        """Setup."""
+
+        self.additional_context = ''
+        self.ancestry = []
         self.comments = False
         self.attributes = []
         self.parser = 'xml'
-        self.ignores = []
         self.type = ''
         self.filepattern = ''
-        self.captures = []
-        self.namespaces = {}
+        self.ignores = SelectorMatcher([], 'xml', {})
+        self.captures = None
 
     def _detect_encoding(self, source_file):
         """Detect encoding."""
@@ -81,8 +86,7 @@ class OoxmlFilter(odf.OdfFilter):
                 if self.type:
                     break
         self.filepattern = DOC_PARAMS[self.type]['filepattern']
-        self.captures = self.process_selectors(*DOC_PARAMS[self.type]['captures'])
-        self.namespaces = DOC_PARAMS[self.type]['namespaces']
+        self.captures = SelectorMatcher(DOC_PARAMS[self.type]['captures'], 'xml', DOC_PARAMS[self.type]['namespaces'])
 
     def soft_break(self, el, text):
         """Apply soft break."""

@@ -92,7 +92,7 @@ class PluginTestCase(unittest.TestCase):
         """Spell check."""
 
         words = set()
-        for results in spellcheck(os.path.join(self.tempdir, config_file), name, 'c:\\Users\\1000064655\\Documents\\hunspell\\bin\\hunspell.exe', verbose, 'hunspell', debug):
+        for results in spellcheck(os.path.join(self.tempdir, config_file), name, binary, verbose, checker, debug):
             if results.error:
                 print(results.error)
             words |= set(results.words)

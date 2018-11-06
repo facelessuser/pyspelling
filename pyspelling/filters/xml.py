@@ -9,7 +9,7 @@ import re
 import codecs
 import bs4
 import html
-from collections import namedtuple
+from ..util.css_selectors import SelectorMatcher
 
 NON_CONTENT = (bs4.Doctype, bs4.Declaration, bs4.CData, bs4.ProcessingInstruction)
 
@@ -31,49 +31,31 @@ RE_XML_ENCODE = re.compile(br'''(?i)^<\?xml[^>]*encoding=(['"])(.*?)\1[^>]*\?>''
 RE_XML_ENCODE_U = re.compile(r'''(?i)^<\?xml[^>]*encoding=(['"])(.*?)\1[^>]*\?>''')
 
 
-class Selector(namedtuple('Selector', ['tags', 'attributes', 'selectors', 'is_not'])):
-    """Selector."""
-
-
-class SelectorTag(namedtuple('SelectorTag', ['name', 'prefix'])):
-    """Selector tag."""
-
-
-class SelectorAttribute(namedtuple('AttrRule', ['attribute', 'prefix', 'pattern'])):
-    """Selector attribute rule."""
-
-
 class XmlFilter(filters.Filter):
     """Spelling Python."""
-
-    re_sel = re.compile(
-        r'''(?x)
-        (?P<pseudo_open>:(?:not|matches)\() |                                 # optinal pseudo selector wrapper
-        (?P<ns_tag>(?:(?:[-\w.]+|\*)?\|)?(?:[-\w:.]+|\*)) |                   # namespace:tag
-        \[(?P<ns_attr>(?:(?:[-\w]+|\*)\|)?[-\w:.]+)                           # namespace:attributes
-        (?:(?P<cmp>[~^|*$]?=)                                                 # compare
-        (?P<value>"(\\.|[^\\"]+)*?"|'(?:\\.|[^\\']+)*?'|[^'"\[\] \t\r\n]+))?  # attribute value
-        (?P<i>[ ]+i)?\] |                                                     # case insensitive
-        (?P<pseudo_close>\)) |                                                # optional pseudo selector close
-        (?P<split>\s*,\s*) |                                                  # Split for multiple selectors
-        (?P<invalid>.+)                                                       # not proper syntax
-        '''
-    )
 
     default_capture = ['*|*']
 
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
+        super(XmlFilter, self).__init__(options, default_encoding)
+        self.setup()
+
+    def setup(self):
+        """Setup."""
+
         self.ancestry = []
-        self.comments = options.get('comments', True) is True
-        self.attributes = set(options.get('attributes', []))
+        self.comments = self.config.get('comments', True) is True
+        self.attributes = set(self.config.get('attributes', []))
         self.parser = 'xml'
         self.type = 'xml'
-        self.ignores = self.process_selectors(*options.get('ignores', []))
-        self.captures = self.process_selectors(*options.get('captures', self.default_capture))
-        self.namespaces = options.get('namespaces', {})
-        super(XmlFilter, self).__init__(options, default_encoding)
+        self.ignores = SelectorMatcher(
+            self.config.get('ignores', []), self.type, self.config.get('namespaces', {})
+        )
+        self.captures = SelectorMatcher(
+            self.config.get('captures', self.default_capture), self.type, self.config.get('namespaces', {})
+        )
 
     def _has_xml_encode(self, content):
         """Check XML encoding."""
@@ -126,256 +108,6 @@ class XmlFilter(filters.Filter):
         """Special HTML encoding check."""
 
         return self._has_xml_encode(content)
-
-    def get_namespace(self, el):
-        """Get the namespace for the element."""
-
-        namespace = ''
-        ns = el.namespace
-        if ns:
-            namespace = ns
-        return namespace
-
-    def create_attribute_selector(self, m):
-        """Create attribute selector from the returned regex match."""
-
-        flags = re.I if m.group('i') else 0
-        parts = [a.strip() for a in m.group('ns_attr').split('|')]
-        ns = ''
-        if len(parts) > 1:
-            ns = parts[0]
-            attr = parts[1]
-        else:
-            attr = parts[0]
-        op = m.group('cmp')
-        if op:
-            value = m.group('value')[1:-1] if m.group('value').startswith('"') else m.group('value')
-        else:
-            value = None
-        if not op:
-            # Attribute name
-            pattern = None
-        elif op.startswith('^'):
-            # Value start with
-            pattern = re.compile(r'^%s.*' % re.escape(value), flags)
-        elif op.startswith('$'):
-            # Value ends with
-            pattern = re.compile(r'.*?%s$' % re.escape(value), flags)
-        elif op.startswith('*'):
-            # Value contains
-            pattern = re.compile(r'.*?%s.*' % re.escape(value), flags)
-        elif op.startswith('~'):
-            # Value contains word within space separated list
-            pattern = re.compile(r'.*?(?:(?<=^)|(?<= ))%s(?=(?:[ ]|$)).*' % re.escape(value), flags)
-        elif op.startswith('|'):
-            # Value starts with word in dash separated list
-            pattern = re.compile(r'^%s(?=-).*' % re.escape(value), flags)
-        else:
-            # Value matches
-            pattern = re.compile(r'^%s$' % re.escape(value), flags)
-        return SelectorAttribute(attr, ns, pattern)
-
-    def parse_tag_pattern(self, m):
-        """Parse tag pattern from regex match."""
-
-        parts = m.group('ns_tag').split('|')
-        if len(parts) > 1:
-            prefix = parts[0]
-            tag = parts[1]
-        else:
-            tag = parts[0]
-            prefix = None
-        return SelectorTag(tag, prefix)
-
-    def parse_selectors(self, iselector, is_pseudo=False, is_not=False):
-        """Parse selectors."""
-
-        selectors = []
-        has_selector = False
-        tag = []
-        attributes = []
-        sub_selectors = []
-        closed = False
-
-        try:
-            while True:
-                m = next(iselector)
-
-                # Handle parts
-                if m.group('pseudo_open'):
-                    if is_pseudo:
-                        raise ValueError("Cannot have nested `:pseudo()`")
-                    sub_selectors.extend(self.parse_selectors(iselector, True, m.group('pseudo_open') == ':not('))
-                    has_selector = True
-                elif m.group('pseudo_close'):
-                    if is_pseudo:
-                        closed = True
-                        break
-                    else:
-                        raise ValueError("Bad selector '{}'".format(m.group(0)))
-                elif m.group('split'):
-                    if has_selector:
-                        if not tag and not is_pseudo:
-                            # Implied `*`
-                            tag.append(SelectorTag('*', None))
-                        selectors.append(Selector(tag, tuple(attributes), sub_selectors, is_not))
-                    has_selector = False
-                    tag = []
-                    attributes = []
-                    sub_selectors = []
-                    continue
-                elif m.group('ns_attr'):
-                    attributes.append(self.create_attribute_selector(m))
-                    has_selector = True
-                elif m.group('ns_tag'):
-                    tag.append(self.parse_tag_pattern(m))
-                    has_selector = True
-                elif m.group('invalid'):
-                    raise ValueError("Bad selector '{}'".format(m.group(0)))
-        except StopIteration:
-            pass
-
-        if is_pseudo and not closed:
-            raise ValueError("Unclosed `:pseudo()`")
-
-        if has_selector:
-            if not tag and not is_pseudo:
-                # Implied `*`
-                tag.append(SelectorTag('*', None))
-            selectors.append(Selector(tag, tuple(attributes), sub_selectors, is_not))
-
-        return selectors
-
-    def process_selectors(self, *args):
-        """
-        Process selectors.
-
-        We do our own selectors as BeautifulSoup4 has some annoying quirks,
-        and we don't really need to do nth selectors or siblings or
-        descendants etc.
-        """
-
-        selectors = []
-
-        for selector in args:
-            iselector = self.re_sel.finditer(selector)
-            selectors.extend(self.parse_selectors(iselector))
-        return selectors
-
-    def get_attribute(self, el, attr, prefix):
-        """Get attribute from element if it exists."""
-
-        value = None
-        # If we have not defined namespaces, we can't very well find them, so don't bother trying.
-        if prefix and prefix not in self.namespaces and prefix != '*':
-            return None
-
-        for k, v in el.attrs.items():
-            parts = k.split(':', 1)
-            if len(parts) > 1:
-                if not parts[0]:
-                    a = k
-                    p = ''
-                else:
-                    p = parts[0]
-                    a = parts[1]
-            else:
-                p = ''
-                a = k
-            # Can't match a prefix attribute as we haven't specified one to match
-            if not prefix and p:
-                continue
-            # We can't match our desired prefix attribute as the attribute doesn't have a prefix
-            if prefix and not p and prefix != '*':
-                continue
-            # The prefix doesn't match
-            if prefix and p and prefix != '*' and prefix != p:
-                continue
-            # The attribute doesn't match.
-            if attr != a:
-                continue
-            value = v
-            break
-        return value
-
-    def match_namespace(self, el, tag):
-        """Match the namespace of the element."""
-
-        match = True
-        namespace = self.get_namespace(el)
-        default_namespace = self.namespaces.get('')
-        # We must match the default namespace if one is not provided
-        if tag.prefix is None and (default_namespace is not None and namespace != default_namespace):
-            match = False
-        # If we specified `|tag`, we must not have a namespace.
-        elif (tag.prefix is not None and tag.prefix == '' and namespace):
-            match = False
-        # Verify prefix matches
-        elif (
-            tag.prefix and
-            tag.prefix != '*' and namespace != self.namespaces.get(tag.prefix, '')
-        ):
-            match = False
-        return match
-
-    def match_attributes(self, el, attributes):
-        """Match attributes."""
-
-        match = True
-        if attributes:
-            for a in attributes:
-                value = self.get_attribute(el, a.attribute, a.prefix)
-                if isinstance(value, list):
-                    value = ' '.join(value)
-                if a.pattern is None and value is None:
-                    match = False
-                    break
-                elif a.pattern is not None and value is None:
-                    match = False
-                    break
-                elif a.pattern is None:
-                    continue
-                elif value is None or a.pattern.match(value) is None:
-                    match = False
-                    break
-        return match
-
-    def match_tagname(self, el, tag):
-        """Match tag name."""
-
-        return not (tag.name and tag.name not in (el.name, '*'))
-
-    def match_tag(self, el, tags):
-        """Match the tag."""
-
-        match = True
-        for t in tags:
-            # Verify namespace
-            if not self.match_namespace(el, t):
-                match = False
-                break
-            if not self.match_tagname(el, t):
-                match = False
-                break
-        return match
-
-    def match_selectors(self, el, selectors):
-        """Check if element matches one of the selectors."""
-
-        match = False
-        for selector in selectors:
-            # Verify tag matches
-            if not self.match_tag(el, selector.tags):
-                continue
-            # Verify attribute(s) match
-            if not self.match_attributes(el, selector.attributes):
-                continue
-            if selector.selectors and not self.match_selectors(el, selector.selectors):
-                continue
-            match = not selector.is_not
-            break
-
-        return match
 
     def store_blocks(self, el, blocks, text, is_root):
         """Store the text as desired."""
@@ -438,8 +170,8 @@ class XmlFilter(filters.Filter):
         comments = []
         blocks = []
 
-        if root or not self.match_selectors(tree, self.ignores):
-            capture = self.match_selectors(tree, self.captures)
+        if root or not self.ignores.match(tree):
+            capture = self.captures.match(tree)
             # Check attributes for normal tags
             if not root and capture:
                 for attr in self.attributes:

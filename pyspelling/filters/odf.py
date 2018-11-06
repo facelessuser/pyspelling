@@ -12,6 +12,7 @@ import codecs
 from .. import filters
 from . import xml
 from wcmatch import glob
+from ..util.css_selectors import SelectorMatcher
 
 MIMEMAP = {
     'application/vnd.oasis.opendocument.spreadsheet': 'ods',
@@ -25,24 +26,33 @@ class OdfFilter(xml.XmlFilter):
 
     FLAGS = glob.G | glob.N | glob.B
 
+    default_capture = ['text|*']
+
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
         super(OdfFilter, self).__init__(options, default_encoding)
 
+    def setup(self):
+        """Setup."""
+
         self.additional_context = ''
+        self.ancestry = []
         self.comments = False
         self.attributes = []
         self.parser = 'xml'
         self.type = 'odf'
         self.filepattern = 'content.xml'
-        self.ignores = []
-        self.captures = self.process_selectors(*['text|*'])
-        self.slide_num = None
-        self.namespaces = {
+        namespaces = {
             'text': 'urn:oasis:names:tc:opendocument:xmlns:text:1.0',
             'draw': 'urn:oasis:names:tc:opendocument:xmlns:drawing:1.0'
         }
+        self.ignores = SelectorMatcher(
+            [], 'xml', namespaces
+        )
+        self.captures = SelectorMatcher(
+            self.default_capture, 'xml', namespaces
+        )
 
     def _detect_encoding(self, source_file):
         """Detect encoding."""
