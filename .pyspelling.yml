@@ -19,17 +19,10 @@ matrix:
       - title
       - alt
       ignores:
-      - code
-      - pre
-      - a.magiclink-compare
-      - a.magiclink-commit
+      - :matches(code, pre)
+      - a:matches(magiclink-compare, magiclink-commit)
       - span.keys
-      - .MathJax_Preview
-      - .md-nav__link
-      - .md-footer-custom-text
-      - .md-source__repository
-      - .headerlink
-      - .md-icon
+      - :matches(.MathJax_Preview, .md-nav__link, .md-footer-custom-text, .md-source__repository, .headerlink, .md-icon)
   - pyspelling.filters.url:
 
 - name: odt

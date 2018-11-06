@@ -164,6 +164,9 @@ class TestHTML5LIB(util.PluginTestCase):
             """
             <html>
             <head>
+            <script>
+            ffffff
+            </script>
             </head>
             <body>
             <!-- {} -->

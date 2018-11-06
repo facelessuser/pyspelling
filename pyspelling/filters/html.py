@@ -21,7 +21,7 @@ MODE = {'html': 'lxml', 'xhtml': 'xml', 'html5': 'html5lib'}
 XHTML_NAMESPACE = ('http://www.w3.org/1999/xhtml',)
 
 
-class HtmlSelector(namedtuple('HtmlSelector', ['tags', 'ids', 'classes', 'attributes'])):
+class HtmlSelector(namedtuple('HtmlSelector', ['tags', 'ids', 'classes', 'attributes', 'selectors', 'is_not'])):
     """Ignore rule."""
 
 
@@ -30,17 +30,16 @@ class HtmlFilter(xml.XmlFilter):
 
     re_sel = re.compile(
         r'''(?x)
-        (?P<not_open>:not\()?(?:                                                    # optinal pseudo selector wrapper
-            (?P<class_id>(?:\#|\.)[-\w]+) |                                         #.class and #id
-            (?P<ns_tag>(?:(?:[-\w]+|\*)?\|)?(?:[-\w:]+|\*)) |                       # namespace:tag
-            \[(?P<ns_attr>(?:(?:[-\w]+|\*)?\|)?[-\w:]+)                             # namespace:attributes
-                (?:(?P<cmp>[~^|*$]?=)                                               # compare
-                (?P<value>"(\\.|[^\\"]+)*?"|'(\\.|[^\\']+)*?'|[^'"\[\] \t\r\n]+))?  # attribute value
-                (?P<i>[ ]+i)?                                                       # case insensitive
-            \]
-        )(?P<not_close>\))? |                                                       # optional psuedo selector close
-        (?P<split>\s*,\s*) |                                                        # split multiple selectors
-        .+                                                                          # not proper syntax
+        (?P<pseudo_open>:(?:not|matches)\() |                               # optinal pseudo selector wrapper
+        (?P<class_id>(?:\#|\.)[-\w]+) |                                     #.class and #id
+        (?P<ns_tag>(?:(?:[-\w]+|\*)?\|)?(?:[-\w:]+|\*)) |                   # namespace:tag
+        \[(?P<ns_attr>(?:(?:[-\w]+|\*)?\|)?[-\w:]+)                         # namespace:attributes
+        (?:(?P<cmp>[~^|*$]?=)                                               # compare
+        (?P<value>"(\\.|[^\\"]+)*?"|'(\\.|[^\\']+)*?'|[^'"\[\] \t\r\n]+))?  # attribute value
+        (?P<i>[ ]+i)? \] |                                                  # case insensitive
+        (?P<pseudo_close>\)) |                                              # optional pseudo selector close
+        (?P<split>\s*,\s*) |                                                # split multiple selectors
+        (?P<invalid>).+                                                     # not proper syntax
         '''
     )
 
@@ -55,7 +54,7 @@ class HtmlFilter(xml.XmlFilter):
         'script', 'style', 'table', 'video', 'body', 'head'
     ]
 
-    default_capture = ['*|*:not(script):not(style)']
+    default_capture = ['*|*:not(script, style)']
 
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
@@ -91,7 +90,7 @@ class HtmlFilter(xml.XmlFilter):
 
         return el.name.lower() in self.block_tags
 
-    def process_selectors(self, *args):
+    def parse_selectors(self, iselector, is_pseudo=False, is_not=False):
         """
         Process selectors.
 
@@ -101,58 +100,72 @@ class HtmlFilter(xml.XmlFilter):
         """
 
         selectors = []
+        has_selector = False
+        tag = []
+        attributes = []
+        tag_id = []
+        classes = []
+        sub_selectors = []
+        closed = False
 
-        for selector in args:
-            has_selector = False
-            tag = []
-            attributes = []
-            tag_id = []
-            classes = []
-
-            for m in self.re_sel.finditer(selector):
-                # Track if this is `not` and fail if syntax is broken
-                if m.group('not_open') and m.group('not_close'):
-                    is_not = True
-                elif m.group('not_open') or m.group('not_close'):
-                    raise ValueError("Bad selector '{}'".format(m.group(0)))
-                else:
-                    is_not = False
+        try:
+            while True:
+                m = next(iselector)
 
                 # Handle parts
-                if m.group('split'):
+                if m.group('pseudo_open'):
+                    if is_pseudo:
+                        raise ValueError("Cannot have nested `:pseudo()`")
+                    sub_selectors.extend(self.parse_selectors(iselector, True, m.group('pseudo_open') == ':not('))
+                    has_selector = True
+                elif m.group('pseudo_close'):
+                    if is_pseudo:
+                        closed = True
+                        break
+                    else:
+                        raise ValueError("Bad selector '{}'".format(m.group(0)))
+                elif m.group('split'):
                     if has_selector:
-                        if not tag:
+                        if not tag and not is_pseudo:
                             # Implied `*`
-                            tag.append(xml.SelectorTag('*', None, False))
-                        selectors.append(HtmlSelector(tag, tag_id, tuple(classes), tuple(attributes)))
+                            tag.append(xml.SelectorTag('*', None))
+                        selectors.append(
+                            HtmlSelector(tag, tag_id, tuple(classes), tuple(attributes), sub_selectors, is_not)
+                        )
                     has_selector = False
                     tag = []
                     attributes = []
                     tag_id = []
                     classes = []
+                    sub_selectors = []
                     continue
                 elif m.group('ns_attr'):
-                    attributes.append(self.create_attribute_selector(m, is_not))
+                    attributes.append(self.create_attribute_selector(m))
                     has_selector = True
                 elif m.group('ns_tag'):
-                    tag.append(self.parse_tag_pattern(m, is_not))
+                    tag.append(self.parse_tag_pattern(m))
                     has_selector = True
                 elif m.group('class_id'):
                     selector = m.group('class_id')
                     if selector.startswith('.'):
-                        classes.append(xml.SelectorString(selector[1:], is_not))
+                        classes.append(selector[1:])
                         has_selector = True
                     else:
-                        tag_id.append(xml.SelectorString(selector[1:], is_not))
+                        tag_id.append(selector[1:])
                         has_selector = True
-                else:
+                elif m.group('invalid'):
                     raise ValueError("Bad selector '{}'".format(m.group(0)))
+        except StopIteration:
+            pass
 
-            if has_selector:
-                if not tag:
-                    # Implied `*`
-                    tag.append(xml.SelectorTag('*', None, False))
-                selectors.append(HtmlSelector(tag, tag_id, tuple(classes), tuple(attributes)))
+        if is_pseudo and not closed:
+            raise ValueError("Unclosed `:pseudo()`")
+
+        if has_selector:
+            if not tag and not is_pseudo:
+                # Implied `*`
+                tag.append(xml.SelectorTag('*', None))
+            selectors.append(HtmlSelector(tag, tag_id, tuple(classes), tuple(attributes), sub_selectors, is_not))
 
         return selectors
 
@@ -169,7 +182,7 @@ class HtmlFilter(xml.XmlFilter):
 
         return self.type in ('html5', 'xhtml')
 
-    def get_attribute(self, el, attr, prefix, is_not):
+    def get_attribute(self, el, attr, prefix):
         """Get attribute from element if it exists."""
 
         value = None
@@ -178,7 +191,7 @@ class HtmlFilter(xml.XmlFilter):
         elif self.supports_namespaces():
             value = None
             # If we have not defined namespaces, we can't very well find them, so don't bother trying.
-            if prefix and self.selector_equal(prefix not in self.namespaces and prefix != '*', is_not):
+            if prefix and prefix not in self.namespaces and prefix != '*':
                 return None
 
             for k, v in el.attrs.items():
@@ -194,22 +207,22 @@ class HtmlFilter(xml.XmlFilter):
                     p = ''
                     a = k
                 # Can't match a prefix attribute as we haven't specified one to match
-                if self.selector_equal(not prefix and p, is_not):
+                if not prefix and p:
                     continue
                 # We can't match our desired prefix attribute as the attribute doesn't have a prefix
-                if prefix and not p and self.selector_equal(prefix != '*', is_not):
+                if prefix and not p and prefix != '*':
                     continue
                 # The prefix doesn't match
-                if prefix and p and self.selector_equal(prefix != '*' and prefix.lower() != p.lower(), is_not):
+                if prefix and p and prefix != '*' and prefix.lower() != p.lower():
                     continue
                 # The attribute doesn't match.
-                if self.selector_equal(attr.lower() != a.lower(), is_not):
+                if attr.lower() != a.lower():
                     continue
                 value = v
                 break
         else:
             for k, v in el.attrs.items():
-                if self.selector_equal(attr.lower() != k.lower(), is_not):
+                if attr.lower() != k.lower():
                     continue
                 value = v
                 break
@@ -220,10 +233,7 @@ class HtmlFilter(xml.XmlFilter):
 
         return not (
             tag.name and
-            self.selector_equal(
-                tag.name not in ((el.name.lower() if not self.supports_namespaces() else el.name), '*'),
-                tag.is_not
-            )
+            tag.name not in ((el.name.lower() if not self.supports_namespaces() else el.name), '*')
         )
 
     def match_tag(self, el, tags):
@@ -246,6 +256,7 @@ class HtmlFilter(xml.XmlFilter):
 
         match = False
         for selector in selectors:
+            match = selector.is_not
             # Verify tag matches
             if not self.match_tag(el, selector.tags):
                 continue
@@ -253,7 +264,7 @@ class HtmlFilter(xml.XmlFilter):
             if selector.ids:
                 found = True
                 for i in selector.ids:
-                    if self.selector_equal(i != el.attrs.get('id', ''), i.is_not):
+                    if i != el.attrs.get('id', ''):
                         found = False
                         break
                 if not found:
@@ -263,7 +274,7 @@ class HtmlFilter(xml.XmlFilter):
                 current_classes = self.get_classes(el)
                 found = True
                 for c in selector.classes:
-                    if self.selector_equal(c not in current_classes, c.is_not):
+                    if c not in current_classes:
                         found = False
                         break
                 if not found:
@@ -271,8 +282,11 @@ class HtmlFilter(xml.XmlFilter):
             # Verify attribute(s) match
             if not self.match_attributes(el, selector.attributes):
                 continue
-            match = True
+            if selector.selectors and not self.match_selectors(el, selector.selectors):
+                continue
+            match = not selector.is_not
             break
+
         return match
 
     def store_blocks(self, el, blocks, text, is_root):
@@ -291,8 +305,9 @@ class HtmlFilter(xml.XmlFilter):
         selector = []
         for ancestor in self.ancestry:
             if ancestor is not el:
-                selector.append(ancestor.name)
-            else:
+                if ancestor.name != '[document]':
+                    selector.append(ancestor.name)
+            elif ancestor.name != '[document]':
                 tag = ancestor.name
                 prefix = ancestor.prefix
                 classes = self.get_classes(ancestor)
@@ -308,7 +323,7 @@ class HtmlFilter(xml.XmlFilter):
                 if attr:
                     sel += '[%s]' % attr
                 selector.append(sel)
-        return ' '.join(selector)
+        return '>'.join(selector)
 
 
 def get_plugin():
