@@ -122,7 +122,8 @@ class HtmlFilter(xml.XmlFilter):
                 if m.group('split'):
                     if has_selector:
                         if not tag:
-                            tag.append(xml.SelectorTag(None, None, False))
+                            # Implied `*`
+                            tag.append(xml.SelectorTag('*', None, False))
                         selectors.append(HtmlSelector(tag, tag_id, tuple(classes), tuple(attributes)))
                     has_selector = False
                     tag = []
@@ -149,7 +150,8 @@ class HtmlFilter(xml.XmlFilter):
 
             if has_selector:
                 if not tag:
-                    tag.append(xml.SelectorTag(None, None, False))
+                    # Implied `*`
+                    tag.append(xml.SelectorTag('*', None, False))
                 selectors.append(HtmlSelector(tag, tag_id, tuple(classes), tuple(attributes)))
 
         return selectors
@@ -286,21 +288,27 @@ class HtmlFilter(xml.XmlFilter):
     def construct_selector(self, el, attr=''):
         """Construct an selector for context."""
 
-        tag = el.name
-        prefix = el.prefix
-        classes = self.get_classes(el)
-        tag_id = el.attrs.get('id', '').strip()
-        sel = ''
-        if prefix:
-            sel += prefix + '|'
-        sel += tag
-        if tag_id:
-            sel += '#' + tag_id
-        if classes:
-            sel += '.' + '.'.join(classes)
-        if attr:
-            sel += '[%s]' % attr
-        return sel
+        selector = []
+        for ancestor in self.ancestry:
+            if ancestor is not el:
+                selector.append(ancestor.name)
+            else:
+                tag = ancestor.name
+                prefix = ancestor.prefix
+                classes = self.get_classes(ancestor)
+                tag_id = ancestor.attrs.get('id', '').strip()
+                sel = ''
+                if prefix:
+                    sel += prefix + '|'
+                sel += tag
+                if tag_id:
+                    sel += '#' + tag_id
+                if classes:
+                    sel += '.' + '.'.join(classes)
+                if attr:
+                    sel += '[%s]' % attr
+                selector.append(sel)
+        return ' '.join(selector)
 
 
 def get_plugin():

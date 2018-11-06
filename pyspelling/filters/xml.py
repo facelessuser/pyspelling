@@ -41,6 +41,7 @@ class SelectorString(str):
         setattr(sel_str, '_not', inverse)
         return sel_str
 
+    @property
     def is_not(self):
         """Check if is not."""
 
@@ -233,7 +234,8 @@ class XmlFilter(filters.Filter):
                 if m.group('split'):
                     if has_selector:
                         if not tag:
-                            tag.append(SelectorTag(None, None, False))
+                            # Implied `*`
+                            tag.append(SelectorTag('*', None, False))
                         selectors.append(Selector(tag, tuple(attributes)))
                     has_selector = False
                     tag = []
@@ -250,7 +252,8 @@ class XmlFilter(filters.Filter):
 
             if has_selector:
                 if not tag:
-                    tag.append(SelectorTag(None, None, False))
+                    # Implied `*`
+                    tag.append(SelectorTag('*', None, False))
                 selectors.append(Selector(tag, tuple(attributes)))
 
         return selectors
@@ -385,15 +388,21 @@ class XmlFilter(filters.Filter):
     def construct_selector(self, el, attr=''):
         """Construct an selector for context."""
 
-        tag = el.name
-        prefix = el.prefix
-        sel = ''
-        if prefix:
-            sel += prefix + '|'
-        sel = tag
-        if attr:
-            sel += '[%s]' % attr
-        return sel
+        selector = []
+        for ancestor in self.ancestry:
+            if ancestor is not el:
+                selector.append(ancestor.name)
+            else:
+                tag = ancestor.name
+                prefix = ancestor.prefix
+                sel = ''
+                if prefix:
+                    sel += prefix + '|'
+                sel = tag
+                if attr:
+                    sel += '[%s]' % attr
+                selector.append(sel)
+        return ' '.join(selector)
 
     def extract_tag_metadata(self, el):
         """Extract meta data."""
