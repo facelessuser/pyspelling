@@ -21,7 +21,7 @@ MODE = {'html': 'lxml', 'xhtml': 'xml', 'html5': 'html5lib'}
 XHTML_NAMESPACE = ('http://www.w3.org/1999/xhtml',)
 
 
-class HtmlSelector(namedtuple('IgnoreRule', ['tag', 'prefix', 'id', 'classes', 'attributes'])):
+class HtmlSelector(namedtuple('HtmlSelector', ['tags', 'ids', 'classes', 'attributes'])):
     """Ignore rule."""
 
 
@@ -30,14 +30,17 @@ class HtmlFilter(xml.XmlFilter):
 
     re_sel = re.compile(
         r'''(?x)
-        (?P<class_id>(?:\#|\.)[-\w]+) |                                         #.class and #id
-        (?P<ns_tag>(?:(?:[-\w]+|\*)?\|)?(?:[-\w:]+|\*)) |                       # namespace:tag
-        \[(?P<ns_attr>(?:(?:[-\w]+|\*)?\|)?[-\w:]+)                             # namespace:attributes
-            (?:(?P<cmp>[~^|*$]?=)                                               # compare
-            (?P<value>"(\\.|[^\\"]+)*?"|'(\\.|[^\\']+)*?'|[^'"\[\] \t\r\n]+))?  # attribute value
-            (?P<i>[ ]+i)?                                                       # case insensitive
-        \] |
-        .+                                                                      # not proper syntax
+        (?P<not_open>:not\()?(?:                                                    # optinal pseudo selector wrapper
+            (?P<class_id>(?:\#|\.)[-\w]+) |                                         #.class and #id
+            (?P<ns_tag>(?:(?:[-\w]+|\*)?\|)?(?:[-\w:]+|\*)) |                       # namespace:tag
+            \[(?P<ns_attr>(?:(?:[-\w]+|\*)?\|)?[-\w:]+)                             # namespace:attributes
+                (?:(?P<cmp>[~^|*$]?=)                                               # compare
+                (?P<value>"(\\.|[^\\"]+)*?"|'(\\.|[^\\']+)*?'|[^'"\[\] \t\r\n]+))?  # attribute value
+                (?P<i>[ ]+i)?                                                       # case insensitive
+            \]
+        )(?P<not_close>\))? |                                                       # optional psuedo selector close
+        (?P<split>\s*,\s*) |                                                        # split multiple selectors
+        .+                                                                          # not proper syntax
         '''
     )
 
@@ -51,6 +54,8 @@ class HtmlFilter(xml.XmlFilter):
         'canvas', 'group', 'iframe', 'math', 'noscript', 'output',
         'script', 'style', 'table', 'video', 'body', 'head'
     ]
+
+    default_capture = ['*|*:not(script):not(style)']
 
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
@@ -95,39 +100,57 @@ class HtmlFilter(xml.XmlFilter):
         descendants etc.
         """
 
-        selectors = [
-            HtmlSelector('style', None, None, tuple(), tuple()),
-            HtmlSelector('script', None, None, tuple(), tuple()),
-        ]
+        selectors = []
 
         for selector in args:
             has_selector = False
-            tag = None
+            tag = []
             attributes = []
-            prefix = None
-            tag_id = None
-            classes = set()
+            tag_id = []
+            classes = []
 
             for m in self.re_sel.finditer(selector):
-                if m.group('ns_attr'):
-                    attributes.append(self.create_attribute_selector(m))
+                # Track if this is `not` and fail if syntax is broken
+                if m.group('not_open') and m.group('not_close'):
+                    is_not = True
+                elif m.group('not_open') or m.group('not_close'):
+                    raise ValueError("Bad selector '{}'".format(m.group(0)))
+                else:
+                    is_not = False
+
+                # Handle parts
+                if m.group('split'):
+                    if has_selector:
+                        if not tag:
+                            tag.append(xml.SelectorTag(None, None, False))
+                        selectors.append(HtmlSelector(tag, tag_id, tuple(classes), tuple(attributes)))
+                    has_selector = False
+                    tag = []
+                    attributes = []
+                    tag_id = []
+                    classes = []
+                    continue
+                elif m.group('ns_attr'):
+                    attributes.append(self.create_attribute_selector(m, is_not))
                     has_selector = True
-                elif m.group('ns_tag') and tag is None:
-                    prefix, tag = self.parse_tag_pattern(m)
+                elif m.group('ns_tag'):
+                    tag.append(self.parse_tag_pattern(m, is_not))
                     has_selector = True
                 elif m.group('class_id'):
                     selector = m.group('class_id')
                     if selector.startswith('.'):
-                        classes.add(selector[1:])
+                        classes.append(xml.SelectorString(selector[1:], is_not))
                         has_selector = True
-                    elif tag_id is None:
-                        tag_id = selector[1:]
+                    else:
+                        tag_id.append(xml.SelectorString(selector[1:], is_not))
                         has_selector = True
                 else:
-                    raise ValueError('Bad selector!')
+                    raise ValueError("Bad selector '{}'".format(m.group(0)))
 
             if has_selector:
-                selectors.append(HtmlSelector(tag, prefix, tag_id, tuple(classes), tuple(attributes)))
+                if not tag:
+                    tag.append(xml.SelectorTag(None, None, False))
+                selectors.append(HtmlSelector(tag, tag_id, tuple(classes), tuple(attributes)))
 
         return selectors
 
@@ -144,7 +167,7 @@ class HtmlFilter(xml.XmlFilter):
 
         return self.type in ('html5', 'xhtml')
 
-    def get_attribute(self, el, attr, prefix):
+    def get_attribute(self, el, attr, prefix, is_not):
         """Get attribute from element if it exists."""
 
         value = None
@@ -153,7 +176,7 @@ class HtmlFilter(xml.XmlFilter):
         elif self.supports_namespaces():
             value = None
             # If we have not defined namespaces, we can't very well find them, so don't bother trying.
-            if prefix and prefix not in self.namespaces and prefix != '*':
+            if prefix and self.selector_equal(prefix not in self.namespaces and prefix != '*', is_not):
                 return None
 
             for k, v in el.attrs.items():
@@ -169,48 +192,76 @@ class HtmlFilter(xml.XmlFilter):
                     p = ''
                     a = k
                 # Can't match a prefix attribute as we haven't specified one to match
-                if not prefix and p:
+                if self.selector_equal(not prefix and p, is_not):
                     continue
                 # We can't match our desired prefix attribute as the attribute doesn't have a prefix
-                if prefix and not p and prefix != '*':
+                if prefix and not p and self.selector_equal(prefix != '*', is_not):
                     continue
                 # The prefix doesn't match
-                if prefix and prefix != '*' and prefix.lower() != p.lower():
+                if prefix and p and self.selector_equal(prefix != '*' and prefix.lower() != p.lower(), is_not):
                     continue
                 # The attribute doesn't match.
-                if attr.lower() != a.lower():
+                if self.selector_equal(attr.lower() != a.lower(), is_not):
                     continue
                 value = v
                 break
         else:
             for k, v in el.attrs.items():
-                if attr.lower() != k.lower():
+                if self.selector_equal(attr.lower() != k.lower(), is_not):
                     continue
                 value = v
                 break
         return value
+
+    def match_tagname(self, el, tag):
+        """Match tag name."""
+
+        return not (
+            tag.name and
+            self.selector_equal(
+                tag.name not in ((el.name.lower() if not self.supports_namespaces() else el.name), '*'),
+                tag.is_not
+            )
+        )
+
+    def match_tag(self, el, tags):
+        """Match the tag."""
+
+        has_ns = self.supports_namespaces()
+        match = True
+        for t in tags:
+            # Verify namespace
+            if has_ns and not self.match_namespace(el, t):
+                match = False
+                break
+            if not self.match_tagname(el, t):
+                match = False
+                break
+        return match
 
     def match_selectors(self, el, selectors):
         """Check if element matches one of the selectors."""
 
         match = False
         for selector in selectors:
-            has_ns = self.supports_namespaces()
-            # Verify namespace
-            if has_ns and not self.match_namespace(el, selector.prefix):
-                continue
             # Verify tag matches
-            if selector.tag and selector.tag not in ((el.name.lower() if not has_ns else el.name), '*'):
+            if not self.match_tag(el, selector.tags):
                 continue
             # Verify id matches
-            if selector.id and selector.id != el.attrs.get('id', ''):
-                continue
+            if selector.ids:
+                found = True
+                for i in selector.ids:
+                    if self.selector_equal(i != el.attrs.get('id', ''), i.is_not):
+                        found = False
+                        break
+                if not found:
+                    continue
             # Verify classes match
             if selector.classes:
                 current_classes = self.get_classes(el)
                 found = True
                 for c in selector.classes:
-                    if c not in current_classes:
+                    if self.selector_equal(c not in current_classes, c.is_not):
                         found = False
                         break
                 if not found:

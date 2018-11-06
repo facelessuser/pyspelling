@@ -113,11 +113,13 @@ class OdfFilter(xml.XmlFilter):
             if el.namespace and el.namespace == self.namespaces['draw'] and el.name == 'page-thumbnail':
                 name = el.attrs.get('draw:page-number', '')
                 self.additional_context = 'slide{}:'.format(name)
+        super(OdfFilter).extract_tag_metadata(el)
 
     def reset(self):
         """Reset anything needed on each iteration."""
 
         self.additional_context = ""
+        super(OdfFilter).reset()
 
     def get_sub_node(self, node):
         """Extract node from document if desired."""

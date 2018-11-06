@@ -103,6 +103,8 @@ class OoxmlFilter(odf.OdfFilter):
     def extract_tag_metadata(self, el):
         """Extract meta data."""
 
+        self.ancestry.append(el)
+
     def get_context(self, filename):
         """Get context."""
 
