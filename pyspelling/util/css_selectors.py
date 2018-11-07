@@ -104,7 +104,7 @@ class SelectorMatcher(object):
             pattern = re.compile(r'.*?(?:(?<=^)|(?<= ))%s(?=(?:[ ]|$)).*' % re.escape(value), flags)
         elif op.startswith('|'):
             # Value starts with word in dash separated list
-            pattern = re.compile(r'^%s(?=-).*' % re.escape(value), flags)
+            pattern = re.compile(r'^%s(?:-.*)?$' % re.escape(value), flags)
         else:
             # Value matches
             pattern = re.compile(r'^%s$' % re.escape(value), flags)
