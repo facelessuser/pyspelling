@@ -38,6 +38,7 @@ nav:
     - Stylesheets: filters/stylesheets.md
     - Text: filters/text.md
     - URL: filters/url.md
+    - XML: filters/xml.md
   - Flow Control:
     - Wildcard: flow_control/wildcard.md
   - About:

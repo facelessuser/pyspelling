@@ -24,7 +24,8 @@ Name                                     | Include\ Path
 [Python](./filters/python.md)            | `pyspelling.filters.python`
 [Stylesheets](./filters/stylesheets.md)  | `pyspelling.filters.stylesheets`
 [Text](./filters/text.md)                | `pyspelling.filters.text`
-[URL](./filters/url.md)                  | `PySpelling.filters.url`
+[URL](./filters/url.md)                  | `pyspelling.filters.url`
+[XML](./filters/xml.md)                  | `pyspelling filters.xml`
 
 ## Flow Control
 
