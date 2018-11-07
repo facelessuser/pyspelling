@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.2.0
+
+- **NEW**: Add XML filter (PySpelling now has a dependency on `lxml`).
+- **NEW**: Add Open Document Format (ODF) filter for `.odt`, `.ods`, and `.odp` files.
+- **NEW**: Add Office Open XML format (newer Microsoft document format) for `.docx`, `.xlsx`, and `.pptx` files.
+- **NEW**: For CSS selectors in XML and HTML filter now support `:not()` and `:matches()` pseudo class.
+- **NEW**: CSS selectors now support `,` in patterns.
+- **NEW**: CSS selectors now support `i` in attribute selectors: `[attr=value i]`.
+- **NEW**: CSS selectors now support namespaces (some configuration required).
+- **NEW**: For better HTML context, display a tag's ancestry (just tag name of parents).
+- **NEW**: Tags whose content is captured is now configurable via `captures`, but tags that are not captured still have their children crawled unless they are under `ignores`.
+- **NEW**: Support modes added for HTML filter: `html`, `html5`, `xhtml`.
+- **FIX**: Case related issues when comparing tags and attributes in HTML.
+- **FIX**: CSS selectors should only compare case insensitive for ASCII characters A-Z and a-z.
+- **FIX**: Allow CSS escapes in selectors.
+
 ## 1.1.0
 
 - **NEW**: Add URL/email address filter. (#30)

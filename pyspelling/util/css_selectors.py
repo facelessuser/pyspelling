@@ -2,36 +2,75 @@
 import re
 from collections import namedtuple
 
-HTML_SEL = re.compile(
+CSS_ESCAPES = r'(?:\\[a-fA-F0-9]{1,6}[ ]?|\\.)'
+RE_ESC = re.compile(r'(?:(\\[a-fA-F0-9]{1,6}[ ]?)|(\\.))')
+
+RE_HTML_SEL = re.compile(
     r'''(?x)
-    (?P<pseudo_open>:(?:not|matches)\() |                               # optinal pseudo selector wrapper
-    (?P<class_id>(?:\#|\.)[-\w]+) |                                     #.class and #id
-    (?P<ns_tag>(?:(?:[-\w]+|\*)?\|)?(?:[-\w]+|\*)) |                    # namespace:tag
-    \[(?P<ns_attr>(?:(?:[-\w]+|\*)?\|)?[-\w:]+)                         # namespace:attributes
-    (?:(?P<cmp>[~^|*$]?=)                                               # compare
-    (?P<value>"(\\.|[^\\"]+)*?"|'(\\.|[^\\']+)*?'|[^'"\[\] \t\r\n]+))?  # attribute value
-    (?P<i>[ ]+i)? \] |                                                  # case insensitive
-    (?P<pseudo_close>\)) |                                              # optional pseudo selector close
-    (?P<split>\s*,\s*) |                                                # split multiple selectors
-    (?P<invalid>).+                                                     # not proper syntax
-    '''
+    (?P<pseudo_open>:(?:not|matches)\() |                                         # optinal pseudo selector wrapper
+    (?P<class_id>(?:\#|\.)(?:[-\w]|{esc})+) |                                     #.class and #id
+    (?P<ns_tag>(?:(?:(?:[-\w]|{esc})+|\*)?\|)?(?:(?:[-\w]|{esc})+|\*)) |          # namespace:tag
+    \[(?P<ns_attr>(?:(?:(?:[-\w]|{esc})+|\*)?\|)?(?:[-\w]|{esc})+)                # namespace:attributes
+    (?:(?P<cmp>[~^|*$]?=)                                                         # compare
+    (?P<value>"(\\.|[^\\"]+)*?"|'(\\.|[^\\']+)*?'|(?:[^'"\[\] \t\r\n]|{esc})+))?  # attribute value
+    (?P<i>[ ]+i)? \] |                                                            # case insensitive
+    (?P<pseudo_close>\)) |                                                        # optional pseudo selector close
+    (?P<split>\s*,\s*) |                                                          # split multiple selectors
+    (?P<invalid>).+                                                               # not proper syntax
+    '''.format(**{'esc': CSS_ESCAPES})
 )
 
-XML_SEL = re.compile(
+RE_XML_SEL = re.compile(
     r'''(?x)
-    (?P<pseudo_open>:(?:not|matches)\() |                                 # optinal pseudo selector wrapper
-    (?P<ns_tag>(?:(?:[-\w.]+|\*)?\|)?(?:[-\w.]+|\*)) |                   # namespace:tag
-    \[(?P<ns_attr>(?:(?:[-\w]+|\*)\|)?[-\w:.]+)                           # namespace:attributes
-    (?:(?P<cmp>[~^|*$]?=)                                                 # compare
-    (?P<value>"(\\.|[^\\"]+)*?"|'(?:\\.|[^\\']+)*?'|[^'"\[\] \t\r\n]+))?  # attribute value
-    (?P<i>[ ]+i)?\] |                                                     # case insensitive
-    (?P<pseudo_close>\)) |                                                # optional pseudo selector close
-    (?P<split>\s*,\s*) |                                                  # Split for multiple selectors
-    (?P<invalid>.+)                                                       # not proper syntax
-    '''
+    (?P<pseudo_open>:(?:not|matches)\() |                                           # optinal pseudo selector wrapper
+    (?P<ns_tag>(?:(?:(?:[-\w.]|{esc})+|\*)?\|)?(?:(?:[-\w.]|{esc})+|\*)) |          # namespace:tag
+    \[(?P<ns_attr>(?:(?:(?:[-\w]|{esc})+|\*)\|)?(?:[-\w.]|{esc})+)                  # namespace:attributes
+    (?:(?P<cmp>[~^|*$]?=)                                                           # compare
+    (?P<value>"(\\.|[^\\"]+)*?"|'(?:\\.|[^\\']+)*?'|(?:[^'"\[\] \t\r\n]|{esc})+))?  # attribute value
+    (?P<i>[ ]+i)?\] |                                                               # case insensitive
+    (?P<pseudo_close>\)) |                                                          # optional pseudo selector close
+    (?P<split>\s*,\s*) |                                                            # Split for multiple selectors
+    (?P<invalid>.+)                                                                 # not proper syntax
+    '''.format(**{'esc': CSS_ESCAPES})
 )
 
 MODES = ('xml', 'html', 'html5', 'xhtml')
+
+LC_A = ord('a')
+LC_Z = ord('z')
+UC_A = ord('A')
+UC_Z = ord('Z')
+
+
+def unescape(string):
+    """Unescape CSS value."""
+
+    def replace(m):
+        """Replace with the appropriate substitute."""
+
+        return chr(int(m.group(1)[1:], 16)) if m.group(1) else m.group(2)[1:]
+
+    return RE_ESC.sub(replace, string)
+
+
+def lower(string):
+    """Lower."""
+
+    new_string = []
+    for c in string:
+        o = ord(c)
+        new_string.append(chr(o + 32) if UC_A <= o <= UC_Z else c)
+    return ''.join(new_string)
+
+
+def upper(string):  # pragma: no cover
+    """Lower."""
+
+    new_string = []
+    for c in string:
+        o = ord(c)
+        new_string.append(chr(o - 32) if LC_A <= o <= LC_Z else c)
+    return ''.join(new_string)
 
 
 class Selector(namedtuple('HtmlSelector', ['tags', 'ids', 'classes', 'attributes', 'selectors', 'is_not'])):
@@ -53,7 +92,7 @@ class SelectorMatcher(object):
         """Initialize."""
 
         self.mode = mode
-        self.re_sel = HTML_SEL if self.mode != 'xml' else XML_SEL
+        self.re_sel = RE_HTML_SEL if self.mode != 'xml' else RE_XML_SEL
         self.namespaces = namespaces if namespaces else {}
         self.selectors = self.process_selectors(*selectors)
 
@@ -71,11 +110,16 @@ class SelectorMatcher(object):
 
         return self.mode in ('html5', 'xhtml', 'xml')
 
+    def is_xml(self):
+        """Check if document is an XML type."""
+
+        return self.mode in ('xml', 'xhtml')
+
     def create_attribute_selector(self, m):
         """Create attribute selector from the returned regex match."""
 
         flags = re.I if m.group('i') else 0
-        parts = [a.strip() for a in m.group('ns_attr').split('|')]
+        parts = [unescape(a.strip()) for a in m.group('ns_attr').split('|')]
         ns = ''
         if len(parts) > 1:
             ns = parts[0]
@@ -84,7 +128,7 @@ class SelectorMatcher(object):
             attr = parts[0]
         op = m.group('cmp')
         if op:
-            value = m.group('value')[1:-1] if m.group('value').startswith('"') else m.group('value')
+            value = unescape(m.group('value')[1:-1] if m.group('value').startswith(('"', "'")) else m.group('value'))
         else:
             value = None
         if not op:
@@ -113,7 +157,7 @@ class SelectorMatcher(object):
     def parse_tag_pattern(self, m):
         """Parse tag pattern from regex match."""
 
-        parts = m.group('ns_tag').split('|')
+        parts = [unescape(x) for x in m.group('ns_tag').split('|')]
         if len(parts) > 1:
             prefix = parts[0]
             tag = parts[1]
@@ -175,10 +219,10 @@ class SelectorMatcher(object):
                 elif is_html and m.group('class_id'):
                     selector = m.group('class_id')
                     if selector.startswith('.'):
-                        classes.append(selector[1:])
+                        classes.append(unescape(selector[1:]))
                         has_selector = True
                     else:
-                        tag_id.append(selector[1:])
+                        tag_id.append(unescape(selector[1:]))
                         has_selector = True
                 elif m.group('invalid'):
                     raise ValueError("Bad selector '{}'".format(m.group(0)))
@@ -216,7 +260,7 @@ class SelectorMatcher(object):
         """Get attribute from element if it exists."""
 
         value = None
-        is_xml = self.mode in ('xhtml', 'xml')
+        is_xml = self.is_xml()
         if self.supports_namespaces():
             value = None
             # If we have not defined namespaces, we can't very well find them, so don't bother trying.
@@ -250,16 +294,16 @@ class SelectorMatcher(object):
                         continue
                 else:
                     # The prefix doesn't match
-                    if prefix and p and prefix != '*' and prefix.lower() != p.lower():
+                    if prefix and p and prefix != '*' and lower(prefix) != lower(p):
                         continue
                     # The attribute doesn't match.
-                    if attr.lower() != a.lower():
+                    if lower(attr) != lower(a):
                         continue
                 value = v
                 break
         else:
             for k, v in el.attrs.items():
-                if attr.lower() != k.lower():
+                if lower(attr) != lower(k):
                     continue
                 value = v
                 break
@@ -320,7 +364,7 @@ class SelectorMatcher(object):
 
         return not (
             tag.name and
-            tag.name not in ((el.name.lower() if not self.supports_namespaces() else el.name), '*')
+            tag.name not in ((lower(el.name) if not self.is_xml() else el.name), '*')
         )
 
     def match_tag(self, el, tags):

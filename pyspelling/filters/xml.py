@@ -36,6 +36,8 @@ class XmlFilter(filters.Filter):
 
     default_capture = ['*|*']
 
+    block_tags = set()
+
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
@@ -46,6 +48,7 @@ class XmlFilter(filters.Filter):
         """Setup."""
 
         self.ancestry = []
+        self.user_block_tags = set()
         self.comments = self.config.get('comments', True) is True
         self.attributes = set(self.config.get('attributes', []))
         self.parser = 'xml'
@@ -109,10 +112,16 @@ class XmlFilter(filters.Filter):
 
         return self._has_xml_encode(content)
 
+    def is_block(self, el):
+        """Check if tag is a block element."""
+
+        name = el.name
+        return name in self.block_tags or name in self.user_block_tags
+
     def store_blocks(self, el, blocks, text, is_root):
         """Store the text as desired."""
 
-        if is_root:
+        if is_root or self.is_block(el):
             content = html.unescape(''.join(text))
             if content:
                 blocks.append((content, self.construct_selector(el)))

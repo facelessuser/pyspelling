@@ -8,7 +8,7 @@ import re
 import codecs
 import html
 from . import xml
-from ..util.css_selectors import SelectorMatcher
+from ..util.css_selectors import SelectorMatcher, lower
 
 RE_HTML_ENCODE = re.compile(
     br'''(?xi)
@@ -22,7 +22,7 @@ MODE = {'html': 'lxml', 'xhtml': 'xml', 'html5': 'html5lib'}
 class HtmlFilter(xml.XmlFilter):
     """Spelling Python."""
 
-    block_tags = [
+    block_tags = {
         # Block level elements (and other blockish elements)
         'address', 'article', 'aside', 'blockquote', 'details', 'dialog', 'dd',
         'div', 'dl', 'dt'
@@ -31,7 +31,7 @@ class HtmlFilter(xml.XmlFilter):
         'section', 'table', 'ul',
         'canvas', 'group', 'iframe', 'math', 'noscript', 'output',
         'script', 'style', 'table', 'video', 'body', 'head'
-    ]
+    }
 
     default_capture = ['*|*:not(script, style)']
 
@@ -44,6 +44,7 @@ class HtmlFilter(xml.XmlFilter):
         """Setup."""
 
         self.ancestry = []
+        self.user_block_tags = set()
         self.comments = self.config.get('comments', True) is True
         self.attributes = set(self.config.get('attributes', []))
         self.type = self.config.get('mode', 'html')
@@ -79,7 +80,8 @@ class HtmlFilter(xml.XmlFilter):
     def is_block(self, el):
         """Check if tag is a block element."""
 
-        return el.name.lower() in self.block_tags
+        name = lower(el.name) if self.type != 'xhtml' else el.name
+        return name in self.block_tags or name in self.user_block_tags
 
     def get_classes(self, el):
         """Get classes."""
