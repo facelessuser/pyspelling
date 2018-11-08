@@ -22,7 +22,7 @@ MODE = {'html': 'lxml', 'xhtml': 'xml', 'html5': 'html5lib'}
 class HtmlFilter(xml.XmlFilter):
     """Spelling Python."""
 
-    block_tags = {
+    break_tags = {
         # Block level elements (and other blockish elements)
         'address', 'article', 'aside', 'blockquote', 'details', 'dialog', 'dd',
         'div', 'dl', 'dt'
@@ -38,7 +38,7 @@ class HtmlFilter(xml.XmlFilter):
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
-        super(HtmlFilter, self).__init__(options, default_encoding)
+        super().__init__(options, default_encoding)
 
     def get_default_config(self):
         """Get default configuration."""
@@ -47,17 +47,24 @@ class HtmlFilter(xml.XmlFilter):
             "comments": True,
             "mode": "html",
             "attributes": [],
-            "block_tags": [],
+            "break_tags": [],
             "ignores": [],
             "captures": self.default_capture,
             "namespaces": {}
         }
 
+    def validate_options(self, k, v):
+        """Validate options."""
+
+        super().validate_options(k, v)
+        if k == 'mode' and v not in MODE:
+            raise ValueError("{}: '{}' is not a valid value for '{}'".format(self.__class__.__name, v, k))
+
     def setup(self):
         """Setup."""
 
         self.ancestry = []
-        self.user_block_tags = set(self.config['block_tags'])
+        self.user_break_tags = set(self.config['break_tags'])
         self.comments = self.config.get('comments', True) is True
         self.attributes = set(self.config['attributes'])
         self.type = self.config['mode']
@@ -90,11 +97,11 @@ class HtmlFilter(xml.XmlFilter):
             encode = self._has_xml_encode(content)
         return encode
 
-    def is_block(self, el):
-        """Check if tag is a block element."""
+    def is_break_tag(self, el):
+        """Check if tag is an element we should break on."""
 
         name = lower(el.name) if self.type != 'xhtml' else el.name
-        return name in self.block_tags or name in self.user_block_tags
+        return name in self.break_tags or name in self.user_break_tags
 
     def get_classes(self, el):
         """Get classes."""
@@ -107,7 +114,7 @@ class HtmlFilter(xml.XmlFilter):
     def store_blocks(self, el, blocks, text, is_root):
         """Store the text as desired."""
 
-        if is_root or self.is_block(el):
+        if is_root or self.is_break_tag(el):
             content = html.unescape(''.join(text))
             if content:
                 blocks.append((content, self.construct_selector(el)))

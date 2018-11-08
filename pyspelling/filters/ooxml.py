@@ -46,7 +46,7 @@ class OoxmlFilter(odf.OdfFilter):
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
-        super(OoxmlFilter, self).__init__(options, default_encoding)
+        super().__init__(options, default_encoding)
 
     def get_default_config(self):
         """Get default configuration."""
@@ -66,10 +66,16 @@ class OoxmlFilter(odf.OdfFilter):
         self.ignores = SelectorMatcher([], 'xml', {})
         self.captures = None
 
-    def _detect_encoding(self, source_file):
-        """Detect encoding."""
+    def has_bom(self, filestream):
+        """Check if has BOM."""
 
-        return ''
+        content = filestream.read(2)
+        if content == b'PK':
+            # Zip file found.
+            # Return no encoding as content is binary type,
+            # but don't return None which means we don't know what we have.
+            return ''
+        return None
 
     def determine_file_type(self, z):
         """Determine file type."""

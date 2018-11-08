@@ -33,7 +33,7 @@ class StylesheetsFilter(cpp.CppFilter):
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
-        super(StylesheetsFilter, self).__init__(options, default_encoding)
+        super().__init__(options, default_encoding)
 
     def get_default_config(self):
         """Get default configuration."""
@@ -44,6 +44,13 @@ class StylesheetsFilter(cpp.CppFilter):
             "group_comments": False,
             "stylesheets": 'css'
         }
+
+    def validate_options(self, k, v):
+        """Validate options."""
+
+        super().validate_options(k, v)
+        if k == 'stylesheets' and v not in STYLESHEET_TYPE:
+            raise ValueError("{}: '{}' is not a valid value for '{}'".format(self.__class__.__name, v, k))
 
     def setup(self):
         """Setup."""
@@ -62,7 +69,7 @@ class StylesheetsFilter(cpp.CppFilter):
             for m in RE_CSS_COMMENT.finditer(text):
                 self._css_evaluate(m)
         else:
-            super(StylesheetsFilter, self).find_comments(text)
+            super().find_comments(text)
 
     def _css_evaluate(self, m):
         """Search for comments."""

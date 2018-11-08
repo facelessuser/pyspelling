@@ -11,7 +11,7 @@ class WildcardFlowControl(flow_control.FlowControl):
     def __init__(self, options):
         """Initialization."""
 
-        super(WildcardFlowControl, self).__init__(options)
+        super().__init__(options)
         self.setup()
 
     def get_default_config(self):

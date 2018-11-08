@@ -26,7 +26,7 @@ class CppFilter(filters.Filter):
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
-        super(CppFilter, self).__init__(options, default_encoding)
+        super().__init__(options, default_encoding)
 
     def get_default_config(self):
         """Get default configuration."""

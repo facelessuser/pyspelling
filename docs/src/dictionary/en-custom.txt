@@ -2,8 +2,8 @@ API
 Accessors
 BOM
 BOMs
-BeatifulSoup
 BeautifulSoup
+Booleans
 CPP
 CSS
 Changelog
@@ -52,6 +52,7 @@ facelessuser
 filename
 gforcada
 globbing
+iterables
 linter
 lxml
 matcher
@@ -77,6 +78,7 @@ sublicense
 substring
 syntaxes
 tuple
+validator
 whitespace
 wildcard
 wordlist

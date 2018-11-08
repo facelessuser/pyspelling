@@ -5,8 +5,9 @@ import codecs
 import contextlib
 import mmap
 import os
-from collections import namedtuple, OrderedDict
-import warnings
+from collections import namedtuple
+from .. import plugin
+from .. import util
 
 PYTHON_ENCODING_NAMES = {
     'iso-8859-8-i': 'iso-8859-8',
@@ -56,7 +57,7 @@ class SourceText(namedtuple('SourceText', ['text', 'context', 'encoding', 'categ
         if RE_CATEGORY_NAME.match(category) is None and error is None:
             raise ValueError('Invalid category name in SourceText!')
 
-        return super(SourceText, cls).__new__(cls, text, context, encoding, category, error)
+        return super().__new__(cls, text, context, encoding, category, error)
 
     def _is_bytes(self):
         """Is bytes."""
@@ -69,7 +70,7 @@ class SourceText(namedtuple('SourceText', ['text', 'context', 'encoding', 'categ
         return self.error is not None
 
 
-class Filter(object):
+class Filter(plugin.Plugin):
     """Spelling language."""
 
     MAX_GUESS_SIZE = 31457280
@@ -78,59 +79,9 @@ class Filter(object):
     def __init__(self, options, default_encoding='utf-8'):
         """Initialize."""
 
-        self.config = self.get_default_config()
-        if self.config is None:
-            warnings.warn(
-                "'{}' did not provide a default config. ".format(self.__class__.__name__) +
-                "All plugins in the future should provide a default config.",
-                category=FutureWarning,
-                stacklevel=1
-            )
-            self.config = options
-        else:
-            self.override_config(options)
         self.default_encoding = PYTHON_ENCODING_NAMES.get(default_encoding, default_encoding).lower()
+        super().__init__(options)
         self.setup()
-
-    def get_default_config(self):
-        """Get default configuration."""
-
-        return None
-
-    def setup(self):
-        """Setup."""
-
-    def override_config(self, options):
-        """Override the default configuration."""
-
-        for k, v in options.items():
-            if k not in self.config:
-                raise ValueError("'{}' is not a valid option for '{}'".format(k, self.__class__.__name__))
-            self.validate_options(k, v)
-            self.config[k] = v
-
-    def validate_options(self, k, v):
-        """Validate options."""
-
-        args = [self.__class__.__name__, k]
-        if isinstance(self.config[k], bool) and not isinstance(v, bool):
-            raise ValueError("{}: option '{}' must be a bool type.".format(*args))
-        if isinstance(self.config[k], str) and not isinstance(v, str):
-            raise ValueError("{}: option '{}' must be a str type.".format(*args))
-        if (
-            isinstance(self.config[k], int) and
-            (not isinstance(v, int) and not (isinstance(v, float) and v.is_integer()))
-        ):
-            raise ValueError("{}: option '{}' must be a int type.".format(*args))
-        if isinstance(self.config[k], float) and not isinstance(v, (int, float)):
-            raise ValueError("{}: option '{}' must be a float type.".format(*args))
-        if isinstance(self.config[k], (list, tuple)) and not isinstance(v, list):
-            raise ValueError("{}: option '{}' must be a float type.".format(*args))
-        if isinstance(self.config[k], (dict, OrderedDict)) and not isinstance(v, (dict, OrderedDict)):
-            raise ValueError("{}: option '{}' must be a dict type.".format(*args))
-
-    def reset(self):
-        """Reset anything needed on each iteration."""
 
     def _is_very_large(self, size):
         """Check if content is very large."""
@@ -148,9 +99,10 @@ class Filter(object):
             encoding = None
         return encoding
 
-    def _has_bom(self, content):
+    def has_bom(self, f):
         """Check for UTF8, UTF16, and UTF32 BOMs."""
 
+        content = f.read(4)
         encoding = None
         m = RE_UTF_BOM.match(content)
         if m is not None:
@@ -190,17 +142,23 @@ class Filter(object):
     def _analyze_file(self, f):
         """Analyze the file."""
 
+        f.seek(0)
         # Check for BOMs
         if self.CHECK_BOM:
-            encoding = self._has_bom(f.read(4))
-        f.seek(0)
+            encoding = self.has_bom(f)
+            f.seek(0)
+        else:
+            util.warn_deprecated(
+                "'CHECK_BOM' attribute is deprecated. "
+                "Please override 'has_bom` function to control or avoid BOM detection."
+            )
         # Check file extensions
         if encoding is None:
             encoding = self._utf_strip_bom(self.header_check(f.read(1024)))
             f.seek(0)
         if encoding is None:
-            f.seek(0)
             encoding = self._utf_strip_bom(self.content_check(f))
+            f.seek(0)
 
         return encoding
 
@@ -209,7 +167,7 @@ class Filter(object):
 
         encoding = self._guess(source_file)
         # If we didn't explicitly detect an encoding, assume default.
-        if not encoding:
+        if encoding is None:
             encoding = self.default_encoding
 
         return encoding

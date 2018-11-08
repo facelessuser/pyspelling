@@ -31,7 +31,7 @@ class OdfFilter(xml.XmlFilter):
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
-        super(OdfFilter, self).__init__(options, default_encoding)
+        super().__init__(options, default_encoding)
 
     def get_default_config(self):
         """Get default configuration."""
@@ -59,13 +59,16 @@ class OdfFilter(xml.XmlFilter):
             self.default_capture, 'xml', self.namespaces
         )
 
-    def _detect_encoding(self, source_file):
-        """Detect encoding."""
+    def has_bom(self, filestream):
+        """Check if has BOM."""
 
-        with open(source_file, 'rb') as f:
-            if f.read(2) == b'PK':
-                return ''
-        return super(OdfFilter, self)._detect_encoding(source_file)
+        content = filestream.read(2)
+        if content == b'PK':
+            # Zip file found.
+            # Return no encoding as content is binary type,
+            # but don't return None which means we don't know what we have.
+            return ''
+        return super().has_bom(filestream)
 
     def determine_file_type(self, z):
         """Determine file type."""
@@ -128,13 +131,13 @@ class OdfFilter(xml.XmlFilter):
             if el.namespace and el.namespace == self.namespaces['draw'] and el.name == 'page-thumbnail':
                 name = el.attrs.get('draw:page-number', '')
                 self.additional_context = 'slide{}:'.format(name)
-        super(OdfFilter, self).extract_tag_metadata(el)
+        super().extract_tag_metadata(el)
 
     def reset(self):
         """Reset anything needed on each iteration."""
 
         self.additional_context = ""
-        super(OdfFilter, self).reset()
+        super().reset()
 
     def get_sub_node(self, node):
         """Extract node from document if desired."""

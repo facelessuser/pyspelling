@@ -11,7 +11,7 @@ class TextFilter(filters.Filter):
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
-        super(TextFilter, self).__init__(options, default_encoding)
+        super().__init__(options, default_encoding)
 
     def get_default_config(self):
         """Get default configuration."""
@@ -21,6 +21,15 @@ class TextFilter(filters.Filter):
             'convert_encoding': '',
             'errors': 'strict'
         }
+
+    def validate_options(self, k, v):
+        """Validate options."""
+
+        super().validate_options(k, v)
+        if k == 'errors' and v.lower() not in ('strict', 'replace', 'ignore', 'backslashreplace'):
+            raise ValueError("{}: '{}' is not a valid value for '{}'".format(self.__class__.__name, v, k))
+        if k == 'normalize' and v.upper() not in ('NFC', 'NFKC', 'NFD', 'NFKD'):
+            raise ValueError("{}: '{}' is not a valid value for '{}'".format(self.__class__.__name, v, k))
 
     def setup(self):
         """Setup."""

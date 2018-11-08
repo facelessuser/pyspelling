@@ -4,16 +4,25 @@ import os
 import importlib
 from . import util
 from .__meta__ import __version__, __version_info__  # noqa: F401
-from . import settings
 from . import flow_control
 from . import filters
 from wcmatch import glob
 import codecs
+from collections import namedtuple
 
 __all__ = ("spellcheck",)
 
 
-class SpellChecker(object):
+class Results(namedtuple('Results', ['words', 'context', 'category', 'error'])):
+    """Results."""
+
+    def __new__(cls, words, context, category, error=None):
+        """Allow defaults."""
+
+        return super().__new__(cls, words, context, category, error)
+
+
+class SpellChecker:
     """Spell check class."""
 
     DICTIONARY = 'dictionary.dic'
@@ -114,7 +123,7 @@ class SpellChecker(object):
 
         for source in self._pipeline_step(sources, options, personal_dict):
             if source._has_error():
-                yield util.Results([], source.context, source.category, source.error)
+                yield Results([], source.context, source.category, source.error)
             else:
                 encoding = source.encoding
                 if source._is_bytes():
@@ -127,7 +136,7 @@ class SpellChecker(object):
                 self.log("Command: " + str(cmd), 4)
 
                 wordlist = util.call_spellchecker(cmd, input_text=text, encoding=encoding)
-                yield util.Results(
+                yield Results(
                     [w for w in sorted(set(wordlist.replace('\r', '').split('\n'))) if w],
                     source.context,
                     source.category
@@ -272,7 +281,7 @@ class Aspell(SpellChecker):
     def __init__(self, config, binary='', verbose=0, debug=False):
         """Initialize."""
 
-        super(Aspell, self).__init__(config, binary, verbose, debug)
+        super().__init__(config, binary, verbose, debug)
         self.binary = binary if binary else 'aspell'
 
     def setup_spellchecker(self, task):
@@ -352,7 +361,7 @@ class Aspell(SpellChecker):
 
         cmd = self.setup_command(source.encoding, options, personal_dict, source.context)
         wordlist = util.call_spellchecker(cmd, input_text=content, encoding=source.encoding)
-        return util.Results(
+        return Results(
             [w for w in sorted(set(wordlist.split('\n'))) if w], source.context, source.category
         )
 
@@ -412,7 +421,7 @@ class Hunspell(SpellChecker):  # pragma: no cover
     def __init__(self, config, binary='', verbose=0, debug=False):
         """Initialize."""
 
-        super(Hunspell, self).__init__(config, binary, verbose)
+        super().__init__(config, binary, verbose)
         self.binary = binary if binary else 'hunspell'
 
     def setup_spellchecker(self, task):
@@ -465,7 +474,7 @@ class Hunspell(SpellChecker):  # pragma: no cover
 
         cmd = self.setup_command(source.encoding, options, personal_dict, source.context)
         wordlist = util.call_spellchecker(cmd, input_text=None, encoding=source.encoding)
-        return util.Results(
+        return Results(
             [w for w in sorted(set(wordlist.split('\n'))) if w], source.context, source.category
         )
 
@@ -513,7 +522,7 @@ def spellcheck(config_file, name=None, binary='', verbose=0, checker='', debug=F
     hunspell = None
     aspell = None
     spellchecker = None
-    config = settings.read_config(config_file)
+    config = util.read_config(config_file)
 
     matrix = config.get('matrix', [])
     preferred_checker = config.get('spellchecker', 'aspell')

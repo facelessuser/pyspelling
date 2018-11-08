@@ -85,7 +85,7 @@ class SelectorAttribute(namedtuple('AttrRule', ['attribute', 'prefix', 'pattern'
     """Selector attribute rule."""
 
 
-class SelectorMatcher(object):
+class SelectorMatcher:
     """Match tags in Beautiful Soup with CSS selectors."""
 
     def __init__(self, selectors, mode='html', namespaces=None):
