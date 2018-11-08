@@ -33,6 +33,8 @@ RE_UTF_BOM = re.compile(
 
 RE_CATEGORY_NAME = re.compile(r'^[-a-z0-9_]+$', re.I)
 
+BINARY_ENCODE = ''
+
 
 class SourceText(namedtuple('SourceText', ['text', 'context', 'encoding', 'category', 'error'])):
     """Source text."""
@@ -199,26 +201,25 @@ class Filter(plugin.Plugin):
 
         encoding = None
 
-        try:
-            file_size = os.path.getsize(filename)
-            # If the file is really big, lets just call it binary.
-            # We don't have time to let Python chug through a massive file.
-            if not self._is_very_large(file_size):
-                with open(filename, "rb") as f:
-                    if file_size == 0:
-                        encoding = 'ascii'
-                    else:
-                        encoding = self._detect_buffer_encoding(f)
-                        if encoding is not None:
-                            encoding = self._verify_encoding(encoding)
-            else:
-                raise UnicodeDecodeError('Unicode detection is not applied to very large files!')
-        except Exception:  # pragma: no cover
-            raise UnicodeDecodeError('Cannot resolve encoding!')
+        file_size = os.path.getsize(filename)
+        # If the file is really big, lets just call it binary.
+        # We don't have time to let Python chug through a massive file.
+        if not self._is_very_large(file_size):
+            with open(filename, "rb") as f:
+                if file_size == 0:
+                    encoding = 'ascii'
+                else:
+                    encoding = self._detect_buffer_encoding(f)
+                    if encoding is None:
+                        raise UnicodeDecodeError('None', b'', 0, 0, 'Unicode cannot be detected.')
+                    if encoding != BINARY_ENCODE:
+                        encoding = self._verify_encoding(encoding)
+        else:  # pragma: no cover
+            raise UnicodeDecodeError('None', b'', 0, 0, 'Unicode detection is not applied to very large files!')
 
         return encoding
 
-    def content_check(self, file_handle):
+    def content_check(self, f):
         """File content check."""
 
         return None

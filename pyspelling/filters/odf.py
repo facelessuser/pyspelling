@@ -46,7 +46,7 @@ class OdfFilter(xml.XmlFilter):
         self.comments = False
         self.attributes = []
         self.parser = 'xml'
-        self.type = 'odf'
+        self.type = None
         self.filepattern = 'content.xml'
         self.namespaces = {
             'text': 'urn:oasis:names:tc:opendocument:xmlns:text:1.0',
@@ -62,12 +62,13 @@ class OdfFilter(xml.XmlFilter):
     def has_bom(self, filestream):
         """Check if has BOM."""
 
-        content = filestream.read(2)
-        if content == b'PK':
+        content = filestream.read(4)
+        if content == b'PK\x03\x04':
             # Zip file found.
-            # Return no encoding as content is binary type,
+            # Return `BINARY_ENCODE` as content is binary type,
             # but don't return None which means we don't know what we have.
-            return ''
+            return filters.BINARY_ENCODE
+        # Not a zip file, so maybe a flat ODF XML file.
         return super().has_bom(filestream)
 
     def determine_file_type(self, z):
@@ -136,6 +137,7 @@ class OdfFilter(xml.XmlFilter):
     def reset(self):
         """Reset anything needed on each iteration."""
 
+        self.type = None
         self.additional_context = ""
         super().reset()
 
@@ -183,7 +185,7 @@ class OdfFilter(xml.XmlFilter):
         """Filter."""
 
         sources = []
-        if source[:2] != 'PK':
+        if source.text[:4].encode(source.encoding) != b'PK\x03\x04':
             sources.extend(self._filter(source.text, source.context, source.encoding))
         else:
             for content, filename, enc in self.get_content(io.BytesIO(source.text.encode(source.encoding))):

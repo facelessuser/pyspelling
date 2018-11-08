@@ -82,19 +82,20 @@ class MyFilter(filters.Filter):
 
 `has_bom` takes a file stream and is usually used to check the first few bytes. While BOM checking could be performed in `header_check`, this mainly provided as `UTF` BOMs are quite common in many file types, so a specific test was dedicated to it. Additionally, this replaces the old, less flexible `CHECK_BOM` attribute that was deprecated in version `1.2`.
 
-This is useful if you want to handle binary parsing, or a file type that has a custom BOM in the header. When returning encoding in any of the encoding check functions, `None` means no encoding was detecting, but anything else, including an empty string will be passed through. Just be sure to include a sensible encoding in your `SourceText` object when your plugin returns file content.
+This is useful if you want to handle binary parsing, or a file type that has a custom BOM in the header. When returning encoding in any of the encoding check functions, `None` means no encoding was detecting, an empty string means binary data (encoding validation is skipped), and anything else will be validated and passed through. Just be sure to include a sensible encoding in your `SourceText` object when your plugin returns file content.
 
 ```py3
     def has_bom(self, filestream):
         """Check if has BOM."""
 
         content = filestream.read(2)
-        if content == b'PK':
+        if content == b'PK\x03\x04':
             # Zip file found.
-            # Return no encoding as content is binary type,
+            # Return `BINARY_ENCODE` as content is binary type,
             # but don't return None which means we don't know what we have.
-            return ''
-        return None
+            return filters.BINARY_ENCODE
+        # Not a zip file, so pass it on to the normal file checker.
+        return super().has_bom(filestream)
 ```
 
 ### `Filter.header_check`
@@ -113,7 +114,7 @@ This is useful if you want to handle binary parsing, or a file type that has a c
 `content_check` receives a file object which allows you to check the entire file buffer to determine encoding. A string with the encoding name should be returned or `None` if a valid encoding header cannot be found.
 
 ```py3
-    def content_check(self, file_handle):
+    def content_check(self, filestream):
         """File content check."""
 
         return None

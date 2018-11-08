@@ -77,6 +77,9 @@ class PluginTestCase(unittest.TestCase):
         self.tempdir = TESTFN + "_dir"
         self.setup_fs()
 
+    def setup_fs(self):
+        """Setup file system (common files used across multiple tests)."""
+
     def tearDown(self):
         """Cleanup."""
 

@@ -421,7 +421,7 @@ class Hunspell(SpellChecker):  # pragma: no cover
     def __init__(self, config, binary='', verbose=0, debug=False):
         """Initialize."""
 
-        super().__init__(config, binary, verbose)
+        super().__init__(config, binary, verbose, debug)
         self.binary = binary if binary else 'hunspell'
 
     def setup_spellchecker(self, task):
@@ -535,7 +535,12 @@ def spellcheck(config_file, name=None, binary='', verbose=0, checker='', debug=F
 
     for task in matrix:
 
+        # Only run tasks called by names if names are provided.
         if name and task.get('name', '') not in name:
+            continue
+
+        # Ignore hidden items unless they are explicitly called by name.
+        if not name and task.get('hidden', False):
             continue
 
         if not checker:

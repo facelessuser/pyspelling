@@ -10,6 +10,7 @@ import io
 import bs4
 from . import odf
 import re
+from .. import filters
 from ..util.css_selectors import SelectorMatcher
 
 DOC_PARAMS = {
@@ -61,7 +62,7 @@ class OoxmlFilter(odf.OdfFilter):
         self.comments = False
         self.attributes = []
         self.parser = 'xml'
-        self.type = ''
+        self.type = None
         self.filepattern = ''
         self.ignores = SelectorMatcher([], 'xml', {})
         self.captures = None
@@ -69,12 +70,25 @@ class OoxmlFilter(odf.OdfFilter):
     def has_bom(self, filestream):
         """Check if has BOM."""
 
-        content = filestream.read(2)
-        if content == b'PK':
+        content = filestream.read(4)
+        if content == b'PK\x03\x04':
             # Zip file found.
-            # Return no encoding as content is binary type,
+            # Return `BINARY_ENCODE` as content is binary type,
             # but don't return None which means we don't know what we have.
-            return ''
+            return filters.BINARY_ENCODE
+        # We only handle zip files, so if we are checking this, we've already failed.
+        return None
+
+    def content_check(self, filestream):
+        """File content check."""
+
+        # We only handle zip files, so if we are checking this, we've already failed.
+        return None
+
+    def header_check(self, content):
+        """Special encode check."""
+
+        # We only handle zip files, so if we are checking this, we've already failed.
         return None
 
     def determine_file_type(self, z):
@@ -152,7 +166,7 @@ class OoxmlFilter(odf.OdfFilter):
         sources = []
         for content, filename, enc in self.get_content(io.BytesIO(source.text.encode(source.encoding))):
             self.additional_context = self.get_context(filename)
-            self.extend(self._filter(content, source.context, enc))
+            sources.extend(self._filter(content, source.context, enc))
         return sources
 
 

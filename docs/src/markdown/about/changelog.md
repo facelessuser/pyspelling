@@ -13,6 +13,7 @@
 - **NEW**: Tags whose content is captured is now configurable via `captures`, but tags that are not captured still have their children crawled unless they are under `ignores`.
 - **NEW**: Support modes added for HTML filter: `html`, `html5`, `xhtml`.
 - **NEW**: `CHECK_BOM` plugin attribute has been deprecated in favor of overriding the exposed `has_bom`.
+- **NEW**: Tasks can be hidden with the `hidden` configuration option. Tasks with `hidden` enabled will only run if they are explicitly called by name.
 - **FIX**: Case related issues when comparing tags and attributes in HTML.
 - **FIX**: CSS selectors should only compare case insensitive for ASCII characters A-Z and a-z.
 - **FIX**: Allow CSS escapes in selectors.
