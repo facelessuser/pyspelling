@@ -5,7 +5,7 @@ import codecs
 import contextlib
 import mmap
 import os
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 import warnings
 
 PYTHON_ENCODING_NAMES = {
@@ -111,6 +111,23 @@ class Filter(object):
 
     def validate_options(self, k, v):
         """Validate options."""
+
+        args = [self.__class__.__name__, k]
+        if isinstance(self.config[k], bool) and not isinstance(v, bool):
+            raise ValueError("{}: option '{}' must be a bool type.".format(*args))
+        if isinstance(self.config[k], str) and not isinstance(v, str):
+            raise ValueError("{}: option '{}' must be a str type.".format(*args))
+        if (
+            isinstance(self.config[k], int) and
+            (not isinstance(v, int) and not (isinstance(v, float) and v.is_integer()))
+        ):
+            raise ValueError("{}: option '{}' must be a int type.".format(*args))
+        if isinstance(self.config[k], float) and not isinstance(v, (int, float)):
+            raise ValueError("{}: option '{}' must be a float type.".format(*args))
+        if isinstance(self.config[k], (list, tuple)) and not isinstance(v, list):
+            raise ValueError("{}: option '{}' must be a float type.".format(*args))
+        if isinstance(self.config[k], (dict, OrderedDict)) and not isinstance(v, (dict, OrderedDict)):
+            raise ValueError("{}: option '{}' must be a dict type.".format(*args))
 
     def reset(self):
         """Reset anything needed on each iteration."""
