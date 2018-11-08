@@ -40,22 +40,35 @@ class HtmlFilter(xml.XmlFilter):
 
         super(HtmlFilter, self).__init__(options, default_encoding)
 
+    def get_default_config(self):
+        """Get default configuration."""
+
+        return {
+            "comments": True,
+            "mode": "html",
+            "attributes": [],
+            "block_tags": [],
+            "ignores": [],
+            "captures": self.default_capture,
+            "namespaces": {}
+        }
+
     def setup(self):
         """Setup."""
 
         self.ancestry = []
-        self.user_block_tags = set()
+        self.user_block_tags = set(self.config['block_tags'])
         self.comments = self.config.get('comments', True) is True
-        self.attributes = set(self.config.get('attributes', []))
-        self.type = self.config.get('mode', 'html')
+        self.attributes = set(self.config['attributes'])
+        self.type = self.config['mode']
         if self.type not in MODE:
             self.type = 'html'
         self.parser = MODE[self.type]
         self.ignores = SelectorMatcher(
-            self.config.get('ignores', []), self.type, self.config.get('namespaces', {})
+            self.config['ignores'], self.type, self.config['namespaces']
         )
         self.captures = SelectorMatcher(
-            self.config.get('captures', self.default_capture), self.type, self.config.get('namespaces', {})
+            self.config['captures'], self.type, self.config['namespaces']
         )
 
     def header_check(self, content):

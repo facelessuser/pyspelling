@@ -42,22 +42,33 @@ class XmlFilter(filters.Filter):
         """Initialization."""
 
         super(XmlFilter, self).__init__(options, default_encoding)
-        self.setup()
+
+    def get_default_config(self):
+        """Get default configuration."""
+
+        return {
+            "comments": True,
+            "attributes": [],
+            "block_tags": [],
+            "ignores": [],
+            "captures": self.default_capture,
+            "namespaces": {}
+        }
 
     def setup(self):
         """Setup."""
 
         self.ancestry = []
-        self.user_block_tags = set()
-        self.comments = self.config.get('comments', True) is True
-        self.attributes = set(self.config.get('attributes', []))
+        self.user_block_tags = set(self.config['block_tags'])
+        self.comments = self.config['comments']
+        self.attributes = set(self.config['attributes'])
         self.parser = 'xml'
         self.type = 'xml'
         self.ignores = SelectorMatcher(
-            self.config.get('ignores', []), self.type, self.config.get('namespaces', {})
+            self.config['ignores'], self.type, self.config['namespaces']
         )
         self.captures = SelectorMatcher(
-            self.config.get('captures', self.default_capture), self.type, self.config.get('namespaces', {})
+            self.config['captures'], self.type, self.config['namespaces']
         )
 
     def _has_xml_encode(self, content):

@@ -33,10 +33,27 @@ class StylesheetsFilter(cpp.CppFilter):
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
-        # If the style isn't found, just go with CSS, then use the appropriate prefix.
-        self.stylesheets = STYLESHEET_TYPE.get(options.get('stylesheets', 'css').lower(), CSS)
-        self.prefix = [k for k, v in STYLESHEET_TYPE.items() if v == SASS][0]
         super(StylesheetsFilter, self).__init__(options, default_encoding)
+
+    def get_default_config(self):
+        """Get default configuration."""
+
+        return {
+            "block_comments": True,
+            "line_comments": True,
+            "group_comments": False,
+            "stylesheets": 'css'
+        }
+
+    def setup(self):
+        """Setup."""
+
+        self.blocks = self.config['block_comments']
+        self.lines = self.config['line_comments']
+        self.group_comments = self.config['group_comments']
+        # If the style isn't found, just go with CSS, then use the appropriate prefix.
+        self.stylesheets = STYLESHEET_TYPE.get(self.config['stylesheets'].lower(), CSS)
+        self.prefix = [k for k, v in STYLESHEET_TYPE.items() if v == SASS][0]
 
     def find_comments(self, text):
         """Find comments."""

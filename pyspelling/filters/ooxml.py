@@ -48,6 +48,11 @@ class OoxmlFilter(odf.OdfFilter):
 
         super(OoxmlFilter, self).__init__(options, default_encoding)
 
+    def get_default_config(self):
+        """Get default configuration."""
+
+        return {}
+
     def setup(self):
         """Setup."""
 
@@ -86,6 +91,7 @@ class OoxmlFilter(odf.OdfFilter):
                 if self.type:
                     break
         self.filepattern = DOC_PARAMS[self.type]['filepattern']
+        self.namespaces = DOC_PARAMS[self.type]['namespaces']
         self.captures = SelectorMatcher(DOC_PARAMS[self.type]['captures'], 'xml', DOC_PARAMS[self.type]['namespaces'])
 
     def soft_break(self, el, text):

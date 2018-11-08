@@ -83,7 +83,6 @@ matrix:
     output: build/dictionary/mkdocs.dic
   pipeline:
   - pyspelling.filters.ooxml:
-      mode: documents
   - pyspelling.filters.url:
 
 - name: pptx
@@ -99,7 +98,6 @@ matrix:
     output: build/dictionary/mkdocs.dic
   pipeline:
   - pyspelling.filters.ooxml:
-      mode: presentation
   - pyspelling.filters.url:
 
 - name: xlsx
@@ -115,7 +113,6 @@ matrix:
     output: build/dictionary/mkdocs.dic
   pipeline:
   - pyspelling.filters.ooxml:
-      mode: spreadsheet
   - pyspelling.filters.url:
 
 - name: markdown

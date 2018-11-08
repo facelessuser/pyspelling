@@ -11,9 +11,21 @@ class MarkdownFilter(filters.Filter):
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
+        super(MarkdownFilter, self).__init__(options, default_encoding)
+
+    def get_default_config(self):
+        """Get default configuration."""
+
+        return {
+            "markdown_extensions": []
+        }
+
+    def setup(self):
+        """Setup."""
+
         extensions = []
         extension_configs = {}
-        for item in options.get('markdown_extensions', []):
+        for item in self.config['markdown_extensions']:
             if isinstance(item, str):
                 extensions.append(item)
             else:
@@ -22,7 +34,6 @@ class MarkdownFilter(filters.Filter):
                 if v is not None:
                     extension_configs[k] = v
         self.markdown = markdown.Markdown(extensions=extensions, extension_configs=extension_configs)
-        super(MarkdownFilter, self).__init__(options, default_encoding)
 
     def filter(self, source_file, encoding):  # noqa A001
         """Parse Markdown file."""

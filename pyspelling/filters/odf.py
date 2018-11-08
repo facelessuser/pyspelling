@@ -33,6 +33,11 @@ class OdfFilter(xml.XmlFilter):
 
         super(OdfFilter, self).__init__(options, default_encoding)
 
+    def get_default_config(self):
+        """Get default configuration."""
+
+        return {}
+
     def setup(self):
         """Setup."""
 
@@ -43,15 +48,15 @@ class OdfFilter(xml.XmlFilter):
         self.parser = 'xml'
         self.type = 'odf'
         self.filepattern = 'content.xml'
-        namespaces = {
+        self.namespaces = {
             'text': 'urn:oasis:names:tc:opendocument:xmlns:text:1.0',
             'draw': 'urn:oasis:names:tc:opendocument:xmlns:drawing:1.0'
         }
         self.ignores = SelectorMatcher(
-            [], 'xml', namespaces
+            [], 'xml', self.namespaces
         )
         self.captures = SelectorMatcher(
-            self.default_capture, 'xml', namespaces
+            self.default_capture, 'xml', self.namespaces
         )
 
     def _detect_encoding(self, source_file):
@@ -123,13 +128,13 @@ class OdfFilter(xml.XmlFilter):
             if el.namespace and el.namespace == self.namespaces['draw'] and el.name == 'page-thumbnail':
                 name = el.attrs.get('draw:page-number', '')
                 self.additional_context = 'slide{}:'.format(name)
-        super(OdfFilter).extract_tag_metadata(el)
+        super(OdfFilter, self).extract_tag_metadata(el)
 
     def reset(self):
         """Reset anything needed on each iteration."""
 
         self.additional_context = ""
-        super(OdfFilter).reset()
+        super(OdfFilter, self).reset()
 
     def get_sub_node(self, node):
         """Extract node from document if desired."""

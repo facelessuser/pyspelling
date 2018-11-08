@@ -14,11 +14,25 @@ class ContextFilter(filters.Filter):
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
-        self.context_visible_first = options.get('context_visible_first', False) is True
+        super(ContextFilter, self).__init__(options, default_encoding)
+
+    def get_default_config(self):
+        """Get default configuration."""
+
+        return {
+            "context_visible_first": False,
+            "delimiters": [],
+            "escapes": None
+        }
+
+    def setup(self):
+        """Setup."""
+
+        self.context_visible_first = self.config['context_visible_first']
         self.delimiters = []
         self.escapes = None
         escapes = []
-        for delimiter in options.get('delimiters', []):
+        for delimiter in self.config['delimiters']:
             if not isinstance(delimiter, dict):
                 continue
             group = util.random_name_gen()
@@ -36,11 +50,9 @@ class ContextFilter(filters.Filter):
                 delimiter['close']
             )
             self.delimiters.append((re.compile(pattern, re.M), group))
-        escapes = options.get('escapes', None)
+        escapes = self.config['escapes']
         if escapes:
             self.escapes = re.compile(escapes)
-
-        super(ContextFilter, self).__init__(options, default_encoding)
 
     def filter(self, source_file, encoding):  # noqa A001
         """Parse file."""

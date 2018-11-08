@@ -11,9 +11,26 @@ class JavaScriptFilter(cpp.CppFilter):
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
-        self.jsdocs = options.get('jsdocs', False) is True
-        options['prefix'] = 'js'
         super(JavaScriptFilter, self).__init__(options, default_encoding)
+
+    def get_default_config(self):
+        """Get default configuration."""
+
+        return {
+            "block_comments": True,
+            "line_comments": True,
+            "group_comments": False,
+            "jsdocs": False
+        }
+
+    def setup(self):
+        """Setup."""
+
+        self.blocks = self.config['block_comments']
+        self.lines = self.config['line_comments']
+        self.group_comments = self.config['group_comments']
+        self.jsdocs = self.config['jsdocs']
+        self.prefix = 'js'
 
     def evaluate_block(self, groups):
         """Evaluate block comments."""
