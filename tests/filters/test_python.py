@@ -16,6 +16,8 @@ class TestPython(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.python:
                   group_comments: true
@@ -64,6 +66,8 @@ class TestPythonChained(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.text:
               - pyspelling.filters.python:

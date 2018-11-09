@@ -16,6 +16,8 @@ class TestMarkdown(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.markdown:
                   markdown_extensions:
@@ -70,6 +72,8 @@ class TestMarkdownChained(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.text:
               - pyspelling.filters.markdown:

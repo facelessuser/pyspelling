@@ -1,4 +1,5 @@
 [![Unix Build Status][travis-image]][travis-link]
+[![Windows Build Status][appveyor-image]][appveyor-link]
 [![Coverage Status][codecov-image]][codecov-link]
 [![Requirements Status][requires-image]][requires-link]
 [![PyPI Version][pypi-image]][pypi-link]
@@ -33,10 +34,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 [codecov-image]: https://img.shields.io/codecov/c/github/facelessuser/pyspelling/master.svg
 [codecov-link]: https://codecov.io/github/facelessuser/pyspelling
-[travis-image]: https://img.shields.io/travis/facelessuser/pyspelling/master.svg?label=Unix%20Build
+[travis-image]: https://img.shields.io/travis/facelessuser/pyspelling/master.svg?label=Unix%20Build&logo=travis
 [travis-link]: https://travis-ci.org/facelessuser/pyspelling
+[appveyor-image]: https://img.shields.io/appveyor/ci/facelessuser/pyspelling/master.svg?label=Windows%20Build&logo=appveyor
+[appveyor-link]: https://ci.appveyor.com/project/facelessuser/pyspelling
 [requires-image]: https://img.shields.io/requires/github/facelessuser/pyspelling/master.svg
 [requires-link]: https://requires.io/github/facelessuser/pyspelling/requirements/?branch=master
-[pypi-image]: https://img.shields.io/pypi/v/pyspelling.svg
+[pypi-image]: https://img.shields.io/pypi/v/pyspelling.svg?logo=python&logoColor=white
 [pypi-link]: https://pypi.python.org/pypi/pyspelling
 [license-image-mit]: https://img.shields.io/badge/license-MIT-blue.svg

@@ -16,6 +16,8 @@ class TestStylesheetsCSS(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.stylesheets:
                   stylesheets: css
@@ -60,6 +62,8 @@ class TestStylesheetsSCSS(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.stylesheets:
                   stylesheets: scss
@@ -115,6 +119,8 @@ class TestStylesheetsSASS(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.stylesheets:
                   stylesheets: sass
@@ -170,6 +176,8 @@ class TestStylesheetsCSSChained(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.text:
               - pyspelling.filters.stylesheets:

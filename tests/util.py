@@ -6,6 +6,7 @@ import unittest
 import warnings
 from textwrap import dedent
 from pyspelling import spellcheck
+import sys
 
 # Below is general helper stuff that Python uses in `unittests`.  As these
 # not meant for users, and could change without notice, include them
@@ -93,6 +94,9 @@ class PluginTestCase(unittest.TestCase):
 
     def spellcheck(self, config_file, name=None, binary='', checker='', verbose=0, debug=True):
         """Spell check."""
+
+        if not checker:
+            checker = 'hunspell' if sys.platform.startswith('win') else 'aspell'
 
         words = set()
         for results in spellcheck(os.path.join(self.tempdir, config_file), name, binary, checker, verbose, debug):

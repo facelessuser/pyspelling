@@ -16,6 +16,8 @@ class TestHTML(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.html:
                   attributes:
@@ -106,6 +108,8 @@ class TestCSSEscapes(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.html:
                   mode: html5
@@ -166,6 +170,8 @@ class TestHtml5AttrNamespace(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.html:
                   mode: html5
@@ -191,6 +197,8 @@ class TestHtml5AttrNamespace(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.html:
                   mode: html5
@@ -217,6 +225,8 @@ class TestHtml5AttrNamespace(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.html:
                   mode: html5
@@ -246,6 +256,8 @@ class TestHTML5LIB(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.html:
                   mode: html5
@@ -311,6 +323,8 @@ class TestXHTML(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.html:
                   mode: xhtml
@@ -374,6 +388,8 @@ class TestHTMLChained(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.text:
               - pyspelling.filters.html:

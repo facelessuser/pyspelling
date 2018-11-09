@@ -16,6 +16,8 @@ class TestODFFilter(util.PluginTestCase):
               - 'tests/**/*.odt'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.odf
             """
@@ -35,6 +37,8 @@ class TestODFFilter(util.PluginTestCase):
               - 'tests/**/*.fodt'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.odf
             """
@@ -73,6 +77,8 @@ class TestODFFilter(util.PluginTestCase):
               - 'tests/**/*.ods'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.odf
             """
@@ -93,6 +99,8 @@ class TestODFFilter(util.PluginTestCase):
               - 'tests/**/*.odt'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.text
               - pyspelling.filters.odf
@@ -113,6 +121,8 @@ class TestODFFilter(util.PluginTestCase):
               - 'tests/**/*.fodt'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.text
               - pyspelling.filters.odf

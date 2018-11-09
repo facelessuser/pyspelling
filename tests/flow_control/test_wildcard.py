@@ -16,6 +16,8 @@ class TestWildcard(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.python:
                   group_comments: true

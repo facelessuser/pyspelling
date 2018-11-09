@@ -17,6 +17,8 @@ class TestURL(util.PluginTestCase):
               aspell:
                 lang: en
                 mode: none
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.url:
             """
@@ -55,6 +57,8 @@ class TestURLChained(util.PluginTestCase):
               aspell:
                 lang: en
                 mode: none
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.text:
               - pyspelling.filters.url:
