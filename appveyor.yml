@@ -21,7 +21,7 @@ init:
   - ps: "ls C:/Python*"
 
 install:
-  - curl -fsS -o hunspell.zip https://github.com/facelessuser/hunspell-windows/releases/download/2.1/hunspell-windows-h-1.6.2-1-d-9ec31e4-v2.zip
+  - curl -fsSL -o hunspell.zip https://github.com/facelessuser/hunspell-windows/releases/download/2.1/hunspell-windows-h-1.6.2-1-d-9ec31e4-v2.zip
   - 7z x hunspell.zip -ohunspell
   - "%PYTHON%/Scripts/pip.exe install virtualenv"
   - "%PYTHON%/Scripts/pip.exe install tox"
