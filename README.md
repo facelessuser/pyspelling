@@ -1,4 +1,5 @@
 [![Unix Build Status][travis-image]][travis-link]
+[![Coverage Status][codecov-image]][codecov-link]
 [![Requirements Status][requires-image]][requires-link]
 [![PyPI Version][pypi-image]][pypi-link]
 ![License][license-image-mit]
@@ -30,6 +31,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 [aspell]: http://aspell.net/
 [hunspell]: http://hunspell.github.io/
 
+[codecov-image]: https://img.shields.io/codecov/c/github/facelessuser/pyspelling/master.svg
+[codecov-link]: https://codecov.io/github/facelessuser/pyspelling
 [travis-image]: https://img.shields.io/travis/facelessuser/pyspelling/master.svg?label=Unix%20Build
 [travis-link]: https://travis-ci.org/facelessuser/pyspelling
 [requires-image]: https://img.shields.io/requires/github/facelessuser/pyspelling/master.svg

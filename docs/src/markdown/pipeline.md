@@ -21,6 +21,8 @@ Name                                     | Include\ Path
 [HTML](./filters/html.md)                | `pyspelling.filters.html`
 [JavaScript](./filters/javascript.md)    | `pyspelling.filters.javascript`
 [Markdown](./filters/markdown.md)        | `pyspelling.filters.markdown`
+[ODF](./filters/odf.md)                  | `pyspelling.filters.odf`
+[OOXML](./filters/ooxml.md)              | `pyspelling.filters.ooxml`
 [Python](./filters/python.md)            | `pyspelling.filters.python`
 [Stylesheets](./filters/stylesheets.md)  | `pyspelling.filters.stylesheets`
 [Text](./filters/text.md)                | `pyspelling.filters.text`

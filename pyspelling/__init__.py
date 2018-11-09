@@ -516,7 +516,7 @@ class Hunspell(SpellChecker):  # pragma: no cover
         return cmd
 
 
-def spellcheck(config_file, name=None, binary='', verbose=0, checker='', debug=False):
+def spellcheck(config_file, name=None, binary='', checker='', verbose=0, debug=False):
     """Spell check."""
 
     hunspell = None

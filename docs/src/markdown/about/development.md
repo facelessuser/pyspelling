@@ -68,13 +68,13 @@ python -m pyspelling
 
 It should print out the files with the misspelled words if any are found.  If you find it prints words that are not misspelled, you can add them in `docs/src/dictionary/en-custom.text`.
 
-<!-- ## Validation Tests
+## Validation Tests
 
 In order to preserve good code health, a test suite has been put together with pytest (@pytest-dev/pytest). There are currently two kinds of tests: syntax and targeted.  To run these tests, you can use the following command:
 
 ```
 python run_tests.py
-``` -->
+```
 
 ### Running Validation With Tox
 
@@ -100,11 +100,11 @@ As most people will not have all the Python versions on their machine, it makes 
 tox -elint
 ```
 
-<!-- To select PY37 unit tests (or other versions -- change accordingly):
+To select Python 3.7 unit tests (or other versions -- change accordingly):
 
 ```
 tox -epy37
-``` -->
+```
 
 To select spelling and document building:
 
@@ -112,16 +112,16 @@ To select spelling and document building:
 tox -edocuments
 ```
 
-<!-- ## Code Coverage
+## Code Coverage
 
-When running the validation tests through Tox, it is setup to track code coverage via the Coverage (@bitbucket:ned/coveragepy) module.  Coverage is run on each `pyxx-unittests` environment.  If you've made changes to the code, you can clear the old coverage data:
+When running the validation tests through Tox, it is setup to track code coverage via the Coverage (@bitbucket:ned/coveragepy) module.  Coverage is run on each `pyxx` environment.  If you've made changes to the code, you can clear the old coverage data:
 
 ```
 coverage erase
 ```
 
-Then run each unit test environment to and coverage will be calculated. All the data from each run is merged together.  HTML is output for each file in `.tox/pyXX-unittests/tmp`.  You can use these to see areas that are not covered/exercised yet with testing.
+Then run each unit test environment to and coverage will be calculated. All the data from each run is merged together.  HTML is output for each file in `.tox/pyXX/tmp`.  You can use these to see areas that are not covered/exercised yet with testing.
 
-You can checkout `tox.ini` to see how this is accomplished. -->
+You can checkout `tox.ini` to see how this is accomplished.
 
 --8<-- "links.txt"

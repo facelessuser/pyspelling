@@ -20,7 +20,7 @@ matrix:
       - alt
       ignores:
       - ':matches(code, pre)'
-      - 'a:matches(.magiclink-compare, .magiclink-commit)'
+      - 'a:matches(.magiclink-compare, .magiclink-commit, .magiclink-repository)'
       - 'span.keys'
       - ':matches(.MathJax_Preview, .md-nav__link, .md-footer-custom-text, .md-source__repository, .headerlink, .md-icon)'
   - pyspelling.filters.url:

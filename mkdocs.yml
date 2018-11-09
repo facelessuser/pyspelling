@@ -34,6 +34,8 @@ nav:
     - HTML: filters/html.md
     - JavaScript: filters/javascript.md
     - Markdown: filters/markdown.md
+    - ODF: filters/odf.md
+    - OOXML: filters/ooxml.md
     - Python: filters/python.md
     - Stylesheets: filters/stylesheets.md
     - Text: filters/text.md

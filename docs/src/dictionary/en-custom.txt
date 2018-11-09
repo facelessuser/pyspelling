@@ -16,6 +16,7 @@ MULTILINE
 MkDocs
 NONINFRINGEMENT
 ODF
+OOXML
 OpenOffice
 Parsers
 PyMdown
@@ -23,6 +24,8 @@ PyPI
 PySpelling
 PySpelling's
 PyYaml's
+Virtualenv
+pytest
 SCSS
 SVG
 Stylesheets
@@ -41,6 +44,7 @@ builtin
 builtins
 chainable
 charset
+checkable
 chunking
 could've
 dicts

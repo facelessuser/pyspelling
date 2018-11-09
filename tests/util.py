@@ -91,11 +91,11 @@ class PluginTestCase(unittest.TestCase):
             except Exception:
                 retry -= 1
 
-    def spellcheck(self, config_file, name=None, binary='', verbose=0, checker='', debug=True):
+    def spellcheck(self, config_file, name=None, binary='', checker='', verbose=0, debug=True):
         """Spell check."""
 
         words = set()
-        for results in spellcheck(os.path.join(self.tempdir, config_file), name, binary, verbose, checker, debug):
+        for results in spellcheck(os.path.join(self.tempdir, config_file), name, binary, checker, verbose, debug):
             if results.error:
                 print(results.error)
             words |= set(results.words)

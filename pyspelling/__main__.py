@@ -32,7 +32,7 @@ def run(config, name=None, binary='', verbose=0, spellchecker='', debug=False):
 
     fail = False
     count = 0
-    for results in spellcheck(config, name, binary, verbose, spellchecker, debug):
+    for results in spellcheck(config, name, binary, spellchecker, verbose, debug):
         count += 1
         if results.error:
             fail = True

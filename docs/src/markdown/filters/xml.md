@@ -1,6 +1,7 @@
 # XML
 
 ## Usage
+
 The XML filter is designed to capture XML content, comments, and even attributes. It allows for filtering out specific tags, and you can even filter them out with CSS selectors (even though this is XML content :slightly_smiling:).
 
 When first in the chain, the XML filter will look for the encoding of the file in its header and convert the buffer to Unicode. It will assume `utf-8` if no encoding header is found, and the user has not overridden the fallback encoding.
@@ -67,6 +68,7 @@ Options      | Type     | Default         | Description
 `ignores`    | [string] | `#!py3 []`      | CSS style selectors that identify tags to ignore. Child tags will not be crawled.
 `captures`   | [string] | `#!py3 ['*|*']` | CSS style selectors used to narrow which tags that text is collected from. Unlike `ignores`, tags which text is not captured from still have their children crawled.
 `namespaces` | dict     | `#!py3 {}`      | Dictionary containing key value pairs of namespaces to use for CSS selectors (equivalent to `@namespace` in CSS). Use the an empty string for the key to define default the namespace. See below for example.
+`break_tags` | [string] | `#!py3 []`      | Tags to break on for context. Causes more calls to the spell checker.
 
 !!! example "Namespace example"
     ```
