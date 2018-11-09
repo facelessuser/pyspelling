@@ -2,8 +2,8 @@ API
 Accessors
 BOM
 BOMs
-BeatifulSoup
 BeautifulSoup
+Booleans
 CPP
 CSS
 Changelog
@@ -16,6 +16,7 @@ MULTILINE
 MkDocs
 NONINFRINGEMENT
 ODF
+OOXML
 OpenOffice
 Parsers
 PyMdown
@@ -23,11 +24,16 @@ PyPI
 PySpelling
 PySpelling's
 PyYaml's
+Virtualenv
+pytest
 SCSS
+SVG
 Stylesheets
 TODO
 Tox
 UTF
+Unescape
+XHTML
 YAML
 accessor
 backticks
@@ -38,6 +44,7 @@ builtin
 builtins
 chainable
 charset
+checkable
 chunking
 could've
 dicts
@@ -49,10 +56,14 @@ facelessuser
 filename
 gforcada
 globbing
+iterables
 linter
 lxml
+matcher
 metadata
 mkdocs
+namespace
+namespaces
 overridable
 parsers
 pre
@@ -71,6 +82,7 @@ sublicense
 substring
 syntaxes
 tuple
+validator
 whitespace
 wildcard
 wordlist

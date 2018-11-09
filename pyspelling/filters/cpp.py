@@ -26,11 +26,25 @@ class CppFilter(filters.Filter):
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
-        self.blocks = options.get('block_comments', True) is True
-        self.lines = options.get('line_comments', True) is True
-        self.group_comments = options.get('group_comments', False) is True
-        self.prefix = options.get('prefix', 'cpp')
-        super(CppFilter, self).__init__(options, default_encoding)
+        super().__init__(options, default_encoding)
+
+    def get_default_config(self):
+        """Get default configuration."""
+
+        return {
+            "block_comments": True,
+            "line_comments": True,
+            "group_comments": False,
+            "prefix": 'cpp'
+        }
+
+    def setup(self):
+        """Setup."""
+
+        self.blocks = self.config['block_comments']
+        self.lines = self.config['line_comments']
+        self.group_comments = self.config['group_comments']
+        self.prefix = self.config['prefix']
 
     def evaluate_block(self, groups):
         """Evaluate block comments."""

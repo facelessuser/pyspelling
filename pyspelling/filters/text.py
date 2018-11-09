@@ -11,12 +11,36 @@ class TextFilter(filters.Filter):
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
-        self.normalize = options.get('normalize', '').upper()
-        self.convert_encoding = options.get('convert_encoding', '').lower()
-        self.errors = options.get('errors', 'strict').lower()
+        super().__init__(options, default_encoding)
+
+    def get_default_config(self):
+        """Get default configuration."""
+
+        return {
+            'normalize': '',
+            'convert_encoding': '',
+            'errors': 'strict'
+        }
+
+    def validate_options(self, k, v):
+        """Validate options."""
+
+        super().validate_options(k, v)
+        if k == 'errors' and v.lower() not in ('strict', 'replace', 'ignore', 'backslashreplace'):
+            raise ValueError("{}: '{}' is not a valid value for '{}'".format(self.__class__.__name, v, k))
+        if k == 'normalize' and v.upper() not in ('NFC', 'NFKC', 'NFD', 'NFKD'):
+            raise ValueError("{}: '{}' is not a valid value for '{}'".format(self.__class__.__name, v, k))
+
+    def setup(self):
+        """Setup."""
+
+        self.normalize = self.config['normalize'].upper()
+        self.convert_encoding = self.config['convert_encoding'].lower()
+        self.errors = self.config['errors'].lower()
+
         if self.convert_encoding:
             self.convert_encoding = codecs.lookup(
-                filters.PYTHON_ENCODING_NAMES.get(default_encoding, default_encoding).lower()
+                filters.PYTHON_ENCODING_NAMES.get(self.default_encoding, self.default_encoding).lower()
             ).name
 
             # Don't generate content with BOMs
@@ -28,8 +52,6 @@ class TextFilter(filters.Filter):
 
             if self.convert_encoding == 'utf-8-sig':
                 self.convert_encoding = 'utf-8'
-
-        super(TextFilter, self).__init__(options, default_encoding)
 
     def convert(self, text, encoding):
         """Convert the text."""

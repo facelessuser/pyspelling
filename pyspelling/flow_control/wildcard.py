@@ -8,12 +8,27 @@ class WildcardFlowControl(flow_control.FlowControl):
 
     FNMATCH_FLAGS = fnmatch.N | fnmatch.B | fnmatch.I
 
-    def __init__(self, config):
+    def __init__(self, options):
         """Initialization."""
 
-        self.allow = config.get('allow', ['*'])
-        self.halt = config.get('halt', [])
-        self.skip = config.get('skip', [])
+        super().__init__(options)
+        self.setup()
+
+    def get_default_config(self):
+        """Get default configuration."""
+
+        return {
+            'allow': ['*'],
+            'halt': [],
+            'skip': []
+        }
+
+    def setup(self):
+        """Get default configuration."""
+
+        self.allow = self.config['allow']
+        self.halt = self.config['halt']
+        self.skip = self.config['skip']
 
     def match(self, category, pattern):
         """Match the category."""

@@ -6,6 +6,8 @@ import contextlib
 import mmap
 import os
 from collections import namedtuple
+from .. import plugin
+from .. import util
 
 PYTHON_ENCODING_NAMES = {
     'iso-8859-8-i': 'iso-8859-8',
@@ -31,6 +33,8 @@ RE_UTF_BOM = re.compile(
 
 RE_CATEGORY_NAME = re.compile(r'^[-a-z0-9_]+$', re.I)
 
+BINARY_ENCODE = ''
+
 
 class SourceText(namedtuple('SourceText', ['text', 'context', 'encoding', 'category', 'error'])):
     """Source text."""
@@ -55,7 +59,7 @@ class SourceText(namedtuple('SourceText', ['text', 'context', 'encoding', 'categ
         if RE_CATEGORY_NAME.match(category) is None and error is None:
             raise ValueError('Invalid category name in SourceText!')
 
-        return super(SourceText, cls).__new__(cls, text, context, encoding, category, error)
+        return super().__new__(cls, text, context, encoding, category, error)
 
     def _is_bytes(self):
         """Is bytes."""
@@ -68,17 +72,18 @@ class SourceText(namedtuple('SourceText', ['text', 'context', 'encoding', 'categ
         return self.error is not None
 
 
-class Filter(object):
+class Filter(plugin.Plugin):
     """Spelling language."""
 
     MAX_GUESS_SIZE = 31457280
     CHECK_BOM = True
 
-    def __init__(self, config, default_encoding='utf-8'):
+    def __init__(self, options, default_encoding='utf-8'):
         """Initialize."""
 
-        self.config = config
         self.default_encoding = PYTHON_ENCODING_NAMES.get(default_encoding, default_encoding).lower()
+        super().__init__(options)
+        self.setup()
 
     def _is_very_large(self, size):
         """Check if content is very large."""
@@ -96,9 +101,10 @@ class Filter(object):
             encoding = None
         return encoding
 
-    def _has_bom(self, content):
+    def has_bom(self, f):
         """Check for UTF8, UTF16, and UTF32 BOMs."""
 
+        content = f.read(4)
         encoding = None
         m = RE_UTF_BOM.match(content)
         if m is not None:
@@ -132,17 +138,29 @@ class Filter(object):
 
         encoding = None
         with contextlib.closing(mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)) as m:
-            # Check for BOMs
-            if self.CHECK_BOM:
-                encoding = self._has_bom(m.read(4))
-            m.seek(0)
-            # Check file extensions
-            if encoding is None:
-                encoding = self._utf_strip_bom(self.header_check(m.read(1024)))
-                m.seek(0)
-            if encoding is None:
-                m.seek(0)
-                encoding = self._utf_strip_bom(self.content_check(m))
+            encoding = self._analyze_file(m)
+        return encoding
+
+    def _analyze_file(self, f):
+        """Analyze the file."""
+
+        f.seek(0)
+        # Check for BOMs
+        if self.CHECK_BOM:
+            encoding = self.has_bom(f)
+            f.seek(0)
+        else:
+            util.warn_deprecated(
+                "'CHECK_BOM' attribute is deprecated. "
+                "Please override 'has_bom` function to control or avoid BOM detection."
+            )
+        # Check file extensions
+        if encoding is None:
+            encoding = self._utf_strip_bom(self.header_check(f.read(1024)))
+            f.seek(0)
+        if encoding is None:
+            encoding = self._utf_strip_bom(self.content_check(f))
+            f.seek(0)
 
         return encoding
 
@@ -151,14 +169,15 @@ class Filter(object):
 
         encoding = self._guess(source_file)
         # If we didn't explicitly detect an encoding, assume default.
-        if not encoding:
+        if encoding is None:
             encoding = self.default_encoding
 
         return encoding
 
-    def _parse(self, source_file):
-        """Parse the file."""
+    def _run_first(self, source_file):
+        """Run on as first in chain."""
 
+        self.reset()
         self.current_encoding = self.default_encoding
         encoding = None
         try:
@@ -171,31 +190,36 @@ class Filter(object):
                 raise
         return content
 
+    def _run(self, source):
+        """Run chained."""
+
+        self.reset()
+        return self.sfilter(source)
+
     def _guess(self, filename):
         """Guess the encoding and decode the content of the file."""
 
         encoding = None
 
-        try:
-            file_size = os.path.getsize(filename)
-            # If the file is really big, lets just call it binary.
-            # We don't have time to let Python chug through a massive file.
-            if not self._is_very_large(file_size):
-                with open(filename, "rb") as f:
-                    if file_size == 0:
-                        encoding = 'ascii'
-                    else:
-                        encoding = self._detect_buffer_encoding(f)
-                        if encoding is not None:
-                            encoding = self._verify_encoding(encoding)
-            else:
-                raise UnicodeDecodeError('Unicode detection is not applied to very large files!')
-        except Exception:  # pragma: no cover
-            raise UnicodeDecodeError('Cannot resolve encoding!')
+        file_size = os.path.getsize(filename)
+        # If the file is really big, lets just call it binary.
+        # We don't have time to let Python chug through a massive file.
+        if not self._is_very_large(file_size):
+            with open(filename, "rb") as f:
+                if file_size == 0:
+                    encoding = 'ascii'
+                else:
+                    encoding = self._detect_buffer_encoding(f)
+                    if encoding is None:
+                        raise UnicodeDecodeError('None', b'', 0, 0, 'Unicode cannot be detected.')
+                    if encoding != BINARY_ENCODE:
+                        encoding = self._verify_encoding(encoding)
+        else:  # pragma: no cover
+            raise UnicodeDecodeError('None', b'', 0, 0, 'Unicode detection is not applied to very large files!')
 
         return encoding
 
-    def content_check(self, file_handle):
+    def content_check(self, f):
         """File content check."""
 
         return None

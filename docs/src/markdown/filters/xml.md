@@ -1,40 +1,38 @@
-# HTML
+# XML
 
 ## Usage
 
-The HTML filter is designed to capture HTML content, comments, and even attributes. It allows for filtering out specific tags, and you can even filter them out with basic selectors.
+The XML filter is designed to capture XML content, comments, and even attributes. It allows for filtering out specific tags, and you can even filter them out with CSS selectors (even though this is XML content :slightly_smiling:).
 
-When first in the chain, the HTML filter will look for the encoding of the HTML in its header and convert the buffer to Unicode. It will assume `utf-8` if no encoding header is found, and the user has not overridden the fallback encoding.
+When first in the chain, the XML filter will look for the encoding of the file in its header and convert the buffer to Unicode. It will assume `utf-8` if no encoding header is found, and the user has not overridden the fallback encoding.
 
-The HTML filter uses BeautifulSoup4 to convert the Unicode content to HTML. Content is returned in individual chunks by block tags. While this causes more overhead, as each block is processed individually through the command line tool, it provides context for where the spelling errors are. If enabled, the HTML filter will also return chunks for comments and even attributes. Each type of text chunk is returned with their own category type.
+The HTML filter uses BeautifulSoup4 to convert the Unicode content to XML structure. Tag content is as one block for the whole file. If enabled, the XML filter will also return chunks for comments and even attributes. Each type of text chunk is returned with their own category type.
 
 Tags can be captured or ignored with the `captures` and `ignores` options. These options work by employing CSS selectors to target the tags. The CSS selectors are based on a limited subset of CSS4 selectors.
 
 ```yaml
 matrix:
-- name: html
+- name: xml
   pipeline:
-  - pyspelling.filters.html:
+  - pyspelling.filters.xml:
       comments: false
       attributes:
-      - title
-      - alt
+      - some-data
       ignores:
-      - :matches(code, pre)
-      - a:matches(.magiclink-compare, .magiclink-commit)
-      - span.keys
-      - :matches(.MathJax_Preview, .md-nav__link, .md-footer-custom-text, .md-source__repository, .headerlink, .md-icon)
+      - :matches(ignore_tag, [ignore_attribute])
   sources:
-  - site/*.html
+  - site/*.xml
 ```
 
 ## Supported CSS Selectors
 
-The CSS selectors are based on a limited subset of CSS4 selectors.
+The CSS selectors are based on a limited subset of CSS4 selectors. The same selectors that are available for HTML are available for XML except for classes and IDs.
 
-Below shows accepted selectors. When speaking about namespaces, they only apply to XHTML or when dealing with recognized foreign tags in HTML5. You must configure the CSS namespaces in the plugin options in order for them to work properly.
+Below shows accepted selectors. You must configure the CSS namespaces in the plugin options in order for them to work properly.
 
 While an effort is made to mimic CSS selector behavior, there may be some differences or quirks. We do not support all CSS selector features, but enough to make the task of ignoring tags or selectively capturing tags easy. We particularly do not support notations with ancestry such as `div > p`, `div + p`, `div p`, or `div ~ p`. The only pseudo classes that are currently supported is `:not()` and `:matches()` as they are the most helpful in the task of ignoring or capturing tags.
+
+Examples below are using HTML, but can be adapted for XML.
 
 Selector             | Example                       | Description
 -------------------- | ----------------------------- | -----------
@@ -47,8 +45,6 @@ Selector             | Example                       | Description
 `|*`                 | `|*`                          | Select any element without a namespace.
 `*|*`                | `*|*`                         | Select all elements with any or no namespace.
 `*`                  | `*`                           | Select all elements. If a default namespace is defined, it will be any element under the default namespace.
-`.class`             | `.some-class`                 | Select all elements with the class `some-class`.
-`#id`                | `#some-id`                    | Select the element with the ID `some-id`.
 `[attribute]`        | `[target]`                    | Selects all elements with a `target` attribute.
 `[ns|attribute]`     | `[xlink|href]`                | Selects elements with the attribute `href` and the namespace `xlink` (assuming it has been configured in the `namespaces` option).
 `[*|attribute]`      | `[*|name]`                    | Selects any element with a `name` attribute that has a namespace or not.
@@ -65,23 +61,21 @@ Selector             | Example                       | Description
 
 ## Options
 
-Options      | Type     | Default                           | Description
------------- | -------- | --------------------------------- | -----------
-`comments`   | bool     | `#!py3 True`                      | Include comment text in the output.
-`attributes` | [string] | `#!py3 []`                        | Attributes whose content should be included in the output.
-`ignores`    | [string] | `#!py3 []`                        | CSS style selectors that identify tags to ignore. Child tags will not be crawled.
-`captures`   | [string] | `#!py3 ['*|*:not(script,style)']` | CSS style selectors used to narrow which tags that text is collected from. Unlike `ignores`, tags which text is not captured from still have their children crawled.
-`mode`       | string   | `#!py3 'html`                     | Mode to use when parsing HTML: `html`, `xhtml`, `html5`.
-`namespaces` | dict     | `#!py3 {}`                        | Dictionary containing key value pairs of namespaces to use for CSS selectors (equivalent to `@namespace` in CSS). Use the an empty string for the key to define default the namespace. See below for example.
-`break_tags` | [string] | `#!py3 []`                        | Additional tags (in addition to the default, defined block tags), to break on for context. Useful for new or currently unsupported block tags.
+Options      | Type     | Default         | Description
+------------ | -------- | --------------- | -----------
+`comments`   | bool     | `#!py3 True`    | Include comment text in the output.
+`attributes` | [string] | `#!py3 []`      | Attributes whose content should be included in the output.
+`ignores`    | [string] | `#!py3 []`      | CSS style selectors that identify tags to ignore. Child tags will not be crawled.
+`captures`   | [string] | `#!py3 ['*|*']` | CSS style selectors used to narrow which tags that text is collected from. Unlike `ignores`, tags which text is not captured from still have their children crawled.
+`namespaces` | dict     | `#!py3 {}`      | Dictionary containing key value pairs of namespaces to use for CSS selectors (equivalent to `@namespace` in CSS). Use the an empty string for the key to define default the namespace. See below for example.
+`break_tags` | [string] | `#!py3 []`      | Tags to break on for context. Causes more calls to the spell checker.
 
 !!! example "Namespace example"
     ```
     matrix:
-    - name: html
+    - name: xml
       pipeline:
-      - pyspelling.filters.html:
-          mode: xhtml
+      - pyspelling.filters.xml:
           namespaces:
             "": http://www.w3.org/1999/xhtml
             svg: http://www.w3.org/2000/svg
@@ -94,6 +88,6 @@ HTML returns text with the following categories.
 
 Category         | Description
 ---------------- | -----------
-`html-content`   | Text captured from HTML blocks.
-`html-attribute` | Text captured from HTML attributes.
-`html-comment`   | Text captured from HTML comments.
+`xml-content`   | Text captured from XML tags.
+`xml-attribute` | Text captured from XML attributes.
+`xml-comment`   | Text captured from XML comments.

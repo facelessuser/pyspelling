@@ -77,6 +77,9 @@ class PluginTestCase(unittest.TestCase):
         self.tempdir = TESTFN + "_dir"
         self.setup_fs()
 
+    def setup_fs(self):
+        """Setup file system (common files used across multiple tests)."""
+
     def tearDown(self):
         """Cleanup."""
 
@@ -88,10 +91,12 @@ class PluginTestCase(unittest.TestCase):
             except Exception:
                 retry -= 1
 
-    def spellcheck(self, config_file, name=None, binary='', verbose=0, checker='', debug=False):
+    def spellcheck(self, config_file, name=None, binary='', checker='', verbose=0, debug=True):
         """Spell check."""
 
         words = set()
-        for results in spellcheck(os.path.join(self.tempdir, config_file), name, binary, verbose, checker, debug):
+        for results in spellcheck(os.path.join(self.tempdir, config_file), name, binary, checker, verbose, debug):
+            if results.error:
+                print(results.error)
             words |= set(results.words)
         return sorted(list(words))

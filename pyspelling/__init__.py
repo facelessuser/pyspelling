@@ -4,16 +4,25 @@ import os
 import importlib
 from . import util
 from .__meta__ import __version__, __version_info__  # noqa: F401
-from . import settings
 from . import flow_control
 from . import filters
 from wcmatch import glob
 import codecs
+from collections import namedtuple
 
 __all__ = ("spellcheck",)
 
 
-class SpellChecker(object):
+class Results(namedtuple('Results', ['words', 'context', 'category', 'error'])):
+    """Results."""
+
+    def __new__(cls, words, context, category, error=None):
+        """Allow defaults."""
+
+        return super().__new__(cls, words, context, category, error)
+
+
+class SpellChecker:
     """Spell check class."""
 
     DICTIONARY = 'dictionary.dic'
@@ -77,7 +86,7 @@ class SpellChecker(object):
                 if isinstance(f, flow_control.FlowControl):
                     err = ''
                     try:
-                        status = f.adjust_flow(source.category)
+                        status = f._run(source.category)
                     except Exception as e:
                         err = self.get_error(e)
                         yield filters.SourceText('', source.context, '', '', err)
@@ -90,7 +99,7 @@ class SpellChecker(object):
                     if flow_status == flow_control.ALLOW:
                         err = ''
                         try:
-                            srcs = f.sfilter(source)
+                            srcs = f._run(source)
                         except Exception as e:
                             err = self.get_error(e)
                             yield filters.SourceText('', source.context, '', '', err)
@@ -114,7 +123,7 @@ class SpellChecker(object):
 
         for source in self._pipeline_step(sources, options, personal_dict):
             if source._has_error():
-                yield util.Results([], source.context, source.category, source.error)
+                yield Results([], source.context, source.category, source.error)
             else:
                 encoding = source.encoding
                 if source._is_bytes():
@@ -127,7 +136,11 @@ class SpellChecker(object):
                 self.log("Command: " + str(cmd), 4)
 
                 wordlist = util.call_spellchecker(cmd, input_text=text, encoding=encoding)
-                yield util.Results([w for w in sorted(set(wordlist.split('\n'))) if w], source.context, source.category)
+                yield Results(
+                    [w for w in sorted(set(wordlist.replace('\r', '').split('\n'))) if w],
+                    source.context,
+                    source.category
+                )
 
     def spell_check_no_pipeline(self, source, options, personal_dict):
         """Spell check without the pipeline."""
@@ -146,10 +159,10 @@ class SpellChecker(object):
                     self.log('> Processing: %s' % f, 1)
                     if pipeline:
                         try:
-                            yield pipeline[0]._parse(f)
+                            yield pipeline[0]._run_first(f)
                         except Exception as e:
                             err = self.get_error(e)
-                            yield filters.SourceText('', f, '', '', err)
+                            yield [filters.SourceText('', f, '', '', err)]
                     else:
                         try:
                             if self.default_encoding:
@@ -159,10 +172,10 @@ class SpellChecker(object):
                                 encoding = codecs.lookup(encoding).name
                             else:
                                 encoding = self.default_encoding
-                            yield filters.SourceText('', f, encoding, 'file')
+                            yield [filters.SourceText('', f, encoding, 'file')]
                         except Exception as e:
                             err = self.get_error(e)
-                            yield filters.SourceText('', f, '', '', err)
+                            yield [filters.SourceText('', f, '', '', err)]
 
     def setup_spellchecker(self, task):
         """Setup spell checker."""
@@ -268,7 +281,7 @@ class Aspell(SpellChecker):
     def __init__(self, config, binary='', verbose=0, debug=False):
         """Initialize."""
 
-        super(Aspell, self).__init__(config, binary, verbose, debug)
+        super().__init__(config, binary, verbose, debug)
         self.binary = binary if binary else 'aspell'
 
     def setup_spellchecker(self, task):
@@ -348,7 +361,7 @@ class Aspell(SpellChecker):
 
         cmd = self.setup_command(source.encoding, options, personal_dict, source.context)
         wordlist = util.call_spellchecker(cmd, input_text=content, encoding=source.encoding)
-        return util.Results(
+        return Results(
             [w for w in sorted(set(wordlist.split('\n'))) if w], source.context, source.category
         )
 
@@ -408,7 +421,7 @@ class Hunspell(SpellChecker):  # pragma: no cover
     def __init__(self, config, binary='', verbose=0, debug=False):
         """Initialize."""
 
-        super(Hunspell, self).__init__(config, binary, verbose)
+        super().__init__(config, binary, verbose, debug)
         self.binary = binary if binary else 'hunspell'
 
     def setup_spellchecker(self, task):
@@ -461,7 +474,7 @@ class Hunspell(SpellChecker):  # pragma: no cover
 
         cmd = self.setup_command(source.encoding, options, personal_dict, source.context)
         wordlist = util.call_spellchecker(cmd, input_text=None, encoding=source.encoding)
-        return util.Results(
+        return Results(
             [w for w in sorted(set(wordlist.split('\n'))) if w], source.context, source.category
         )
 
@@ -503,13 +516,13 @@ class Hunspell(SpellChecker):  # pragma: no cover
         return cmd
 
 
-def spellcheck(config_file, name=None, binary='', verbose=0, checker='', debug=False):
+def spellcheck(config_file, name=None, binary='', checker='', verbose=0, debug=False):
     """Spell check."""
 
     hunspell = None
     aspell = None
     spellchecker = None
-    config = settings.read_config(config_file)
+    config = util.read_config(config_file)
 
     matrix = config.get('matrix', [])
     preferred_checker = config.get('spellchecker', 'aspell')
@@ -522,7 +535,12 @@ def spellcheck(config_file, name=None, binary='', verbose=0, checker='', debug=F
 
     for task in matrix:
 
+        # Only run tasks called by names if names are provided.
         if name and task.get('name', '') not in name:
+            continue
+
+        # Ignore hidden items unless they are explicitly called by name.
+        if not name and task.get('hidden', False):
             continue
 
         if not checker:

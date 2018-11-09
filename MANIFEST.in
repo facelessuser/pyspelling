@@ -1,5 +1,5 @@
 recursive-include pyspelling *.py
-recursive-include tests *.py
+recursive-include tests *.py *.fodt *.odt *.ods *.odp *.docx *.xlsx *.pptx
 recursive-include docs/src/markdown *.md *.png *.gif *.html
 recursive-include docs/src/dictionary *.txt
 recursive-include docs/theme *.js *.css *.html

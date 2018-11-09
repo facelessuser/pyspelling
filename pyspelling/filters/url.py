@@ -36,10 +36,21 @@ class URLFilter(filters.Filter):
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
-        self.emails = options.get('emails', True)
-        self.urls = options.get('urls', True)
+        super().__init__(options, default_encoding)
 
-        super(URLFilter, self).__init__(options, default_encoding)
+    def get_default_config(self):
+        """Get default configuration."""
+
+        return {
+            "emails": True,
+            "urls": True
+        }
+
+    def setup(self):
+        """Setup."""
+
+        self.emails = self.config['emails']
+        self.urls = self.config['urls']
 
     def _filter(self, text):
         """Filter out the URL and email addresses."""

@@ -64,7 +64,17 @@ When using the command line `--name` option, any task with the matching name wil
 
 ```yaml
 matrix:
-- name: Python Source
+- name: python
+```
+
+### Hidden
+
+All tasks in a configuration file will be run if no `name` is specified. If a task enables the option `hidden` by setting it to `true`, that task will *not* be run automatically when no `name` is specified. `hidden` tasks will only be run if they are specifically mentioned by `name`.
+
+```yaml
+matrix:
+- name: python
+  hidden: true
 ```
 
 ### Default Encoding

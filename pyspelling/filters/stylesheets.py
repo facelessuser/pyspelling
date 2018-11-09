@@ -33,10 +33,34 @@ class StylesheetsFilter(cpp.CppFilter):
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
+        super().__init__(options, default_encoding)
+
+    def get_default_config(self):
+        """Get default configuration."""
+
+        return {
+            "block_comments": True,
+            "line_comments": True,
+            "group_comments": False,
+            "stylesheets": 'css'
+        }
+
+    def validate_options(self, k, v):
+        """Validate options."""
+
+        super().validate_options(k, v)
+        if k == 'stylesheets' and v not in STYLESHEET_TYPE:
+            raise ValueError("{}: '{}' is not a valid value for '{}'".format(self.__class__.__name, v, k))
+
+    def setup(self):
+        """Setup."""
+
+        self.blocks = self.config['block_comments']
+        self.lines = self.config['line_comments']
+        self.group_comments = self.config['group_comments']
         # If the style isn't found, just go with CSS, then use the appropriate prefix.
-        self.stylesheets = STYLESHEET_TYPE.get(options.get('stylesheets', 'css').lower(), CSS)
+        self.stylesheets = STYLESHEET_TYPE.get(self.config['stylesheets'].lower(), CSS)
         self.prefix = [k for k, v in STYLESHEET_TYPE.items() if v == SASS][0]
-        super(StylesheetsFilter, self).__init__(options, default_encoding)
 
     def find_comments(self, text):
         """Find comments."""
@@ -45,7 +69,7 @@ class StylesheetsFilter(cpp.CppFilter):
             for m in RE_CSS_COMMENT.finditer(text):
                 self._css_evaluate(m)
         else:
-            super(StylesheetsFilter, self).find_comments(text)
+            super().find_comments(text)
 
     def _css_evaluate(self, m):
         """Search for comments."""

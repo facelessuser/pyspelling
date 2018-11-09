@@ -30,10 +30,23 @@ class PythonFilter(filters.Filter):
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
-        self.comments = options.get('comments', True) is True
-        self.docstrings = options.get('docstrings', True) is True
-        self.group_comments = options.get('group_comments', False) is True
-        super(PythonFilter, self).__init__(options, default_encoding)
+        super().__init__(options, default_encoding)
+
+    def get_default_config(self):
+        """Get default configuration."""
+
+        return {
+            'comments': True,
+            'docstrings': True,
+            'group_comments': False
+        }
+
+    def setup(self):
+        """Setup."""
+
+        self.comments = self.config['comments']
+        self.docstrings = self.config['docstrings']
+        self.group_comments = self.config['group_comments']
 
     def header_check(self, content):
         """Special Python encoding check."""
