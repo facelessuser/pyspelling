@@ -415,7 +415,7 @@ class Aspell(SpellChecker):
         return cmd
 
 
-class Hunspell(SpellChecker):  # pragma: no cover
+class Hunspell(SpellChecker):
     """Hunspell spell check class."""
 
     def __init__(self, config, binary='', verbose=0, debug=False):

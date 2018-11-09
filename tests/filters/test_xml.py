@@ -16,6 +16,8 @@ class TestXMLNamespaceNoDefault(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.xml:
                   namespaces:
@@ -81,6 +83,8 @@ class TestXMLNamespace(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.xml:
                   namespaces:

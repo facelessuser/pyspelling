@@ -16,6 +16,8 @@ class TestText(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.text:
                   convert_encoding: utf-8
@@ -65,6 +67,8 @@ class TestTextChained(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.python:
               - pyspelling.filters.text:

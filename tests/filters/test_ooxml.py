@@ -16,6 +16,8 @@ class TestOOOXMLFilter(util.PluginTestCase):
               - 'tests/**/*.docx'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.ooxml
             """
@@ -35,6 +37,8 @@ class TestOOOXMLFilter(util.PluginTestCase):
               - 'tests/**/*.pptx'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.ooxml
             """
@@ -54,6 +58,8 @@ class TestOOOXMLFilter(util.PluginTestCase):
               - 'tests/**/*.xlsx'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.ooxml
             """
@@ -74,6 +80,8 @@ class TestOOOXMLFilter(util.PluginTestCase):
               - 'tests/**/*.docx'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.text
               - pyspelling.filters.ooxml

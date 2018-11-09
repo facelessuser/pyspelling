@@ -16,6 +16,8 @@ class TestJavaScript(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.javascript:
                   jsdocs: true
@@ -71,6 +73,8 @@ class TestJavaScriptChained(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.text:
               - pyspelling.filters.javascript:
