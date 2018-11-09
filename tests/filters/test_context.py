@@ -53,8 +53,7 @@ class TestContext(util.PluginTestCase):
             """
         ).format('\n'.join(bad_words + good_words))
         self.mktemp('test.txt', template, 'utf-8')
-        words = self.spellcheck('.context.yml')
-        self.assertEqual(sorted(bad_words), words)
+        self.assert_spellcheck('.context.yml', bad_words)
 
 
 class TestContextChained(util.PluginTestCase):
@@ -109,5 +108,4 @@ class TestContextChained(util.PluginTestCase):
             """
         ).format('\n'.join(bad_words + good_words))
         self.mktemp('test.txt', template, 'utf-8')
-        words = self.spellcheck('.context.yml')
-        self.assertEqual(sorted(bad_words), words)
+        self.assert_spellcheck('.context.yml', bad_words)

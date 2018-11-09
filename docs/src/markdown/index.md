@@ -25,6 +25,10 @@ accessor
 !!!Spelling check failed!!!
 ```
 
+## Prerequisites
+
+PySpelling is a wrapper around either Aspell or Hunspell. If you do not have a working Aspell or Hunspell on your system, PySpelling will **not** work. It is up to the user to either build locally or acquire via a package manager a working spell checker installation. PySpelling pre-processes files with Python filters, and then sends the resulting text to the preferred spell checker via command line.
+
 ## Installing
 
 Installation is easy with pip:
@@ -98,8 +102,12 @@ You can specify the spell checker type by specifying it on the command line. PyS
 pyspelling -s hunspell
 ```
 
-## Windows Unicode Console
+## Supported Spell Check Versions
 
-If you are dealing with Unicode text, Windows often has difficulty showing it in the console. Using [Windows Unicode Console][win-unicode-console] to patch your Windows install can help. On Python 3.6+ it might not be needed at all.
+PySpelling is tested with Hunspell 1.6+, and recommends using only 1.6 and above. PySpelling is also tested on Aspell 0.60+ (which is recommended), but should also work on the 0.50 series.
+
+## Usage in Windows
+
+If you are dealing with Unicode text, Windows often has difficulty showing it in the console. Using [Windows Unicode Console][win-unicode-console] to patch your Windows install can help. On Python 3.6+ it might not be needed at all. Certain specialty consoles on Windows may report confusing information related to what encoding is used in the console. It is left to the user to resolve console Unicode issues, though proposals for better ways to handle this would be considered.
 
 --8<-- "refs.txt"

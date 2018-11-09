@@ -51,8 +51,7 @@ class TestCPP(util.PluginTestCase):
             ' '.join(bad_comments2 + good_words)
         )
         self.mktemp('test.txt', template, 'utf-8')
-        words = self.spellcheck('.cpp.yml')
-        self.assertEqual(sorted(bad_words), words)
+        self.assert_spellcheck('.cpp.yml', bad_words)
 
 
 class TestCPPChained(util.PluginTestCase):
@@ -105,5 +104,4 @@ class TestCPPChained(util.PluginTestCase):
             ' '.join(bad_comments2 + good_words)
         )
         self.mktemp('test.txt', template, 'utf-8')
-        words = self.spellcheck('.cpp.yml')
-        self.assertEqual(sorted(bad_words), words)
+        self.assert_spellcheck('.cpp.yml', bad_words)

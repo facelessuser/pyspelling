@@ -72,5 +72,4 @@ class TestWildcard(util.PluginTestCase):
             '\n'.join(bad_words + good_words)
         )
         self.mktemp('test.txt', template, 'utf-8')
-        words = self.spellcheck('.wildcard.yml')
-        self.assertEqual(sorted(bad_words), words)
+        self.assert_spellcheck('.wildcard.yml', bad_words)

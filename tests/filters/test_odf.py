@@ -23,8 +23,7 @@ class TestODFFilter(util.PluginTestCase):
             """
         ).format(self.tempdir)
         self.mktemp('.odt.yml', config, 'utf-8')
-        words = self.spellcheck('.odt.yml')
-        self.assertEqual(sorted(['tihs', 'smoe', 'txet']), words)
+        self.assert_spellcheck('.odt.yml', ['tihs', 'smoe', 'txet'])
 
     def test_fodt(self):
         """Test `fodt` files."""
@@ -44,8 +43,7 @@ class TestODFFilter(util.PluginTestCase):
             """
         ).format(self.tempdir)
         self.mktemp('.fodt.yml', config, 'utf-8')
-        words = self.spellcheck('.fodt.yml')
-        self.assertEqual(sorted(['tihs', 'smoe', 'txet']), words)
+        self.assert_spellcheck('.fodt.yml', ['tihs', 'smoe', 'txet'])
 
     def test_odp(self):
         """Test `odp` files."""
@@ -63,8 +61,7 @@ class TestODFFilter(util.PluginTestCase):
             """
         ).format(self.tempdir)
         self.mktemp('.odp.yml', config, 'utf-8')
-        words = self.spellcheck('.odp.yml')
-        self.assertEqual(sorted(['tihs', 'smoe', 'txet']), words)
+        self.assert_spellcheck('.odp.yml', ['tihs', 'smoe', 'txet'])
 
     def test_ods(self):
         """Test `ods` files."""
@@ -84,8 +81,7 @@ class TestODFFilter(util.PluginTestCase):
             """
         ).format(self.tempdir)
         self.mktemp('.ods.yml', config, 'utf-8')
-        words = self.spellcheck('.ods.yml')
-        self.assertEqual(sorted(['tihs', 'smoe', 'txet']), words)
+        self.assert_spellcheck('.ods.yml', ['tihs', 'smoe', 'txet'])
 
     def test_odt_chained(self):
         """Test `odt` chained files."""
@@ -107,8 +103,7 @@ class TestODFFilter(util.PluginTestCase):
             """
         ).format(self.tempdir)
         self.mktemp('.odt.yml', config, 'utf-8')
-        words = self.spellcheck('.odt.yml')
-        self.assertEqual(sorted(['tihs', 'smoe', 'txet']), words)
+        self.assert_spellcheck('.odt.yml', ['tihs', 'smoe', 'txet'])
 
     def test_fodt_chained(self):
         """Test `fodt` chained files."""
@@ -129,5 +124,4 @@ class TestODFFilter(util.PluginTestCase):
             """
         ).format(self.tempdir)
         self.mktemp('.fodt.yml', config, 'utf-8')
-        words = self.spellcheck('.fodt.yml')
-        self.assertEqual(sorted(['tihs', 'smoe', 'txet']), words)
+        self.assert_spellcheck('.fodt.yml', ['tihs', 'smoe', 'txet'])

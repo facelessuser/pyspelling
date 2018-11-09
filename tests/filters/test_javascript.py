@@ -55,8 +55,7 @@ class TestJavaScript(util.PluginTestCase):
             ' '.join(bad_comments2 + good_words)
         )
         self.mktemp('test.txt', template, 'utf-8')
-        words = self.spellcheck('.javascript.yml')
-        self.assertEqual(sorted(bad_words), words)
+        self.assert_spellcheck('.javascript.yml', bad_words)
 
 
 class TestJavaScriptChained(util.PluginTestCase):
@@ -113,5 +112,4 @@ class TestJavaScriptChained(util.PluginTestCase):
             ' '.join(bad_comments2 + good_words)
         )
         self.mktemp('test.txt', template, 'utf-8')
-        words = self.spellcheck('.javascript.yml')
-        self.assertEqual(sorted(bad_words), words)
+        self.assert_spellcheck('.javascript.yml', bad_words)

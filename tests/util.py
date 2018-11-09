@@ -12,10 +12,30 @@ import sys
 # not meant for users, and could change without notice, include them
 # ourselves so we aren't surprised later.
 TESTFN = '@test'
+WIN = sys.platform.startswith('win')
+HUNSPELL = 'hunspell.exe' if WIN else 'hunspell'
+ASPELL = 'aspell.exe' if WIN else 'aspell'
 
 # Disambiguate `TESTFN` for parallel testing, while letting it remain a valid
 # module name.
 TESTFN = "{}_{}_tmp".format(TESTFN, os.getpid())
+
+
+def which(executable):
+    """See if executable exists."""
+
+    location = None
+    if os.path.basename(executable) != executable:
+        if os.path.isfile(executable):
+            location = executable
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            exe = os.path.join(path, executable)
+            print(exe)
+            if os.path.isfile(exe):
+                location = exe
+                break
+    return location
 
 
 @contextlib.contextmanager
@@ -92,15 +112,20 @@ class PluginTestCase(unittest.TestCase):
             except Exception:
                 retry -= 1
 
-    def spellcheck(self, config_file, name=None, binary='', checker='', verbose=0, debug=True):
+    def assert_spellcheck(self, config_file, expected, name=None, verbose=0):
         """Spell check."""
 
-        if not checker:
-            checker = 'hunspell' if sys.platform.startswith('win') else 'aspell'
-
-        words = set()
-        for results in spellcheck(os.path.join(self.tempdir, config_file), name, binary, checker, verbose, debug):
-            if results.error:
-                print(results.error)
-            words |= set(results.words)
-        return sorted(list(words))
+        if which(HUNSPELL):
+            words = set()
+            for results in spellcheck(os.path.join(self.tempdir, config_file), name, checker='hunspell', debug=True):
+                if results.error:
+                    print(results.error)
+                words |= set(results.words)
+            self.assertEqual(sorted(expected), sorted(list(words)))
+        if which(ASPELL):
+            words = set()
+            for results in spellcheck(os.path.join(self.tempdir, config_file), name, checker='aspell', debug=True):
+                if results.error:
+                    print(results.error)
+                words |= set(results.words)
+            self.assertEqual(sorted(expected), sorted(list(words)))

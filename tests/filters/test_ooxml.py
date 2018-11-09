@@ -23,8 +23,7 @@ class TestOOOXMLFilter(util.PluginTestCase):
             """
         ).format(self.tempdir)
         self.mktemp('.docx.yml', config, 'utf-8')
-        words = self.spellcheck('.docx.yml')
-        self.assertEqual(sorted(['tihs', 'smoe', 'txet']), words)
+        self.assert_spellcheck('.docx.yml', ['tihs', 'smoe', 'txet'])
 
     def test_pptx(self):
         """Test `pptx` files."""
@@ -44,8 +43,7 @@ class TestOOOXMLFilter(util.PluginTestCase):
             """
         ).format(self.tempdir)
         self.mktemp('.pptx.yml', config, 'utf-8')
-        words = self.spellcheck('.pptx.yml')
-        self.assertEqual(sorted(['tihs', 'smoe', 'txet']), words)
+        self.assert_spellcheck('.pptx.yml', ['tihs', 'smoe', 'txet'])
 
     def test_xlsx(self):
         """Test `xlsx` files."""
@@ -65,8 +63,7 @@ class TestOOOXMLFilter(util.PluginTestCase):
             """
         ).format(self.tempdir)
         self.mktemp('.xlsx.yml', config, 'utf-8')
-        words = self.spellcheck('.xlsx.yml')
-        self.assertEqual(sorted(['tihs', 'smoe', 'txet']), words)
+        self.assert_spellcheck('.xlsx.yml', ['tihs', 'smoe', 'txet'])
 
     def test_docx_chained(self):
         """Test `docx` chained files."""
@@ -88,5 +85,4 @@ class TestOOOXMLFilter(util.PluginTestCase):
             """
         ).format(self.tempdir)
         self.mktemp('.docx.yml', config, 'utf-8')
-        words = self.spellcheck('.docx.yml')
-        self.assertEqual(sorted(['tihs', 'smoe', 'txet']), words)
+        self.assert_spellcheck('.docx.yml', ['tihs', 'smoe', 'txet'])

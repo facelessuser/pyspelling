@@ -14,6 +14,8 @@ environment:
       TOXENV: "py37"
     - PYTHON: "C:/Python36"
       TOXENV: "lint"
+    - PYTHON: "C:/Python36"
+      TOXENV: "documents"
 
 init:
   - "ECHO %TOXENV%"
@@ -21,12 +23,14 @@ init:
   - ps: "ls C:/Python*"
 
 install:
-  - curl -fsSL -o hunspell.zip https://github.com/facelessuser/hunspell-windows/releases/download/2.1/hunspell-windows-h-1.6.2-1-d-9ec31e4-v2.zip
-  - 7z x hunspell.zip -ohunspell
   - "%PYTHON%/Scripts/pip.exe install virtualenv"
   - "%PYTHON%/Scripts/pip.exe install tox"
   - "%PYTHON%/Scripts/pip.exe install codecov"
-  - "SET PATH=%CD%\\hunspell\\bin;%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+  - SET PATH=C:\msys64\mingw64\bin;C:\msys64\usr\bin;%PYTHON%;%PYTHON%\Scripts;%PATH%
+  - SET PKG_CONFIG_PATH=C:\msys64\mingw64\lib\pkgconfig
+  - SET XDG_DATA_DIRS=C:\msys64\mingw64\share
+  - pacman --version
+  - pacman -S mingw-w64-x86_64-aspell mingw-w64-x86_64-aspell-en mingw-w64-x86_64-hunspell mingw-w64-x86_64-hunspell-en
 
 test_script:
   - pip --version
@@ -35,7 +39,7 @@ test_script:
   - tox
 
 after_test:
-  - if not ("%TOXENV%" == "lint") codecov
+  - if not ("%TOXENV%" == "lint") if not ("%TOXENV% == "documents") codecov
 
 matrix:
   fast_finish: true

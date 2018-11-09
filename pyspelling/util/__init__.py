@@ -111,6 +111,7 @@ def call_spellchecker(cmd, input_text=None, encoding=None):
 
     process = get_process(cmd)
 
+    # A buffer has been provided
     if input_text is not None:
         for line in input_text.splitlines():
             # Hunspell truncates lines at `0x1fff` (at least on Windows this has been observed)
@@ -127,7 +128,9 @@ def call_spellchecker(cmd, input_text=None, encoding=None):
                 else:
                     chunk = line[offset:chunk_end]
                     offset = chunk_end
-                process.stdin.write(chunk + b'\n')
+                # Avoid wasted calls to empty strings
+                if chunk and not chunk.isspace():
+                    process.stdin.write(chunk + b'\n')
                 if offset >= end:
                     break
 

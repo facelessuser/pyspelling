@@ -48,8 +48,7 @@ class TestPython(util.PluginTestCase):
             ' '.join(bad_comments2 + good_words)
         )
         self.mktemp('test.txt', template, 'utf-8')
-        words = self.spellcheck('.python.yml')
-        self.assertEqual(sorted(bad_words), words)
+        self.assert_spellcheck('.python.yml', bad_words)
 
 
 class TestPythonChained(util.PluginTestCase):
@@ -99,5 +98,4 @@ class TestPythonChained(util.PluginTestCase):
             ' '.join(bad_comments2 + good_words)
         )
         self.mktemp('test.txt', template, 'utf-8')
-        words = self.spellcheck('.python.yml')
-        self.assertEqual(sorted(bad_words), words)
+        self.assert_spellcheck('.python.yml', bad_words)
