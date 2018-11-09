@@ -14,8 +14,6 @@ environment:
       TOXENV: "py37"
     - PYTHON: "C:/Python36"
       TOXENV: "lint"
-    - PYTHON: "C:/Python36"
-      TOXENV: "documents"
 
 init:
   - "ECHO %TOXENV%"
@@ -23,14 +21,28 @@ init:
   - ps: "ls C:/Python*"
 
 install:
+  # Setup Python test tools
   - "%PYTHON%/Scripts/pip.exe install virtualenv"
   - "%PYTHON%/Scripts/pip.exe install tox"
   - "%PYTHON%/Scripts/pip.exe install codecov"
-  - SET PATH=C:\msys64\mingw64\bin;C:\msys64\usr\bin;%PYTHON%;%PYTHON%\Scripts;%PATH%
-  - SET PKG_CONFIG_PATH=C:\msys64\mingw64\lib\pkgconfig
-  - SET XDG_DATA_DIRS=C:\msys64\mingw64\share
-  - pacman --version
-  - pacman -S mingw-w64-x86_64-aspell mingw-w64-x86_64-aspell-en mingw-w64-x86_64-hunspell mingw-w64-x86_64-hunspell-en
+  # Add Python and MSYS2 to the path
+  - SET PATH=%PYTHON%;%PYTHON%\Scripts;C:\msys64\usr\bin;%PATH%
+  # Setup MSYS2 environment and setup TOX_SPELL_PATH so our tests will know to look there for the spell checkers.
+  - bash -lc "pacman --version"
+  - bash -lc "pacman -S --noconfirm mingw-w64-x86_64-aspell mingw-w64-x86_64-aspell-en mingw-w64-x86_64-hunspell mingw-w64-x86_64-hunspell-en"
+  - SET TOX_SPELL_PATH=C:\msys64\mingw64\bin
+  - SET TOX_SPELL_REQUIRE=both
+  # Aspell on windows mixes windows slashes and 'nix slashes.
+  # We need to write the default config with data-dir and dict-dir with with 'nix slashes so it can find filters etc.
+  - bash -lc "aconf=$(${TOX_SPELL_PATH}/aspell config conf-dir | sed 's/\\\\/\\//g');
+    ${TOX_SPELL_PATH}/aspell dump config | sed 's/\\\\\\\\/\//g' > ${aconf}/aspell.conf;
+    temp=$(${TOX_SPELL_PATH}/aspell config data-dir | sed 's/\\\\/\\//g');
+    echo \"data-dir ${temp}\" >> ${aconf}/aspell.conf;
+    temp=$(${TOX_SPELL_PATH}/aspell config dict-dir | sed 's/\\\\/\\//g');
+    echo \"dict-dir ${temp}\" >> ${aconf}/aspell.conf"
+  # Display current installed versions
+  - bash -lc "${TOX_SPELL_PATH}/aspell --version"
+  - bash -lc "${TOX_SPELL_PATH}/hunspell --version"
 
 test_script:
   - pip --version
@@ -39,7 +51,7 @@ test_script:
   - tox
 
 after_test:
-  - if not ("%TOXENV%" == "lint") if not ("%TOXENV% == "documents") codecov
+  - if not ("%TOXENV%" == "lint") if not ("%TOXENV%" == "documents") codecov
 
 matrix:
   fast_finish: true

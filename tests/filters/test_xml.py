@@ -65,7 +65,7 @@ class TestXMLNamespaceNoDefault(util.PluginTestCase):
         )
 
         self.mktemp('test.txt', template, 'utf-8')
-        words = self.assert_spellcheck('.xml.yml', ['dddd', 'ffff'])
+        self.assert_spellcheck('.xml.yml', ['dddd', 'ffff'])
 
 
 class TestXMLNamespace(util.PluginTestCase):

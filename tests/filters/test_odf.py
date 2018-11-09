@@ -56,6 +56,8 @@ class TestODFFilter(util.PluginTestCase):
               - 'tests/**/*.odp'
               aspell:
                 lang: en
+              hunspell:
+                d: en_US
               pipeline:
               - pyspelling.filters.odf
             """
