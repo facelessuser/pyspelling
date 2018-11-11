@@ -31,8 +31,7 @@ class TestText(util.PluginTestCase):
         bad_words = ['helo', 'begn']
         good_words = ['yes', 'word']
         self.mktemp('test.txt', '\n'.join(bad_words + good_words), 'utf-8')
-        words = self.spellcheck('.text.yml')
-        self.assertEqual(sorted(bad_words), words)
+        self.assert_spellcheck('.text.yml', bad_words)
 
     def test_text_utf16(self):
         """Test text `UTF-16`."""
@@ -40,8 +39,7 @@ class TestText(util.PluginTestCase):
         bad_words = ['helo', 'begn']
         good_words = ['yes', 'word']
         self.mktemp('test.txt', '\n'.join(bad_words + good_words), 'utf-16')
-        words = self.spellcheck('.text.yml')
-        self.assertEqual(sorted(bad_words), words)
+        self.assert_spellcheck('.text.yml', bad_words)
 
     def test_text_utf32(self):
         """Test text `UTF-32`."""
@@ -49,8 +47,7 @@ class TestText(util.PluginTestCase):
         bad_words = ['helo', 'begn']
         good_words = ['yes', 'word']
         self.mktemp('test.txt', '\n'.join(bad_words + good_words), 'utf-32')
-        words = self.spellcheck('.text.yml')
-        self.assertEqual(sorted(bad_words), words)
+        self.assert_spellcheck('.text.yml', bad_words)
 
 
 class TestTextChained(util.PluginTestCase):
@@ -90,5 +87,4 @@ class TestTextChained(util.PluginTestCase):
             """
         ).format('\n'.join(bad_words + good_words))
         self.mktemp('test.txt', template, 'utf-8')
-        words = self.spellcheck('.text.yml')
-        self.assertEqual(sorted(bad_words), words)
+        self.assert_spellcheck('.text.yml', bad_words)

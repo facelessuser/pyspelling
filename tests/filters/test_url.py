@@ -38,8 +38,7 @@ class TestURL(util.PluginTestCase):
             """
         ).format(' '.join(bad_words + good_words))
         self.mktemp('test.txt', text, 'utf-8')
-        words = self.spellcheck('.url.yml')
-        self.assertEqual(sorted(bad_words), words)
+        self.assert_spellcheck('.url.yml', bad_words)
 
 
 class TestURLChained(util.PluginTestCase):
@@ -79,5 +78,4 @@ class TestURLChained(util.PluginTestCase):
             """
         ).format(' '.join(bad_words + good_words))
         self.mktemp('test.txt', text, 'utf-8')
-        words = self.spellcheck('.url.yml')
-        self.assertEqual(sorted(bad_words), words)
+        self.assert_spellcheck('.url.yml', bad_words)

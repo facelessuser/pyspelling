@@ -122,6 +122,9 @@ class SpellChecker:
         """Check spelling pipeline."""
 
         for source in self._pipeline_step(sources, options, personal_dict):
+            # Don't waste time on empty strings
+            if not source.text or source.text.isspace():
+                continue
             if source._has_error():
                 yield Results([], source.context, source.category, source.error)
             else:
@@ -360,7 +363,15 @@ class Aspell(SpellChecker):
             with open(source.context, 'rb') as f:
                 content = f.read()
 
+            # Don't waste time on empty string
+            if not content or content.isspace():
+                continue
+
+            self.log('', 3)
+            self.log(content, 3)
+
             cmd = self.setup_command(source.encoding, options, personal_dict, source.context)
+            self.log("Command: " + str(cmd), 4)
             wordlist = util.call_spellchecker(cmd, input_text=content, encoding=source.encoding)
             yield Results(
                 [w for w in sorted(set(wordlist.replace('\r', '').split('\n'))) if w], source.context, source.category
@@ -475,7 +486,8 @@ class Hunspell(SpellChecker):
 
         for source in sources:
             cmd = self.setup_command(source.encoding, options, personal_dict, source.context)
-            print(cmd)
+            self.log('', 3)
+            self.log("Command: " + str(cmd), 4)
             wordlist = util.call_spellchecker(cmd, input_text=None, encoding=source.encoding)
             yield Results(
                 [w for w in sorted(set(wordlist.replace('\r', '').split('\n'))) if w], source.context, source.category

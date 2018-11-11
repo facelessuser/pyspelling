@@ -12,10 +12,31 @@ import sys
 # not meant for users, and could change without notice, include them
 # ourselves so we aren't surprised later.
 TESTFN = '@test'
+WIN = sys.platform.startswith('win')
+HUNSPELL = 'hunspell.exe' if WIN else 'hunspell'
+ASPELL = 'aspell.exe' if WIN else 'aspell'
 
 # Disambiguate `TESTFN` for parallel testing, while letting it remain a valid
 # module name.
 TESTFN = "{}_{}_tmp".format(TESTFN, os.getpid())
+
+
+def which(executable):
+    """See if executable exists."""
+
+    location = None
+    if os.path.basename(executable) != executable:
+        if os.path.isfile(executable):
+            location = executable
+    else:
+        paths = [x for x in os.environ["PATH"].split(os.pathsep) if not x.isspace()]
+        paths.extend([x for x in os.environ.get("TOX_SPELL_PATH", "").split(os.pathsep) if not x.isspace()])
+        for path in paths:
+            exe = os.path.join(path, executable)
+            if os.path.isfile(exe):
+                location = exe
+                break
+    return location
 
 
 @contextlib.contextmanager
@@ -92,15 +113,57 @@ class PluginTestCase(unittest.TestCase):
             except Exception:
                 retry -= 1
 
-    def spellcheck(self, config_file, name=None, binary='', checker='', verbose=0, debug=True):
+    def assert_spell_required(self, running):
+        """Check if what we are running matches what we request."""
+
+        required = os.environ.get("TOX_SPELL_REQUIRE", "any")
+
+        if required not in ("both", "any", "aspell", "hunspell"):
+            raise RuntimeError("Invalid value of '{}' in 'TOX_SPELL_REQUIRE'".format(required))
+
+        if running not in ("both", "aspell", "hunspell"):
+            raise RuntimeError(
+                "Required tests are not being run (currently running '{}'). ".format(running) +
+                "Make sure spell checker can be found and " +
+                "'TOX_SPELL_REQUIRE' is set appropriately (currently '{}')".format(required)
+            )
+
+        if required != running and (required != "any" and running != "both"):
+            raise RuntimeError(
+                "'TOX_SPELL_REQUIRE' env variable, which is "
+                "'{}', is not compatible with '{}'".format(running, required)
+            )
+
+    def assert_spellcheck(self, config_file, expected, name=None, verbose=0):
         """Spell check."""
 
-        if not checker:
-            checker = 'hunspell' if sys.platform.startswith('win') else 'aspell'
+        hunspell_location = which(HUNSPELL)
+        aspell_location = which(ASPELL)
+        if hunspell_location and aspell_location:
+            running = "both"
+        elif hunspell_location:
+            running = "hunspell"
+        elif aspell_location:
+            running = "aspell"
+        else:
+            running = "none"
+        self.assert_spell_required(running)
 
-        words = set()
-        for results in spellcheck(os.path.join(self.tempdir, config_file), name, binary, checker, verbose, debug):
-            if results.error:
-                print(results.error)
-            words |= set(results.words)
-        return sorted(list(words))
+        if hunspell_location:
+            words = set()
+            for results in spellcheck(
+                os.path.join(self.tempdir, config_file), name, checker='hunspell', binary=hunspell_location, debug=True
+            ):
+                if results.error:
+                    print(results.error)
+                words |= set(results.words)
+            self.assertEqual(sorted(expected), sorted(list(words)))
+        if aspell_location:
+            words = set()
+            for results in spellcheck(
+                os.path.join(self.tempdir, config_file), name, checker='aspell', binary=aspell_location, debug=True
+            ):
+                if results.error:
+                    print(results.error)
+                words |= set(results.words)
+            self.assertEqual(sorted(expected), sorted(list(words)))

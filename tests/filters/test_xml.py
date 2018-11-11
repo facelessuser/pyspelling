@@ -65,8 +65,7 @@ class TestXMLNamespaceNoDefault(util.PluginTestCase):
         )
 
         self.mktemp('test.txt', template, 'utf-8')
-        words = self.spellcheck('.xml.yml')
-        self.assertEqual(sorted(['dddd', 'ffff']), words)
+        self.assert_spellcheck('.xml.yml', ['dddd', 'ffff'])
 
 
 class TestXMLNamespace(util.PluginTestCase):
@@ -133,5 +132,4 @@ class TestXMLNamespace(util.PluginTestCase):
         )
 
         self.mktemp('test.txt', template, 'utf-8')
-        words = self.spellcheck('.xml.yml')
-        self.assertEqual(sorted(['aaaa', 'dddd', 'ffff', 'jjjj']), words)
+        self.assert_spellcheck('.xml.yml', ['aaaa', 'dddd', 'ffff', 'jjjj'])

@@ -59,8 +59,7 @@ class TestHTML(util.PluginTestCase):
         )
 
         self.mktemp('test.txt', template, 'utf-8')
-        words = self.spellcheck('.html.yml')
-        self.assertEqual(sorted(bad_words), words)
+        self.assert_spellcheck('.html.yml', bad_words)
 
 
 class TestCSSEscapes(util.PluginTestCase):
@@ -121,8 +120,7 @@ class TestCSSEscapes(util.PluginTestCase):
             """
         ).format(self.tempdir)
         self.mktemp('.html5.yml', config, 'utf-8')
-        words = self.spellcheck('.html5.yml')
-        self.assertEqual(sorted(['aaaa', 'cccc']), words)
+        self.assert_spellcheck('.html5.yml', ['aaaa', 'cccc'])
 
 
 class TestHtml5AttrNamespace(util.PluginTestCase):
@@ -183,8 +181,7 @@ class TestHtml5AttrNamespace(util.PluginTestCase):
             """
         ).format(self.tempdir)
         self.mktemp('.html5.yml', config, 'utf-8')
-        words = self.spellcheck('.html5.yml')
-        self.assertEqual(sorted(['bbbb', 'cccc']), words)
+        self.assert_spellcheck('.html5.yml', ['bbbb', 'cccc'])
 
     def test_html_attr_namespace2(self):
         """Test HTML."""
@@ -211,8 +208,7 @@ class TestHtml5AttrNamespace(util.PluginTestCase):
             """
         ).format(self.tempdir)
         self.mktemp('.html5.yml', config, 'utf-8')
-        words = self.spellcheck('.html5.yml')
-        self.assertEqual(sorted(['dddd']), words)
+        self.assert_spellcheck('.html5.yml', ['dddd'])
 
     def test_html_attr_namespace3(self):
         """Test HTML."""
@@ -238,8 +234,7 @@ class TestHtml5AttrNamespace(util.PluginTestCase):
             """
         ).format(self.tempdir)
         self.mktemp('.html5.yml', config, 'utf-8')
-        words = self.spellcheck('.html5.yml')
-        self.assertEqual(sorted(['cccc']), words)
+        self.assert_spellcheck('.html5.yml', ['cccc'])
 
 
 class TestHTML5LIB(util.PluginTestCase):
@@ -305,8 +300,7 @@ class TestHTML5LIB(util.PluginTestCase):
         )
 
         self.mktemp('test.txt', template, 'utf-8')
-        words = self.spellcheck('.html5lib.yml')
-        self.assertEqual(sorted(bad_words), words)
+        self.assert_spellcheck('.html5lib.yml', bad_words)
 
 
 class TestXHTML(util.PluginTestCase):
@@ -370,8 +364,7 @@ class TestXHTML(util.PluginTestCase):
         )
 
         self.mktemp('test.txt', template, 'utf-8')
-        words = self.spellcheck('.xhtml.yml')
-        self.assertEqual(sorted(bad_words), words)
+        self.assert_spellcheck('.xhtml.yml', bad_words)
 
 
 class TestHTMLChained(util.PluginTestCase):
@@ -434,5 +427,4 @@ class TestHTMLChained(util.PluginTestCase):
         )
 
         self.mktemp('test.txt', template, 'utf-8')
-        words = self.spellcheck('.html.yml')
-        self.assertEqual(sorted(bad_words), words)
+        self.assert_spellcheck('.html.yml', bad_words)

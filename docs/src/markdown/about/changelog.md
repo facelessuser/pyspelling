@@ -17,6 +17,7 @@
 - **FIX**: Case related issues when comparing tags and attributes in HTML.
 - **FIX**: CSS selectors should only compare case insensitive for ASCII characters A-Z and a-z.
 - **FIX**: Allow CSS escapes in selectors.
+- **FIX**: Don't send empty (or strings that are just whitespace) to spell checker to prevent Aspell 0.50 series from crashing (also to increase performance).
 
 ## 1.1.0
 

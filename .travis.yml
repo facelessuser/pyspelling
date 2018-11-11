@@ -1,6 +1,6 @@
-sudo: false
-
 language: python
+dist: xenial
+sudo: true
 
 # Limit git depth to speed up build
 git:
@@ -9,15 +9,21 @@ git:
 matrix:
   include:
   - python: 3.4
-    env: TOXENV=py34
+    env:
+    - TOXENV=py34
+    - TOX_SPELL_REQUIRE=aspell
   - python: 3.5
-    env: TOXENV=py35
+    env:
+    - TOXENV=py35
+    - TOX_SPELL_REQUIRE=aspell
   - python: 3.6
-    env: TOXENV=py36
+    env:
+    - TOXENV=py36
+    - TOX_SPELL_REQUIRE=aspell
   - python: 3.7
-    dist: xenial
-    env: TOXENV=py37
-    sudo: true
+    env:
+    - TOXENV=py37
+    - TOX_SPELL_REQUIRE=aspell
   - python: 3.6
     env: TOXENV=lint
   - python: 3.6

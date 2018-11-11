@@ -44,8 +44,7 @@ class TestStylesheetsCSS(util.PluginTestCase):
             '\n'.join(bad_words + good_words)
         )
         self.mktemp('test.txt', template, 'utf-8')
-        words = self.spellcheck('.stylesheets_css.yml')
-        self.assertEqual(sorted(bad_words), words)
+        self.assert_spellcheck('.stylesheets_css.yml', bad_words)
 
 
 class TestStylesheetsSCSS(util.PluginTestCase):
@@ -101,8 +100,7 @@ class TestStylesheetsSCSS(util.PluginTestCase):
             ' '.join(bad_comments2 + good_words)
         )
         self.mktemp('test.txt', template, 'utf-8')
-        words = self.spellcheck('.stylesheets_scss.yml')
-        self.assertEqual(sorted(bad_words), words)
+        self.assert_spellcheck('.stylesheets_scss.yml', bad_words)
 
 
 class TestStylesheetsSASS(util.PluginTestCase):
@@ -158,8 +156,7 @@ class TestStylesheetsSASS(util.PluginTestCase):
             ' '.join(bad_comments2 + good_words)
         )
         self.mktemp('test.txt', template, 'utf-8')
-        words = self.spellcheck('.stylesheets_sass.yml')
-        self.assertEqual(sorted(bad_words), words)
+        self.assert_spellcheck('.stylesheets_sass.yml', bad_words)
 
 
 class TestStylesheetsCSSChained(util.PluginTestCase):
@@ -205,5 +202,4 @@ class TestStylesheetsCSSChained(util.PluginTestCase):
             '\n'.join(bad_words + good_words)
         )
         self.mktemp('test.txt', template, 'utf-8')
-        words = self.spellcheck('.stylesheets_css.yml')
-        self.assertEqual(sorted(bad_words), words)
+        self.assert_spellcheck('.stylesheets_css.yml', bad_words)

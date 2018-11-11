@@ -25,6 +25,10 @@ accessor
 !!!Spelling check failed!!!
 ```
 
+## Prerequisites
+
+PySpelling is a wrapper around either Aspell or Hunspell. If you do not have a working Aspell or Hunspell on your system, PySpelling will **not** work. It is up to the user to either build locally or acquire via a package manager a working spell checker installation. PySpelling pre-processes files with Python filters, and then sends the resulting text to the preferred spell checker via command line.
+
 ## Installing
 
 Installation is easy with pip:
@@ -98,8 +102,116 @@ You can specify the spell checker type by specifying it on the command line. PyS
 pyspelling -s hunspell
 ```
 
-## Windows Unicode Console
+## Supported Spell Check Versions
 
-If you are dealing with Unicode text, Windows often has difficulty showing it in the console. Using [Windows Unicode Console][win-unicode-console] to patch your Windows install can help. On Python 3.6+ it might not be needed at all.
+PySpelling is tested with Hunspell 1.6+, and recommends using only 1.6 and above. Some lower versions might work, but none have been tested, and related issues will probably not be addressed.
+
+PySpelling is also tested on Aspell 0.60+ (which is recommended), but should also work on the 0.50 series. 0.60+ is recommended as spell checking is better in the 0.60 series.
+
+## Usage in Linux
+
+Aspell and Hunspell is most likely available in your distro's package manager. You need to install both the spell checker and the dictionaries, or provide your own custom dictionaries. The option to build manually is always available as well. See your preferred spell checker's manual for more information on building manually.
+
+Ubuntu Aspell install example:
+
+```
+sudo apt-get install aspell aspell-en
+```
+
+Ubuntu Hunspell install example:
+
+```
+sudo apt-get install hunspell hunspell-en-us
+```
+
+I usually patch the English dictionary that I use to add apostrophes, if not present, to the word character entry which I feel is a must. I also prefer to not include numbers as word characters and often remove them, but this is just my personal preference.
+
+```diff
+diff --git a/en/en_US.aff b/en/en_US.aff
+index d0cccb3..4258f85 100644
+--- a/en/en_US.aff
++++ b/en/en_US.aff
+@@ -14,7 +14,7 @@ ONLYINCOMPOUND c
+ COMPOUNDRULE 2
+ COMPOUNDRULE n*1t
+ COMPOUNDRULE n*mp
+-WORDCHARS 0123456789
++WORDCHARS ’
+
+ PFX A Y 1
+ PFX A   0     re   
+```
+
+## Usage in macOS
+
+Aspell and Hunspell can be included via package managers such as Homebrew. You need to install both the spell checker and the dictionaries, or provide your own custom dictionaries. The option to build manually is always available as well. See your preferred spell checker's manual for more information on building manually.
+
+Homebrew Aspell install examples:
+
+```
+brew install aspell
+```
+
+Homebrew Hunspell install examples:
+
+```
+brew install hunspell
+```
+
+Don't forget to download dictionaries and put them to `/Library/Spelling/`. I usually use the ones found in the git repository: `git://anongit.freedesktop.org/libreoffice/dictionaries`. I patch them to add apostrophes to the word character entry which I feel is a must. I also prefer to not include numbers as word characters and often remove them, but this is just my personal preference.
+
+```diff
+diff --git a/en/en_US.aff b/en/en_US.aff
+index d0cccb3..4258f85 100644
+--- a/en/en_US.aff
++++ b/en/en_US.aff
+@@ -14,7 +14,7 @@ ONLYINCOMPOUND c
+ COMPOUNDRULE 2
+ COMPOUNDRULE n*1t
+ COMPOUNDRULE n*mp
+-WORDCHARS 0123456789
++WORDCHARS ’
+
+ PFX A Y 1
+ PFX A   0     re   
+```
+
+## Usage in Windows
+
+Installing Aspell and/or Hunspell in Windows is traditionally done through either a Cygwin or MSYS2/MinGW environment. If using MYSYS2/MinGW, you can usually install both packages via Pacman. You need to install both the spell checker and the dictionaries, or provide your own custom dictionaries. The option to build manually is always available as well. See your preferred spell checker's manual for more information on building manually.
+
+Pacman Aspell install example:
+
+```
+pacman -S mingw-w64-x86_64-aspell mingw-w64-x86_64-aspell-en
+```
+
+For Aspell, it has been noted that the way the default configuration is configured, builtin Aspell filters are often inaccessible as the configuration seems to configure paths with mixed, incompatible slash style (backslash and forward slash). By creating your own override configuration, and using forward slashes only can fix the issue. You must manually specify a proper `data-dir` and `dict-dir` override path.  This is done in our `appveyor.yml` file for our own personal tests, so you can check it out to see what is done. After fixing the configuration file, you should have everything working.
+
+Pacman Hunspell install example:
+
+```
+pacman -S mingw-w64-x86_64-hunspell mingw-w64-x86_64-hunspell-en
+```
+
+I usually patch the English dictionary that I use to add apostrophes, if not present, to the word character entry which I feel is a must. I also prefer to not include numbers as word characters and often remove them, but this is just my personal preference.
+
+```diff
+diff --git a/en/en_US.aff b/en/en_US.aff
+index d0cccb3..4258f85 100644
+--- a/en/en_US.aff
++++ b/en/en_US.aff
+@@ -14,7 +14,7 @@ ONLYINCOMPOUND c
+ COMPOUNDRULE 2
+ COMPOUNDRULE n*1t
+ COMPOUNDRULE n*mp
+-WORDCHARS 0123456789
++WORDCHARS ’
+
+ PFX A Y 1
+ PFX A   0     re   
+```
+
+If you are dealing with Unicode text, Windows often has difficulty showing it in the console. Using [Windows Unicode Console][win-unicode-console] to patch your Windows install can help. On Python 3.6+ it might not be needed at all. Certain specialty consoles on Windows may report confusing information related to what encoding is used in the console. It is left to the user to resolve console Unicode issues, though proposals for better ways to handle this would be considered.
 
 --8<-- "refs.txt"

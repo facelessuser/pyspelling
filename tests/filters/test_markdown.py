@@ -54,8 +54,7 @@ class TestMarkdown(util.PluginTestCase):
 
         print(template)
         self.mktemp('test.txt', template, 'utf-8')
-        words = self.spellcheck('.markdown.yml')
-        self.assertEqual(sorted(bad_words), words)
+        self.assert_spellcheck('.markdown.yml', bad_words)
 
 
 class TestMarkdownChained(util.PluginTestCase):
@@ -110,5 +109,4 @@ class TestMarkdownChained(util.PluginTestCase):
         )
 
         self.mktemp('test.txt', template, 'utf-8')
-        words = self.spellcheck('.markdown.yml')
-        self.assertEqual(sorted(bad_words), words)
+        self.assert_spellcheck('.markdown.yml', bad_words)

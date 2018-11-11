@@ -27,8 +27,7 @@ class TestNoPipeline(util.PluginTestCase):
         bad_words = ['helo', 'begn']
         good_words = ['yes', 'word']
         self.mktemp('test.txt', '\n'.join(bad_words + good_words), 'utf-8')
-        words = self.spellcheck('.nopipeline.yml')
-        self.assertEqual(sorted(bad_words), words)
+        self.assert_spellcheck('.nopipeline.yml', bad_words)
 
     def test_no_pipeline_wordlist(self):
         """Test text."""
@@ -57,5 +56,4 @@ class TestNoPipeline(util.PluginTestCase):
         good_words = ['yes', 'word']
         self.mktemp('mydict.wl', '\n'.join(bad_words), 'utf-8')
         self.mktemp('test.txt', '\n'.join(bad_words + good_words), 'utf-8')
-        words = self.spellcheck('.nopipeline.yml')
-        self.assertEqual([], words)
+        self.assert_spellcheck('.nopipeline.yml', [])
