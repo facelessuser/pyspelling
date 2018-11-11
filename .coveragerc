@@ -1,0 +1,7 @@
+[run]
+omit=
+    pyspelling/__main__.py
+
+[report]
+omit=
+    pyspelling/__main__.py

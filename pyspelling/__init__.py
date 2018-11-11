@@ -258,7 +258,7 @@ class SpellChecker:
                 flags |= self.GLOB_FLAG_MAP.get(value, 0)
         return flags
 
-    def run_task(self, task):
+    def run_task(self, task, source_patterns=None):
         """Walk source and initiate spell check."""
 
         # Perform spell check
@@ -271,7 +271,10 @@ class SpellChecker:
         glob_flags = self._to_flags(task.get('glob_flags', "N|B|G"))
         self._build_pipeline(task)
 
-        for sources in self._walk_src(task.get('sources', []), glob_flags, self.pipeline_steps):
+        if not source_patterns:
+            source_patterns = task.get('sources', [])
+
+        for sources in self._walk_src(source_patterns, glob_flags, self.pipeline_steps):
             if self.pipeline_steps is not None:
                 yield from self._spelling_pipeline(sources, options, personal_dict)
             else:
@@ -531,13 +534,33 @@ class Hunspell(SpellChecker):
         return cmd
 
 
-def spellcheck(config_file, name=None, binary='', checker='', verbose=0, debug=False):
+def iter_tasks(matrix, names, groups):
+    """Iterate tasks."""
+
+    # Build name index
+    name_index = dict([(task.get('name', ''), index) for index, task in enumerate(matrix)])
+
+    for index, task in enumerate(matrix):
+        name = task.get('name', '')
+        group = task.get('group', '')
+        hidden = task.get('hidden', False)
+        if names and name in names and index == name_index[name]:
+            yield task
+        elif groups and group in groups and not hidden:
+            yield task
+        elif not names and not groups and not hidden:
+            yield task
+
+
+def spellcheck(config_file, names=None, groups=None, binary='', checker='', sources=None, verbose=0, debug=False):
     """Spell check."""
 
     hunspell = None
     aspell = None
     spellchecker = None
     config = util.read_config(config_file)
+    if sources is None:
+        sources = []
 
     matrix = config.get('matrix', [])
     preferred_checker = config.get('spellchecker', 'aspell')
@@ -546,17 +569,14 @@ def spellcheck(config_file, name=None, binary='', checker='', verbose=0, debug=F
         if matrix:
             util.warn_deprecated("'documents' key in config is deprecated. 'matrix' should be used going forward.")
 
-    name = set() if name is None else set(name)
+    groups = set() if groups is None else set(groups)
+    names = set() if names is None else set(names)
 
-    for task in matrix:
+    # Sources are only recognized when requesting a single name.
+    if (len(names) != 1 and len(sources)):
+        sources = []
 
-        # Only run tasks called by names if names are provided.
-        if name and task.get('name', '') not in name:
-            continue
-
-        # Ignore hidden items unless they are explicitly called by name.
-        if not name and task.get('hidden', False):
-            continue
+    for task in iter_tasks(matrix, names, groups):
 
         if not checker:
             checker = preferred_checker
@@ -574,7 +594,7 @@ def spellcheck(config_file, name=None, binary='', checker='', verbose=0, debug=F
             raise ValueError('%s is not a valid spellchecker!' % checker)
 
         spellchecker.log('Using %s to spellcheck %s' % (checker, task.get('name', '')), 1)
-        for result in spellchecker.run_task(task):
+        for result in spellchecker.run_task(task, source_patterns=sources):
             spellchecker.log('Context: %s' % result.context, 2)
             yield result
         spellchecker.log("", 1)

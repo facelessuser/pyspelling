@@ -39,6 +39,9 @@ class MyFilter(filters.Filter):
         }
 ```
 
+!!! new "New 2.0"
+    `get_default_confg` was added in version `2.0`.
+
 ### `Filter.validate_options`
 
 `validate_options` is where you can specify validation of your options. By default, basic validation is done on incoming options. For instance, if you specify a default as a `bool`, the default validator will ensure the passed user options match. Checking is performed on `bool`, `str`, `list`, `dict`, `int`, and `float` types. Nothing beyond simple type checking is performed, so if you had some custom validation, or simply wanted to bypass the default validator with your own, you should override `validate_options`.
@@ -55,6 +58,9 @@ class MyFilter(filters.Filter):
             raise ValueError("Value should be 'bar' for 'foo'")
 ```
 
+!!! new "New 2.0"
+    `validate_options` was added in version `2.0`.
+
 ### `Filter.setup`
 
 `setup` is were basic setup can be performed post-validation. At this point, you can access the merged and validated configuration via `self.config`.
@@ -65,6 +71,9 @@ class MyFilter(filters.Filter):
 
         self.enable_foo = self.config['foo']
 ```
+
+!!! new "New 2.0"
+    `setup` was added in version `2.0`.
 
 ### `Filter.reset`
 
@@ -77,6 +86,9 @@ class MyFilter(filters.Filter):
         self.counter = 0
         self.tracked_stuff = []
 ```
+
+!!! new "New 2.0"
+    `reset` was added in version `2.0`.
 
 ### `Filter.has_bom`
 
@@ -97,6 +109,12 @@ This is useful if you want to handle binary parsing, or a file type that has a c
         # Not a zip file, so pass it on to the normal file checker.
         return super().has_bom(filestream)
 ```
+
+!!! new "New 2.0"
+    `has_bom` was added in version `2.0`.
+
+!!! warning "Deprecation 2.0"
+    `CHECK_BOM` has been deprecated since `2.0`.
 
 ### `Filter.header_check`
 
@@ -224,6 +242,9 @@ class MyFlowControl(flow_control.FlowControl):
         }
 ```
 
+!!! new "New 2.0"
+    `get_default_confg` was added in version `2.0`.
+
 ### `FlowControl.validate_options`
 
 `validate_options` is where you can specify validation of your options. By default, basic validation is done on incoming options. For instance, if you specify a default as a `bool`, the default validator will ensure the passed user options match. Checking is performed on `bool`, `str`, `list`, `dict`, `int`, and `float` types. Nothing beyond simple type checking is performed, so if you had some custom validation, or simply wanted to bypass the default validator with your own, you should override `validate_options`.
@@ -240,6 +261,9 @@ class MyFlowControl(flow_control.FlowControl):
             raise ValueError("Value should be 'bar' for 'foo'")
 ```
 
+!!! new "New 2.0"
+    `validate_options` was added in version `2.0`.
+
 ### `FlowControl.setup`
 
 `setup` is were basic setup can be performed post-validation. At this point, you can access the merged and validated configuration via `self.config`.
@@ -250,6 +274,9 @@ class MyFlowControl(flow_control.FlowControl):
 
         self.enable_foo = self.config['foo']
 ```
+
+!!! new "New 2.0"
+    `setup` was added in version `2.0`.
 
 ### `FlowControl.reset`
 
@@ -262,6 +289,9 @@ class MyFlowControl(flow_control.FlowControl):
         self.counter = 0
         self.tracked_stuff = []
 ```
+
+!!! new "New 2.0"
+    `reset` was added in version `2.0`.
 
 ### `FlowControl.adjust_flow`
 

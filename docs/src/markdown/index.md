@@ -78,10 +78,22 @@ To specify a specific configuration other than the default, or even point to a d
 pyspelling -c myconfig.yml
 ```
 
-To run a specific spelling task in your configuration file by name, you can use the `name` option. You can even specify multiple names if desired:
+To run a specific spelling task in your configuration file by name, you can use the `name` option. You can even specify multiple names if desired. You cannot use `name` and `group` together:
 
 ```
 pyspelling -n my_task -n my_task2
+```
+
+If you've specified groups for your tasks, you can run all tasks in a group with the `group` option. You can specify multiple groups if desired. You cannot use `name` and `group` together.
+
+```
+pyspelling -g my_group -g my_group2
+```
+
+If you've specified exactly one name via the `name` option, you can override that named task's source patterns with the `source` option. You can specify multiple `source` patterns if desired.
+
+```
+pyspelling -n my_task -S "this/specific/file.txt" -S "these/specific/files_{a,b}.txt"
 ```
 
 To run a more verbose output, use the `-v` flag. You can increase verbosity level by including more `v`s: `-vv`.  You can currently go up to four levels.
@@ -106,6 +118,24 @@ pyspelling -s hunspell
 
 PySpelling is tested with Hunspell 1.6+, and recommends using only 1.6 and above. Some lower versions might work, but none have been tested, and related issues will probably not be addressed.
 
+I usually patch the English Hunspell dictionary that I use to add apostrophes, if not present. Apostrophe support is a must for me. I also prefer to not include numbers as word characters (like Aspell) does as I find them problematic, but this is just my personal preference. Below is a patch I use on an OpenOffice dictionary set ([`git://anongit.freedesktop.org/libreoffice/dictionaries`](https://anongit.freedesktop.org/git/libreoffice/dictionaries.git/)).
+
+```diff
+diff --git a/en/en_US.aff b/en/en_US.aff
+index d0cccb3..4258f85 100644
+--- a/en/en_US.aff
++++ b/en/en_US.aff
+@@ -14,7 +14,7 @@ ONLYINCOMPOUND c
+ COMPOUNDRULE 2
+ COMPOUNDRULE n*1t
+ COMPOUNDRULE n*mp
+-WORDCHARS 0123456789
++WORDCHARS ’
+
+ PFX A Y 1
+ PFX A   0     re   
+```
+
 PySpelling is also tested on Aspell 0.60+ (which is recommended), but should also work on the 0.50 series. 0.60+ is recommended as spell checking is better in the 0.60 series.
 
 ## Usage in Linux
@@ -124,24 +154,6 @@ Ubuntu Hunspell install example:
 sudo apt-get install hunspell hunspell-en-us
 ```
 
-I usually patch the English dictionary that I use to add apostrophes, if not present, to the word character entry which I feel is a must. I also prefer to not include numbers as word characters and often remove them, but this is just my personal preference.
-
-```diff
-diff --git a/en/en_US.aff b/en/en_US.aff
-index d0cccb3..4258f85 100644
---- a/en/en_US.aff
-+++ b/en/en_US.aff
-@@ -14,7 +14,7 @@ ONLYINCOMPOUND c
- COMPOUNDRULE 2
- COMPOUNDRULE n*1t
- COMPOUNDRULE n*mp
--WORDCHARS 0123456789
-+WORDCHARS ’
-
- PFX A Y 1
- PFX A   0     re   
-```
-
 ## Usage in macOS
 
 Aspell and Hunspell can be included via package managers such as Homebrew. You need to install both the spell checker and the dictionaries, or provide your own custom dictionaries. The option to build manually is always available as well. See your preferred spell checker's manual for more information on building manually.
@@ -158,23 +170,7 @@ Homebrew Hunspell install examples:
 brew install hunspell
 ```
 
-Don't forget to download dictionaries and put them to `/Library/Spelling/`. I usually use the ones found in the git repository: `git://anongit.freedesktop.org/libreoffice/dictionaries`. I patch them to add apostrophes to the word character entry which I feel is a must. I also prefer to not include numbers as word characters and often remove them, but this is just my personal preference.
-
-```diff
-diff --git a/en/en_US.aff b/en/en_US.aff
-index d0cccb3..4258f85 100644
---- a/en/en_US.aff
-+++ b/en/en_US.aff
-@@ -14,7 +14,7 @@ ONLYINCOMPOUND c
- COMPOUNDRULE 2
- COMPOUNDRULE n*1t
- COMPOUNDRULE n*mp
--WORDCHARS 0123456789
-+WORDCHARS ’
-
- PFX A Y 1
- PFX A   0     re   
-```
+Don't forget to download dictionaries and put them to `/Library/Spelling/`.
 
 ## Usage in Windows
 
@@ -192,24 +188,6 @@ Pacman Hunspell install example:
 
 ```
 pacman -S mingw-w64-x86_64-hunspell mingw-w64-x86_64-hunspell-en
-```
-
-I usually patch the English dictionary that I use to add apostrophes, if not present, to the word character entry which I feel is a must. I also prefer to not include numbers as word characters and often remove them, but this is just my personal preference.
-
-```diff
-diff --git a/en/en_US.aff b/en/en_US.aff
-index d0cccb3..4258f85 100644
---- a/en/en_US.aff
-+++ b/en/en_US.aff
-@@ -14,7 +14,7 @@ ONLYINCOMPOUND c
- COMPOUNDRULE 2
- COMPOUNDRULE n*1t
- COMPOUNDRULE n*mp
--WORDCHARS 0123456789
-+WORDCHARS ’
-
- PFX A Y 1
- PFX A   0     re   
 ```
 
 If you are dealing with Unicode text, Windows often has difficulty showing it in the console. Using [Windows Unicode Console][win-unicode-console] to patch your Windows install can help. On Python 3.6+ it might not be needed at all. Certain specialty consoles on Windows may report confusing information related to what encoding is used in the console. It is left to the user to resolve console Unicode issues, though proposals for better ways to handle this would be considered.
