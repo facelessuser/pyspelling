@@ -4,7 +4,13 @@
 
 PySpelling requires a YAML configuration file. The file defines the various spelling tasks along with their individual filters and options.
 
-All of the tasks are contained under the keyword `matrix` and are organized in a list:
+You can optionally specify the preferred spell checker as a global option (`aspell` is the default if not specified). This can be overridden on the command line.
+
+```yaml
+spellchecker: hunspell
+```
+
+All of the spelling tasks are contained under the keyword `matrix` and are organized in a list:
 
 ```yaml
 matrix:
@@ -26,7 +32,7 @@ matrix:
   - pyspelling/**/*.py
 ```
 
-You can also define more complicated tasks to run your text through various filters before performing the spell checking by providing a custom pipeline.  You can also add your own custom wordlists to extend the dictionary.
+You can also define more complicated tasks which will run your text through various filters before performing the spell checking by providing a custom pipeline.  You can also add your own custom wordlists to extend the dictionary.
 
 ```yaml
 matrix:
@@ -58,24 +64,43 @@ matrix:
 
 ### Name
 
-Each spelling tasks *should* have a name and is defined with the `name` key.
+Each spelling tasks *should* have a unique name and is defined with the `name` key.
 
-When using the command line `--name` option, any task with the matching name will be run. Each task can have a unique name, or you can assign multiple tasks with the same name so that you can run them all with the `--name` option.
+When using the command line `--name` option, the task with the matching name will be run.
 
 ```yaml
 matrix:
 - name: python
 ```
 
+!!! new "New Behavior 2.0"
+    In `1.0`, names doubled as identifiers and groups. It became apparent for certain features that a unique name is desirable for targeting different tasks, while a group specifier should be implemented separately. In `2.0`, if multiple tasks have the same name, the last defined one will be the targeted task when requesting a named task. Use groups to target multiple grouped tasks.
+
+### Groups
+
+Each task can be assigned to a group. The group name can be shared with multiple tasks. All tasks in a group can be run by specifying the `--group` option with the name of the group on the command line. This option is only available in version `1.1` of the configuration file.
+
+```yaml
+matrix:
+- name: python
+  group: some_name
+```
+
+!!! new "New 2.0"
+    `group` was added in version `2.0`.
+
 ### Hidden
 
-All tasks in a configuration file will be run if no `name` is specified. If a task enables the option `hidden` by setting it to `true`, that task will *not* be run automatically when no `name` is specified. `hidden` tasks will only be run if they are specifically mentioned by `name`.
+All tasks in a configuration file will be run if no `name` is specified. In version `1.1` of the configuration file, If a task enables the option `hidden` by setting it to `true`, that task will *not* be run automatically when no `name` is specified. `hidden` tasks will only be run if they are specifically mentioned by `name`.
 
 ```yaml
 matrix:
 - name: python
   hidden: true
 ```
+
+!!! new "New 2.0"
+    `group` was added in version `2.0`.
 
 ### Default Encoding
 
@@ -144,7 +169,7 @@ If for some reason you need to send the file directly to the spell checker witho
 
 Below is an example where we send an OpenOffice ODF file directly to Hunspell in order to use Hunspell's `-O` option to parse the ODF file. Keep in mind that when doing this, no encoding is sent to the spell checker unless you define `default_encoding`. If `default_encoding` is not defined, PySpelling will decode the returned content with the terminal's encoding (or what it thinks the terminal's encoding is).
 
-```
+```yaml
 matrix:
 - name: openoffice_ODF
   sources:
@@ -215,7 +240,7 @@ matrix:
   - docs/**/*.html
   aspell:
     H: true
-  filters:
+  pipeline:
   - pyspelling.filters.html
 ```
 
@@ -228,7 +253,7 @@ matrix:
   - pyspelling/**/*.py
   aspell:
     lang: en
-  filters:
+  pipeline:
   - pyspelling.filters.python:
       strings: false
       comments: false
@@ -237,6 +262,7 @@ matrix:
 Lastly, if you have an option that can be used multiple times, just set the value up as an array, and the option will be added for each value in the array. Assuming you had multiple pre-compiled dictionaries, you could add them under Aspell's `--add-extra-dicts` option:
 
 ```yaml
+matrix:
 - name: Python Source
   sources:
   - pyspelling/**/*.py

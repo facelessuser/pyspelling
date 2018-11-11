@@ -13,26 +13,52 @@ def main():
     parser.add_argument('--version', action='version', version=('%(prog)s ' + __version__))
     parser.add_argument('--debug', action='store_true', default=False, help=argparse.SUPPRESS)
     parser.add_argument('--verbose', '-v', action='count', default=0, help="Verbosity level.")
-    parser.add_argument('--name', '-n', action='append', help="Specific spelling task by name to run.")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument('--name', '-n', action='append', help="Specific spelling task by name to run.")
+    group.add_argument('--group', '-g', action='append', help="Specific spelling task groun to run.")
     parser.add_argument('--binary', '-b', action='store', default='', help="Provide path to spell checker's binary.")
     parser.add_argument('--config', '-c', action='store', default='', help="Spelling config.")
+    parser.add_argument('--source', '-S', action='append', help="Specify override file pattern.")
     parser.add_argument(
         '--spellchecker', '-s', action='store', default='', help="Choose between aspell and hunspell"
     )
     args = parser.parse_args()
 
-    return run(args.config, args.name, args.binary, args.verbose, args.spellchecker, args.debug)
+    return run(
+        args.config,
+        names=args.name,
+        groups=args.group,
+        binary=args.binary,
+        spellchecker=args.spellchecker,
+        sources=args.source,
+        verbose=args.verbose,
+        debug=args.debug
+    )
 
 
-def run(config, name=None, binary='', verbose=0, spellchecker='', debug=False):
+def run(config, **kwargs):
     """Run."""
 
-    if name is None:
-        name = []
+    names = kwargs.get('names', [])
+    groups = kwargs.get('groups', [])
+    binary = kwargs.get('binary', '')
+    spellchecker = kwargs.get('spellchecker', '')
+    verbose = kwargs.get('verbose', 0)
+    sources = kwargs.get('sources', [])
+    debug = kwargs.get('debug', False)
 
     fail = False
     count = 0
-    for results in spellcheck(config, name, binary, spellchecker, verbose, debug):
+    for results in spellcheck(
+        config,
+        names=names,
+        groups=groups,
+        binary=binary,
+        checker=spellchecker,
+        sources=sources,
+        verbose=verbose,
+        debug=debug
+    ):
         count += 1
         if results.error:
             fail = True
