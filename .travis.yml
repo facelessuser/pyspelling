@@ -1,6 +1,6 @@
-sudo: false
-
 language: python
+dist: xenial
+sudo: true
 
 # Limit git depth to speed up build
 git:
@@ -11,21 +11,19 @@ matrix:
   - python: 3.4
     env:
     - TOXENV=py34
-    - TOX_SPELL_REQUIRE=aspell
+    - TOX_SPELL_REQUIRE=both
   - python: 3.5
     env:
     - TOXENV=py35
-    - TOX_SPELL_REQUIRE=aspell
+    - TOX_SPELL_REQUIRE=both
   - python: 3.6
     env:
     - TOXENV=py36
-    - TOX_SPELL_REQUIRE=aspell
+    - TOX_SPELL_REQUIRE=both
   - python: 3.7
-    dist: xenial
     env:
     - TOXENV=py37
-    - TOX_SPELL_REQUIRE=aspell
-    sudo: true
+    - TOX_SPELL_REQUIRE=both
   - python: 3.6
     env: TOXENV=lint
   - python: 3.6
@@ -36,6 +34,8 @@ addons:
     packages:
     - aspell
     - aspell-en
+    - hunspell
+    - hunspell-en-us
 
 install:
 - pip install tox
