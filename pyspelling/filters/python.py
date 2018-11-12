@@ -10,6 +10,7 @@ import textwrap
 import tokenize
 import codecs
 import io
+import unicodedata
 
 tokenizer = tokenize.generate_tokens
 PREV_DOC_TOKENS = (tokenize.INDENT, tokenize.DEDENT, tokenize.NEWLINE, tokenize.ENCODING)
@@ -18,6 +19,44 @@ RE_PY_ENCODE = re.compile(
     br'^[^\r\n]*?coding[:=]\s*([-\w.]+)|[^\r\n]*?\r?\n[^\r\n]*?coding[:=]\s*([-\w.]+)'
 )
 RE_NON_PRINTABLE_ASCII = re.compile(br"[^ -~]+")
+
+
+BACK_SLASH_TRANSLATION = {
+    "\\a": '\a',
+    "\\b": '\b',
+    "\\f": '\f',
+    "\\r": '\r',
+    "\\t": '\t',
+    "\\n": '\n',
+    "\\v": '\v',
+    "\\\\": '\\',
+    "\n": ''
+}
+
+RE_ESC = re.compile(
+    r'''(\\[abfrtnv\\\n])|(\\U[\da-fA-F]{8}|\\u[\da-fA-F]{4}|\\x[\da-fA-F]{2})|(\\[0-7]{1,3})|(\N\{[^}{]*\})'''
+)
+
+RE_BESC = re.compile(
+    r'''(\\[abfrtnv\\\n])|(\\x[\da-fA-F]{2})|(\\[0-7]{1,3})'''
+)
+
+RE_FESC = re.compile(
+    r'''(?x)
+    (\\[abfrtnv\\\n])|
+    (\\U[\da-fA-F]{8}|\\u[\da-fA-F]{4}|\\x[\da-fA-F]{2})|
+    (\\[0-7]{1,3})|
+    (\N\{\{[^}{]*\}\})|
+    (\{\{)|
+    (\{[^}{]*\})
+    '''
+)
+
+RE_FBESC = re.compile(
+    r'''(\\[abfrtnv\\\n])|(\\x[\da-fA-F]{2})|(\\[0-7]{1,3})(\{\{|\}\})|(\{[^}{]*\})'''
+)
+
+RE_STRING_TYPE = re.compile(r'''((?:r|u|f|b)+)?(\'''|"""|'|")(.*?)\2''', re.I | re.S)
 
 
 class PythonFilter(filters.Filter):
@@ -38,14 +77,91 @@ class PythonFilter(filters.Filter):
         return {
             'comments': True,
             'docstrings': True,
+            'strings': False,
             'group_comments': False
         }
+
+    def replace_escapes(self, m):
+        """Replace escapes."""
+
+        esc = m.group(0)
+        if m.group(1):
+            return BACK_SLASH_TRANSLATION[esc]
+        elif m.group(2):
+            try:
+                esc = chr(int(esc[2:], 16))
+            except:
+                pass
+            return esc
+        elif m.group(3):
+            value = int(esc[1:], 8)
+            return chr(value)
+        elif m.group(4):
+            try:
+                esc = unicodedata.lookup(esc[3:-1])
+            except:
+                pass
+            return esc
+
+    def replace_format_escapes(self, m):
+        """Replace format escapes."""
+
+        if m.group(5):
+            return m.group(0)
+        elif m.group(6):
+            return ' '
+        return replace_escapes(m)
+
+    def replace_format_byte_escapes(self, m):
+        """Replace escapes."""
+
+        if m.group(5):
+            return m.group(0)
+        elif m.group(6):
+            return ' '
+        return replace_byte_escapes(m)
+
+    def replace_byte_escapes(self, m):
+        """Replace escapes."""
+
+        esc = m.group(0)
+        if m.group(1):
+            return BACK_SLASH_TRANSLATION[esc]
+        elif m.group(2):
+            try:
+                esc = chr(int(esc[2:], 16))
+            except:
+                pass
+            return esc
+        elif m.group(3):
+            value = int(esc[1:], 8)
+            if value > 255:
+                value -= 256
+            return chr(value)
+
+    def process_escapes(self, string):
+        """Process escapes."""
+
+        m = RE_STRING_TYPE.match(self.norm_nl(string))
+        stype = m.group(1).lower() if m.group(1) else ''
+        content = m.group(3)
+        if 'r' in stype:
+            return content
+        if 'b' in stype:
+            if 'f' in stype:
+                RE_FBESC.sub(self.replace_format_byte_escapes, content)
+            else:
+                return RE_BESC.sub(self.replace_byte_escapes, content)
+        if 'f' in stype:
+            return RE_FESC.sub(self.replace_format_escapes, content)
+        return RE_ESC.sub(self.replace_escapes, content)
 
     def setup(self):
         """Setup."""
 
         self.comments = self.config['comments']
         self.docstrings = self.config['docstrings']
+        self.strings = self.config['strings']
         self.group_comments = self.config['group_comments']
 
     def header_check(self, content):
@@ -72,6 +188,7 @@ class PythonFilter(filters.Filter):
         """Retrieve the Python docstrings."""
 
         docstrings = []
+        strings = []
         comments = []
         prev_token_type = tokenize.NEWLINE
         indent = ''
@@ -128,14 +245,14 @@ class PythonFilter(filters.Filter):
                 if prev_token_type in PREV_DOC_TOKENS:
                     if self.docstrings:
                         value = value.strip()
-                        string = textwrap.dedent(eval(value))
-
-                        if not isinstance(string, str):
-                            # Since docstrings should be readable and printable,
-                            # if byte string assume `ascii`.
-                            string = string.decode('ascii')
+                        string = textwrap.dedent(self.process_escapes(value))
                         loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
                         docstrings.append(filters.SourceText(string, loc, encoding, 'py-docstring'))
+                elif self.strings:
+                    value = value.strip()
+                    string = textwrap.dedent(self.process_escapes(value))
+                    loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
+                    strings.append(filters.SourceText(string, loc, encoding, 'py-string'))
 
             if token_type == tokenize.INDENT:
                 indent = value
@@ -158,7 +275,7 @@ class PythonFilter(filters.Filter):
         for comment in comments:
             final_comments.append(filters.SourceText(textwrap.dedent(comment[0]), comment[1], encoding, 'py-comment'))
 
-        return docstrings + final_comments
+        return docstrings + final_comments + strings
 
     def filter(self, source_file, encoding):  # noqa A001
         """Parse Python file returning content."""

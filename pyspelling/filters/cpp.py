@@ -98,7 +98,7 @@ class CppFilter(filters.Filter):
         for comment, line in text_list:
             content.append(
                 filters.SourceText(
-                    textwrap.dedent(comment),
+                    textwrap.dedent(self.norm_nl(comment)),
                     "%s (%d)" % (context, line),
                     encoding,
                     prefix + category

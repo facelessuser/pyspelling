@@ -16,6 +16,9 @@
 - **NEW**: Support modes added for HTML filter: `html`, `html5`, `xhtml`.
 - **NEW**: `CHECK_BOM` plugin attribute has been deprecated in favor of overriding the exposed `has_bom` function.
 - **NEW**: Tasks can be hidden with the `hidden` configuration option. Tasks with `hidden` enabled will only run if they are explicitly called by name.
+- **NEW**: Add normal string support to Python filter.
+- **NEW**: Context will normalize line endings before applying context (can be disabled).
+- **NEW**: CPP and plugins derived from CPP now normalize line endings of block comments.
 - **FIX**: Case related issues when comparing tags and attributes in HTML.
 - **FIX**: CSS selectors should only compare case insensitive for ASCII characters A-Z and a-z.
 - **FIX**: Allow CSS escapes in selectors.
