@@ -1,5 +1,8 @@
 """Test Python plugin."""
 from .. import util
+import sys
+
+F_SUPPORT = PY36 = (3, 6) <= sys.version_info
 
 
 class TestPython(util.PluginTestCase):
@@ -49,6 +52,68 @@ class TestPython(util.PluginTestCase):
         )
         self.mktemp('test.txt', template, 'utf-8')
         self.assert_spellcheck('.python.yml', bad_words)
+
+
+class TestPythonStrings(util.PluginTestCase):
+    """Test Python plugin."""
+
+    def setup_fs(self):
+        """Setup file system."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: python
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.python:
+                  strings: true
+                  allowed: u,f,r,b,rb
+                  group_comments: true
+            """
+        ).format(self.tempdir)
+        self.mktemp('.pystrings.yml', config, 'utf-8')
+
+    def test_python_bytes(self):
+        """Test Python."""
+
+        bad_words = ['helo', 'begn']
+        good_words = ['yes', 'word']
+        template = self.dedent(
+            r"""
+            def function():
+                test = b"\x03\x03\x02{}\x03\xff\x03\x02"
+            """
+        ).format(
+            '\\x03'.join(bad_words + good_words)
+        )
+        self.mktemp('test.txt', template, 'utf-8')
+        self.assert_spellcheck('.pystrings.yml', bad_words)
+
+    def test_python_format(self):
+        """Test Python."""
+
+        bad_words = ['helo', 'begn']
+        good_words = ['yes', 'word']
+        template = self.dedent(
+            r"""
+            def function():
+                aaaa = "text"
+                test = fr"{} {{aaaa}}"
+            """
+        ).format(
+            ' '.join(bad_words + good_words)
+        )
+
+        if not F_SUPPORT:
+            bad_words.append('aaaa')
+        self.mktemp('test.txt', template, 'utf-8')
+        self.assert_spellcheck('.pystrings.yml', bad_words)
 
 
 class TestPythonChained(util.PluginTestCase):

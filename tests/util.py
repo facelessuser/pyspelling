@@ -134,7 +134,7 @@ class PluginTestCase(unittest.TestCase):
                 "'{}', is not compatible with '{}'".format(running, required)
             )
 
-    def assert_spellcheck(self, config_file, expected, names=None, groups=None, sources=None, verbose=0):
+    def assert_spellcheck(self, config_file, expected, names=None, groups=None, sources=None, verbose=4):
         """Spell check."""
 
         hunspell_location = which(HUNSPELL)
@@ -158,7 +158,8 @@ class PluginTestCase(unittest.TestCase):
                 sources=sources,
                 checker='hunspell',
                 binary=hunspell_location,
-                debug=True
+                debug=True,
+                verbose=verbose
             ):
                 if results.error:
                     print(results.error)
@@ -173,7 +174,8 @@ class PluginTestCase(unittest.TestCase):
                 sources=sources,
                 checker='aspell',
                 binary=aspell_location,
-                debug=True
+                debug=True,
+                verbose=verbose
             ):
                 if results.error:
                     print(results.error)
