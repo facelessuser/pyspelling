@@ -1,8 +1,5 @@
 """Test Python plugin."""
 from .. import util
-import sys
-
-F_SUPPORT = (3, 6) <= sys.version_info
 
 
 class TestPython(util.PluginTestCase):
@@ -162,8 +159,6 @@ class TestPythonStrings(util.PluginTestCase):
             ' '.join(bad_words + good_words)
         )
 
-        if not F_SUPPORT:
-            bad_words.append('aaaa')
         self.mktemp('test.txt', template, 'utf-8')
         self.assert_spellcheck('.pystrings.yml', bad_words)
 
@@ -182,15 +177,7 @@ class TestPythonStrings(util.PluginTestCase):
             ' '.join(bad_words + good_words)
         )
 
-        if not F_SUPPORT:
-            # Python versions that don't support format strings
-            # will not see the `fr` which will cause it to be treated
-            # like a normal Unicode string. `aaaa` should be found, but
-            # `\t` will be turned to a tab.
-            bad_words.append('aaaa')
-        else:
-            # Raw will not process `\t`. Format will strip out `aaaa`.
-            bad_words.append('tthe')
+        bad_words.append('tthe')
 
         self.mktemp('test.txt', template, 'utf-8')
         self.assert_spellcheck('.pystrings.yml', bad_words)

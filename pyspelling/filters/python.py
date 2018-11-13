@@ -11,6 +11,9 @@ import tokenize
 import codecs
 import io
 import unicodedata
+import sys
+
+F_SUPPORT = (3, 6) <= sys.version_info
 
 tokenizer = tokenize.generate_tokens
 PREV_DOC_TOKENS = (tokenize.INDENT, tokenize.DEDENT, tokenize.NEWLINE, tokenize.ENCODING)
@@ -69,6 +72,14 @@ FE_RFESC = re.compile(
 RE_STRING_TYPE = re.compile(r'''((?:r|u|f|b)+)?(\'''|"""|'|")(.*?)\2''', re.I | re.S)
 
 RE_NON_PRINTABLE = re.compile(r'[\x00-\x0f\x0b-\x1f\x7f-\xff]+')
+
+FMT_STR = (
+    'f', 'F',
+    'fr', 'rf',
+    'Fr', 'rF',
+    'fR', 'Rf',
+    'FR', 'RF'
+)
 
 
 class PythonFilter(filters.Filter):
@@ -214,6 +225,7 @@ class PythonFilter(filters.Filter):
         name = None
         stack = [(context, 0, self.MODULE)]
         last_comment = False
+        possible_fmt_str = None
 
         src = io.StringIO(text)
 
@@ -228,6 +240,7 @@ class PythonFilter(filters.Filter):
 
             # Track function and class ancestry
             if token_type == tokenize.NAME:
+                possible_fmt_str = None
                 if value in ('def', 'class'):
                     name = value
                 elif name:
@@ -240,6 +253,10 @@ class PythonFilter(filters.Filter):
                     elif name == 'def':
                         stack.append(('%s%s()' % (prefix, value), len(indent), self.FUNCTION))
                     name = None
+                elif not F_SUPPORT and value in FMT_STR:
+                    possible_fmt_str = (prev_token_type, value)
+            elif token_type != tokenize.STRING:
+                possible_fmt_str = None
 
             if token_type == tokenize.COMMENT and self.comments:
                 # Capture comments
@@ -261,9 +278,14 @@ class PythonFilter(filters.Filter):
                 # Capture docstrings.
                 # If we captured an `INDENT` or `NEWLINE` previously we probably have a docstring.
                 # `NL` means end of line, but not the end of the Python code line (line continuation).
-                if prev_token_type in PREV_DOC_TOKENS:
+                if (
+                    (prev_token_type in PREV_DOC_TOKENS) or
+                    (possible_fmt_str and possible_fmt_str[0] in PREV_DOC_TOKENS)
+                ):
                     if self.docstrings:
                         value = value.strip()
+                        if possible_fmt_str and value.startswith(("'", "\"")):
+                            value = possible_fmt_str[1] + value
                         string, is_bytes = self.process_strings(value)
                         if string:
                             loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
@@ -272,6 +294,8 @@ class PythonFilter(filters.Filter):
                             )
                 elif self.strings:
                     value = value.strip()
+                    if possible_fmt_str and value.startswith(("'", "\"")):
+                        value = possible_fmt_str[1] + value
                     string, is_bytes = self.process_strings(value)
                     if string:
                         loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
