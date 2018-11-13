@@ -91,7 +91,7 @@ class PythonFilter(filters.Filter):
             'docstrings': True,
             'strings': False,
             'group_comments': False,
-            'allowed': 'u,f'
+            'allowed': 'fu'
         }
 
     def setup(self):
@@ -101,18 +101,15 @@ class PythonFilter(filters.Filter):
         self.docstrings = self.config['docstrings']
         self.strings = self.config['strings']
         self.group_comments = self.config['group_comments']
-        self.allowed = set()
-        for item in self.config['allowed'].split(','):
-            self.allowed.add(self.eval_string_type(item))
+        self.allowed = self.eval_string_type(self.config['allowed'])
 
     def validate_options(self, k, v):
         """Validate options."""
 
         if k == 'allowed':
-            for item in v.split(','):
-                for c in item:
-                    if c.lower() not in 'rbuf':
-                        raise ValueError("{}: '{}' is not a valid string type".format(self.__class__.__name__, c))
+            for c in v.lower():
+                if c not in 'rbuf':
+                    raise ValueError("{}: '{}' is not a valid string type".format(self.__class__.__name__, c))
 
     def header_check(self, content):
         """Special Python encoding check."""
@@ -132,7 +129,10 @@ class PythonFilter(filters.Filter):
     def eval_string_type(self, stype):
         """Evaluate string type."""
 
-        return tuple(sorted(set([c.lower() for c in stype if c.lower() != 'u'])))
+        stype = set([c for c in stype.lower()])
+        if 'b' not in stype:
+            stype.add('u')
+        return stype
 
     def replace_unicode(self, m):
         """Replace escapes."""
@@ -154,7 +154,7 @@ class PythonFilter(filters.Filter):
         elif groups.get('oct'):
             value = int(esc[1:], 8)
             return chr(value)
-        elif groups.get('named'):
+        elif groups.get('name'):
             try:
                 esc = unicodedata.lookup(esc[3:-1])
             except Exception:
@@ -184,7 +184,7 @@ class PythonFilter(filters.Filter):
 
         m = RE_STRING_TYPE.match(string)
         stype = self.eval_string_type(m.group(1) if m.group(1) else '')
-        if stype not in self.allowed:
+        if stype - self.allowed:
             return '', False
         is_bytes = 'b' in stype
         is_raw = 'r' in stype

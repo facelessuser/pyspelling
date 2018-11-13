@@ -2,7 +2,7 @@
 from .. import util
 import sys
 
-F_SUPPORT = PY36 = (3, 6) <= sys.version_info
+F_SUPPORT = (3, 6) <= sys.version_info
 
 
 class TestPython(util.PluginTestCase):
@@ -73,11 +73,45 @@ class TestPythonStrings(util.PluginTestCase):
               pipeline:
               - pyspelling.filters.python:
                   strings: true
-                  allowed: u,f,r,b,rb
+                  allowed: bfru
                   group_comments: true
             """
         ).format(self.tempdir)
         self.mktemp('.pystrings.yml', config, 'utf-8')
+
+    def test_python_raw(self):
+        """Test Python."""
+
+        bad_words = ['helo', 'begn']
+        good_words = ['yes', 'word']
+        template = self.dedent(
+            r"""
+            def function():
+                test = r"{} \tthe"
+            """
+        ).format(
+            ' '.join(bad_words + good_words)
+        )
+        bad_words.append('tthe')
+        self.mktemp('test.txt', template, 'utf-8')
+        self.assert_spellcheck('.pystrings.yml', bad_words)
+
+    def test_python_unicode(self):
+        """Test Python."""
+
+        bad_words = ['helo', 'begn']
+        good_words = ['yes', 'word']
+        template = self.dedent(
+            r"""
+            def function():
+                test = "{} \141\x61\u0061\U00000061\N{{LATIN SMALL LETTER A}}"
+            """
+        ).format(
+            ' '.join(bad_words + good_words)
+        )
+        bad_words.append('aaaaa')
+        self.mktemp('test.txt', template, 'utf-8')
+        self.assert_spellcheck('.pystrings.yml', bad_words)
 
     def test_python_bytes(self):
         """Test Python."""
@@ -87,11 +121,29 @@ class TestPythonStrings(util.PluginTestCase):
         template = self.dedent(
             r"""
             def function():
-                test = b"\x03\x03\x02{}\x03\xff\x03\x02"
+                test = b"\x03\x03\x02{} \tthe \141\541\141\541\x03\xff\x03\x02"
             """
         ).format(
             '\\x03'.join(bad_words + good_words)
         )
+        bad_words.append('aaaa')
+        self.mktemp('test.txt', template, 'utf-8')
+        self.assert_spellcheck('.pystrings.yml', bad_words)
+
+    def test_python_raw_bytes(self):
+        """Test Python."""
+
+        bad_words = ['helo', 'begn']
+        good_words = ['yes', 'word']
+        template = self.dedent(
+            r"""
+            def function():
+                test = rb"{} \tthe \xff"
+            """
+        ).format(
+            ' '.join(bad_words + good_words)
+        )
+        bad_words.extend(['tthe', 'xff'])
         self.mktemp('test.txt', template, 'utf-8')
         self.assert_spellcheck('.pystrings.yml', bad_words)
 
@@ -104,7 +156,7 @@ class TestPythonStrings(util.PluginTestCase):
             r"""
             def function():
                 aaaa = "text"
-                test = fr"{} {{aaaa}}"
+                test = f"{} \tthe {{aaaa}}"
             """
         ).format(
             ' '.join(bad_words + good_words)
@@ -112,6 +164,34 @@ class TestPythonStrings(util.PluginTestCase):
 
         if not F_SUPPORT:
             bad_words.append('aaaa')
+        self.mktemp('test.txt', template, 'utf-8')
+        self.assert_spellcheck('.pystrings.yml', bad_words)
+
+    def test_python_raw_sformat(self):
+        """Test Python."""
+
+        bad_words = ['helo', 'begn']
+        good_words = ['yes', 'word']
+        template = self.dedent(
+            r"""
+            def function():
+                aaaa = "text"
+                test = fr"{} \tthe {{aaaa}}"
+            """
+        ).format(
+            ' '.join(bad_words + good_words)
+        )
+
+        if not F_SUPPORT:
+            # Python versions that don't support format strings
+            # will not see the `fr` which will cause it to be treated
+            # like a normal Unicode string. `aaaa` should be found, but
+            # `\t` will be turned to a tab.
+            bad_words.append('aaaa')
+        else:
+            # Raw will not process `\t`. Format will strip out `aaaa`.
+            bad_words.append('tthe')
+
         self.mktemp('test.txt', template, 'utf-8')
         self.assert_spellcheck('.pystrings.yml', bad_words)
 
