@@ -102,7 +102,8 @@ class PythonFilter(filters.Filter):
             'docstrings': True,
             'strings': False,
             'group_comments': False,
-            'allowed': 'fu'
+            'allowed': 'fu',
+            'decode_escapes': True
         }
 
     def setup(self):
@@ -113,6 +114,7 @@ class PythonFilter(filters.Filter):
         self.strings = self.config['strings']
         self.group_comments = self.config['group_comments']
         self.allowed = self.eval_string_type(self.config['allowed'])
+        self.decode_escapes = self.config['decode_escapes']
 
     def validate_options(self, k, v):
         """Validate options."""
@@ -201,10 +203,10 @@ class PythonFilter(filters.Filter):
         is_raw = 'r' in stype
         is_format = 'f' in stype
         content = m.group(3)
-        if is_raw and is_format:
-            string = self.norm_nl(FE_RFESC.sub(self.replace_unicode, content))
-        elif is_raw:
+        if is_raw and (not is_format or not self.decode_escapes):
             string = self.norm_nl(content)
+        elif is_raw and is_format:
+            string = self.norm_nl(FE_RFESC.sub(self.replace_unicode, content))
         elif is_bytes:
             string = self.norm_nl(RE_BESC.sub(self.replace_bytes, content))
         elif is_format:
