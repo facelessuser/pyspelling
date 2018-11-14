@@ -4,6 +4,31 @@ from . import cpp
 
 RE_JSDOC = re.compile(r"(?s)^/\*\*$(.*?)[ \t]*\*/", re.MULTILINE)
 
+BACK_SLASH_TRANSLATION = {
+    "\\b": '\b',
+    "\\f": '\f',
+    "\\r": '\r',
+    "\\t": '\t',
+    "\\n": '\n',
+    "\\v": '\v',
+    "\\\\": '\\',
+    '\\"': '"',
+    "\\'": "'",
+    "\\\n": '',
+    "\\0": "\000"
+}
+
+RE_ESC = re.compile(
+    r'''(?x)
+    (?P<oct>\\(?:[1-7][0-7]{0,2}|[0-7]{2,3}))|
+    (?P<special>\\['"bfrt0nv\\\n])|
+    (?P<char>\\u(?:\{[\da-fA-F]+\}|[\da-fA-F]{4})|\\x[\da-fA-F]{2}) |
+    (?P<other>\\.)
+    '''
+)
+
+RE_SURROGATES = re.compile(r'([\ud800-\udbff])([\udc00-\udfff])')
+
 
 class JavaScriptFilter(cpp.CppFilter):
     """JavaScript filter."""
@@ -20,6 +45,8 @@ class JavaScriptFilter(cpp.CppFilter):
             "block_comments": True,
             "line_comments": True,
             "group_comments": False,
+            "decode_escapes": True,
+            "strings": False,
             "jsdocs": False
         }
 
@@ -30,7 +57,56 @@ class JavaScriptFilter(cpp.CppFilter):
         self.lines = self.config['line_comments']
         self.group_comments = self.config['group_comments']
         self.jsdocs = self.config['jsdocs']
+        self.decode_escapes = self.config['decode_escapes']
+        self.strings = self.config['strings']
         self.prefix = 'js'
+
+    def replace_escapes(self, m):
+        """Replace escapes."""
+
+        groups = m.groupdict()
+        esc = m.group(0)
+        if groups.get('special'):
+            value = BACK_SLASH_TRANSLATION[esc]
+        elif groups.get('char'):
+            try:
+                if esc.endswith('}'):
+                    value = chr(int(esc[3:-1], 16))
+                else:
+                    value = chr(int(esc[2:], 16))
+            except Exception:
+                value = esc
+        elif groups.get('oct'):
+            # JavaScript only supports hex range.
+            # So \400 would be \40 + '0'
+            value = int(esc[1:], 8)
+            overflow = ''
+            if value > 255:
+                value = esc[1:-1]
+                overflow + esc[-1]
+            value = chr(value) + overflow
+        elif('other'):
+            value = esc[1:]
+        return value
+
+    def replace_surrogates(self, m):
+        """Replace surrogates."""
+
+        high, low = ord(m.group(1)), ord(m.group(2))
+        return chr((high - 0xD800) * 0x400 + low - 0xDC00 + 0x10000)
+
+    def evaluate_strings(self, groups):
+        """Evaluate strings."""
+
+        if self.strings:
+            if self.decode_escapes:
+                value = RE_SURROGATES.sub(
+                    self.replace_surrogates,
+                    RE_ESC.sub(self.replace_escapes, groups['strings'][1:-1])
+                )
+            else:
+                value = groups['strings'][1:-1]
+            self.quoted_strings.append([value, self.line_num])
 
     def evaluate_block(self, groups):
         """Evaluate block comments."""
