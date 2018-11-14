@@ -31,12 +31,14 @@ BACK_SLASH_TRANSLATION = {
     "\\n": '\n',
     "\\v": '\v',
     "\\\\": '\\',
+    '\\"': '"',
+    "\\'": "'",
     "\n": ''
 }
 
 RE_ESC = re.compile(
     r'''(?x)
-    (?P<special>\\[abfrtnv\\\n])|
+    (?P<special>\\['"abfrtnv\\\n])|
     (?P<char>\\U[\da-fA-F]{8}|\\u[\da-fA-F]{4}|\\x[\da-fA-F]{2})|
     (?P<oct>\\[0-7]{1,3})|
     (?P<name>\\N\{[^}{]*\})
@@ -45,7 +47,7 @@ RE_ESC = re.compile(
 
 RE_BESC = re.compile(
     r'''(?x)
-    (?P<special>\\[abfrtnv\\\n])|
+    (?P<special>\\['"abfrtnv\\\n])|
     (?P<char>\\x[\da-fA-F]{2})|
     (?P<oct>\\[0-7]{1,3})
     '''
@@ -53,7 +55,7 @@ RE_BESC = re.compile(
 
 RE_FESC = re.compile(
     r'''(?x)
-    (?P<special>\\[abfrtnv\\\n])|
+    (?P<special>\\['"abfrtnv\\\n])|
     (?P<char>\\U[\da-fA-F]{8}|\\u[\da-fA-F]{4}|\\x[\da-fA-F]{2})|
     (?P<oct>\\[0-7]{1,3})|
     (?P<name>\\N\{\{[^}{]*\}\})|
