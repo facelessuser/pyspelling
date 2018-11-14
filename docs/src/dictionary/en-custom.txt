@@ -89,6 +89,7 @@ subclassing
 sublicense
 substring
 syntaxes
+trigraphs
 tuple
 validator
 whitespace
