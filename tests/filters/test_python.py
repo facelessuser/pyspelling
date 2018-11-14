@@ -76,8 +76,26 @@ class TestPythonStrings(util.PluginTestCase):
         ).format(self.tempdir)
         self.mktemp('.pystrings.yml', config, 'utf-8')
 
+    def test_python_continue(self):
+        """Test strings with line continuation."""
+
+        bad_words = ['helo', 'begn']
+        good_words = ['yes', 'word']
+        template = self.dedent(
+            r"""
+            def function():
+                test = "{} \tthe\
+                aaaa"
+            """
+        ).format(
+            ' '.join(bad_words + good_words)
+        )
+        bad_words.append('aaaa')
+        self.mktemp('test.txt', template, 'utf-8')
+        self.assert_spellcheck('.pystrings.yml', bad_words)
+
     def test_python_raw(self):
-        """Test Python."""
+        """Test Python raw strings."""
 
         bad_words = ['helo', 'begn']
         good_words = ['yes', 'word']
@@ -94,7 +112,7 @@ class TestPythonStrings(util.PluginTestCase):
         self.assert_spellcheck('.pystrings.yml', bad_words)
 
     def test_python_unicode(self):
-        """Test Python."""
+        """Test Python Unicode strings."""
 
         bad_words = ['helo', 'begn']
         good_words = ['yes', 'word']
@@ -111,7 +129,7 @@ class TestPythonStrings(util.PluginTestCase):
         self.assert_spellcheck('.pystrings.yml', bad_words)
 
     def test_python_bytes(self):
-        """Test Python."""
+        """Test Python byte strings."""
 
         bad_words = ['helo', 'begn']
         good_words = ['yes', 'word']
@@ -128,7 +146,7 @@ class TestPythonStrings(util.PluginTestCase):
         self.assert_spellcheck('.pystrings.yml', bad_words)
 
     def test_python_raw_bytes(self):
-        """Test Python."""
+        """Test Python raw byte strings."""
 
         bad_words = ['helo', 'begn']
         good_words = ['yes', 'word']
@@ -145,7 +163,7 @@ class TestPythonStrings(util.PluginTestCase):
         self.assert_spellcheck('.pystrings.yml', bad_words)
 
     def test_python_format(self):
-        """Test Python."""
+        """Test Python format strings."""
 
         bad_words = ['helo', 'begn']
         good_words = ['yes', 'word']
@@ -162,8 +180,8 @@ class TestPythonStrings(util.PluginTestCase):
         self.mktemp('test.txt', template, 'utf-8')
         self.assert_spellcheck('.pystrings.yml', bad_words)
 
-    def test_python_raw_sformat(self):
-        """Test Python."""
+    def test_python_raw_format(self):
+        """Test Python raw format strings."""
 
         bad_words = ['helo', 'begn']
         good_words = ['yes', 'word']

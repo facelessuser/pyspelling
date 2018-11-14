@@ -33,7 +33,7 @@ BACK_SLASH_TRANSLATION = {
     "\\\\": '\\',
     '\\"': '"',
     "\\'": "'",
-    "\n": ''
+    "\\\n": ''
 }
 
 RE_ESC = re.compile(
@@ -155,44 +155,42 @@ class PythonFilter(filters.Filter):
         groups = m.groupdict()
         esc = m.group(0)
         if groups.get('fesc'):
-            return m.group(0)
+            value = m.group(0)
         elif groups.get('format'):
-            return ' '
+            value = ' '
         elif groups.get('special'):
-            return BACK_SLASH_TRANSLATION[esc]
+            value = BACK_SLASH_TRANSLATION[esc]
         elif groups.get('char'):
             try:
-                esc = chr(int(esc[2:], 16))
+                value = chr(int(esc[2:], 16))
             except Exception:
-                pass
-            return esc
+                value = esc
         elif groups.get('oct'):
-            value = int(esc[1:], 8)
-            return chr(value)
+            value = chr(int(esc[1:], 8))
         elif groups.get('name'):
             try:
-                esc = unicodedata.lookup(esc[3:-1])
+                value = unicodedata.lookup(esc[3:-1])
             except Exception:
-                pass
-            return esc
+                value = esc
+        return value
 
     def replace_bytes(self, m):
         """Replace escapes."""
 
         esc = m.group(0)
         if m.group('special'):
-            return BACK_SLASH_TRANSLATION[esc]
+            value = BACK_SLASH_TRANSLATION[esc]
         elif m.group('char'):
             try:
-                esc = chr(int(esc[2:], 16))
+                value = chr(int(esc[2:], 16))
             except Exception:
-                pass
-            return esc
+                value = esc
         elif m.group('oct'):
             value = int(esc[1:], 8)
             if value > 255:
                 value -= 256
-            return chr(value)
+            value = chr(value)
+        return value
 
     def process_strings(self, string):
         """Process escapes."""
@@ -293,6 +291,7 @@ class PythonFilter(filters.Filter):
                         string, is_bytes = self.process_strings(value)
                         if string:
                             loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
+                            print(string)
                             docstrings.append(
                                 filters.SourceText(string, loc, 'ascii' if is_bytes else encoding, 'py-docstring')
                             )
@@ -301,6 +300,8 @@ class PythonFilter(filters.Filter):
                     if possible_fmt_str and value.startswith(("'", "\"")):
                         value = possible_fmt_str[1] + value
                     string, is_bytes = self.process_strings(value)
+                    print('======')
+                    print(string, is_bytes)
                     if string:
                         loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
                         strings.append(filters.SourceText(string, loc, 'ascii' if is_bytes else encoding, 'py-string'))

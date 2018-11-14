@@ -67,7 +67,7 @@ class CppFilter(filters.Filter):
         self.group_comments = self.config['group_comments']
         self.prefix = self.config['prefix']
         self.generic_comments = self.config['generic_comments']
-        self.enable_strings = False
+        self.strings = False
         self.trigraphs = self.config['trigraphs']
         if not self.generic_comments:
             self.pattern = C_COMMENT
@@ -82,7 +82,7 @@ class CppFilter(filters.Filter):
         """Evaluate inline comments at the tail of source code."""
 
         if self.lines:
-            self.line_comments.append([groups['line'][2:].replace('\n', ''), self.line_num])
+            self.line_comments.append([groups['line'][2:].replace('\\\n', ''), self.line_num])
 
     def evaluate_inline(self, groups):
         """Evaluate inline comments on their own lines."""
@@ -95,9 +95,9 @@ class CppFilter(filters.Filter):
                 self.line_num == self.prev_line + 1 and
                 groups['leading_space'] == self.leading
             ):
-                self.line_comments[-1][0] += '\n' + groups['line'][2:].replace('\n', '')
+                self.line_comments[-1][0] += '\n' + groups['line'][2:].replace('\\\n', '')
             else:
-                self.line_comments.append([groups['line'][2:].replace('\n', ''), self.line_num])
+                self.line_comments.append([groups['line'][2:].replace('\\\n', ''), self.line_num])
             self.leading = groups['leading_space']
             self.prev_line = self.line_num
 
@@ -142,8 +142,8 @@ class CppFilter(filters.Filter):
 
         self.extend_src_text(content, context, self.block_comments, encoding, 'block-comment')
         self.extend_src_text(content, context, self.line_comments, encoding, 'line-comment')
-        if self.strings:
-            self.extend_src_text(content, context, self.strings, encoding, 'strings')
+        if self.quoted_strings:
+            self.extend_src_text(content, context, self.quoted_strings, encoding, 'strings')
 
     def process_trigraphs(self, m):
         """Process trigraphs."""
@@ -168,7 +168,7 @@ class CppFilter(filters.Filter):
         self.leading = ''
         self.block_comments = []
         self.line_comments = []
-        self.strings = []
+        self.quoted_strings = []
 
         self.find_comments(text)
         self.extend_src(content, context, encoding)
