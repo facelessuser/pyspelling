@@ -23,6 +23,7 @@
 - **FIX**: CSS selectors should only compare case insensitive for ASCII characters A-Z and a-z.
 - **FIX**: Allow CSS escapes in selectors.
 - **FIX**: Don't send empty (or strings that are just whitespace) to spell checker to prevent Aspell 0.50 series from crashing (also to increase performance).
+- **FIX**: Catch and bubble up errors better.
 
 ## 1.1.0
 
