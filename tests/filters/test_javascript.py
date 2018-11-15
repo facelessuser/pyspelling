@@ -58,6 +58,57 @@ class TestJavaScript(util.PluginTestCase):
         self.assert_spellcheck('.javascript.yml', bad_words)
 
 
+class TestJavaScriptStrings(util.PluginTestCase):
+    """Test JavaScript plugin."""
+
+    def setup_fs(self):
+        """Setup file system."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: javascript
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.javascript:
+                  jsdocs: true
+                  strings: true
+                  group_comments: true
+            """
+        ).format(self.tempdir)
+        self.mktemp('.javascript.yml', config, 'utf-8')
+
+    def test_javascript_strings(self):
+        """Test CPP."""
+
+        bad_string1 = ['helo', 'begn']
+        bad_string2 = ['adn', 'highight']
+        bad_words = bad_string1 + bad_string2
+        good_words = ['yes', 'word']
+        template = self.dedent(
+            r"""
+            function Func(arg, arg2) {{
+
+              test = "{} \
+              {}"
+
+              test2 = "\141\x61\u0061\u{{00000061}}\a"
+            }}
+            """
+        ).format(
+            ' '.join(bad_string1 + good_words),
+            ' '.join(bad_string2 + good_words)
+        )
+        bad_words.append('aaaaa')
+        self.mktemp('test.txt', template, 'utf-8')
+        self.assert_spellcheck('.javascript.yml', bad_words)
+
+
 class TestJavaScriptChained(util.PluginTestCase):
     """Test chained JavaScript plugin."""
 
