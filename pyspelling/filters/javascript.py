@@ -87,7 +87,7 @@ class JavaScriptFilter(cpp.CppFilter):
             value = chr(value) + overflow
         elif('other'):
             value = esc[1:]
-        return value
+        return value.replace('\x00', '\n')
 
     def replace_surrogates(self, m):
         """Replace surrogates."""

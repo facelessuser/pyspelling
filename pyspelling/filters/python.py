@@ -172,7 +172,7 @@ class PythonFilter(filters.Filter):
                 value = unicodedata.lookup(esc[3:-1])
             except Exception:
                 value = esc
-        return value
+        return value.replace('\x00', ' ')
 
     def replace_bytes(self, m):
         """Replace escapes."""
@@ -190,7 +190,7 @@ class PythonFilter(filters.Filter):
             if value > 255:
                 value -= 256
             value = chr(value)
-        return value
+        return value.replace('\x00', '\n')
 
     def process_strings(self, string):
         """Process escapes."""
