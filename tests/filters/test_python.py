@@ -141,6 +141,7 @@ class TestPythonStrings(util.PluginTestCase):
         ).format(
             '\\x03'.join(bad_words + good_words)
         )
+        bad_words.append('aaaa')
         self.mktemp('test.txt', template, 'utf-8')
         self.assert_spellcheck('.pystrings.yml', bad_words)
 
