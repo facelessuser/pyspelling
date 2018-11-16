@@ -215,7 +215,7 @@ class PythonFilter(filters.Filter):
         else:
             string = self.norm_nl(RE_ESC.sub(self.replace_unicode, content))
 
-        return textwrap.dedent(RE_NON_PRINTABLE.sub(' ', string) if is_bytes else string), is_bytes
+        return textwrap.dedent(RE_NON_PRINTABLE.sub('\n', string) if is_bytes else string), is_bytes
 
     def _filter(self, text, context, encoding):
         """Retrieve the Python docstrings."""

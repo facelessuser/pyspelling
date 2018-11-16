@@ -62,6 +62,86 @@ class TestCPP(util.PluginTestCase):
         self.assert_spellcheck('.cpp.yml', bad_words)
 
 
+class TestCPPStrings(util.PluginTestCase):
+    """Test CPP plugin."""
+
+    def setup_fs(self):
+        """Setup file system."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: cpp
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.cpp:
+                  strings: true
+                  line_comments: false
+                  group_comments: true
+            """
+        ).format(self.tempdir)
+        self.mktemp('.cpp.yml', config, 'utf-8')
+
+    def test_cpp_strings(self):
+        """Test CPP strings."""
+
+        bad_char = ['helo', 'begn']
+        bad_wchar = ['flga', 'graet']
+        bad_u8 = ['recieve', 'teh']
+        bad_u16 = ['acept', 'thruogh']
+        bad_u32 = ['hpoe', 'lvoe']
+        bad_raw = ['aaaa', 'bbbb']
+        bad_raw_delim = ['cccc', 'dddd']
+        bad_raw_wide = ['eeee', 'ffff']
+        bad_raw_u8 = ['gggg', 'hhhh']
+        bad_raw_u16 = ['iiii', 'jjjj']
+        bad_raw_u32 = ['kkkk', 'llll']
+
+        bad_words = (
+            bad_char + bad_wchar + bad_u8 + bad_u16 + bad_u32 + bad_raw + bad_raw_wide +
+            bad_raw_delim + bad_raw_u8 + bad_raw_u16 + bad_raw_u32
+        )
+        good_words = ['yes', 'word']
+        template = self.dedent(
+            r"""
+            uint8_t func() {{
+                auto c0 =   'xxxx'; // char
+                auto s0 =   "{}"; // char
+                auto s1 =  L"{}"; // wchar_t
+                auto s2 = u8"{}"; // char
+                auto s3 =  u"{}"; // char16_t
+                auto s4 =  U"{}"; // char32_t
+                auto R0 =   R"("{}")"; // const char*
+                auto R1 =   R"delim("{}")delim";    // const char*
+                auto R3 =  LR"("{}")"; // const wchar_t*
+                auto R4 = u8R"("{}")"; // const char*, encoded as UTF-8
+                auto R5 =  uR"("{}")"; // const char16_t*, encoded as UTF-16
+                auto R6 =  UR"("{}")"; // const char32_t*, encoded as UTF-32
+            }}
+            """
+        ).format(
+            ' '.join(bad_char + good_words),
+            ' '.join(bad_wchar + good_words),
+            ' '.join(bad_u8 + good_words),
+            ' '.join(bad_u16 + good_words),
+            ' '.join(bad_u32 + good_words),
+            ' '.join(bad_raw + good_words),
+            ' '.join(bad_raw_delim + good_words),
+            ' '.join(bad_raw_wide + good_words),
+            ' '.join(bad_raw_u8 + good_words),
+            ' '.join(bad_raw_u16 + good_words),
+            ' '.join(bad_raw_u32 + good_words)
+        )
+
+        self.mktemp('test.txt', template, 'utf-8')
+        self.assert_spellcheck('.cpp.yml', bad_words)
+
+
 class TestCPPGeneric(util.PluginTestCase):
     """Test CPP plugin."""
 

@@ -77,12 +77,11 @@ class StylesheetsFilter(cpp.CppFilter):
         else:
             super().evaluate(m)
 
-    def extend_src(self, content, context, encoding):
+    def extend_src(self, content, context):
         """Extend source list."""
 
-        self.extend_src_text(content, context, self.block_comments, encoding, 'block-comment')
-        if self.stylesheets != CSS:
-            self.extend_src_text(content, context, self.line_comments, encoding, 'line-comment')
+        self.extend_src_text(content, context, self.block_comments, 'block-comment')
+        self.extend_src_text(content, context, self.line_comments, 'line-comment')
 
 
 def get_plugin():

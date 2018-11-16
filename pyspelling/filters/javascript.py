@@ -106,7 +106,7 @@ class JavaScriptFilter(cpp.CppFilter):
                 )
             else:
                 value = groups['strings'][1:-1]
-            self.quoted_strings.append([value, self.line_num])
+            self.quoted_strings.append([value, self.line_num, 'utf-8'])
 
     def evaluate_block(self, groups):
         """Evaluate block comments."""
@@ -118,19 +118,19 @@ class JavaScriptFilter(cpp.CppFilter):
                 for line in m1.group(1).splitlines(True):
                     l = line.lstrip()
                     lines.append(l[1:] if l.startswith('*') else l)
-                self.jsdoc_comments.append([''.join(lines), self.line_num])
+                self.jsdoc_comments.append([''.join(lines), self.line_num, self.current_encoding])
             elif self.blocks:
-                self.block_comments.append([groups['block'][2:-2], self.line_num])
+                self.block_comments.append([groups['block'][2:-2], self.line_num, self.current_encoding])
         elif self.blocks:
-            self.block_comments.append([groups['block'][2:-2], self.line_num])
+            self.block_comments.append([groups['block'][2:-2], self.line_num, self.current_encoding])
 
-    def extend_src(self, content, context, encoding):
+    def extend_src(self, content, context):
         """Extend source list."""
 
-        self.extend_src_text(content, context, self.block_comments, encoding, 'block-comment')
-        self.extend_src_text(content, context, self.line_comments, encoding, 'line-comment')
-        self.extend_src_text(content, context, self.jsdoc_comments, encoding, 'docs')
-        self.extend_src_text(content, context, self.quoted_strings, 'utf-8', 'strings')
+        self.extend_src_text(content, context, self.block_comments, 'block-comment')
+        self.extend_src_text(content, context, self.line_comments, 'line-comment')
+        self.extend_src_text(content, context, self.jsdoc_comments, 'docs')
+        self.extend_src_text(content, context, self.quoted_strings, 'strings')
 
     def _filter(self, text, context, encoding):
         """Filter JavaScript comments."""

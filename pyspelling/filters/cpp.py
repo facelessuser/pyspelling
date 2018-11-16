@@ -58,11 +58,18 @@ BACK_SLASH_TRANSLATION = {
     "\\\n": ''
 }
 
-RE_ESC = re.compile(
+RE_UESC = re.compile(
     r'''(?x)
     (?P<special>\\['"abfrtnv?\\\n])|
     (?P<char>\\U[\da-fA-F]{8}|\\u[\da-fA-F]{4}|\\x[\da-fA-F]{1,})|
     (?P<oct>\\[0-7]{1,3})
+    '''
+)
+
+RE_ESC = re.compile(
+    r'''(?x)
+    (?P<special>\\['"abfrtnv?\\\n])|
+    (?P<char>(?:(?:\\U[\da-fA-F]{8}|\\u[\da-fA-F]{4}|\\x[\da-fA-F]{1,})|(?:\\[0-7]{1,3}))+)
     '''
 )
 
@@ -87,7 +94,8 @@ class CppFilter(filters.Filter):
             "prefix": 'cpp',
             "generic_comments": False,
             "trigraphs": False,
-            "strings": False
+            "strings": False,
+            "decode_escapes": True
         }
 
     def setup(self):
@@ -100,6 +108,7 @@ class CppFilter(filters.Filter):
         self.generic_comments = self.config['generic_comments']
         self.strings = self.config['strings']
         self.trigraphs = self.config['trigraphs']
+        self.decode_escapes = self.config['decode_escapes']
         if not self.generic_comments:
             self.pattern = C_COMMENT
 
@@ -107,13 +116,13 @@ class CppFilter(filters.Filter):
         """Evaluate block comments."""
 
         if self.blocks:
-            self.block_comments.append([groups['block'][2:-2], self.line_num])
+            self.block_comments.append([groups['block'][2:-2], self.line_num, self.current_encoding])
 
     def evaluate_inline_tail(self, groups):
         """Evaluate inline comments at the tail of source code."""
 
         if self.lines:
-            self.line_comments.append([groups['line'][2:].replace('\\\n', ''), self.line_num])
+            self.line_comments.append([groups['line'][2:].replace('\\\n', ''), self.line_num, self.current_encoding])
 
     def evaluate_inline(self, groups):
         """Evaluate inline comments on their own lines."""
@@ -128,21 +137,23 @@ class CppFilter(filters.Filter):
             ):
                 self.line_comments[-1][0] += '\n' + groups['line'][2:].replace('\\\n', '')
             else:
-                self.line_comments.append([groups['line'][2:].replace('\\\n', ''), self.line_num])
+                self.line_comments.append(
+                    [groups['line'][2:].replace('\\\n', ''), self.line_num, self.current_encoding]
+                )
             self.leading = groups['leading_space']
             self.prev_line = self.line_num
 
     def evaluate_unicode(self, value):
-        """Evalute Unicode."""
+        """Evaluate Unicode."""
 
         if value.startswith('u8'):
-            length = 2
+            length = 1
             value = value[3:-1]
         elif value.startswith('u'):
-            length = 4
+            length = 2
             value = value[2:-1]
         else:
-            length = 8
+            length = 4
             value = value[2:-1]
 
         def replace_unicode(m):
@@ -152,29 +163,31 @@ class CppFilter(filters.Filter):
             esc = m.group(0)
             value = esc
             if groups.get('special'):
+                # Handle basic string escapes.
                 value = BACK_SLASH_TRANSLATION[esc]
-            elif groups.get('char'):
-                integer = int(esc[2:-1], 16)
+            elif groups.get('char') or groups.get('oct'):
+                # Handle character escapes.
+                integer = int(esc[2:], 16) if groups.get('char') else int(esc[1:], 8)
                 if (
-                    (length == 2 and integer <= 0xFF) or
-                    (length == 4 and integer <= 0xFFFF) or
-                    (length == 8 and integer <= 0x10FFFF)
+                    (length < 2 and integer <= 0xFF) or
+                    (length < 4 and integer <= 0xFFFF) or
+                    (length >= 4 and integer <= 0x10FFFF)
                 ):
-                    value = chr(integer)
-            elif groups.get('oct'):
-                integer = int(esc[1:], 8)
-                if (
-                    (length == 2 and integer <= 0xFF) or
-                    (length == 4 and integer <= 0xFFFF) or
-                    (length == 8 and integer <= 0x10FFFF)
-                ):
-                    value = chr(integer)
+                    try:
+                        value = chr(integer)
+                    except Exception:
+                        value = ' '
             return value
 
         return self.norm_nl(RE_ESC.sub(replace_unicode, value).replace('\x00', '\n'))
 
     def evaluate_normal(self, value):
-        """Evalute normal string."""
+        """Evaluate normal string."""
+
+        if value.startswith('L'):
+            value = value[2:-1]
+        else:
+            value = value[1:-1]
 
         def replace(m):
             """Replace."""
@@ -183,37 +196,50 @@ class CppFilter(filters.Filter):
             esc = m.group(0)
             value = esc
             if groups.get('special'):
+                # Handle basic string escapes.
                 value = BACK_SLASH_TRANSLATION[esc]
-            elif groups.get('char') or groups.get('oct'):
-                value = ' '
+            elif groups.get('char'):
+                # Strip out escapes as we cannot assume encoding.
+                value = '\n'
+
             return value
 
-        return self.norm_nl(RE_ESC.sub(replace_unicode, value).replace('\x00', '\n'))
+        return self.norm_nl(RE_ESC.sub(replace, value).replace('\x00', '\n'))
 
     def evaluate_strings(self, groups):
         """Evaluate strings."""
 
         if self.strings:
+            encoding = self.current_encoding
             if self.generic_comments:
-                self.quoted_strings.append([groups['strings'][1:-1], self.line_num])
+                # Generic assumes no escapes rules.
+                self.quoted_strings.append([groups['strings'][1:-1], self.line_num, encoding])
             else:
                 value = groups['strings']
                 if groups.get('raw'):
+                    # Handle raw strings. We can handle even if decoding is disabled.
                     olen = len(groups.get('raw')) + len(groups.get('delim')) + 2
                     clen = len(groups.get('delim')) + 2
                     value = self.norm_nl(value[olen:-clen].replace('\x00', '\n'))
-                elif not value.startswith(('\'', '"')) and value.endswith('"'):
-                    if value.startswith('L'):
-                        value = self.evaluate_normal(value[2:-1])
-                    else:
-                        value = self.evaluate_unicode(value)
-                elif value.startswith('"'):
-                    value = self.evaluate_normal(value[1:-1])
+                elif (
+                    self.decode_escapes and not value.startswith(('\'', '"')) and
+                    not value.startswith('L') and value.endswith('"')
+                ):
+                    # Decode Unicode string. May have added unsupported chars, so use `UTF-8`.
+                    value = self.evaluate_unicode(value)
+                    encoding = 'utf-8'
+                elif self.decode_escapes and value.startswith(('"', 'L')):
+                    # Decode normal strings.
+                    value = self.evaluate_normal(value)
+                elif not self.decode_escapes and value.endswith('"'):
+                    # Don't decode and just return string content.
+                    value = self.norm_nl(value[value.index('"') + 1:-1]).replace('\x00', '\n')
                 else:
+                    # Char constant. Just ignore
                     value = ''
 
                 if value:
-                    self.quoted_strings.append([value, self.line_num])
+                    self.quoted_strings.append([value, self.line_num, encoding])
 
     def evaluate(self, m):
         """Search for comments."""
@@ -233,12 +259,12 @@ class CppFilter(filters.Filter):
                 self.evaluate_inline(g)
             self.line_num += g['comments'].count('\n')
 
-    def extend_src_text(self, content, context, text_list, encoding, category):
+    def extend_src_text(self, content, context, text_list, category):
         """Extend the source text list with the gathered text data."""
 
         prefix = self.prefix + '-' if self.prefix else ''
 
-        for comment, line in text_list:
+        for comment, line, encoding in text_list:
             content.append(
                 filters.SourceText(
                     textwrap.dedent(comment),
@@ -248,12 +274,12 @@ class CppFilter(filters.Filter):
                 )
             )
 
-    def extend_src(self, content, context, encoding):
+    def extend_src(self, content, context):
         """Extend source list."""
 
-        self.extend_src_text(content, context, self.block_comments, encoding, 'block-comment')
-        self.extend_src_text(content, context, self.line_comments, encoding, 'line-comment')
-        self.extend_src_text(content, context, self.quoted_strings, 'utf-8', 'strings')
+        self.extend_src_text(content, context, self.block_comments, 'block-comment')
+        self.extend_src_text(content, context, self.line_comments, 'line-comment')
+        self.extend_src_text(content, context, self.quoted_strings, 'strings')
 
     def process_trigraphs(self, m):
         """Process trigraphs."""
@@ -273,6 +299,7 @@ class CppFilter(filters.Filter):
         """Filter JavaScript comments."""
 
         content = []
+        self.current_encoding = encoding
         self.line_num = 1
         self.prev_line = -1
         self.leading = ''
@@ -281,7 +308,7 @@ class CppFilter(filters.Filter):
         self.quoted_strings = []
 
         self.find_comments(text)
-        self.extend_src(content, context, encoding)
+        self.extend_src(content, context)
 
         return content
 
