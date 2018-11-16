@@ -10,17 +10,24 @@ COMMENTS = r'''(?x)
     (?P<start>^)?(?P<leading_space>[ \t]*)?(?P<line>//(?:{})*)  # single line comments
 ) |
 (?P<strings>
+    {}
     "(?:\\.|[^"\\])*" |                                         # double quotes
     '(?:\\.|[^'\\])*'                                           # single quotes
 ) |
 (?P<code>
-    .[^/"']*?                                                   # everything else
+    .[^/"'RLuU]*?                                               # everything else
 )
 '''
 
-C_COMMENT = re.compile(COMMENTS.format(r'\\.|[^\\\n]+'), re.DOTALL | re.MULTILINE)
+CPP_STRING = r'''
+(?P<raw>(?:L|u8?|U)?R)"(?P<delim>[^\n ()\t]*)\(.*?\)(?P=delim)" |
+(?:L|u8?|U)"(?:\\.|[^"\\])*" |
+(?:L|u8?|U)'(?:\\.|[^'\\])*' |
+'''
 
-GENERIC = re.compile(COMMENTS.format('[^\n]'), re.DOTALL | re.MULTILINE)
+C_COMMENT = re.compile(COMMENTS.format(r'\\.|[^\\\n]+', CPP_STRING), re.DOTALL | re.MULTILINE)
+
+GENERIC = re.compile(COMMENTS.format('[^\n]', ''), re.DOTALL | re.MULTILINE)
 
 TRIGRAPHS = {
     '??=': '#',
@@ -35,6 +42,29 @@ TRIGRAPHS = {
 }
 
 RE_TRIGRAPHS = re.compile(r'\?{2}[=/\'()!<>-]')
+
+BACK_SLASH_TRANSLATION = {
+    "\\a": '\a',
+    "\\b": '\b',
+    "\\f": '\f',
+    "\\r": '\r',
+    "\\t": '\t',
+    "\\n": '\n',
+    "\\v": '\v',
+    "\\\\": '\\',
+    '\\"': '"',
+    "\\'": "'",
+    "\\?": "?",
+    "\\\n": ''
+}
+
+RE_ESC = re.compile(
+    r'''(?x)
+    (?P<special>\\['"abfrtnv?\\\n])|
+    (?P<char>\\U[\da-fA-F]{8}|\\u[\da-fA-F]{4}|\\x[\da-fA-F]{1,})|
+    (?P<oct>\\[0-7]{1,3})
+    '''
+)
 
 
 class CppFilter(filters.Filter):
@@ -56,7 +86,8 @@ class CppFilter(filters.Filter):
             "group_comments": False,
             "prefix": 'cpp',
             "generic_comments": False,
-            "trigraphs": False
+            "trigraphs": False,
+            "strings": False
         }
 
     def setup(self):
@@ -67,7 +98,7 @@ class CppFilter(filters.Filter):
         self.group_comments = self.config['group_comments']
         self.prefix = self.config['prefix']
         self.generic_comments = self.config['generic_comments']
-        self.strings = False
+        self.strings = self.config['strings']
         self.trigraphs = self.config['trigraphs']
         if not self.generic_comments:
             self.pattern = C_COMMENT
@@ -101,8 +132,88 @@ class CppFilter(filters.Filter):
             self.leading = groups['leading_space']
             self.prev_line = self.line_num
 
+    def evaluate_unicode(self, value):
+        """Evalute Unicode."""
+
+        if value.startswith('u8'):
+            length = 2
+            value = value[3:-1]
+        elif value.startswith('u'):
+            length = 4
+            value = value[2:-1]
+        else:
+            length = 8
+            value = value[2:-1]
+
+        def replace_unicode(m):
+            """Replace Unicode."""
+
+            groups = m.groupdict()
+            esc = m.group(0)
+            value = esc
+            if groups.get('special'):
+                value = BACK_SLASH_TRANSLATION[esc]
+            elif groups.get('char'):
+                integer = int(esc[2:-1], 16)
+                if (
+                    (length == 2 and integer <= 0xFF) or
+                    (length == 4 and integer <= 0xFFFF) or
+                    (length == 8 and integer <= 0x10FFFF)
+                ):
+                    value = chr(integer)
+            elif groups.get('oct'):
+                integer = int(esc[1:], 8)
+                if (
+                    (length == 2 and integer <= 0xFF) or
+                    (length == 4 and integer <= 0xFFFF) or
+                    (length == 8 and integer <= 0x10FFFF)
+                ):
+                    value = chr(integer)
+            return value
+
+        return self.norm_nl(RE_ESC.sub(replace_unicode, value).replace('\x00', '\n'))
+
+    def evaluate_normal(self, value):
+        """Evalute normal string."""
+
+        def replace(m):
+            """Replace."""
+
+            groups = m.groupdict()
+            esc = m.group(0)
+            value = esc
+            if groups.get('special'):
+                value = BACK_SLASH_TRANSLATION[esc]
+            elif groups.get('char') or groups.get('oct'):
+                value = ' '
+            return value
+
+        return self.norm_nl(RE_ESC.sub(replace_unicode, value).replace('\x00', '\n'))
+
     def evaluate_strings(self, groups):
         """Evaluate strings."""
+
+        if self.strings:
+            if self.generic_comments:
+                self.quoted_strings.append([groups['strings'][1:-1], self.line_num])
+            else:
+                value = groups['strings']
+                if groups.get('raw'):
+                    olen = len(groups.get('raw')) + len(groups.get('delim')) + 2
+                    clen = len(groups.get('delim')) + 2
+                    value = self.norm_nl(value[olen:-clen].replace('\x00', '\n'))
+                elif not value.startswith(('\'', '"')) and value.endswith('"'):
+                    if value.startswith('L'):
+                        value = self.evaluate_normal(value[2:-1])
+                    else:
+                        value = self.evaluate_unicode(value)
+                elif value.startswith('"'):
+                    value = self.evaluate_normal(value[1:-1])
+                else:
+                    value = ''
+
+                if value:
+                    self.quoted_strings.append([value, self.line_num])
 
     def evaluate(self, m):
         """Search for comments."""
@@ -142,8 +253,7 @@ class CppFilter(filters.Filter):
 
         self.extend_src_text(content, context, self.block_comments, encoding, 'block-comment')
         self.extend_src_text(content, context, self.line_comments, encoding, 'line-comment')
-        if self.quoted_strings:
-            self.extend_src_text(content, context, self.quoted_strings, encoding, 'strings')
+        self.extend_src_text(content, context, self.quoted_strings, 'utf-8', 'strings')
 
     def process_trigraphs(self, m):
         """Process trigraphs."""
