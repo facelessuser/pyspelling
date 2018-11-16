@@ -73,7 +73,7 @@ FE_RFESC = re.compile(
 
 RE_STRING_TYPE = re.compile(r'''((?:r|u|f|b)+)?(\'''|"""|'|")(.*?)\2''', re.I | re.S)
 
-RE_NON_PRINTABLE = re.compile(r'[\x00-\x0f\x0b-\x1f\x7f-\xff]+')
+RE_NON_PRINTABLE = re.compile(r'[\x00-\x09\x0b-\x1f\x7f-\xff]+')
 
 FMT_STR = (
     'f', 'F',
@@ -172,12 +172,13 @@ class PythonFilter(filters.Filter):
                 value = unicodedata.lookup(esc[3:-1])
             except Exception:
                 value = esc
-        return value.replace('\x00', ' ')
+        return value.replace('\x00', '\n')
 
     def replace_bytes(self, m):
         """Replace escapes."""
 
         esc = m.group(0)
+        value = esc
         if m.group('special'):
             value = BACK_SLASH_TRANSLATION[esc]
         elif m.group('char'):
@@ -291,20 +292,17 @@ class PythonFilter(filters.Filter):
                         string, is_bytes = self.process_strings(value)
                         if string:
                             loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
-                            print(string)
                             docstrings.append(
-                                filters.SourceText(string, loc, 'ascii' if is_bytes else encoding, 'py-docstring')
+                                filters.SourceText(string, loc, 'utf-8', 'py-docstring')
                             )
                 elif self.strings:
                     value = value.strip()
                     if possible_fmt_str and value.startswith(("'", "\"")):
                         value = possible_fmt_str[1] + value
                     string, is_bytes = self.process_strings(value)
-                    print('======')
-                    print(string, is_bytes)
                     if string:
                         loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
-                        strings.append(filters.SourceText(string, loc, 'ascii' if is_bytes else encoding, 'py-string'))
+                        strings.append(filters.SourceText(string, loc, 'utf-8', 'py-string'))
 
             if token_type == tokenize.INDENT:
                 indent = value

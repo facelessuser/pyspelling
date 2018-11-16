@@ -130,7 +130,7 @@ class JavaScriptFilter(cpp.CppFilter):
         self.extend_src_text(content, context, self.block_comments, encoding, 'block-comment')
         self.extend_src_text(content, context, self.line_comments, encoding, 'line-comment')
         self.extend_src_text(content, context, self.jsdoc_comments, encoding, 'docs')
-        self.extend_src_text(content, context, self.quoted_strings, encoding, 'strings')
+        self.extend_src_text(content, context, self.quoted_strings, 'utf-8', 'strings')
 
     def _filter(self, text, context, encoding):
         """Filter JavaScript comments."""
