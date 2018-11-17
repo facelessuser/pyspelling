@@ -147,9 +147,9 @@ class TestCPPStrings(util.PluginTestCase):
         template = self.dedent(
             r"""
             uint8_t func() {{
-                auto s0 =   "\xaagggg \ntext\
-                             \uaaaa \\ubbbb"; // char
-                auto s1 =  L"\xaahhhh \ntext"; // wchar_t
+                auto s0 =   "\x61gggg \ntext\
+                             \u0061yyyy \\ubbbb"; // char
+                auto s1 =  L"\x0061hhhh \ntexts"; // wchar_t
                 auto s2 = u8"\141\x000000061\u0061\U00000061"; // char
                 auto s3 =  u"\142\x000000062\u0062\U00000062"; // char16_t
                 auto s4 =  U"\143\x000000063\u0063\U00000063"; // char32_t
@@ -168,7 +168,7 @@ class TestCPPStrings(util.PluginTestCase):
         # Unicode strings will have all escapes decoded.
         # Raw will decode none.
         bad_words = [
-            'gggg', 'hhhh', 'aaaa', 'bbbb', 'cccc',
+            'agggg', 'ahhhh', 'ayyyy', 'aaaa', 'bbbb', 'cccc',
             'xaa', 'xbb', 'xcc', 'xdd', 'xee', 'xff',
             'ubbbb', 'nbad', 'vbad'
         ]

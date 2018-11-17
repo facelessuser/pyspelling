@@ -3,6 +3,8 @@ import re
 import codecs
 from .. import filters
 import textwrap
+import struct
+import sys
 
 COMMENTS = r'''(?x)
 (?P<comments>
@@ -69,9 +71,27 @@ RE_UESC = re.compile(
 RE_ESC = re.compile(
     r'''(?x)
     (?P<special>\\['"abfrtnv?\\\n])|
-    (?P<char>(?:(?:\\U[\da-fA-F]{8}|\\u[\da-fA-F]{4}|\\x[\da-fA-F]{1,})|(?:\\[0-7]{1,3}))+)
+    (?P<char>\\U[\da-fA-F]{8}|\\u[\da-fA-F]{4}|(?:\\x[\da-fA-F]{1,})+)|
+    (?P<oct>(?:\\[0-7]{1,3})+)
     '''
 )
+
+BIT8 = 1
+BIT16 = 2
+BIT32 = 4
+
+BIG_ENDIAN = 0x10
+LITTLE_ENDIAN = 0x20
+CURRENT_ENDIAN = BIG_ENDIAN if sys.byteorder == 'big' else LITTLE_ENDIAN
+
+BYTE_STORE = {
+    (BIT8 | BIG_ENDIAN): '>B',
+    (BIT16 | BIG_ENDIAN): '>H',
+    (BIT32 | BIG_ENDIAN): '>I',
+    (BIT8 | LITTLE_ENDIAN): '<B',
+    (BIT16 | LITTLE_ENDIAN): '<H',
+    (BIT32 | LITTLE_ENDIAN): '<I'
+}
 
 
 class CppFilter(filters.Filter):
@@ -95,8 +115,44 @@ class CppFilter(filters.Filter):
             "generic_comments": False,
             "trigraphs": False,
             "strings": False,
-            "decode_escapes": True
+            "decode_escapes": True,
+            "exec_charset": 'utf-8',
+            "wide_exec_charset": 'utf-32',
+            "charset_size": 1,
+            "wide_charset_size": 4
         }
+
+    def validate_options(self, k, v):
+        """Validate options."""
+
+        super().validate_options(k, v)
+        if k == 'charset_size':
+            if v not in (1, 2, 4):
+                raise ValueError("{}: '{}' is an unsupported charset size".format(self.__class__.__name__, v))
+        elif k == 'wide_charset_size':
+            if v not in (2, 4):
+                raise ValueError("{}: '{}' is an unsupported wide charset size".format(self.__class__.__name__, v))
+        elif k in ('exec_charset', 'wide_exec_charset'):
+            # See if parsing fails.
+            self.get_encoding_name(v)
+
+    def get_encoding_name(self, name):
+        """Get encoding name."""
+
+        name = codecs.lookup(
+            filters.PYTHON_ENCODING_NAMES.get(name, name).lower()
+        ).name
+
+        if name.startswith(('utf-32', 'utf-16')):
+            name = name[:6]
+            if CURRENT_ENDIAN == BIG_ENDIAN:
+                name += '-be'
+            else:
+                name += '-le'
+
+        if name == 'utf-8-sig':
+            name = 'utf-8'
+        return name
 
     def setup(self):
         """Setup."""
@@ -109,6 +165,10 @@ class CppFilter(filters.Filter):
         self.strings = self.config['strings']
         self.trigraphs = self.config['trigraphs']
         self.decode_escapes = self.config['decode_escapes']
+        self.charset_size = self.config['charset_size']
+        self.wide_charset_size = self.config['wide_charset_size']
+        self.exec_charset = self.get_encoding_name(self.config['exec_charset'])
+        self.wide_exec_charset = self.get_encoding_name(self.config['wide_exec_charset'])
         if not self.generic_comments:
             self.pattern = C_COMMENT
 
@@ -179,15 +239,22 @@ class CppFilter(filters.Filter):
                         value = ' '
             return value
 
-        return self.norm_nl(RE_UESC.sub(replace_unicode, value).replace('\x00', '\n'))
+        return self.norm_nl(RE_UESC.sub(replace_unicode, value).replace('\x00', '\n')), 'utf-8'
 
     def evaluate_normal(self, value):
         """Evaluate normal string."""
 
         if value.startswith('L'):
+            size = self.wide_charset_size
+            encoding = self.wide_exec_charset
             value = value[2:-1]
+            pack = BYTE_STORE[size | CURRENT_ENDIAN]
         else:
+            size = self.charset_size
+            encoding = self.exec_charset
             value = value[1:-1]
+            pack = BYTE_STORE[size | CURRENT_ENDIAN]
+        max_value = 2 ** (size * 8) - 1
 
         def replace(m):
             """Replace."""
@@ -199,12 +266,33 @@ class CppFilter(filters.Filter):
                 # Handle basic string escapes.
                 value = BACK_SLASH_TRANSLATION[esc]
             elif groups.get('char'):
-                # Strip out escapes as we cannot assume encoding.
-                value = '\n'
-
+                # Handle hex/Unicode character escapes
+                if value.startswith('\\x'):
+                    values = [int(x, 16) for x in value[2:].split('\\x')]
+                    for i, v in enumerate(values):
+                        if v <= max_value:
+                            values[i] = struct.pack(pack, v)
+                        else:
+                            values[i] = b' '
+                    value = b''.join(values).decode(encoding, errors='replace')
+                else:
+                    integer = int(value[2:], 16)
+                    value = chr(integer).encode(encoding, errors='replace').decode(encoding)
+            elif groups.get('oct'):
+                # Handle octal escapes.
+                values = [int(x, 8) for x in value[1:].split('\\')]
+                for i, v in enumerate(values):
+                    if v <= max_value:
+                        values[i] = struct.pack(pack, v)
+                    else:
+                        values[i] = b' '
+                value = b''.join(values).decode(encoding, errors='replace')
             return value
 
-        return self.norm_nl(RE_ESC.sub(replace, value).replace('\x00', '\n'))
+        text = self.norm_nl(RE_ESC.sub(replace, value)).replace('\x00', '\n')
+        if encoding.startswith(('utf-32', 'utf-16')):
+            encoding = 'utf-8'
+        return text, encoding
 
     def evaluate_strings(self, groups):
         """Evaluate strings."""
@@ -226,11 +314,10 @@ class CppFilter(filters.Filter):
                     not value.startswith('L') and value.endswith('"')
                 ):
                     # Decode Unicode string. May have added unsupported chars, so use `UTF-8`.
-                    value = self.evaluate_unicode(value)
-                    encoding = 'utf-8'
+                    value, encoding = self.evaluate_unicode(value)
                 elif self.decode_escapes and value.startswith(('"', 'L')):
                     # Decode normal strings.
-                    value = self.evaluate_normal(value)
+                    value, encoding = self.evaluate_normal(value)
                 elif not self.decode_escapes and value.endswith('"'):
                     # Don't decode and just return string content.
                     value = self.norm_nl(value[value.index('"') + 1:-1]).replace('\x00', '\n')
@@ -279,7 +366,7 @@ class CppFilter(filters.Filter):
 
         self.extend_src_text(content, context, self.block_comments, 'block-comment')
         self.extend_src_text(content, context, self.line_comments, 'line-comment')
-        self.extend_src_text(content, context, self.quoted_strings, 'strings')
+        self.extend_src_text(content, context, self.quoted_strings, 'string')
 
     def process_trigraphs(self, m):
         """Process trigraphs."""
