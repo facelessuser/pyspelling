@@ -141,6 +141,41 @@ class TestCPPStrings(util.PluginTestCase):
         self.mktemp('test.txt', template, 'utf-8')
         self.assert_spellcheck('.cpp.yml', bad_words)
 
+    def test_cpp_strings_escapes(self):
+        """Test CPP strings escapes."""
+
+        template = self.dedent(
+            r"""
+            uint8_t func() {{
+                auto s0 =   "\xaagggg \ntext\
+                             \uaaaa \\ubbbb"; // char
+                auto s1 =  L"\xaahhhh \ntext"; // wchar_t
+                auto s2 = u8"\141\x000000061\u0061\U00000061"; // char
+                auto s3 =  u"\142\x000000062\u0062\U00000062"; // char16_t
+                auto s4 =  U"\143\x000000063\u0063\U00000063"; // char32_t
+                auto R0 =   R"("\xaa \nbad")"; // const char*
+                auto R1 =   R"delim("\xbb
+                                     \vbad")delim";    // const char*
+                auto R3 =  LR"("\xcc")"; // const wchar_t*
+                auto R4 = u8R"("\xdd")"; // const char*, encoded as UTF-8
+                auto R5 =  uR"("\xee")"; // const char16_t*, encoded as UTF-16
+                auto R6 =  UR"("\xff")"; // const char32_t*, encoded as UTF-32
+            }}
+            """
+        )
+
+        # `char*` and `wchar*` will have escapes `\x`, `\u`, and `\U` stripped out as we don't know the encoding.
+        # Unicode strings will have all escapes decoded.
+        # Raw will decode none.
+        bad_words = [
+            'gggg', 'hhhh', 'aaaa', 'bbbb', 'cccc',
+            'xaa', 'xbb', 'xcc', 'xdd', 'xee', 'xff',
+            'ubbbb', 'nbad', 'vbad'
+        ]
+
+        self.mktemp('test.txt', template, 'utf-8')
+        self.assert_spellcheck('.cpp.yml', bad_words)
+
 
 class TestCPPGeneric(util.PluginTestCase):
     """Test CPP plugin."""

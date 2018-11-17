@@ -179,7 +179,7 @@ class CppFilter(filters.Filter):
                         value = ' '
             return value
 
-        return self.norm_nl(RE_ESC.sub(replace_unicode, value).replace('\x00', '\n'))
+        return self.norm_nl(RE_UESC.sub(replace_unicode, value).replace('\x00', '\n'))
 
     def evaluate_normal(self, value):
         """Evaluate normal string."""
