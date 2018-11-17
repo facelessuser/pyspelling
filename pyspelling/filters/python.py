@@ -193,12 +193,12 @@ class PythonFilter(filters.Filter):
             value = chr(value)
         return value.replace('\x00', '\n')
 
-    def process_strings(self, string):
+    def process_strings(self, string, docstrings=False):
         """Process escapes."""
 
         m = RE_STRING_TYPE.match(string)
         stype = self.eval_string_type(m.group(1) if m.group(1) else '')
-        if stype - self.allowed:
+        if stype - self.allowed and not docstrings:
             return '', False
         is_bytes = 'b' in stype
         is_raw = 'r' in stype
@@ -289,7 +289,7 @@ class PythonFilter(filters.Filter):
                         value = value.strip()
                         if possible_fmt_str and value.startswith(("'", "\"")):
                             value = possible_fmt_str[1] + value
-                        string, is_bytes = self.process_strings(value)
+                        string, is_bytes = self.process_strings(value, docstrings=True)
                         if string:
                             loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
                             docstrings.append(
