@@ -121,6 +121,7 @@ class PythonFilter(filters.Filter):
     def validate_options(self, k, v):
         """Validate options."""
 
+        super().validate_options(k, v)
         if k == 'allowed':
             for c in v.lower():
                 if c not in 'rbuf':
