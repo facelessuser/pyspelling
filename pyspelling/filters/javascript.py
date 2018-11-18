@@ -6,21 +6,27 @@ from .. import filters
 
 RE_JSDOC = re.compile(r"(?s)^/\*\*$(.*?)[ \t]*\*/", re.MULTILINE)
 
-COMMENTS = r'''(?x)
-(?P<comments>
-    (?P<block>/\*[^*]*\*+(?:[^/*][^*]*\*+)*/) |                 # multi-line comments
-    (?P<start>^)?(?P<leading_space>[ \t]*)?(?P<line>//(?:[^\n])*)  # single line comments
-) |
-(?P<strings>
-    "(?:\\.|[^"\\])*" |                                         # double quotes
-    '(?:\\.|[^'\\])*'                                           # single quotes
-) |
-(?P<code>
-    .[^/"']*?                                               # everything else
-)
-'''
+# COMMENTS = r'''(?x)
+# (?P<comments>
+#     (?P<block>/\*[^*]*\*+(?:[^/*][^*]*\*+)*/) |                 # multi-line comments
+#     (?P<start>^)?(?P<leading_space>[ \t]*)?(?P<line>//(?:[^\n])*)  # single line comments
+# ) |
+# (?P<strings>
+#     "(?:\\.|[^"\\])*" |                                         # double quotes
+#     '(?:\\.|[^'\\])*'                                           # single quotes
+# ) |
+# (?P<code>
+#     .[^/"']*?                                               # everything else
+# )
+# '''
 
-GENERIC = re.compile(COMMENTS, re.DOTALL | re.MULTILINE)
+RE_BLOCK_COMMENT = re.compile(r'/\*[^*]*\*+(?:[^/*][^*]*\*+)*/', re.DOTALL | re.MULTILINE)
+RE_COMMENT = re.compile(r'(?P<start>^)?(?P<leading_space>[ \t]*)?(?P<line>//(?:[^\n])*)', re.DOTALL | re.MULTILINE)
+RE_STRING = re.compile(r'''"(?:\\.|[^"\\\n])*"|(?:\\.|[^'\\\n])*''', re.DOTALL | re.MULTILINE)
+RE_TEMPLATE_START = re.compile(r'`((?:\\.|\$(?!\{)|[^`\\$])*)(`|\$\{)', re.DOTALL | re.MULTILINE)
+RE_TEMPLATE_MIDDLE_END = re.compile(r'((?:\\.|\$(?!\{)|[^`\\$])*)(`|\$\{)', re.DOTALL | re.MULTILINE)
+
+# GENERIC = re.compile(COMMENTS, re.DOTALL | re.MULTILINE)
 
 BACK_SLASH_TRANSLATION = {
     "\\b": '\b',
@@ -33,13 +39,23 @@ BACK_SLASH_TRANSLATION = {
     '\\"': '"',
     "\\'": "'",
     "\\\n": '',
+    "\\`": "`",
     "\\0": "\000"
 }
+
 
 RE_ESC = re.compile(
     r'''(?x)
     (?P<oct>\\(?:[1-7][0-7]{0,2}|[0-7]{2,3}))|
     (?P<special>\\['"bfrt0nv\\\n])|
+    (?P<char>\\u(?:\{[\da-fA-F]+\}|[\da-fA-F]{4})|\\x[\da-fA-F]{2}) |
+    (?P<other>\\.)
+    '''
+)
+
+RE_TEMP_ESC = re.compile(
+    r'''(?x)
+    (?P<special>\\['"`bfrt0nv\\\n])|
     (?P<char>\\u(?:\{[\da-fA-F]+\}|[\da-fA-F]{4})|\\x[\da-fA-F]{2}) |
     (?P<other>\\.)
     '''
@@ -71,7 +87,6 @@ class JavaScriptFilter(filters.Filter):
     def setup(self):
         """Setup."""
 
-        self.pattern = GENERIC
         self.blocks = self.config['block_comments']
         self.lines = self.config['line_comments']
         self.group_comments = self.config['group_comments']
@@ -114,18 +129,21 @@ class JavaScriptFilter(filters.Filter):
         high, low = ord(m.group(1)), ord(m.group(2))
         return chr((high - 0xD800) * 0x400 + low - 0xDC00 + 0x10000)
 
-    def evaluate_strings(self, groups):
+    def evaluate_strings(self, string, temp=False):
         """Evaluate strings."""
 
+        value = ''
         if self.strings:
             if self.decode_escapes:
                 value = RE_SURROGATES.sub(
                     self.replace_surrogates,
-                    RE_ESC.sub(self.replace_escapes, groups['strings'][1:-1])
+                    (RE_TEMP_ESC if temp else RE_ESC).sub(self.replace_escapes, string)
                 )
             else:
-                value = groups['strings'][1:-1]
-            self.quoted_strings.append([value, self.line_num, 'utf-8'])
+                value = string
+            if not temp:
+                self.quoted_strings.append([value, self.line_num, 'utf-8'])
+        return value
 
     def evaluate_inline_tail(self, groups):
         """Evaluate inline comments at the tail of source code."""
@@ -152,11 +170,11 @@ class JavaScriptFilter(filters.Filter):
             self.leading = groups['leading_space']
             self.prev_line = self.line_num
 
-    def evaluate_block(self, groups):
+    def evaluate_block(self, comments):
         """Evaluate block comments."""
 
         if self.jsdocs:
-            m1 = RE_JSDOC.match(groups['comments'])
+            m1 = RE_JSDOC.match(comments)
             if m1:
                 lines = []
                 for line in m1.group(1).splitlines(True):
@@ -164,27 +182,9 @@ class JavaScriptFilter(filters.Filter):
                     lines.append(l[1:] if l.startswith('*') else l)
                 self.jsdoc_comments.append([''.join(lines), self.line_num, self.current_encoding])
             elif self.blocks:
-                self.block_comments.append([groups['block'][2:-2], self.line_num, self.current_encoding])
+                self.block_comments.append([comments[2:-2], self.line_num, self.current_encoding])
         elif self.blocks:
-            self.block_comments.append([groups['block'][2:-2], self.line_num, self.current_encoding])
-
-    def evaluate(self, m):
-        """Search for comments."""
-
-        g = m.groupdict()
-        if g["strings"]:
-            self.evaluate_strings(g)
-            self.line_num += g['strings'].count('\n')
-        elif g["code"]:
-            self.line_num += g["code"].count('\n')
-        else:
-            if g['block']:
-                self.evaluate_block(g)
-            elif g['start'] is None:
-                self.evaluate_inline_tail(g)
-            else:
-                self.evaluate_inline(g)
-            self.line_num += g['comments'].count('\n')
+            self.block_comments.append([comments[2:-2], self.line_num, self.current_encoding])
 
     def extend_src_text(self, content, context, text_list, category):
         """Extend the source text list with the gathered text data."""
@@ -209,11 +209,73 @@ class JavaScriptFilter(filters.Filter):
         self.extend_src_text(content, context, self.jsdoc_comments, 'docs')
         self.extend_src_text(content, context, self.quoted_strings, 'strings')
 
-    def find_comments(self, text):
-        """Find comments."""
+    def find_content(self, text, index=0, backtick=False):
+        """Find content."""
 
-        for m in self.pattern.finditer(self.norm_nl(text)):
-            self.evaluate(m)
+        curly_count = 0
+        last = '\n'
+        self.lines_num = 1
+        length = len(text)
+        while index < length:
+            start_index = index
+            c = text[index]
+            if c == '{' and backtick:
+                curly_count += 1
+            elif c == '}' and backtick:
+                if curly_count:
+                    curly_count -= 1
+                else:
+                    index += 1
+                    return index
+            elif c == '`':
+                done = False
+                first = True
+                backtick_content = []
+                start_index = index
+                while not done:
+                    m = (RE_TEMPLATE_START if first else RE_TEMPLATE_MIDDLE_END).match(text, index)
+                    first = False
+                    if m:
+                        self.line_num += m.group(0).count('\n')
+                        content = self.evaluate_strings(m.group(1), True)
+                        if content:
+                            backtick_content.append(content)
+                        index = m.end(0)
+                        if m.group(2) == '${':
+                            index = self.find_content(text, index, True)
+                        else:
+                            done = True
+                    else:
+                        done = True
+                if backtick_content:
+                    self.quoted_strings.append([' '.join(backtick_content), self.line_num, 'utf-8'])
+            elif c in ('\'', '"'):
+                m = RE_STRING.match(text, index)
+                if m:
+                    self.evaluate_strings(m.group(0)[1:-1])
+                    self.line_num += m.group(0).count('\n')
+                    index = m.end(0)
+            elif c == '\n':
+                self.line_num += 1
+            elif last == '\n' or c == '/':
+                m = RE_COMMENT.match(text, index)
+                if m:
+                    g = m.groupdict()
+                    if g['start'] is None:
+                        self.evaluate_inline_tail(g)
+                    else:
+                        self.evaluate_inline(g)
+                    index = m.end(0)
+                elif c == '/':
+                    m = RE_BLOCK_COMMENT.match(text, index)
+                    if m:
+                        self.evaluate_block(m.group(0))
+                        self.line_num += m.group(0).count('\n')
+                        index = m.end(0)
+
+            if index == start_index:
+                index += 1
+            last = text[index - 1]
 
     def _filter(self, text, context, encoding):
         """Filter JavaScript comments."""
@@ -228,7 +290,7 @@ class JavaScriptFilter(filters.Filter):
         self.line_comments = []
         self.quoted_strings = []
 
-        self.find_comments(text)
+        self.find_content(text)
         self.extend_src(content, context)
 
         return content

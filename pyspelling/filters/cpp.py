@@ -13,11 +13,11 @@ COMMENTS = r'''(?x)
 ) |
 (?P<strings>
     {}
-    "(?:\\.|[^"\\])*" |                                         # double quotes
-    '(?:\\.|[^'\\])*'                                           # single quotes
+    "(?:\\.|[^"\\\n])*" |                                         # double quotes
+    '(?:\\.|[^'\\\n])*'                                           # single quotes
 ) |
 (?P<code>
-    .[^/"'{}]*?                                               # everything else
+    .[^/"' \t{}]*?                                               # everything else
 )
 '''
 
@@ -400,8 +400,8 @@ class CppFilter(filters.Filter):
 
         return TRIGRAPHS[m.group(0)]
 
-    def find_comments(self, text):
-        """Find comments."""
+    def find_content(self, text):
+        """Find content."""
 
         if self.trigraphs:
             text = RE_TRIGRAPHS.sub(self.process_trigraphs, text)
@@ -421,7 +421,7 @@ class CppFilter(filters.Filter):
         self.line_comments = []
         self.quoted_strings = []
 
-        self.find_comments(text)
+        self.find_content(text)
         self.extend_src(content, context)
 
         return content

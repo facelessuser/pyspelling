@@ -95,9 +95,9 @@ class TestJavaScriptStrings(util.PluginTestCase):
             function Func(arg, arg2) {{
 
               test = "{} \
-              {}"
+              {}";
 
-              test2 = "\141\x61\u0061\u{{00000061}}\a"
+              test2 = "\141\x61\u0061\u{{00000061}}\a";
             }}
             """
         ).format(
@@ -105,6 +105,33 @@ class TestJavaScriptStrings(util.PluginTestCase):
             ' '.join(bad_string2 + good_words)
         )
         bad_words.append('aaaaa')
+        self.mktemp('test.txt', template, 'utf-8')
+        self.assert_spellcheck('.javascript.yml', bad_words)
+
+    def test_javascript_temp_strings(self):
+        """Test CPP."""
+
+        bad_string1 = ['helo', 'begn']
+        bad_string2 = ['adn', 'highight']
+        bad_words = bad_string1 + bad_string2
+        good_words = ['yes', 'word']
+        template = self.dedent(
+            r"""
+            function Func(arg, arg2) {{
+
+              test = `{} \
+              {}`;
+
+              xxxx = 3;
+
+              test2 = `\x61\u0061\u{{00000061}}\a ${{ {{"test": `value ${{xxxx}} yyyy`}}["test"] }} no`;
+            }}
+            """
+        ).format(
+            ' '.join(bad_string1 + good_words),
+            ' '.join(bad_string2 + good_words)
+        )
+        bad_words.extend(['aaaa', 'yyyy'])
         self.mktemp('test.txt', template, 'utf-8')
         self.assert_spellcheck('.javascript.yml', bad_words)
 
