@@ -17,7 +17,7 @@ COMMENTS = r'''(?x)
     '(?:\\.|[^'\\])*'                                           # single quotes
 ) |
 (?P<code>
-    .[^/"'RLuU]*?                                               # everything else
+    .[^/"'{}]*?                                               # everything else
 )
 '''
 
@@ -27,9 +27,9 @@ CPP_STRING = r'''
 (?:L|u8?|U)'(?:\\.|[^'\\])*' |
 '''
 
-C_COMMENT = re.compile(COMMENTS.format(r'\\.|[^\\\n]+', CPP_STRING), re.DOTALL | re.MULTILINE)
+C_COMMENT = re.compile(COMMENTS.format(r'\\.|[^\\\n]+', CPP_STRING, 'RLuU'), re.DOTALL | re.MULTILINE)
 
-GENERIC = re.compile(COMMENTS.format('[^\n]', ''), re.DOTALL | re.MULTILINE)
+GENERIC = re.compile(COMMENTS.format('[^\n]', '', ''), re.DOTALL | re.MULTILINE)
 
 TRIGRAPHS = {
     '??=': '#',
