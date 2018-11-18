@@ -136,6 +136,68 @@ class TestJavaScriptStrings(util.PluginTestCase):
         self.assert_spellcheck('.javascript.yml', bad_words)
 
 
+class TestJavaScriptGroupedComments(util.PluginTestCase):
+    """Test JavaScript plugin."""
+
+    def setup_fs(self):
+        """Setup file system."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: javascript
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.javascript:
+                  jsdocs: true
+                  strings: true
+                  group_comments: true
+              - pyspelling.filters.context:
+                  context_visible_first: true
+                  escapes: '\\[\\`]'
+                  delimiters:
+                  # Ignore multiline content between fences (fences can have 3 or more back ticks)
+                  # ```
+                  # content
+                  # ```
+                  - open: '(?s)^(?P<open> *`{{3,}})$'
+                    close: '^(?P=open)$'
+                  # Ignore text between inline back ticks
+                  - open: '(?P<open>`+)'
+                    close: '(?P=open)'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.javascript.yml', config, 'utf-8')
+
+    def test_javascript_grouped_comments(self):
+        """Test CPP."""
+
+        template = self.dedent(
+            r"""
+            function Func(arg, arg2) {{
+
+              var test = 3; // what
+              // bbbb
+
+              // ```
+              // akdjal dlkajdlf dkkjkj
+              // skjdl djkjf lslsl
+              // ```
+
+              // aaaa
+            }}
+            """
+        )
+        bad_words = ['aaaa', 'bbbb']
+        self.mktemp('test.txt', template, 'utf-8')
+        self.assert_spellcheck('.javascript.yml', bad_words)
+
+
 class TestJavaScriptChained(util.PluginTestCase):
     """Test chained JavaScript plugin."""
 

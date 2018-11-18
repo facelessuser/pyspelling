@@ -6,27 +6,11 @@ from .. import filters
 
 RE_JSDOC = re.compile(r"(?s)^/\*\*$(.*?)[ \t]*\*/", re.MULTILINE)
 
-# COMMENTS = r'''(?x)
-# (?P<comments>
-#     (?P<block>/\*[^*]*\*+(?:[^/*][^*]*\*+)*/) |                 # multi-line comments
-#     (?P<start>^)?(?P<leading_space>[ \t]*)?(?P<line>//(?:[^\n])*)  # single line comments
-# ) |
-# (?P<strings>
-#     "(?:\\.|[^"\\])*" |                                         # double quotes
-#     '(?:\\.|[^'\\])*'                                           # single quotes
-# ) |
-# (?P<code>
-#     .[^/"']*?                                               # everything else
-# )
-# '''
-
 RE_BLOCK_COMMENT = re.compile(r'/\*[^*]*\*+(?:[^/*][^*]*\*+)*/', re.DOTALL | re.MULTILINE)
 RE_COMMENT = re.compile(r'(?P<start>^)?(?P<leading_space>[ \t]*)?(?P<line>//(?:[^\n])*)', re.DOTALL | re.MULTILINE)
 RE_STRING = re.compile(r'''"(?:\\.|[^"\\\n])*"|(?:\\.|[^'\\\n])*''', re.DOTALL | re.MULTILINE)
 RE_TEMPLATE_START = re.compile(r'`((?:\\.|\$(?!\{)|[^`\\$])*)(`|\$\{)', re.DOTALL | re.MULTILINE)
 RE_TEMPLATE_MIDDLE_END = re.compile(r'((?:\\.|\$(?!\{)|[^`\\$])*)(`|\$\{)', re.DOTALL | re.MULTILINE)
-
-# GENERIC = re.compile(COMMENTS, re.DOTALL | re.MULTILINE)
 
 BACK_SLASH_TRANSLATION = {
     "\\b": '\b',
