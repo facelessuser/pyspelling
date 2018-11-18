@@ -83,6 +83,7 @@ class TestCPPStrings(util.PluginTestCase):
                   strings: true
                   line_comments: false
                   group_comments: true
+                  allowed: ruws
             """
         ).format(self.tempdir)
         self.mktemp('.cpp.yml', config, 'utf-8')
@@ -196,7 +197,7 @@ class TestCPPGeneric(util.PluginTestCase):
               pipeline:
               - pyspelling.filters.cpp:
                   group_comments: true
-                  generic_comments: true
+                  generic_mode: true
             """
         ).format(self.tempdir)
         self.mktemp('.cpp.yml', config, 'utf-8')
