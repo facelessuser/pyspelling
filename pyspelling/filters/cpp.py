@@ -319,6 +319,7 @@ class CppFilter(filters.Filter):
                     start = groups.get('raw')[0].lower()
                     if (
                         'r' not in self.allowed or
+                        (start == 'r' and 's' not in self.allowed) or
                         (start == 'l' and 'w' not in self.allowed) or
                         (start == 'u' and 'u' not in self.allowed)
                     ):
@@ -339,7 +340,7 @@ class CppFilter(filters.Filter):
                         value, encoding = self.evaluate_unicode(value)
                 elif self.decode_escapes and value.startswith(('"', 'L')):
                     start = value[0]
-                    if start == 'L' and 'w' not in self.allowed:
+                    if (start == 'L' and 'w' not in self.allowed) or (start != 'L' and 's' not in self.allowed):
                         value = ''
                     else:
                         # Decode normal strings.
