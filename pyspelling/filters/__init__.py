@@ -33,6 +33,8 @@ RE_UTF_BOM = re.compile(
 
 RE_CATEGORY_NAME = re.compile(r'^[-a-z0-9_]+$', re.I)
 
+RE_LINE_ENDINGS = re.compile(r'(?:\r\n|(?!\r\n)[\n\r])')
+
 BINARY_ENCODE = ''
 
 
@@ -218,6 +220,11 @@ class Filter(plugin.Plugin):
             raise UnicodeDecodeError('None', b'', 0, 0, 'Unicode detection is not applied to very large files!')
 
         return encoding
+
+    def norm_nl(self, text):
+        """Normalize line endings."""
+
+        return RE_LINE_ENDINGS.sub('\n', text)
 
     def content_check(self, f):
         """File content check."""

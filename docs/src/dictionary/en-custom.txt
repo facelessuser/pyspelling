@@ -69,6 +69,7 @@ macOS
 matcher
 metadata
 mkdocs
+multiline
 namespace
 namespaces
 overridable
@@ -89,6 +90,7 @@ subclassing
 sublicense
 substring
 syntaxes
+trigraphs
 tuple
 validator
 whitespace

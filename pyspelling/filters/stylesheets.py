@@ -61,32 +61,27 @@ class StylesheetsFilter(cpp.CppFilter):
         # If the style isn't found, just go with CSS, then use the appropriate prefix.
         self.stylesheets = STYLESHEET_TYPE.get(self.config['stylesheets'].lower(), CSS)
         self.prefix = [k for k, v in STYLESHEET_TYPE.items() if v == SASS][0]
-
-    def find_comments(self, text):
-        """Find comments."""
-
         if self.stylesheets == CSS:
-            for m in RE_CSS_COMMENT.finditer(text):
-                self._css_evaluate(m)
-        else:
-            super().find_comments(text)
+            self.pattern = RE_CSS_COMMENT
 
-    def _css_evaluate(self, m):
+    def evaluate(self, m):
         """Search for comments."""
 
-        g = m.groupdict()
-        if g["code"]:
-            self.line_num += g["code"].count('\n')
+        if self.stylesheets == CSS:
+            g = m.groupdict()
+            if g["code"]:
+                self.line_num += g["code"].count('\n')
+            else:
+                self.evaluate_block(g)
+                self.line_num += g['comments'].count('\n')
         else:
-            self.evaluate_block(g)
-            self.line_num += g['comments'].count('\n')
+            super().evaluate(m)
 
-    def extend_src(self, content, context, encoding):
+    def extend_src(self, content, context):
         """Extend source list."""
 
-        self.extend_src_text(content, context, self.block_comments, encoding, 'block-comment')
-        if self.stylesheets != CSS:
-            self.extend_src_text(content, context, self.line_comments, encoding, 'line-comment')
+        self.extend_src_text(content, context, self.block_comments, 'block-comment')
+        self.extend_src_text(content, context, self.line_comments, 'line-comment')
 
 
 def get_plugin():

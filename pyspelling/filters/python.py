@@ -10,6 +10,10 @@ import textwrap
 import tokenize
 import codecs
 import io
+import unicodedata
+import sys
+
+F_SUPPORT = (3, 6) <= sys.version_info
 
 tokenizer = tokenize.generate_tokens
 PREV_DOC_TOKENS = (tokenize.INDENT, tokenize.DEDENT, tokenize.NEWLINE, tokenize.ENCODING)
@@ -17,7 +21,67 @@ PREV_DOC_TOKENS = (tokenize.INDENT, tokenize.DEDENT, tokenize.NEWLINE, tokenize.
 RE_PY_ENCODE = re.compile(
     br'^[^\r\n]*?coding[:=]\s*([-\w.]+)|[^\r\n]*?\r?\n[^\r\n]*?coding[:=]\s*([-\w.]+)'
 )
-RE_NON_PRINTABLE_ASCII = re.compile(br"[^ -~]+")
+
+BACK_SLASH_TRANSLATION = {
+    "\\a": '\a',
+    "\\b": '\b',
+    "\\f": '\f',
+    "\\r": '\r',
+    "\\t": '\t',
+    "\\n": '\n',
+    "\\v": '\v',
+    "\\\\": '\\',
+    '\\"': '"',
+    "\\'": "'",
+    "\\\n": ''
+}
+
+RE_ESC = re.compile(
+    r'''(?x)
+    (?P<special>\\['"abfrtnv\\\n])|
+    (?P<char>\\U[\da-fA-F]{8}|\\u[\da-fA-F]{4}|\\x[\da-fA-F]{2})|
+    (?P<oct>\\[0-7]{1,3})|
+    (?P<name>\\N\{[^}{]*\})
+    '''
+)
+
+RE_BESC = re.compile(
+    r'''(?x)
+    (?P<special>\\['"abfrtnv\\\n])|
+    (?P<char>\\x[\da-fA-F]{2})|
+    (?P<oct>\\[0-7]{1,3})
+    '''
+)
+
+RE_FESC = re.compile(
+    r'''(?x)
+    (?P<special>\\['"abfrtnv\\\n])|
+    (?P<char>\\U[\da-fA-F]{8}|\\u[\da-fA-F]{4}|\\x[\da-fA-F]{2})|
+    (?P<oct>\\[0-7]{1,3})|
+    (?P<name>\\N\{\{[^}{]*\}\})|
+    (?P<fesc>\{\{)|
+    (?P<format>\{[^}{]*\})
+    '''
+)
+
+FE_RFESC = re.compile(
+    r'''(?x)
+    (?P<fesc>\{\{)|
+    (?P<format>\{[^}{]*\})
+    '''
+)
+
+RE_STRING_TYPE = re.compile(r'''((?:r|u|f|b)+)?(\'''|"""|'|")(.*?)\2''', re.I | re.S)
+
+RE_NON_PRINTABLE = re.compile(r'[\x00-\x09\x0b-\x1f\x7f-\xff]+')
+
+FMT_STR = (
+    'f', 'F',
+    'fr', 'rf',
+    'Fr', 'rF',
+    'fR', 'Rf',
+    'FR', 'RF'
+)
 
 
 class PythonFilter(filters.Filter):
@@ -38,7 +102,10 @@ class PythonFilter(filters.Filter):
         return {
             'comments': True,
             'docstrings': True,
-            'group_comments': False
+            'strings': False,
+            'group_comments': False,
+            'allowed': 'fu',
+            'decode_escapes': True
         }
 
     def setup(self):
@@ -46,7 +113,19 @@ class PythonFilter(filters.Filter):
 
         self.comments = self.config['comments']
         self.docstrings = self.config['docstrings']
+        self.strings = self.config['strings']
         self.group_comments = self.config['group_comments']
+        self.allowed = self.eval_string_type(self.config['allowed'])
+        self.decode_escapes = self.config['decode_escapes']
+
+    def validate_options(self, k, v):
+        """Validate options."""
+
+        super().validate_options(k, v)
+        if k == 'allowed':
+            for c in v.lower():
+                if c not in 'rbuf':
+                    raise ValueError("{}: '{}' is not a valid string type".format(self.__class__.__name__, c))
 
     def header_check(self, content):
         """Special Python encoding check."""
@@ -63,21 +142,94 @@ class PythonFilter(filters.Filter):
             encode = 'utf-8'
         return encode
 
-    def get_ascii(self, text):
-        """Retrieve ASCII text from byte string."""
+    def eval_string_type(self, stype):
+        """Evaluate string type."""
 
-        return RE_NON_PRINTABLE_ASCII.sub(r' ', text).decode('ascii')
+        stype = set([c for c in stype.lower()])
+        if 'b' not in stype:
+            stype.add('u')
+        return stype
+
+    def replace_unicode(self, m):
+        """Replace escapes."""
+
+        groups = m.groupdict()
+        esc = m.group(0)
+        if groups.get('fesc'):
+            value = m.group(0)
+        elif groups.get('format'):
+            value = ' '
+        elif groups.get('special'):
+            value = BACK_SLASH_TRANSLATION[esc]
+        elif groups.get('char'):
+            try:
+                value = chr(int(esc[2:], 16))
+            except Exception:
+                value = esc
+        elif groups.get('oct'):
+            value = chr(int(esc[1:], 8))
+        elif groups.get('name'):
+            try:
+                value = unicodedata.lookup(esc[3:-1])
+            except Exception:
+                value = esc
+        return value.replace('\x00', '\n')
+
+    def replace_bytes(self, m):
+        """Replace escapes."""
+
+        esc = m.group(0)
+        value = esc
+        if m.group('special'):
+            value = BACK_SLASH_TRANSLATION[esc]
+        elif m.group('char'):
+            try:
+                value = chr(int(esc[2:], 16))
+            except Exception:
+                value = esc
+        elif m.group('oct'):
+            value = int(esc[1:], 8)
+            if value > 255:
+                value -= 256
+            value = chr(value)
+        return value.replace('\x00', '\n')
+
+    def process_strings(self, string, docstrings=False):
+        """Process escapes."""
+
+        m = RE_STRING_TYPE.match(string)
+        stype = self.eval_string_type(m.group(1) if m.group(1) else '')
+        if stype - self.allowed and not docstrings:
+            return '', False
+        is_bytes = 'b' in stype
+        is_raw = 'r' in stype
+        is_format = 'f' in stype
+        content = m.group(3)
+        if is_raw and (not is_format or not self.decode_escapes):
+            string = self.norm_nl(content)
+        elif is_raw and is_format:
+            string = self.norm_nl(FE_RFESC.sub(self.replace_unicode, content))
+        elif is_bytes:
+            string = self.norm_nl(RE_BESC.sub(self.replace_bytes, content))
+        elif is_format:
+            string = self.norm_nl(RE_FESC.sub(self.replace_unicode, content))
+        else:
+            string = self.norm_nl(RE_ESC.sub(self.replace_unicode, content))
+
+        return textwrap.dedent(RE_NON_PRINTABLE.sub('\n', string) if is_bytes else string), is_bytes
 
     def _filter(self, text, context, encoding):
         """Retrieve the Python docstrings."""
 
         docstrings = []
+        strings = []
         comments = []
         prev_token_type = tokenize.NEWLINE
         indent = ''
         name = None
         stack = [(context, 0, self.MODULE)]
         last_comment = False
+        possible_fmt_str = None
 
         src = io.StringIO(text)
 
@@ -92,6 +244,7 @@ class PythonFilter(filters.Filter):
 
             # Track function and class ancestry
             if token_type == tokenize.NAME:
+                possible_fmt_str = None
                 if value in ('def', 'class'):
                     name = value
                 elif name:
@@ -104,6 +257,10 @@ class PythonFilter(filters.Filter):
                     elif name == 'def':
                         stack.append(('%s%s()' % (prefix, value), len(indent), self.FUNCTION))
                     name = None
+                elif not F_SUPPORT and value in FMT_STR:
+                    possible_fmt_str = (prev_token_type, value)
+            elif token_type != tokenize.STRING:
+                possible_fmt_str = None
 
             if token_type == tokenize.COMMENT and self.comments:
                 # Capture comments
@@ -125,17 +282,28 @@ class PythonFilter(filters.Filter):
                 # Capture docstrings.
                 # If we captured an `INDENT` or `NEWLINE` previously we probably have a docstring.
                 # `NL` means end of line, but not the end of the Python code line (line continuation).
-                if prev_token_type in PREV_DOC_TOKENS:
+                if (
+                    (prev_token_type in PREV_DOC_TOKENS) or
+                    (possible_fmt_str and possible_fmt_str[0] in PREV_DOC_TOKENS)
+                ):
                     if self.docstrings:
                         value = value.strip()
-                        string = textwrap.dedent(eval(value))
-
-                        if not isinstance(string, str):
-                            # Since docstrings should be readable and printable,
-                            # if byte string assume `ascii`.
-                            string = string.decode('ascii')
+                        if possible_fmt_str and value.startswith(("'", "\"")):
+                            value = possible_fmt_str[1] + value
+                        string, is_bytes = self.process_strings(value, docstrings=True)
+                        if string:
+                            loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
+                            docstrings.append(
+                                filters.SourceText(string, loc, 'utf-8', 'py-docstring')
+                            )
+                elif self.strings:
+                    value = value.strip()
+                    if possible_fmt_str and value.startswith(("'", "\"")):
+                        value = possible_fmt_str[1] + value
+                    string, is_bytes = self.process_strings(value)
+                    if string:
                         loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
-                        docstrings.append(filters.SourceText(string, loc, encoding, 'py-docstring'))
+                        strings.append(filters.SourceText(string, loc, 'utf-8', 'py-string'))
 
             if token_type == tokenize.INDENT:
                 indent = value
@@ -158,7 +326,7 @@ class PythonFilter(filters.Filter):
         for comment in comments:
             final_comments.append(filters.SourceText(textwrap.dedent(comment[0]), comment[1], encoding, 'py-comment'))
 
-        return docstrings + final_comments
+        return docstrings + final_comments + strings
 
     def filter(self, source_file, encoding):  # noqa A001
         """Parse Python file returning content."""

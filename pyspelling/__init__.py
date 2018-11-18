@@ -123,10 +123,10 @@ class SpellChecker:
 
         for source in self._pipeline_step(sources, options, personal_dict):
             # Don't waste time on empty strings
-            if not source.text or source.text.isspace():
-                continue
             if source._has_error():
                 yield Results([], source.context, source.category, source.error)
+            elif not source.text or source.text.isspace():
+                continue
             else:
                 encoding = source.encoding
                 if source._is_bytes():
@@ -138,12 +138,16 @@ class SpellChecker:
                 cmd = self.setup_command(encoding, options, personal_dict)
                 self.log("Command: " + str(cmd), 4)
 
-                wordlist = util.call_spellchecker(cmd, input_text=text, encoding=encoding)
-                yield Results(
-                    [w for w in sorted(set(wordlist.replace('\r', '').split('\n'))) if w],
-                    source.context,
-                    source.category
-                )
+                try:
+                    wordlist = util.call_spellchecker(cmd, input_text=text, encoding=encoding)
+                    yield Results(
+                        [w for w in sorted(set(wordlist.replace('\r', '').split('\n'))) if w],
+                        source.context,
+                        source.category
+                    )
+                except Exception as e:  # pragma: no cover
+                    err = self.get_error(e)
+                    yield Results([], source.context, source.category, err)
 
     def spell_check_no_pipeline(self, sources, options, personal_dict):
         """Spell check without the pipeline."""
@@ -275,6 +279,7 @@ class SpellChecker:
             source_patterns = task.get('sources', [])
 
         for sources in self._walk_src(source_patterns, glob_flags, self.pipeline_steps):
+
             if self.pipeline_steps is not None:
                 yield from self._spelling_pipeline(sources, options, personal_dict)
             else:
@@ -363,8 +368,16 @@ class Aspell(SpellChecker):
         """Spell check without the pipeline."""
 
         for source in sources:
-            with open(source.context, 'rb') as f:
-                content = f.read()
+
+            if source._has_error():  # pragma: no cover
+                yield Results([], source.context, source.category, source.error)
+
+            try:
+                with open(source.context, 'rb') as f:
+                    content = f.read()
+            except Exception as e:  # pragma: no cover
+                err = self.get_error(e)
+                yield Results([], source.context, source.category, err)
 
             # Don't waste time on empty string
             if not content or content.isspace():
@@ -375,10 +388,16 @@ class Aspell(SpellChecker):
 
             cmd = self.setup_command(source.encoding, options, personal_dict, source.context)
             self.log("Command: " + str(cmd), 4)
-            wordlist = util.call_spellchecker(cmd, input_text=content, encoding=source.encoding)
-            yield Results(
-                [w for w in sorted(set(wordlist.replace('\r', '').split('\n'))) if w], source.context, source.category
-            )
+            try:
+                wordlist = util.call_spellchecker(cmd, input_text=content, encoding=source.encoding)
+                yield Results(
+                    [w for w in sorted(set(wordlist.replace('\r', '').split('\n'))) if w],
+                    source.context,
+                    source.category
+                )
+            except Exception as e:  # pragma: no cover
+                err = self.get_error(e)
+                yield Results([], source.context, source.category, err)
 
     def setup_command(self, encoding, options, personal_dict, file_name=None):
         """Setup the command."""
@@ -488,13 +507,22 @@ class Hunspell(SpellChecker):
         """Spell check without the pipeline."""
 
         for source in sources:
+            if source._has_error():  # pragma: no cover
+                yield Results([], source.context, source.category, source.error)
+
             cmd = self.setup_command(source.encoding, options, personal_dict, source.context)
             self.log('', 3)
             self.log("Command: " + str(cmd), 4)
-            wordlist = util.call_spellchecker(cmd, input_text=None, encoding=source.encoding)
-            yield Results(
-                [w for w in sorted(set(wordlist.replace('\r', '').split('\n'))) if w], source.context, source.category
-            )
+            try:
+                wordlist = util.call_spellchecker(cmd, input_text=None, encoding=source.encoding)
+                yield Results(
+                    [w for w in sorted(set(wordlist.replace('\r', '').split('\n'))) if w],
+                    source.context,
+                    source.category
+                )
+            except Exception as e:  # pragma: no cover
+                err = self.get_error(e)
+                yield Results([], source.context, source.category, err)
 
     def setup_command(self, encoding, options, personal_dict, file_name=None):
         """Setup command."""

@@ -23,7 +23,8 @@ class ContextFilter(filters.Filter):
         return {
             "context_visible_first": False,
             "delimiters": [],
-            "escapes": ''
+            "escapes": '',
+            "normalize_line_endings": True
         }
 
     def validate_options(self, k, v):
@@ -50,6 +51,7 @@ class ContextFilter(filters.Filter):
         self.context_visible_first = self.config['context_visible_first']
         self.delimiters = []
         self.escapes = None
+        self.line_endings = self.config['normalize_line_endings']
         escapes = []
         for delimiter in self.config['delimiters']:
             if not isinstance(delimiter, dict):
@@ -88,6 +90,9 @@ class ContextFilter(filters.Filter):
 
     def _filter(self, text):
         """Context delimiter filter."""
+
+        if self.line_endings:
+            text = self.norm_nl(text)
 
         new_text = []
         index = 0
