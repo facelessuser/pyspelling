@@ -118,6 +118,8 @@ matrix:
 
 Once all filtering is complete, the text will be passed to the spell checker as byte strings, usually with the originally detected encoding (unless a filter specifically alters the encoding). The supported spell checkers are limited to very specific encodings, so if your file is using an unsupported encoding, it will fail.
 
+UTF-16 and UTF-32 is not really supported by Aspell and Hunspell, so at the end of the spell check pipeline, Unicode strings that have the associated encoding of UTF-16 or UTF-32 will be encoded with the compatible UTF-8. This does not apply to files being processed with a the pipeline disabled. When the pipeline is disabled, files are sent directly to the spell checker with no modifications.
+
 !!! tip "Unsupported Encodings"
     If you are trying to spell check a file in an unsupported encoding, you can use the builtin text filter to convert the content to a more appropriate encoding. In general, it is recommended to work in, or convert to UTF-8.
 

@@ -2,26 +2,27 @@
 
 ## 2.0.0
 
-- **NEW**: Task names should be unique and using `--name` from the command line will only target one `name` (the last task defined with that name).
+- **NEW**: (Breaking change) Task names should be unique and using `--name` from the command line will only target one `name` (the last task defined with that name). If you were not using `name` to run a group of tasks, you will not notice any changes.
 - **NEW**: Task option `group` has been added to target multiple tasks with the `--group` command line option. `group` name can be shared across different tasks.
 - **NEW**: Add XML filter (PySpelling now has a dependency on `lxml`).
 - **NEW**: Add Open Document Format (ODF) filter for `.odt`, `.ods`, and `.odp` files.
 - **NEW**: Add Office Open XML format (newer Microsoft document format) for `.docx`, `.xlsx`, and `.pptx` files.
-- **NEW**: For CSS selectors in XML and HTML filter now support `:not()` and `:matches()` pseudo class.
+- **NEW**: CSS selectors in XML and HTML filters now support `:not()` and `:matches()` pseudo class.
 - **NEW**: CSS selectors now support `,` in patterns.
 - **NEW**: CSS selectors now support `i` in attribute selectors: `[attr=value i]`.
 - **NEW**: CSS selectors now support namespaces (some configuration required).
 - **NEW**: For better HTML context, display a tag's ancestry (just tag name of parents).
-- **NEW**: Tags whose content is captured is now configurable via `captures`, but tags that are not captured still have their children crawled unless they are under `ignores`.
-- **NEW**: Support modes added for HTML filter: `html`, `html5`, `xhtml`.
+- **NEW**: Captured tags are now configurable via `captures`, but tags that are not captured still have their children crawled unless they are under `ignores`.
+- **NEW**: Support modes added for HTML filter: `html`, `html5`, and `xhtml`.
 - **NEW**: `CHECK_BOM` plugin attribute has been deprecated in favor of overriding the exposed `has_bom` function.
 - **NEW**: Tasks can be hidden with the `hidden` configuration option. Tasks with `hidden` enabled will only run if they are explicitly called by name.
 - **NEW**: Add normal string support to Python filter.
-- **NEW**: Add string support for JavaScript filter.
+- **NEW**: Add string and template literal support for JavaScript filter.
 - **NEW**: Add string support for CPP filter.
 - **NEW**: Add `generic_mode` option to CPP to allow for generic C/C++ comment style capture from non C/C++ file types.
 - **NEW**: Context will normalize line endings before applying context (can be disabled).
-- **NEW**: CPP and plugins derived from CPP now normalize line endings of block comments.
+- **NEW**: CPP, Stylesheet, and JavaScript plugins now normalize line endings of block comments.
+- **NEW**: UTF-16 and UTF-32 is not really supported by Aspell and Hunspell, so at the end of the pipeline, Unicode strings that have the associated encoding of UTF-16 or UTF-32 will encoding with the compatible UTF-8. This does not apply to files being processed with a disabled pipeline. When the pipeline is disabled, files are sent directly to the spell checker with no modifications.
 - **FIX**: Case related issues when comparing tags and attributes in HTML.
 - **FIX**: CSS selectors should only compare case insensitive for ASCII characters A-Z and a-z.
 - **FIX**: Allow CSS escapes in selectors.
