@@ -76,6 +76,10 @@ RE_ESC = re.compile(
     '''
 )
 
+RE_VALID_STRING_TYPES = re.compile(r'^(?:\*|(?:[rusl]\*?)+)$', re.I)
+
+RE_ITER_STRING_TYPES = re.compile(r'(\*|[rusl]\*?)', re.I)
+
 BIT8 = 1
 BIT16 = 2
 BIT32 = 4
@@ -120,7 +124,7 @@ class CppFilter(filters.Filter):
             "wide_exec_charset": 'utf-32',
             "charset_size": 1,
             "wide_charset_size": 4,
-            "allowed": "suw"
+            "string_types": "sul"
         }
 
     def validate_options(self, k, v):
@@ -136,15 +140,41 @@ class CppFilter(filters.Filter):
         elif k in ('exec_charset', 'wide_exec_charset'):
             # See if parsing fails.
             self.get_encoding_name(v)
-        elif k == 'allowed':
-            for c in v.lower():
-                if c not in 'rsuw':
-                    raise ValueError("{}: '{}' is not a valid string type".format(self.__class__.__name__, c))
+        elif k == 'string_types':
+            if RE_VALID_STRING_TYPES.match(v) is None:
+                raise ValueError("{}: '{}' does not define valid string types".format(self.__class__.__name__, v))
 
-    def eval_string_type(self, stype):
+    def eval_string_type(self, text, is_string=False):
         """Evaluate string type."""
 
-        return set([c for c in stype.lower()])
+        stype = set()
+        wstype = set()
+
+        for m in RE_ITER_STRING_TYPES.finditer(text):
+            value = m.group(0)
+            if value == '*':
+                wstype.add('l')
+                wstype.add('s')
+                wstype.add('u')
+                wstype.add('r')
+            elif value.endswith('*'):
+                wstype.add(value[0].lower())
+            else:
+                stype.add(value.lower())
+        if is_string and 'u' not in stype and 'l' not in stype:
+            stype.add('s')
+
+        return stype, wstype
+
+    def match_string(self, stype):
+        """Match string type."""
+
+        return not (stype - self.string_types) or bool(stype & self.wild_string_types)
+
+    def get_string_type(self, text):
+        """Get string type."""
+
+        return self.eval_string_type(text, True)[0]
 
     def get_encoding_name(self, name):
         """Get encoding name."""
@@ -179,7 +209,7 @@ class CppFilter(filters.Filter):
         self.wide_charset_size = self.config['wide_charset_size']
         self.exec_charset = self.get_encoding_name(self.config['exec_charset'])
         self.wide_exec_charset = self.get_encoding_name(self.config['wide_exec_charset'])
-        self.allowed = self.eval_string_type(self.config['allowed'])
+        self.string_types, self.wild_string_types = self.eval_string_type(self.config['string_types'])
         if not self.generic_mode:
             self.pattern = C_COMMENT
 
@@ -315,42 +345,28 @@ class CppFilter(filters.Filter):
                 self.quoted_strings.append([groups['strings'][1:-1], self.line_num, encoding])
             else:
                 value = groups['strings']
-                if groups.get('raw'):
-                    start = groups.get('raw')[0].lower()
-                    if (
-                        'r' not in self.allowed or
-                        (start == 'r' and 's' not in self.allowed) or
-                        (start == 'l' and 'w' not in self.allowed) or
-                        (start == 'u' and 'u' not in self.allowed)
-                    ):
-                        value = ''
-                    else:
-                        # Handle raw strings. We can handle even if decoding is disabled.
-                        olen = len(groups.get('raw')) + len(groups.get('delim')) + 2
-                        clen = len(groups.get('delim')) + 2
-                        value = self.norm_nl(value[olen:-clen].replace('\x00', '\n'))
+                stype = set()
+                if value.endswith('"'):
+                    stype = self.get_string_type(value[:value.index('"')].lower().replace('8', ''))
+                if not self.match_string(stype) or value.endswith("'"):
+                    return
+                if 'r' in stype:
+                    # Handle raw strings. We can handle even if decoding is disabled.
+                    olen = len(groups.get('raw')) + len(groups.get('delim')) + 2
+                    clen = len(groups.get('delim')) + 2
+                    value = self.norm_nl(value[olen:-clen].replace('\x00', '\n'))
                 elif (
                     self.decode_escapes and not value.startswith(('\'', '"')) and
-                    not value.startswith('L') and value.endswith('"')
+                    'l' not in stype
                 ):
-                    if 'u' not in self.allowed:
-                        value = ''
-                    else:
-                        # Decode Unicode string. May have added unsupported chars, so use `UTF-8`.
-                        value, encoding = self.evaluate_unicode(value)
-                elif self.decode_escapes and value.startswith(('"', 'L')):
-                    start = value[0]
-                    if (start == 'L' and 'w' not in self.allowed) or (start != 'L' and 's' not in self.allowed):
-                        value = ''
-                    else:
-                        # Decode normal strings.
-                        value, encoding = self.evaluate_normal(value)
-                elif not self.decode_escapes and value.endswith('"'):
+                    # Decode Unicode string. May have added unsupported chars, so use `UTF-8`.
+                    value, encoding = self.evaluate_unicode(value)
+                elif self.decode_escapes:
+                    # Decode normal strings.
+                    value, encoding = self.evaluate_normal(value)
+                else:
                     # Don't decode and just return string content.
                     value = self.norm_nl(value[value.index('"') + 1:-1]).replace('\x00', '\n')
-                else:
-                    # Char constant. Just ignore
-                    value = ''
 
                 if value:
                     self.quoted_strings.append([value, self.line_num, encoding])

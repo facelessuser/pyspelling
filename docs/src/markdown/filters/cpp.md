@@ -32,6 +32,12 @@ matrix:
   - js_files/**/*.{cpp,hpp,c,h}
 ```
 
+## Filtering String types
+
+When `strings` is enabled, you can specify which strings you want to allow via the `string_types` option. Valid string types are `S` for standard, `L` for long/wide, `U` for Unicode (all variants), and `R` for raw.  Case is not important, and the default value is `sul`.  
+
+If specifying `R`, you must also specify either `U`, `L`, or `S` as raw strings are also either `S`, `L`, or `S` strings. Selecting `UR` will select both Unicode strings and Unicode raw strings. If you need to target just raw strings, you can use `R*` which will target all raw string types: raw Unicode, raw wide, and raw standard. You can use `*` for other types as well. You can also just specify `*` by itself to target all string types.
+
 ## Generic Mode
 
 C/C++ style comments are not exclusive to C/C++. Many different file types have adopted similar style comments. The CPP filter has a generic mode which allows for a C/C++ style comment extraction without all the C/C++ specific considerations. Simply enable `generic_mode` via the [options](#options).
@@ -64,7 +70,7 @@ Options            | Type     | Default         | Description
 `exec_charset`     | string   | `#!py3 'utf-8`  | Set normal string encoding.
 `wide_charset_size`| int      | `#!py3 4`       | Set wide string character byte width.
 `wide_exec_charset`| string   | `#!py3 'utf-32` | Set wide string encoding.
-`allowed`          | string   | `#!py3 "suw"`   | Set the allowed string types to capture: standard strings (`s`),  wide (`wide`), Unicode (`u`), and raw (`r`).
+`string_types`     | string   | `#!py3 "sul"`   | Set the allowed string types to capture: standard strings (`s`),  wide (`l`), Unicode (`u`), and raw (`r`). `*` captures all strings, or when used with a type, captures all variants of that type `r*`.
 `prefix`           | string   | `#!py3 'cpp'`   | Change the category prefix.
 
 ## Categories

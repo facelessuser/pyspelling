@@ -70,7 +70,7 @@ class TestPythonStrings(util.PluginTestCase):
               pipeline:
               - pyspelling.filters.python:
                   strings: true
-                  allowed: bfru
+                  string_types: bfru
                   group_comments: true
             """
         ).format(self.tempdir)
@@ -199,6 +199,182 @@ class TestPythonStrings(util.PluginTestCase):
 
         self.mktemp('test.txt', template, 'utf-8')
         self.assert_spellcheck('.pystrings.yml', bad_words)
+
+
+class TestPythonStringAllow(util.PluginTestCase):
+    """Test Python allow filter."""
+
+    def setup_fs(self):
+        """Setup."""
+
+        template = self.dedent(
+            r"""
+            def func():
+                s0 =   "aaaa"
+                s1 =  u"bbbb"
+                s2 =  b"cccc"
+                s3 =  f"dddd"
+                s4 =  r"eeee"
+                s5 =  br"ffff"
+                s7 =  fr"gggg"
+            """
+        )
+
+        self.mktemp('test.txt', template, 'utf-8')
+
+    def test_exclude_unicode(self):
+        """Test exclude Unicode."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: python
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.python:
+                  strings: true
+                  string_types: brf
+            """
+        ).format(self.tempdir)
+        self.mktemp('.python.yml', config, 'utf-8')
+        self.assert_spellcheck('.python.yml', ['cccc', 'dddd', 'ffff', 'gggg'])
+
+    def test_exclude_bytes(self):
+        """Test exclude bytes."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: python
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.python:
+                  strings: true
+                  string_types: urf
+            """
+        ).format(self.tempdir)
+        self.mktemp('.python.yml', config, 'utf-8')
+        self.assert_spellcheck('.python.yml', ['aaaa', 'bbbb', 'dddd', 'eeee', 'gggg'])
+
+    def test_exclude_format(self):
+        """Test exclude format."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: python
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.python:
+                  strings: true
+                  string_types: bur
+            """
+        ).format(self.tempdir)
+        self.mktemp('.python.yml', config, 'utf-8')
+        self.assert_spellcheck('.python.yml', ['aaaa', 'bbbb', 'cccc', 'eeee', 'ffff'])
+
+    def test_exclude_raw(self):
+        """Test exclude raw."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: python
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.python:
+                  strings: true
+                  string_types: buf
+            """
+        ).format(self.tempdir)
+        self.mktemp('.python.yml', config, 'utf-8')
+        self.assert_spellcheck('.python.yml', ['aaaa', 'bbbb', 'cccc', 'dddd'])
+
+    def test_include_all(self):
+        """Test include all."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: python
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.python:
+                  strings: true
+                  string_types: '*'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.python.yml', config, 'utf-8')
+        self.assert_spellcheck('.python.yml', ['aaaa', 'bbbb', 'cccc', 'dddd', 'eeee', 'ffff', 'gggg'])
+
+    def test_include_all_raw(self):
+        """Test include all raw."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: python
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.python:
+                  strings: true
+                  string_types: 'r*'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.python.yml', config, 'utf-8')
+        self.assert_spellcheck('.python.yml', ['eeee', 'ffff', 'gggg'])
+
+    def test_include_all_unicode(self):
+        """Test include all Unicode."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: python
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.python:
+                  strings: true
+                  string_types: 'u*'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.python.yml', config, 'utf-8')
+        self.assert_spellcheck('.python.yml', ['aaaa', 'bbbb', 'eeee'])
 
 
 class TestPythonChained(util.PluginTestCase):

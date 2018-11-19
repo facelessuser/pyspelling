@@ -75,6 +75,10 @@ RE_STRING_TYPE = re.compile(r'''((?:r|u|f|b)+)?(\'''|"""|'|")(.*?)\2''', re.I | 
 
 RE_NON_PRINTABLE = re.compile(r'[\x00-\x09\x0b-\x1f\x7f-\xff]+')
 
+RE_VALID_STRING_TYPES = re.compile(r'^(?:\*|(?:[rubf]\*?)+)$', re.I)
+
+RE_ITER_STRING_TYPES = re.compile(r'(\*|[rubf]\*?)', re.I)
+
 FMT_STR = (
     'f', 'F',
     'fr', 'rf',
@@ -104,7 +108,7 @@ class PythonFilter(filters.Filter):
             'docstrings': True,
             'strings': False,
             'group_comments': False,
-            'allowed': 'fu',
+            'string_types': 'fu',
             'decode_escapes': True
         }
 
@@ -115,17 +119,16 @@ class PythonFilter(filters.Filter):
         self.docstrings = self.config['docstrings']
         self.strings = self.config['strings']
         self.group_comments = self.config['group_comments']
-        self.allowed = self.eval_string_type(self.config['allowed'])
+        self.string_types, self.wild_string_types = self.eval_string_type(self.config['string_types'])
         self.decode_escapes = self.config['decode_escapes']
 
     def validate_options(self, k, v):
         """Validate options."""
 
         super().validate_options(k, v)
-        if k == 'allowed':
-            for c in v.lower():
-                if c not in 'rbuf':
-                    raise ValueError("{}: '{}' is not a valid string type".format(self.__class__.__name__, c))
+        if k == 'string_types':
+            if RE_VALID_STRING_TYPES.match(v) is None:
+                raise ValueError("{}: '{}' does not define valid string types".format(self.__class__.__name__, v))
 
     def header_check(self, content):
         """Special Python encoding check."""
@@ -142,13 +145,38 @@ class PythonFilter(filters.Filter):
             encode = 'utf-8'
         return encode
 
-    def eval_string_type(self, stype):
+    def eval_string_type(self, text, is_string=False):
         """Evaluate string type."""
 
-        stype = set([c for c in stype.lower()])
-        if 'b' not in stype:
+        stype = set()
+        wstype = set()
+
+        for m in RE_ITER_STRING_TYPES.finditer(text):
+            value = m.group(0)
+            if value == '*':
+                wstype.add('u')
+                wstype.add('f')
+                wstype.add('r')
+                wstype.add('b')
+            elif value.endswith('*'):
+                wstype.add(value[0].lower())
+            else:
+                stype.add(value.lower())
+
+        if is_string and 'b' not in stype and 'f' not in stype:
             stype.add('u')
-        return stype
+
+        return stype, wstype
+
+    def get_string_type(self, text):
+        """Get string type."""
+
+        return self.eval_string_type(text, True)[0]
+
+    def match_string(self, stype):
+        """Match string type."""
+
+        return not (stype - self.string_types) or bool(stype & self.wild_string_types)
 
     def replace_unicode(self, m):
         """Replace escapes."""
@@ -198,8 +226,8 @@ class PythonFilter(filters.Filter):
         """Process escapes."""
 
         m = RE_STRING_TYPE.match(string)
-        stype = self.eval_string_type(m.group(1) if m.group(1) else '')
-        if stype - self.allowed and not docstrings:
+        stype = self.get_string_type(m.group(1) if m.group(1) else '')
+        if not self.match_string(stype) and not docstrings:
             return '', False
         is_bytes = 'b' in stype
         is_raw = 'r' in stype

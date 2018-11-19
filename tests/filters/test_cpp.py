@@ -169,7 +169,7 @@ class TestCPPStringAllow(util.PluginTestCase):
                   strings: true
                   line_comments: false
                   group_comments: true
-                  allowed: uws
+                  string_types: uls
             """
         ).format(self.tempdir)
         self.mktemp('.cpp.yml', config, 'utf-8')
@@ -193,7 +193,7 @@ class TestCPPStringAllow(util.PluginTestCase):
                   strings: true
                   line_comments: false
                   group_comments: true
-                  allowed: rws
+                  string_types: rls
             """
         ).format(self.tempdir)
         self.mktemp('.cpp.yml', config, 'utf-8')
@@ -217,7 +217,7 @@ class TestCPPStringAllow(util.PluginTestCase):
                   strings: true
                   line_comments: false
                   group_comments: true
-                  allowed: rus
+                  string_types: rus
             """
         ).format(self.tempdir)
         self.mktemp('.cpp.yml', config, 'utf-8')
@@ -241,11 +241,92 @@ class TestCPPStringAllow(util.PluginTestCase):
                   strings: true
                   line_comments: false
                   group_comments: true
-                  allowed: ruw
+                  string_types: rul
             """
         ).format(self.tempdir)
         self.mktemp('.cpp.yml', config, 'utf-8')
         self.assert_spellcheck('.cpp.yml', ["bbbb", "cccc", "dddd", "eeee", "hhhh", "iiii", "jjjj", "kkkk"])
+
+    def test_include_all(self):
+        """Test standard exclusion."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: cpp
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.cpp:
+                  strings: true
+                  line_comments: false
+                  group_comments: true
+                  string_types: '*'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.cpp.yml', config, 'utf-8')
+        self.assert_spellcheck(
+            '.cpp.yml',
+            ["aaaa", "bbbb", "cccc", "dddd", "eeee", "ffff", "gggg", "hhhh", "iiii", "jjjj", "kkkk"]
+        )
+
+    def test_include_all_raw(self):
+        """Test standard exclusion."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: cpp
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.cpp:
+                  strings: true
+                  line_comments: false
+                  group_comments: true
+                  string_types: 'r*'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.cpp.yml', config, 'utf-8')
+        self.assert_spellcheck(
+            '.cpp.yml',
+            ["ffff", "gggg", "hhhh", "iiii", "jjjj", "kkkk"]
+        )
+
+    def test_include_all_unicode(self):
+        """Test standard exclusion."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: cpp
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.cpp:
+                  strings: true
+                  line_comments: false
+                  group_comments: true
+                  string_types: 'u*'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.cpp.yml', config, 'utf-8')
+        self.assert_spellcheck(
+            '.cpp.yml',
+            ["cccc", "dddd", "eeee", "iiii", "jjjj", "kkkk"]
+        )
 
 
 class TestCPPStrings(util.PluginTestCase):
@@ -269,7 +350,7 @@ class TestCPPStrings(util.PluginTestCase):
                   strings: true
                   line_comments: false
                   group_comments: true
-                  allowed: ruws
+                  string_types: ruls
             """
         ).format(self.tempdir)
         self.mktemp('.cpp.yml', config, 'utf-8')
