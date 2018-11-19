@@ -36,9 +36,7 @@ matrix:
 
 When `strings` is enabled, you can specify which strings you want to allow via the `string_types` option. Valid string types are `S` for standard, `L` for long/wide, `U` for Unicode (all variants), and `R` for raw.  Case is not important, and the default value is `sul`.  
 
-If you do not explicitly specify `U` or `L`, `S` is assumed. For instance, if only `R` was specified, there is actually multiple types of `R`: standard, Unicode, and wide. Since Unicode or wide were not explicitly specified, `S` is assumed to be enabled and both `S` and `S` variants of `R` will be searched. If you were to specify only `UR` you would be searching `U` strings and `U` variants of `R` strings and not `S` strings. To search both `U` and `S` variants you would need to explicitly specify them via `SUR`.
-
-In short, if you only enable `R`, you will be searching the normal string of that type as well as `R` as the `R` is a subtypes of of `U`, `S` and `L`. If greater resolution is needed, this approach may be reconsidered in the future.
+If specifying `R`, you must also specify either `U`, `L`, or `S` as raw strings are also either `S`, `L`, or `S` strings. Selecting `UR` will select both Unicode strings and Unicode raw strings. If you need to target just raw strings, you can use `R*` which will target all raw string types: raw Unicode, raw wide, and raw standard. You can use `*` for other types as well. You can also just specify `*` by itself to target all string types.
 
 ## Generic Mode
 
@@ -72,7 +70,7 @@ Options            | Type     | Default         | Description
 `exec_charset`     | string   | `#!py3 'utf-8`  | Set normal string encoding.
 `wide_charset_size`| int      | `#!py3 4`       | Set wide string character byte width.
 `wide_exec_charset`| string   | `#!py3 'utf-32` | Set wide string encoding.
-`allowed`          | string   | `#!py3 "sul"`   | Set the allowed string types to capture: standard strings (`s`),  wide (`l`), Unicode (`u`), and raw (`r`).
+`string_types`     | string   | `#!py3 "sul"`   | Set the allowed string types to capture: standard strings (`s`),  wide (`l`), Unicode (`u`), and raw (`r`). `*` captures all strings, or when used with a type, captures all variants of that type `r*`.
 `prefix`           | string   | `#!py3 'cpp'`   | Change the category prefix.
 
 ## Categories

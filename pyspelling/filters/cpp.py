@@ -76,6 +76,10 @@ RE_ESC = re.compile(
     '''
 )
 
+RE_VALID_STRING_TYPES = re.compile(r'^(?:\*|(?:[rusl]\*?)+)$', re.I)
+
+RE_ITER_STRING_TYPES = re.compile(r'(\*|[rusl]\*?)', re.I)
+
 BIT8 = 1
 BIT16 = 2
 BIT32 = 4
@@ -137,18 +141,40 @@ class CppFilter(filters.Filter):
             # See if parsing fails.
             self.get_encoding_name(v)
         elif k == 'string_types':
-            for c in v.lower():
-                if c not in 'rsul':
-                    raise ValueError("{}: '{}' is not a valid string type".format(self.__class__.__name__, c))
+            if RE_VALID_STRING_TYPES.match(v) is None:
+                raise ValueError("{}: '{}' does not define valid string types".format(self.__class__.__name__, v))
 
-    def eval_string_type(self, stype):
+    def eval_string_type(self, text, is_string=False):
         """Evaluate string type."""
 
-        # If neither Unicode or Wide is specified, we can assume standard
-        stype = set([c for c in stype.lower()])
-        if 'u' not in stype and 'l' not in stype:
+        stype = set()
+        wstype = set()
+
+        for m in RE_ITER_STRING_TYPES.finditer(text):
+            value = m.group(0)
+            if value == '*':
+                wstype.add('l')
+                wstype.add('s')
+                wstype.add('u')
+                wstype.add('r')
+            elif value.endswith('*'):
+                wstype.add(value[0].lower())
+            else:
+                stype.add(value.lower())
+        if is_string and 'u' not in stype and 'l' not in stype:
             stype.add('s')
-        return stype
+
+        return stype, wstype
+
+    def match_string(self, stype):
+        """Match string type."""
+
+        return not (stype - self.string_types) or bool(stype & self.wild_string_types)
+
+    def get_string_type(self, text):
+        """Get string type."""
+
+        return self.eval_string_type(text, True)[0]
 
     def get_encoding_name(self, name):
         """Get encoding name."""
@@ -183,7 +209,7 @@ class CppFilter(filters.Filter):
         self.wide_charset_size = self.config['wide_charset_size']
         self.exec_charset = self.get_encoding_name(self.config['exec_charset'])
         self.wide_exec_charset = self.get_encoding_name(self.config['wide_exec_charset'])
-        self.string_types = self.eval_string_type(self.config['string_types'])
+        self.string_types, self.wild_string_types = self.eval_string_type(self.config['string_types'])
         if not self.generic_mode:
             self.pattern = C_COMMENT
 
@@ -321,8 +347,8 @@ class CppFilter(filters.Filter):
                 value = groups['strings']
                 stype = set()
                 if value.endswith('"'):
-                    stype = self.eval_string_type(value[:value.index('"')].lower().replace('8', ''))
-                if stype - self.string_types or value.endswith("'"):
+                    stype = self.get_string_type(value[:value.index('"')].lower().replace('8', ''))
+                if not self.match_string(stype) or value.endswith("'"):
                     return
                 if 'r' in stype:
                     # Handle raw strings. We can handle even if decoding is disabled.
