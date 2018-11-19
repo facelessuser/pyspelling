@@ -120,7 +120,7 @@ class CppFilter(filters.Filter):
             "wide_exec_charset": 'utf-32',
             "charset_size": 1,
             "wide_charset_size": 4,
-            "allowed": "suw"
+            "allowed": "sul"
         }
 
     def validate_options(self, k, v):
@@ -138,13 +138,17 @@ class CppFilter(filters.Filter):
             self.get_encoding_name(v)
         elif k == 'allowed':
             for c in v.lower():
-                if c not in 'rsuw':
+                if c not in 'rsul':
                     raise ValueError("{}: '{}' is not a valid string type".format(self.__class__.__name__, c))
 
     def eval_string_type(self, stype):
         """Evaluate string type."""
 
-        return set([c for c in stype.lower()])
+        # If neither Unicode or Wide is specified, we can assume standard
+        stype = set([c for c in stype.lower()])
+        if 'u' not in stype and 'l' not in stype:
+            stype.add('s')
+        return stype
 
     def get_encoding_name(self, name):
         """Get encoding name."""
@@ -315,36 +319,27 @@ class CppFilter(filters.Filter):
                 self.quoted_strings.append([groups['strings'][1:-1], self.line_num, encoding])
             else:
                 value = groups['strings']
-                if groups.get('raw'):
-                    start = groups.get('raw')[0].lower()
-                    if (
-                        'r' not in self.allowed or
-                        (start == 'r' and 's' not in self.allowed) or
-                        (start == 'l' and 'w' not in self.allowed) or
-                        (start == 'u' and 'u' not in self.allowed)
-                    ):
-                        value = ''
-                    else:
-                        # Handle raw strings. We can handle even if decoding is disabled.
-                        olen = len(groups.get('raw')) + len(groups.get('delim')) + 2
-                        clen = len(groups.get('delim')) + 2
-                        value = self.norm_nl(value[olen:-clen].replace('\x00', '\n'))
+                if value.endswith('"'):
+                    stype = self.eval_string_type(value[:value.index('"')].lower().replace('8', ''))
+                else:
+                    stype = set()
+                print(stype, self.allowed, stype - self.allowed)
+                if stype - self.allowed:
+                    return
+                if 'r' in stype:
+                    # Handle raw strings. We can handle even if decoding is disabled.
+                    olen = len(groups.get('raw')) + len(groups.get('delim')) + 2
+                    clen = len(groups.get('delim')) + 2
+                    value = self.norm_nl(value[olen:-clen].replace('\x00', '\n'))
                 elif (
                     self.decode_escapes and not value.startswith(('\'', '"')) and
                     not value.startswith('L') and value.endswith('"')
                 ):
-                    if 'u' not in self.allowed:
-                        value = ''
-                    else:
-                        # Decode Unicode string. May have added unsupported chars, so use `UTF-8`.
-                        value, encoding = self.evaluate_unicode(value)
+                    # Decode Unicode string. May have added unsupported chars, so use `UTF-8`.
+                    value, encoding = self.evaluate_unicode(value)
                 elif self.decode_escapes and value.startswith(('"', 'L')):
-                    start = value[0]
-                    if (start == 'L' and 'w' not in self.allowed) or (start != 'L' and 's' not in self.allowed):
-                        value = ''
-                    else:
-                        # Decode normal strings.
-                        value, encoding = self.evaluate_normal(value)
+                    # Decode normal strings.
+                    value, encoding = self.evaluate_normal(value)
                 elif not self.decode_escapes and value.endswith('"'):
                     # Don't decode and just return string content.
                     value = self.norm_nl(value[value.index('"') + 1:-1]).replace('\x00', '\n')

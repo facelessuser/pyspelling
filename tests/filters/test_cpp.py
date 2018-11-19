@@ -169,7 +169,7 @@ class TestCPPStringAllow(util.PluginTestCase):
                   strings: true
                   line_comments: false
                   group_comments: true
-                  allowed: uws
+                  allowed: uls
             """
         ).format(self.tempdir)
         self.mktemp('.cpp.yml', config, 'utf-8')
@@ -193,7 +193,7 @@ class TestCPPStringAllow(util.PluginTestCase):
                   strings: true
                   line_comments: false
                   group_comments: true
-                  allowed: rws
+                  allowed: rls
             """
         ).format(self.tempdir)
         self.mktemp('.cpp.yml', config, 'utf-8')
@@ -241,7 +241,7 @@ class TestCPPStringAllow(util.PluginTestCase):
                   strings: true
                   line_comments: false
                   group_comments: true
-                  allowed: ruw
+                  allowed: rul
             """
         ).format(self.tempdir)
         self.mktemp('.cpp.yml', config, 'utf-8')
@@ -269,7 +269,7 @@ class TestCPPStrings(util.PluginTestCase):
                   strings: true
                   line_comments: false
                   group_comments: true
-                  allowed: ruws
+                  allowed: ruls
             """
         ).format(self.tempdir)
         self.mktemp('.cpp.yml', config, 'utf-8')

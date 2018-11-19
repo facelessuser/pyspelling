@@ -64,7 +64,7 @@ Options            | Type     | Default         | Description
 `exec_charset`     | string   | `#!py3 'utf-8`  | Set normal string encoding.
 `wide_charset_size`| int      | `#!py3 4`       | Set wide string character byte width.
 `wide_exec_charset`| string   | `#!py3 'utf-32` | Set wide string encoding.
-`allowed`          | string   | `#!py3 "suw"`   | Set the allowed string types to capture: standard strings (`s`),  wide (`wide`), Unicode (`u`), and raw (`r`).
+`allowed`          | string   | `#!py3 "sul"`   | Set the allowed string types to capture: standard strings (`s`),  wide (`l`), Unicode (`u`), and raw (`r`).
 `prefix`           | string   | `#!py3 'cpp'`   | Change the category prefix.
 
 ## Categories

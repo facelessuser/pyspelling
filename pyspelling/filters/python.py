@@ -145,6 +145,7 @@ class PythonFilter(filters.Filter):
     def eval_string_type(self, stype):
         """Evaluate string type."""
 
+        # If bytes is not specified, we can assume Unicode
         stype = set([c for c in stype.lower()])
         if 'b' not in stype:
             stype.add('u')
