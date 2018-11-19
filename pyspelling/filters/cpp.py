@@ -13,11 +13,11 @@ COMMENTS = r'''(?x)
 ) |
 (?P<strings>
     {}
-    "(?:\\.|[^"\\])*" |                                         # double quotes
-    '(?:\\.|[^'\\])*'                                           # single quotes
+    "(?:\\.|[^"\\\n])*" |                                         # double quotes
+    '(?:\\.|[^'\\\n])*'                                           # single quotes
 ) |
 (?P<code>
-    .[^/"'{}]*?                                               # everything else
+    .[^/"' \t{}]*?                                               # everything else
 )
 '''
 
@@ -220,12 +220,15 @@ class CppFilter(filters.Filter):
         if value.startswith('u8'):
             length = 1
             value = value[3:-1]
+            encoding = 'utf-8'
         elif value.startswith('u'):
             length = 2
             value = value[2:-1]
+            encoding = 'utf-16'
         else:
             length = 4
             value = value[2:-1]
+            encoding = 'utf-32'
 
         def replace_unicode(m):
             """Replace Unicode."""
@@ -250,7 +253,7 @@ class CppFilter(filters.Filter):
                         value = ' '
             return value
 
-        return self.norm_nl(RE_UESC.sub(replace_unicode, value).replace('\x00', '\n')), 'utf-8'
+        return self.norm_nl(RE_UESC.sub(replace_unicode, value).replace('\x00', '\n')), encoding
 
     def evaluate_normal(self, value):
         """Evaluate normal string."""
@@ -300,10 +303,7 @@ class CppFilter(filters.Filter):
                 value = b''.join(values).decode(encoding, errors='replace')
             return value
 
-        text = self.norm_nl(RE_ESC.sub(replace, value)).replace('\x00', '\n')
-        if encoding.startswith(('utf-32', 'utf-16')):
-            encoding = 'utf-8'
-        return text, encoding
+        return self.norm_nl(RE_ESC.sub(replace, value)).replace('\x00', '\n'), encoding
 
     def evaluate_strings(self, groups):
         """Evaluate strings."""
@@ -400,8 +400,8 @@ class CppFilter(filters.Filter):
 
         return TRIGRAPHS[m.group(0)]
 
-    def find_comments(self, text):
-        """Find comments."""
+    def find_content(self, text):
+        """Find content."""
 
         if self.trigraphs:
             text = RE_TRIGRAPHS.sub(self.process_trigraphs, text)
@@ -421,7 +421,7 @@ class CppFilter(filters.Filter):
         self.line_comments = []
         self.quoted_strings = []
 
-        self.find_comments(text)
+        self.find_content(text)
         self.extend_src(content, context)
 
         return content

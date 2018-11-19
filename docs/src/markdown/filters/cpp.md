@@ -4,7 +4,7 @@
 
 The CPP plugin is designed to find and return C/C++ style comments. When first in the chain, the CPP filter uses no special encoding detection. It will assume `utf-8` if no encoding BOM is found, and the user has not overridden the fallback encoding. Text is returned in chunks based on the context of the text: block, inline, or string (if enabled).
 
-When the `strings` [option](#options) is enabled, content will be extracted from strings (not character constants). Support is available for all the modern C++ strings shown below. CPP will also handle decoding string escapes as well, but as string character width and encoding can be dependent on implementation and configuration, some additional setup may be required via [option](#options).
+When the `strings` [option](#options) is enabled, content will be extracted from strings (not character constants). Support is available for all the modern C++ strings shown below. CPP will also handle decoding string escapes as well, but as string character width and encoding can be dependent on implementation and configuration, some additional setup may be required via [option](#options). Strings will be returned with the specified encoding, even if it differs from the file's encoding (this is the associated encoding specified in the `SourceText` object, the content itself is still in Unicode).
 
 ```c++
     auto s0 =    "Narrow character string";                   // char

@@ -64,6 +64,67 @@ class TestCPP(util.PluginTestCase):
         self.assert_spellcheck('.cpp.yml', bad_words)
 
 
+class TestCPPGroupedComments(util.PluginTestCase):
+    """Test CPP plugin."""
+
+    def setup_fs(self):
+        """Setup file system."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: cpp
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.cpp:
+                  group_comments: true
+                  trigraphs: true
+              - pyspelling.filters.context:
+                  context_visible_first: true
+                  escapes: '\\[\\`]'
+                  delimiters:
+                  # Ignore multiline content between fences (fences can have 3 or more back ticks)
+                  # ```
+                  # content
+                  # ```
+                  - open: '(?s)^(?P<open> *`{{3,}})$'
+                    close: '^(?P=open)$'
+                  # Ignore text between inline back ticks
+                  - open: '(?P<open>`+)'
+                    close: '(?P=open)'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.cpp.yml', config, 'utf-8')
+
+    def test_cpp_grouped_comments(self):
+        """Test CPP."""
+
+        template = self.dedent(
+            """
+            uint8_t func() {
+
+              uint32_t test = 3; // what
+              // bbbb
+
+              // ```
+              // akdjal dlkajdlf dkkjkj
+              // skjdl djkjf lslsl
+              // ```
+
+              // aaaa
+            }
+            """
+        )
+        bad_words = ['aaaa', 'bbbb']
+        self.mktemp('test.txt', template, 'utf-8')
+        self.assert_spellcheck('.cpp.yml', bad_words)
+
+
 class TestCPPStringAllow(util.PluginTestCase):
     """Test CPP allow filter."""
 

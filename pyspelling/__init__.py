@@ -132,6 +132,10 @@ class SpellChecker:
                 if source._is_bytes():
                     text = source.text
                 else:
+                    # UTF-16 and UTF-32 don't work well with Aspell and Hunspell,
+                    # so encode with the compatible UTF-8 instead.
+                    if encoding.startswith(('utf-16', 'utf-32')):
+                        encoding = 'utf-8'
                     text = source.text.encode(encoding)
                 self.log('', 3)
                 self.log(text, 3)
