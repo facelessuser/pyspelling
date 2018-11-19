@@ -104,7 +104,7 @@ class PythonFilter(filters.Filter):
             'docstrings': True,
             'strings': False,
             'group_comments': False,
-            'allowed': 'fu',
+            'string_types': 'fu',
             'decode_escapes': True
         }
 
@@ -115,14 +115,14 @@ class PythonFilter(filters.Filter):
         self.docstrings = self.config['docstrings']
         self.strings = self.config['strings']
         self.group_comments = self.config['group_comments']
-        self.allowed = self.eval_string_type(self.config['allowed'])
+        self.string_types = self.eval_string_type(self.config['string_types'])
         self.decode_escapes = self.config['decode_escapes']
 
     def validate_options(self, k, v):
         """Validate options."""
 
         super().validate_options(k, v)
-        if k == 'allowed':
+        if k == 'string_types':
             for c in v.lower():
                 if c not in 'rbuf':
                     raise ValueError("{}: '{}' is not a valid string type".format(self.__class__.__name__, c))
@@ -200,7 +200,7 @@ class PythonFilter(filters.Filter):
 
         m = RE_STRING_TYPE.match(string)
         stype = self.eval_string_type(m.group(1) if m.group(1) else '')
-        if stype - self.allowed and not docstrings:
+        if stype - self.string_types and not docstrings:
             return '', False
         is_bytes = 'b' in stype
         is_raw = 'r' in stype

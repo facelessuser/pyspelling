@@ -32,6 +32,14 @@ matrix:
   - js_files/**/*.{cpp,hpp,c,h}
 ```
 
+## Filtering String types
+
+When `strings` is enabled, you can specify which strings you want to allow via the `string_types` option. Valid string types are `S` for standard, `L` for long/wide, `U` for Unicode (all variants), and `R` for raw.  Case is not important, and the default value is `sul`.  
+
+If you do not explicitly specify `U` or `L`, `S` is assumed. For instance, if only `R` was specified, there is actually multiple types of `R`: standard, Unicode, and wide. Since Unicode or wide were not explicitly specified, `S` is assumed to be enabled and both `S` and `S` variants of `R` will be searched. If you were to specify only `UR` you would be searching `U` strings and `U` variants of `R` strings and not `S` strings. To search both `U` and `S` variants you would need to explicitly specify them via `SUR`.
+
+In short, if you only enable `R`, you will be searching the normal string of that type as well as `R` as the `R` is a subtypes of of `U`, `S` and `L`. If greater resolution is needed, this approach may be reconsidered in the future.
+
 ## Generic Mode
 
 C/C++ style comments are not exclusive to C/C++. Many different file types have adopted similar style comments. The CPP filter has a generic mode which allows for a C/C++ style comment extraction without all the C/C++ specific considerations. Simply enable `generic_mode` via the [options](#options).

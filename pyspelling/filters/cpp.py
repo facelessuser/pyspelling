@@ -120,7 +120,7 @@ class CppFilter(filters.Filter):
             "wide_exec_charset": 'utf-32',
             "charset_size": 1,
             "wide_charset_size": 4,
-            "allowed": "sul"
+            "string_types": "sul"
         }
 
     def validate_options(self, k, v):
@@ -136,7 +136,7 @@ class CppFilter(filters.Filter):
         elif k in ('exec_charset', 'wide_exec_charset'):
             # See if parsing fails.
             self.get_encoding_name(v)
-        elif k == 'allowed':
+        elif k == 'string_types':
             for c in v.lower():
                 if c not in 'rsul':
                     raise ValueError("{}: '{}' is not a valid string type".format(self.__class__.__name__, c))
@@ -183,7 +183,7 @@ class CppFilter(filters.Filter):
         self.wide_charset_size = self.config['wide_charset_size']
         self.exec_charset = self.get_encoding_name(self.config['exec_charset'])
         self.wide_exec_charset = self.get_encoding_name(self.config['wide_exec_charset'])
-        self.allowed = self.eval_string_type(self.config['allowed'])
+        self.string_types = self.eval_string_type(self.config['string_types'])
         if not self.generic_mode:
             self.pattern = C_COMMENT
 
@@ -319,12 +319,10 @@ class CppFilter(filters.Filter):
                 self.quoted_strings.append([groups['strings'][1:-1], self.line_num, encoding])
             else:
                 value = groups['strings']
+                stype = set()
                 if value.endswith('"'):
                     stype = self.eval_string_type(value[:value.index('"')].lower().replace('8', ''))
-                else:
-                    stype = set()
-                print(stype, self.allowed, stype - self.allowed)
-                if stype - self.allowed:
+                if stype - self.string_types or value.endswith("'"):
                     return
                 if 'r' in stype:
                     # Handle raw strings. We can handle even if decoding is disabled.
@@ -333,19 +331,16 @@ class CppFilter(filters.Filter):
                     value = self.norm_nl(value[olen:-clen].replace('\x00', '\n'))
                 elif (
                     self.decode_escapes and not value.startswith(('\'', '"')) and
-                    not value.startswith('L') and value.endswith('"')
+                    'l' not in stype
                 ):
                     # Decode Unicode string. May have added unsupported chars, so use `UTF-8`.
                     value, encoding = self.evaluate_unicode(value)
-                elif self.decode_escapes and value.startswith(('"', 'L')):
+                elif self.decode_escapes:
                     # Decode normal strings.
                     value, encoding = self.evaluate_normal(value)
-                elif not self.decode_escapes and value.endswith('"'):
+                else:
                     # Don't decode and just return string content.
                     value = self.norm_nl(value[value.index('"') + 1:-1]).replace('\x00', '\n')
-                else:
-                    # Char constant. Just ignore
-                    value = ''
 
                 if value:
                     self.quoted_strings.append([value, self.line_num, encoding])

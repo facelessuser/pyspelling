@@ -89,6 +89,7 @@ subclassed
 subclassing
 sublicense
 substring
+subtypes
 syntaxes
 trigraphs
 tuple

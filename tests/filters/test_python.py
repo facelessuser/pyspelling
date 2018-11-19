@@ -70,7 +70,7 @@ class TestPythonStrings(util.PluginTestCase):
               pipeline:
               - pyspelling.filters.python:
                   strings: true
-                  allowed: bfru
+                  string_types: bfru
                   group_comments: true
             """
         ).format(self.tempdir)
