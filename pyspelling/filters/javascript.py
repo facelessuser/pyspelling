@@ -274,7 +274,7 @@ class JavaScriptFilter(filters.Filter):
         self.line_comments = []
         self.quoted_strings = []
 
-        self.find_content(text)
+        self.find_content(self.norm_nl(text))
         self.extend_src(content, context)
 
         return content
