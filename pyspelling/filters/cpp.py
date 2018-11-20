@@ -6,7 +6,7 @@ import textwrap
 import struct
 import sys
 
-COMMENTS = r'''(?x)
+TARGETS = r'''(?x)
 (?P<comments>
     (?P<block>/\*[^*]*\*+(?:[^/*][^*]*\*+)*/) |                 # multi-line comments
     (?P<start>^)?(?P<leading_space>[ \t]*)?(?P<line>//(?:{})*)  # single line comments
@@ -27,9 +27,9 @@ CPP_STRING = r'''
 (?:L|u8?|U)'(?:\\.|[^'\\])*' |
 '''
 
-C_COMMENT = re.compile(COMMENTS.format(r'\\.|[^\\\n]+', CPP_STRING, 'RLuU'), re.DOTALL | re.MULTILINE)
+RE_CPP = re.compile(TARGETS.format(r'\\.|[^\\\n]+', CPP_STRING, 'RLuU'), re.DOTALL | re.MULTILINE)
 
-GENERIC = re.compile(COMMENTS.format('[^\n]', '', ''), re.DOTALL | re.MULTILINE)
+RE_GENERIC = re.compile(TARGETS.format('[^\n]', '', ''), re.DOTALL | re.MULTILINE)
 
 TRIGRAPHS = {
     '??=': '#',
@@ -104,7 +104,7 @@ class CppFilter(filters.Filter):
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
-        self.pattern = GENERIC
+        self.pattern = RE_GENERIC
         self.trigraphs = False
         super().__init__(options, default_encoding)
 
@@ -211,7 +211,7 @@ class CppFilter(filters.Filter):
         self.wide_exec_charset = self.get_encoding_name(self.config['wide_exec_charset'])
         self.string_types, self.wild_string_types = self.eval_string_type(self.config['string_types'])
         if not self.generic_mode:
-            self.pattern = C_COMMENT
+            self.pattern = RE_CPP
 
     def evaluate_block(self, groups):
         """Evaluate block comments."""
@@ -443,7 +443,7 @@ class CppFilter(filters.Filter):
         return content
 
     def filter(self, source_file, encoding):  # noqa A001
-        """Parse HTML file."""
+        """Parse CPP file."""
 
         with codecs.open(source_file, 'r', encoding=encoding) as f:
             text = f.read()
