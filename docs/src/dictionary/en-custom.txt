@@ -82,6 +82,7 @@ pymdown
 pytest
 regex
 sacrifice
+shebang
 sortable
 squidfunk
 stylesheet

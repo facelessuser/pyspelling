@@ -28,6 +28,7 @@
 - **FIX**: Allow CSS escapes in selectors.
 - **FIX**: Don't send empty (or strings that are just whitespace) to spell checker to prevent Aspell 0.50 series from crashing (also to increase performance).
 - **FIX**: Catch and bubble up errors better.
+- **FIX**: Fix issue where Python module docstrings would not get spell checked if they followed a shebang.
 
 ## 1.1.0
 
