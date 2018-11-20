@@ -33,6 +33,7 @@ class StylesheetsFilter(cpp.CppFilter):
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
+        self.strings = False
         super().__init__(options, default_encoding)
 
     def get_default_config(self):
