@@ -107,7 +107,6 @@ class SelectorMatcher:
         self.re_sel = RE_HTML_SEL if self.mode != 'xml' else RE_XML_SEL
         self.namespaces = namespaces if namespaces else {}
         self.selectors = self.process_selectors(*selectors)
-        print(self.selectors)
 
     def get_namespace(self, el):
         """Get the namespace for the element."""
@@ -198,8 +197,8 @@ class SelectorMatcher:
 
                 # Handle parts
                 if m.group('pseudo_open'):
-                    if is_pseudo:
-                        raise ValueError("Cannot have nested `:pseudo()`")
+                    if is_pseudo and is_not:
+                        raise ValueError("Pseudo-elements cannot be represented by the negation pseudo-class")
                     sub_selectors.extend(self.parse_selectors(iselector, True, m.group('pseudo_open')[1:-1] == 'not'))
                     has_selector = True
                 elif m.group('pseudo_close'):

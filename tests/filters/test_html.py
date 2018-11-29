@@ -358,6 +358,33 @@ class TestHtml5AdvancedSelectors(util.PluginTestCase):
             ]
         )
 
+    def test_css_nested_pseudo(self):
+        """Test HTML."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: html_css
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.html:
+                  mode: html5
+                  ignores:
+                  - 'p:is(:not(.zzzz), .iiii)'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.html5.yml', config, 'utf-8')
+        self.assert_spellcheck(
+            '.html5.yml', [
+                'aaaa', 'eeee', 'ffff', 'gggg', 'kkkk', 'llll'
+            ]
+        )
+
 
 class TestHTML5LIB(util.PluginTestCase):
     """Test HTML plugin with `html5lib`."""

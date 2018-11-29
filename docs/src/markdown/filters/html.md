@@ -64,8 +64,10 @@ Selector             | Example                       | Description
 `[attribute$=value]` | `a[href$=".pdf"]`             | Selects every `<a>` element whose `href` attribute value ends with `.pdf`.
 `[attribute*=value]` | `a[href*="sometext"]`         | Selects every `<a>` element whose `href` attribute value contains the substring `sometext`.
 `:not(sel, sel)`     | `:not(.some-class, #some-id)` | Selects elements that do not have class `some-class` and ID `some-id`.
-`:matches(sel, sel)` | `:matches(div, .some-class)`  | Selects elements that are not `<div>` and do not have class `some-class`.
+`:is(sel, sel)`      | `:is(div, .some-class)`       | Selects elements that are not `<div>` and do not have class `some-class`. The alias `:matches` is allowed as well.
 
+!!! note ":not()"
+    While you can nest `:not()` inside of `:is()`, you cannot match `:is()` or `:not()` inside of `:not()`. This is due to a limitation imposed by the CSS4 specification, not a limitation in our implementation.
 
 ## Options
 
