@@ -1,6 +1,9 @@
 """CSS selector matcher."""
 import re
 from collections import namedtuple
+import bs4
+
+TAG = bs4.element.Tag
 
 CSS_ESCAPES = r'(?:\\[a-fA-F0-9]{1,6}[ ]?|\\.)'
 RE_ESC = re.compile(r'(?:(\\[a-fA-F0-9]{1,6}[ ]?)|(\\.))')
@@ -15,7 +18,7 @@ RE_HTML_SEL = re.compile(
     (?P<value>"(\\.|[^\\"]+)*?"|'(\\.|[^\\']+)*?'|(?:[^'"\[\] \t\r\n]|{esc})+))?  # attribute value
     (?P<i>[ ]+i)? \] |                                                            # case insensitive
     (?P<pseudo_close>\)) |                                                        # optional pseudo selector close
-    (?P<split>\s*,\s*) |                                                          # split multiple selectors
+    (?P<split>\s*?(?P<relation>[,+>~]|[ ](?![,+>~]))\s*) |                        # split multiple selectors
     (?P<invalid>).+                                                               # not proper syntax
     '''.format(**{'esc': CSS_ESCAPES})
 )
@@ -29,7 +32,7 @@ RE_XML_SEL = re.compile(
     (?P<value>"(\\.|[^\\"]+)*?"|'(?:\\.|[^\\']+)*?'|(?:[^'"\[\] \t\r\n]|{esc})+))?  # attribute value
     (?P<i>[ ]+i)?\] |                                                               # case insensitive
     (?P<pseudo_close>\)) |                                                          # optional pseudo selector close
-    (?P<split>\s*,\s*) |                                                            # Split for multiple selectors
+    (?P<split>\s*?(?P<relation>[,+>~]|[ ](?![,+>~]))\s*) |                          # Split for multiple selectors
     (?P<invalid>.+)                                                                 # not proper syntax
     '''.format(**{'esc': CSS_ESCAPES})
 )
@@ -40,6 +43,13 @@ LC_A = ord('a')
 LC_Z = ord('z')
 UC_A = ord('A')
 UC_Z = ord('Z')
+
+# Relationships
+REL_NONE = ','
+REL_PARENT = ' '
+REL_CLOSE_PARENT = '>'
+REL_SIBLING = '~'
+REL_CLOSE_SIBLING = '+'
 
 
 def unescape(string):
@@ -73,7 +83,9 @@ def upper(string):  # pragma: no cover
     return ''.join(new_string)
 
 
-class Selector(namedtuple('HtmlSelector', ['tags', 'ids', 'classes', 'attributes', 'selectors', 'is_not'])):
+class Selector(
+    namedtuple('HtmlSelector', ['tags', 'ids', 'classes', 'attributes', 'selectors', 'is_not', 'relation', 'rel_type'])
+):
     """CSS selector."""
 
 
@@ -95,6 +107,7 @@ class SelectorMatcher:
         self.re_sel = RE_HTML_SEL if self.mode != 'xml' else RE_XML_SEL
         self.namespaces = namespaces if namespaces else {}
         self.selectors = self.process_selectors(*selectors)
+        print(self.selectors)
 
     def get_namespace(self, el):
         """Get the namespace for the element."""
@@ -166,7 +179,7 @@ class SelectorMatcher:
             prefix = None
         return SelectorTag(tag, prefix)
 
-    def parse_selectors(self, iselector, is_pseudo=False, is_not=False):
+    def parse_selectors(self, iselector, is_pseudo=False, is_not=False, relation=None):
         """Parse selectors."""
 
         selectors = []
@@ -196,12 +209,21 @@ class SelectorMatcher:
                     else:
                         raise ValueError("Bad selector '{}'".format(m.group(0)))
                 elif m.group('split'):
-                    if has_selector:
+                    if not has_selector:
+                        raise ValueError("Cannot start selector with '{}'".format(m.group('relation')))
+                    if m.group('relation') == REL_NONE:
                         if not tag and not is_pseudo:
                             # Implied `*`
                             tag.append(SelectorTag('*', None))
                         selectors.append(
-                            Selector(tag, tag_id, tuple(classes), tuple(attributes), sub_selectors, is_not)
+                            Selector(
+                                tag, tag_id, tuple(classes), tuple(attributes), sub_selectors, is_not, relation, None
+                            )
+                        )
+                    else:
+                        relation = Selector(
+                            tag, tag_id, tuple(classes), tuple(attributes),
+                            sub_selectors, False, relation, m.group('relation')
                         )
                     has_selector = False
                     tag = []
@@ -236,7 +258,9 @@ class SelectorMatcher:
             if not tag and not is_pseudo:
                 # Implied `*`
                 tag.append(SelectorTag('*', None))
-            selectors.append(Selector(tag, tag_id, tuple(classes), tuple(attributes), sub_selectors, is_not))
+            selectors.append(
+                Selector(tag, tag_id, tuple(classes), tuple(attributes), sub_selectors, is_not, relation, None)
+            )
 
         return selectors
 
@@ -382,6 +406,56 @@ class SelectorMatcher:
                 break
         return match
 
+    def match_relations(self, el, relation):
+        """Match relationship to other elements."""
+
+        found = False
+        if relation.rel_type == REL_PARENT:
+            parent = el.parent
+            while not found and parent:
+                found = self.match_selectors(parent, [relation])
+                parent = parent.parent
+        elif relation.rel_type == REL_CLOSE_PARENT:
+            parent = el.parent
+            if parent:
+                found = self.match_selectors(parent, [relation])
+        elif relation.rel_type == REL_SIBLING:
+            sibling = el.previous_element
+            while not found and sibling:
+                if not isinstance(sibling, TAG):
+                    sibling = sibling.previous_element
+                    continue
+                found = self.match_selectors(sibling, [relation])
+                sibling = sibling.previous_element
+        elif relation.rel_type == REL_CLOSE_SIBLING:
+            sibling = el.previous_element
+            while sibling and not isinstance(sibling, TAG):
+                sibling = sibling.previous_element
+            if sibling and isinstance(sibling, TAG):
+                found = self.match_selectors(sibling, [relation])
+        return found
+
+    def match_id(self, el, ids):
+        """Match element's ID."""
+
+        found = True
+        for i in ids:
+            if i != el.attrs.get('id', ''):
+                found = False
+                break
+        return found
+
+    def match_classes(self, el, classes):
+        """Match element's classes."""
+
+        current_classes = self.get_classes(el)
+        found = True
+        for c in classes:
+            if c not in current_classes:
+                found = False
+                break
+        return found
+
     def match_selectors(self, el, selectors):
         """Check if element matches one of the selectors."""
 
@@ -393,28 +467,19 @@ class SelectorMatcher:
             if not self.match_tag(el, selector.tags):
                 continue
             # Verify id matches
-            if is_html and selector.ids:
-                found = True
-                for i in selector.ids:
-                    if i != el.attrs.get('id', ''):
-                        found = False
-                        break
-                if not found:
-                    continue
+            if is_html and selector.ids and not self.match_id(el, selector.ids):
+                continue
             # Verify classes match
-            if is_html and selector.classes:
-                current_classes = self.get_classes(el)
-                found = True
-                for c in selector.classes:
-                    if c not in current_classes:
-                        found = False
-                        break
-                if not found:
-                    continue
+            if is_html and selector.classes and not self.match_classes(el, selector.classes):
+                continue
             # Verify attribute(s) match
             if not self.match_attributes(el, selector.attributes):
                 continue
+            # Verify pseudo selector patterns
             if selector.selectors and not self.match_selectors(el, selector.selectors):
+                continue
+            # Verify relationship selectors
+            if selector.relation and not self.match_relations(el, selector.relation):
                 continue
             match = not selector.is_not
             break
