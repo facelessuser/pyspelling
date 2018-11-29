@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.0
+
+- **NEW**: Add support for `div p`, `div>p`, `div+p`, `div~p` in the HTML/XML filter's CSS selectors.
+
 ## 2.0.0
 
 - **NEW**: (Breaking change) Task names should be unique and using `--name` from the command line will only target one `name` (the last task defined with that name). If you were not using `name` to run a group of tasks, you will not notice any changes.

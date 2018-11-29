@@ -30,7 +30,7 @@ The CSS selectors are based on a limited subset of CSS4 selectors. The same sele
 
 Below shows accepted selectors. You must configure the CSS namespaces in the plugin options in order for them to work properly.
 
-While an effort is made to mimic CSS selector behavior, there may be some differences or quirks. We do not support all CSS selector features, but enough to make the task of ignoring tags or selectively capturing tags easy. We particularly do not support notations with ancestry such as `div > p`, `div + p`, `div p`, or `div ~ p`. The only pseudo classes that are currently supported is `:not()` and `:matches()` as they are the most helpful in the task of ignoring or capturing tags.
+While an effort is made to mimic CSS selector behavior, there may be some differences or quirks. We do not support all CSS selector features, but enough to make the task of ignoring tags or selectively capturing tags easy. The only pseudo classes that are currently supported is `:not()` and `:matches()` as they are the most helpful in the task of ignoring or capturing tags.
 
 Examples below are using HTML, but can be adapted for XML.
 
@@ -38,6 +38,10 @@ Selector             | Example                       | Description
 -------------------- | ----------------------------- | -----------
 `Element`            | `div`                         | Select the `<div>` element (will be under the default namespace if defined for XHTML).
 `Element, Element`   | `div, h1`                     | Select the `<div>` element and the `<h1>` element.
+`Element Element`    | `div p`                       | Select all `<p>` elements inside `<div>` elements.
+`Element>Element`    | `div > p`                     | Select all `<p>` elements where the parent is a `<div>` element.
+`Element+Element`    | `div + p`                     | Select all `<p>` elements that are placed immediately after `<div>` elements.
+`Element~Element`    | `p ~ ul`                      | Select every `<ul>` element that is preceded by a `<p>` element.
 `namespace|Element`  | `svg|circle`                  | Select the `<circle>` element which also has the namespace `svg`.
 `*|Element`          | `*|div`                       | Select the `<div>` element with or without a namespace.
 `namespace|*`        | `svg|*`                       | Select any element with the namespace `svg`.

@@ -237,6 +237,128 @@ class TestHtml5AttrNamespace(util.PluginTestCase):
         self.assert_spellcheck('.html5.yml', ['cccc'])
 
 
+class TestHtml5AdvancedSelectors(util.PluginTestCase):
+    """Test advanced CSS selectors."""
+
+    def setup_fs(self):
+        """Setup file system."""
+
+        template = self.dedent(
+            """
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+            </head>
+            <body>
+              <div class="aaaa">aaaa
+                  <p class="bbbb">bbbb</p>
+                  <p class="cccc">cccc</p>
+                  <p class="dddd">dddd</p>
+                  <div class="eeee">eeee
+                  <div class="ffff">ffff
+                  <div class="gggg">gggg
+                      <p class="hhhh">hhhh</p>
+                      <p class="iiii zzzz">iiii</p>
+                      <p class="jjjj">jjjj</p>
+                      <div class="kkkk">kkkk
+                          <p class="llll zzzz">llll</p>
+                      </div>
+                  </div>
+                  </div>
+                  </div>
+              </div>
+            </body>
+            </body>
+            </html>
+            """
+        )
+
+        self.mktemp('test.txt', template, 'utf-8')
+
+    def test_css_parents(self):
+        """Test HTML."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: html_css
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.html:
+                  mode: html5
+                  ignores:
+                  - 'body div.gggg > p.zzzz'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.html5.yml', config, 'utf-8')
+        self.assert_spellcheck(
+            '.html5.yml', [
+                'aaaa', 'bbbb', 'cccc', 'dddd', 'eeee', 'ffff', 'gggg', 'hhhh', 'jjjj', 'kkkk', 'llll'
+            ]
+        )
+
+    def test_css_siblings(self):
+        """Test HTML."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: html_css
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.html:
+                  mode: html5
+                  ignores:
+                  - 'p.bbbb ~ div.gggg > p.hhhh + p'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.html5.yml', config, 'utf-8')
+        self.assert_spellcheck(
+            '.html5.yml', [
+                'aaaa', 'bbbb', 'cccc', 'dddd', 'eeee', 'ffff', 'gggg', 'hhhh', 'jjjj', 'kkkk', 'llll'
+            ]
+        )
+
+    def test_css_pseudo(self):
+        """Test HTML."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: html_css
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.html:
+                  mode: html5
+                  ignores:
+                  - 'p.bbbb ~ div > div > div :not(p.hhhh + .zzzz)'
+                  - 'p:matches(.aaaa + .bbbb)'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.html5.yml', config, 'utf-8')
+        self.assert_spellcheck(
+            '.html5.yml', [
+                'aaaa', 'cccc', 'dddd', 'eeee', 'ffff', 'gggg', 'iiii'
+            ]
+        )
+
+
 class TestHTML5LIB(util.PluginTestCase):
     """Test HTML plugin with `html5lib`."""
 
