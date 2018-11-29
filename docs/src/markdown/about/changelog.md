@@ -3,6 +3,7 @@
 ## 2.1.0
 
 - **NEW**: Add support for `div p`, `div>p`, `div+p`, `div~p` in the HTML/XML filter's CSS selectors. (#51)
+- **NEW**: Add support for the `:root` CSS selector. (#57)
 - **FIX**: According to CSS4 specification, `:is()` is the final name for `:matches()` but the `:matches()` is an allowed alias. (#53)
 - **FIX**: Allow `:not()` to be nested in `:is()`/`:matches()`. (#56)
 
