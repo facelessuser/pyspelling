@@ -10,7 +10,7 @@ RE_ESC = re.compile(r'(?:(\\[a-fA-F0-9]{1,6}[ ]?)|(\\.))')
 
 RE_HTML_SEL = re.compile(
     r'''(?x)
-    (?P<pseudo_open>:(?:not|matches)\() |                                         # optinal pseudo selector wrapper
+    (?P<pseudo_open>:(?:not|matches|is)\() |                                      # optinal pseudo selector wrapper
     (?P<class_id>(?:\#|\.)(?:[-\w]|{esc})+) |                                     #.class and #id
     (?P<ns_tag>(?:(?:(?:[-\w]|{esc})+|\*)?\|)?(?:(?:[-\w]|{esc})+|\*)) |          # namespace:tag
     \[(?P<ns_attr>(?:(?:(?:[-\w]|{esc})+|\*)?\|)?(?:[-\w]|{esc})+)                # namespace:attributes
@@ -25,7 +25,7 @@ RE_HTML_SEL = re.compile(
 
 RE_XML_SEL = re.compile(
     r'''(?x)
-    (?P<pseudo_open>:(?:not|matches)\() |                                           # optinal pseudo selector wrapper
+    (?P<pseudo_open>:(?:not|matches|is)\() |                                        # optinal pseudo selector wrapper
     (?P<ns_tag>(?:(?:(?:[-\w.]|{esc})+|\*)?\|)?(?:(?:[-\w.]|{esc})+|\*)) |          # namespace:tag
     \[(?P<ns_attr>(?:(?:(?:[-\w]|{esc})+|\*)\|)?(?:[-\w.]|{esc})+)                  # namespace:attributes
     (?:(?P<cmp>[~^|*$]?=)                                                           # compare

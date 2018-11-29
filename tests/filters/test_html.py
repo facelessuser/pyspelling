@@ -23,7 +23,7 @@ class TestHTML(util.PluginTestCase):
                   attributes:
                   - alt
                   ignores:
-                  - ':matches(code, pre)'
+                  - ':is(code, pre)'
                   - 'span:matches(.some-class, #some-id)'
             """
         ).format(self.tempdir)
@@ -348,7 +348,7 @@ class TestHtml5AdvancedSelectors(util.PluginTestCase):
                   mode: html5
                   ignores:
                   - 'p.bbbb ~ div > div > div :not(p.hhhh + .zzzz)'
-                  - 'p:matches(.aaaa + .bbbb)'
+                  - 'p:is(.aaaa + .bbbb)'
             """
         ).format(self.tempdir)
         self.mktemp('.html5.yml', config, 'utf-8')

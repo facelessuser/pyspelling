@@ -19,10 +19,10 @@ matrix:
       - title
       - alt
       ignores:
-      - ':matches(code, pre)'
-      - 'a:matches(.magiclink-compare, .magiclink-commit, .magiclink-repository)'
+      - ':is(code, pre)'
+      - 'a:is(.magiclink-compare, .magiclink-commit, .magiclink-repository)'
       - 'span.keys'
-      - ':matches(.MathJax_Preview, .md-nav__link, .md-footer-custom-text, .md-source__repository, .headerlink, .md-icon)'
+      - ':is(.MathJax_Preview, .md-nav__link, .md-footer-custom-text, .md-source__repository, .headerlink, .md-icon)'
   - pyspelling.filters.url:
 
 - name: odf
