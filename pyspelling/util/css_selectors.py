@@ -11,6 +11,7 @@ RE_ESC = re.compile(r'(?:(\\[a-fA-F0-9]{1,6}[ ]?)|(\\.))')
 RE_HTML_SEL = re.compile(
     r'''(?x)
     (?P<pseudo_open>:(?:not|matches|is)\() |                                      # optinal pseudo selector wrapper
+    (?P<pseudo>:root) |                                                           # Simple pseudo selector
     (?P<class_id>(?:\#|\.)(?:[-\w]|{esc})+) |                                     #.class and #id
     (?P<ns_tag>(?:(?:(?:[-\w]|{esc})+|\*)?\|)?(?:(?:[-\w]|{esc})+|\*)) |          # namespace:tag
     \[(?P<ns_attr>(?:(?:(?:[-\w]|{esc})+|\*)?\|)?(?:[-\w]|{esc})+)                # namespace:attributes
@@ -26,6 +27,7 @@ RE_HTML_SEL = re.compile(
 RE_XML_SEL = re.compile(
     r'''(?x)
     (?P<pseudo_open>:(?:not|matches|is)\() |                                        # optinal pseudo selector wrapper
+    (?P<pseudo>:root) |                                                             # Simple pseudo selector
     (?P<ns_tag>(?:(?:(?:[-\w.]|{esc})+|\*)?\|)?(?:(?:[-\w.]|{esc})+|\*)) |          # namespace:tag
     \[(?P<ns_attr>(?:(?:(?:[-\w]|{esc})+|\*)\|)?(?:[-\w.]|{esc})+)                  # namespace:attributes
     (?:(?P<cmp>[~^|*$]?=)                                                           # compare
@@ -84,7 +86,10 @@ def upper(string):  # pragma: no cover
 
 
 class Selector(
-    namedtuple('HtmlSelector', ['tags', 'ids', 'classes', 'attributes', 'selectors', 'is_not', 'relation', 'rel_type'])
+    namedtuple(
+        'HtmlSelector',
+        ['tags', 'ids', 'classes', 'attributes', 'selectors', 'is_not', 'relation', 'rel_type', 'is_root']
+    )
 ):
     """CSS selector."""
 
@@ -189,6 +194,7 @@ class SelectorMatcher:
         classes = []
         sub_selectors = []
         closed = False
+        is_root = False
         is_html = self.mode != 'xml'
 
         try:
@@ -196,7 +202,11 @@ class SelectorMatcher:
                 m = next(iselector)
 
                 # Handle parts
-                if m.group('pseudo_open'):
+                if m.group('pseudo'):
+                    if m.group('pseudo')[1:] == 'root':
+                        is_root = True
+                        has_selector = True
+                elif m.group('pseudo_open'):
                     if is_pseudo and is_not:
                         raise ValueError("Pseudo-elements cannot be represented by the negation pseudo-class")
                     sub_selectors.extend(self.parse_selectors(iselector, True, m.group('pseudo_open')[1:-1] == 'not'))
@@ -216,13 +226,28 @@ class SelectorMatcher:
                             tag.append(SelectorTag('*', None))
                         selectors.append(
                             Selector(
-                                tag, tag_id, tuple(classes), tuple(attributes), sub_selectors, is_not, relation, None
+                                tag,
+                                tag_id,
+                                tuple(classes),
+                                tuple(attributes),
+                                sub_selectors,
+                                is_not,
+                                relation,
+                                None,
+                                is_root
                             )
                         )
                     else:
                         relation = Selector(
-                            tag, tag_id, tuple(classes), tuple(attributes),
-                            sub_selectors, False, relation, m.group('relation')
+                            tag,
+                            tag_id,
+                            tuple(classes),
+                            tuple(attributes),
+                            sub_selectors,
+                            False,
+                            relation,
+                            m.group('relation'),
+                            is_root
                         )
                     has_selector = False
                     tag = []
@@ -230,6 +255,7 @@ class SelectorMatcher:
                     tag_id = []
                     classes = []
                     sub_selectors = []
+                    is_root = False
                     continue
                 elif m.group('ns_attr'):
                     attributes.append(self.create_attribute_selector(m))
@@ -258,7 +284,17 @@ class SelectorMatcher:
                 # Implied `*`
                 tag.append(SelectorTag('*', None))
             selectors.append(
-                Selector(tag, tag_id, tuple(classes), tuple(attributes), sub_selectors, is_not, relation, None)
+                Selector(
+                    tag,
+                    tag_id,
+                    tuple(classes),
+                    tuple(attributes),
+                    sub_selectors,
+                    is_not,
+                    relation,
+                    None,
+                    is_root
+                )
             )
 
         return selectors
@@ -455,6 +491,12 @@ class SelectorMatcher:
                 break
         return found
 
+    def match_root(self, el):
+        """Match element as root."""
+
+        parent = el.parent
+        return parent and not parent.parent
+
     def match_selectors(self, el, selectors):
         """Check if element matches one of the selectors."""
 
@@ -473,6 +515,8 @@ class SelectorMatcher:
                 continue
             # Verify attribute(s) match
             if not self.match_attributes(el, selector.attributes):
+                continue
+            if selector.is_root and not self.match_root(el):
                 continue
             # Verify pseudo selector patterns
             if selector.selectors and not self.match_selectors(el, selector.selectors):
