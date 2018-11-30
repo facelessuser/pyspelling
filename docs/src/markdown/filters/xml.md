@@ -61,7 +61,14 @@ Selector             | Example                       | Description
 `[attribute*=value]` | `a[href*="sometext"]`         | Selects every `<a>` element whose `href` attribute value contains the substring `sometext`.
 `:not(sel, sel)`     | `:not(.some-class, #some-id)` | Selects elements that do not have class `some-class` and ID `some-id`.
 `:is(sel, sel)`      | `:is(div, .some-class)`       | Selects elements that are not `<div>` and do not have class `some-class`. The alias `:matches` is allowed as well.
+`:has(> sel, + sel)` | `:has(> div, + p)`            | Selects elements that have a direct child that is a `<div>` or that have sibling of `<p>` immediately following.
 `:root`              | `:root`                       | Selects the root element.
+
+!!! new "New 2.1.0"
+    Support for `div p`, `div>p`, `div+p`, `div~p`, `:is()`, `:has()` and `:root`.
+
+!!! warning ":has()"
+    `:has()` implementation is experimental and may change. There are currently no reference implementation available in any browsers, so current implementation is based on our best interpretation.
 
 !!! note ":not()"
     While you can nest `:not()` inside of `:is()`, you cannot match `:is()` or `:not()` inside of `:not()`. This is due to a limitation imposed by the CSS4 specification, not a limitation in our implementation.
