@@ -85,13 +85,21 @@ def upper(string):  # pragma: no cover
     return ''.join(new_string)
 
 
-class Selector(
-    namedtuple(
-        'HtmlSelector',
-        ['tags', 'ids', 'classes', 'attributes', 'selectors', 'is_not', 'relation', 'rel_type', 'is_root']
-    )
-):
+class Selector:
     """CSS selector."""
+
+    def __init__(self, tags, ids, classes, attributes, selectors, is_not, relation, rel_type, is_root):
+        """Initialize."""
+
+        self.tags = tags
+        self.ids = ids
+        self.classes = classes
+        self.attributes = attributes
+        self.selectors = selectors
+        self.is_not = is_not
+        self.relation = relation
+        self.rel_type = rel_type
+        self.is_root = is_root
 
 
 class SelectorTag(namedtuple('SelectorTag', ['name', 'prefix'])):
@@ -183,7 +191,7 @@ class SelectorMatcher:
             prefix = None
         return SelectorTag(tag, prefix)
 
-    def parse_selectors(self, iselector, is_pseudo=False, is_not=False, relation=None):
+    def parse_selectors(self, iselector, is_pseudo=False, is_not=False):
         """Parse selectors."""
 
         selectors = []
@@ -196,6 +204,7 @@ class SelectorMatcher:
         closed = False
         is_root = False
         is_html = self.mode != 'xml'
+        relation = []
 
         try:
             while True:
@@ -209,7 +218,13 @@ class SelectorMatcher:
                 elif m.group('pseudo_open'):
                     if is_pseudo and is_not:
                         raise ValueError("Pseudo-elements cannot be represented by the negation pseudo-class")
-                    sub_selectors.extend(self.parse_selectors(iselector, True, m.group('pseudo_open')[1:-1] == 'not'))
+                    sub_selectors.extend(
+                        self.parse_selectors(
+                            iselector,
+                            True,
+                            m.group('pseudo_open')[1:-1] == 'not'
+                        )
+                    )
                     has_selector = True
                 elif m.group('pseudo_close'):
                     if is_pseudo:
@@ -228,8 +243,8 @@ class SelectorMatcher:
                             Selector(
                                 tag,
                                 tag_id,
-                                tuple(classes),
-                                tuple(attributes),
+                                classes,
+                                attributes,
                                 sub_selectors,
                                 is_not,
                                 relation,
@@ -237,18 +252,23 @@ class SelectorMatcher:
                                 is_root
                             )
                         )
+                        relation = []
                     else:
-                        relation = Selector(
-                            tag,
-                            tag_id,
-                            tuple(classes),
-                            tuple(attributes),
-                            sub_selectors,
-                            False,
-                            relation,
-                            m.group('relation'),
-                            is_root
-                        )
+                        relation = [
+                            [
+                                Selector(
+                                    tag,
+                                    tag_id,
+                                    classes,
+                                    attributes,
+                                    sub_selectors,
+                                    False,
+                                    relation,
+                                    m.group('relation'),
+                                    is_root
+                                )
+                            ]
+                        ]
                     has_selector = False
                     tag = []
                     attributes = []
@@ -287,8 +307,8 @@ class SelectorMatcher:
                 Selector(
                     tag,
                     tag_id,
-                    tuple(classes),
-                    tuple(attributes),
+                    classes,
+                    attributes,
                     sub_selectors,
                     is_not,
                     relation,
@@ -441,33 +461,41 @@ class SelectorMatcher:
                 break
         return match
 
-    def match_relations(self, el, relation):
+    def match_relations(self, el, relations):
         """Match relationship to other elements."""
 
-        found = False
-        if relation.rel_type == REL_PARENT:
-            parent = el.parent
-            while not found and parent:
-                found = self.match_selectors(parent, [relation])
-                parent = parent.parent
-        elif relation.rel_type == REL_CLOSE_PARENT:
-            parent = el.parent
-            if parent:
-                found = self.match_selectors(parent, [relation])
-        elif relation.rel_type == REL_SIBLING:
-            sibling = el.previous_element
-            while not found and sibling:
-                if not isinstance(sibling, TAG):
-                    sibling = sibling.previous_element
-                    continue
-                found = self.match_selectors(sibling, [relation])
-                sibling = sibling.previous_element
-        elif relation.rel_type == REL_CLOSE_SIBLING:
-            sibling = el.previous_element
-            while sibling and not isinstance(sibling, TAG):
-                sibling = sibling.previous_element
-            if sibling and isinstance(sibling, TAG):
-                found = self.match_selectors(sibling, [relation])
+        found = True
+        for relation in relations:
+            found = False
+            for rel in relation:
+                if rel.rel_type == REL_PARENT:
+                    parent = el.parent
+                    while not found and parent:
+                        found = self.match_selectors(parent, [rel])
+                        parent = parent.parent
+                elif rel.rel_type == REL_CLOSE_PARENT:
+                    parent = el.parent
+                    if parent:
+                        found = self.match_selectors(parent, [rel])
+                elif rel.rel_type == REL_SIBLING:
+                    sibling = el.previous_element
+                    while not found and sibling:
+                        if not isinstance(sibling, TAG):
+                            sibling = sibling.previous_element
+                            continue
+                        found = self.match_selectors(sibling, [rel])
+                        sibling = sibling.previous_element
+                elif rel.rel_type == REL_CLOSE_SIBLING:
+                    sibling = el.previous_element
+                    while sibling and not isinstance(sibling, TAG):
+                        sibling = sibling.previous_element
+                    if sibling and isinstance(sibling, TAG):
+                        found = self.match_selectors(sibling, [rel])
+                if found:
+                    break
+            if not found:
+                break
+
         return found
 
     def match_id(self, el, ids):
@@ -522,7 +550,7 @@ class SelectorMatcher:
             if selector.selectors and not self.match_selectors(el, selector.selectors):
                 continue
             # Verify relationship selectors
-            if selector.relation and not self.match_relations(el, selector.relation):
+            if not self.match_relations(el, selector.relation):
                 continue
             match = not selector.is_not
             break
