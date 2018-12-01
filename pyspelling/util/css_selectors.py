@@ -560,22 +560,18 @@ class SelectorMatcher:
             if parent:
                 found = self.match_selectors(parent, [relation])
         elif relation.rel_type == REL_SIBLING:
-            parent = el.parent
-            sibling = el.previous_element
+            sibling = el.previous_sibling
             while not found and sibling:
                 if not isinstance(sibling, TAG):
-                    sibling = sibling.previous_element
+                    sibling = sibling.previous_sibling
                     continue
-                if sibling.parent is not parent:
-                    break
                 found = self.match_selectors(sibling, [relation])
-                sibling = sibling.previous_element
+                sibling = sibling.previous_sibling
         elif relation.rel_type == REL_CLOSE_SIBLING:
-            parent = el.parent
-            sibling = el.previous_element
+            sibling = el.previous_sibling
             while sibling and not isinstance(sibling, TAG):
-                sibling = sibling.previous_element
-            if sibling and sibling.parent is parent and isinstance(sibling, TAG):
+                sibling = sibling.previous_sibling
+            if sibling and isinstance(sibling, TAG):
                 found = self.match_selectors(sibling, [relation])
         return found
 
@@ -583,7 +579,7 @@ class SelectorMatcher:
         """Match future child."""
 
         match = False
-        for child in list(parent):
+        for child in parent.children:
             if not isinstance(child, TAG):
                 continue
             match = self.match_selectors(child, [relation])
@@ -602,22 +598,18 @@ class SelectorMatcher:
         elif relation.rel_type == REL_HAS_CLOSE_PARENT:
             found = self.match_future_child(el, relation)
         elif relation.rel_type == REL_HAS_SIBLING:
-            parent = el.parent
-            sibling = el.next_element
+            sibling = el.next_sibling
             while not found and sibling:
                 if not isinstance(sibling, TAG):
-                    sibling = sibling.next_element
+                    sibling = sibling.next_sibling
                     continue
-                if sibling.parent is not parent:
-                    break
                 found = self.match_selectors(sibling, [relation])
-                sibling = sibling.next_element
+                sibling = sibling.next_sibling
         elif relation.rel_type == REL_HAS_CLOSE_SIBLING:
-            parent = el.parent
-            sibling = el.next_element
+            sibling = el.next_sibling
             while sibling and not isinstance(sibling, TAG):
-                sibling = sibling.next_element
-            if sibling and sibling.parent is parent and isinstance(sibling, TAG):
+                sibling = sibling.next_sibling
+            if sibling and isinstance(sibling, TAG):
                 found = self.match_selectors(sibling, [relation])
         return found
 
