@@ -579,12 +579,10 @@ class SelectorMatcher:
         """Match future child."""
 
         match = False
-        for child in parent.children:
+        for child in (parent.descendants if recursive else parent.children):
             if not isinstance(child, TAG):
                 continue
             match = self.match_selectors(child, [relation])
-            if not match and recursive:
-                match = self.match_future_child(child, relation, recursive)
             if match:
                 break
         return match
