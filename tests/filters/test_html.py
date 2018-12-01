@@ -469,6 +469,7 @@ class TestHtml5AdvancedSelectors2(util.PluginTestCase):
               </div>
               <div class="iiii">iiii
                   <p class="jjjj">jjjj</p>
+                  <span></span>
               </div>
             </body>
             </body>
@@ -528,7 +529,61 @@ class TestHtml5AdvancedSelectors2(util.PluginTestCase):
         self.mktemp('.html5.yml', config, 'utf-8')
         self.assert_spellcheck(
             '.html5.yml', [
+                'aaaa', 'bbbb', 'eeee', 'ffff'
+            ]
+        )
+
+    def test_not_has_list2(self):
+        """Test HTML."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: html_css
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.html:
+                  mode: html5
+                  ignores:
+                  - 'div:not(:has(> .bbbb, .ffff, .jjjj))'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.html5.yml', config, 'utf-8')
+        self.assert_spellcheck(
+            '.html5.yml', [
                 'aaaa', 'bbbb', 'eeee', 'ffff', 'iiii', 'jjjj'
+            ]
+        )
+
+    def test_not_not(self):
+        """Test HTML."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: html_css
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.html:
+                  mode: html5
+                  ignores:
+                  - 'div:not(:not(.aaaa))'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.html5.yml', config, 'utf-8')
+        self.assert_spellcheck(
+            '.html5.yml', [
+                'cccc', 'dddd', 'eeee', 'ffff', 'gggg', 'hhhh', 'iiii', 'jjjj'
             ]
         )
 
