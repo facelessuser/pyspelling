@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.1
+
+- **FIX**: CSS4 allows `:not()`, `:has()`, and `:is()` to be nested in `:not()`.
+
 ## 2.1.0
 
 - **NEW**: Add support for `div p`, `div>p`, `div+p`, `div~p` in the HTML/XML filter's CSS selectors. (#51)

@@ -236,8 +236,6 @@ class SelectorMatcher:
     def parse_pseudo_open(self, sel, m, has_selector, iselector, is_pseudo):
         """Parse pseudo with opening bracket."""
 
-        if is_pseudo and sel.is_not:
-            raise ValueError("Pseudo-elements cannot be represented by the negation pseudo-class")
         sel.selectors.extend(
             self.parse_selectors(
                 iselector,

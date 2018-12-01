@@ -74,9 +74,6 @@ Selector             | Example                       | Description
 !!! warning ":has()"
     `:has()` implementation is experimental and may change. There are currently no reference implementation available in any browsers, not to mention the CSS4 specifications have not been finalized, so current implementation is based on our best interpretation.
 
-!!! note ":not()"
-    While you can nest `:not()` inside of `:is()` or `:has()`, you cannot match `:is()`, `:has()` or `:not()` inside of `:not()`. This is due to a limitation imposed by the CSS4 specification, not a limitation in our implementation.
-
 ## Options
 
 Options      | Type     | Default                           | Description
