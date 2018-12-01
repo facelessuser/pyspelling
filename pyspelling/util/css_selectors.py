@@ -10,7 +10,7 @@ RE_ESC = re.compile(r'(?:(\\[a-fA-F0-9]{1,6}[ ]?)|(\\.))')
 
 RE_HTML_SEL = re.compile(
     r'''(?x)
-    (?P<pseudo_open>:(?:not|matches|is)\() |                                      # optinal pseudo selector wrapper
+    (?P<pseudo_open>:(?:not|matches|is|has)\() |                                  # optinal pseudo selector wrapper
     (?P<pseudo>:root) |                                                           # Simple pseudo selector
     (?P<class_id>(?:\#|\.)(?:[-\w]|{esc})+) |                                     #.class and #id
     (?P<ns_tag>(?:(?:(?:[-\w]|{esc})+|\*)?\|)?(?:(?:[-\w]|{esc})+|\*)) |          # namespace:tag
@@ -26,7 +26,7 @@ RE_HTML_SEL = re.compile(
 
 RE_XML_SEL = re.compile(
     r'''(?x)
-    (?P<pseudo_open>:(?:not|matches|is)\() |                                        # optinal pseudo selector wrapper
+    (?P<pseudo_open>:(?:not|matches|is|has)\() |                                    # optinal pseudo selector wrapper
     (?P<pseudo>:root) |                                                             # Simple pseudo selector
     (?P<ns_tag>(?:(?:(?:[-\w.]|{esc})+|\*)?\|)?(?:(?:[-\w.]|{esc})+|\*)) |          # namespace:tag
     \[(?P<ns_attr>(?:(?:(?:[-\w]|{esc})+|\*)\|)?(?:[-\w.]|{esc})+)                  # namespace:attributes
@@ -52,6 +52,12 @@ REL_PARENT = ' '
 REL_CLOSE_PARENT = '>'
 REL_SIBLING = '~'
 REL_CLOSE_SIBLING = '+'
+
+# Relationships
+REL_HAS_PARENT = ': '
+REL_HAS_CLOSE_PARENT = ':>'
+REL_HAS_SIBLING = ':~'
+REL_HAS_CLOSE_SIBLING = ':+'
 
 
 def unescape(string):
@@ -85,13 +91,45 @@ def upper(string):  # pragma: no cover
     return ''.join(new_string)
 
 
-class Selector(
-    namedtuple(
-        'HtmlSelector',
-        ['tags', 'ids', 'classes', 'attributes', 'selectors', 'is_not', 'relation', 'rel_type', 'is_root']
-    )
-):
+class Selector:
     """CSS selector."""
+
+    def __init__(self, **kwargs):
+        """Initialize."""
+
+        self.tags = kwargs.get('tags', [])
+        self.ids = kwargs.get('ids', [])
+        self.classes = kwargs.get('classes', [])
+        self.attributes = kwargs.get('attributes', [])
+        self.selectors = kwargs.get('selectors', [])
+        self.is_not = kwargs.get('is_not', False)
+        self.relation = kwargs.get('relation', None)
+        self.rel_type = kwargs.get('rel_type', None)
+        self.is_root = kwargs.get('is_root', False)
+
+    def set_distant_relation(self, value):
+        """Set the furthest relation down the chain."""
+
+        if self.relation:
+            temp = self.relation
+            while temp and temp.relation:
+                temp = temp.relation
+            temp.relation = value
+        else:
+            self.relation = value
+
+    def __str__(self):
+        """String representation."""
+
+        return (
+            'Selector(tags=%r, ids=%r, classes=%r, attributes=%r, selectors=%r, '
+            'is_not=%r, relation=%r, rel_type=%r, is_root=%r)'
+        ) % (
+            self.tags, self.ids, self.classes, self.attributes, self.selectors,
+            self.is_not, self.relation, self.rel_type, self.is_root
+        )
+
+    __repr__ = __str__
 
 
 class SelectorTag(namedtuple('SelectorTag', ['name', 'prefix'])):
@@ -132,7 +170,7 @@ class SelectorMatcher:
 
         return self.mode in ('xml', 'xhtml')
 
-    def create_attribute_selector(self, m):
+    def parse_attribute_selector(self, sel, m, has_selector):
         """Create attribute selector from the returned regex match."""
 
         flags = re.I if m.group('i') else 0
@@ -169,9 +207,11 @@ class SelectorMatcher:
         else:
             # Value matches
             pattern = re.compile(r'^%s$' % re.escape(value), flags)
-        return SelectorAttribute(attr, ns, pattern)
+        has_selector = True
+        sel.attributes.append(SelectorAttribute(attr, ns, pattern))
+        return has_selector
 
-    def parse_tag_pattern(self, m):
+    def parse_tag_pattern(self, sel, m, has_selector):
         """Parse tag pattern from regex match."""
 
         parts = [unescape(x) for x in m.group('ns_tag').split('|')]
@@ -181,21 +221,127 @@ class SelectorMatcher:
         else:
             tag = parts[0]
             prefix = None
-        return SelectorTag(tag, prefix)
+        sel.tags.append(SelectorTag(tag, prefix))
+        has_selector = True
+        return has_selector
 
-    def parse_selectors(self, iselector, is_pseudo=False, is_not=False, relation=None):
+    def parse_pseudo(self, sel, m, has_selector):
+        """Parse pseudo."""
+
+        if m.group('pseudo')[1:] == 'root':
+            sel.is_root = True
+            has_selector = True
+        return has_selector
+
+    def parse_pseudo_open(self, sel, m, has_selector, iselector, is_pseudo):
+        """Parse pseudo with opening bracket."""
+
+        if is_pseudo and sel.is_not:
+            raise ValueError("Pseudo-elements cannot be represented by the negation pseudo-class")
+        sel.selectors.extend(
+            self.parse_selectors(
+                iselector,
+                True,
+                m.group('pseudo_open')[1:-1] == 'not',
+                m.group('pseudo_open')[1:-1] == 'has'
+            )
+        )
+        has_selector = True
+        return has_selector
+
+    def parse_has_split(self, sel, m, has_selector, selectors, is_pseudo, rel_type):
+        """Parse splitting tokens."""
+
+        if m.group('relation') == REL_NONE:
+            if not has_selector:
+                raise ValueError("Cannot start or end selector with '{}'".format(m.group('relation')))
+            sel.rel_type = rel_type
+            selectors[-1].set_distant_relation(sel)
+            rel_type = REL_HAS_PARENT
+            selectors.append(Selector())
+        else:
+            if has_selector:
+                sel.rel_type = rel_type
+                selectors[-1].set_distant_relation(sel)
+            rel_type = ':' + m.group('relation')
+        sel = Selector()
+
+        has_selector = False
+        return has_selector, sel, rel_type
+
+    def parse_split(self, sel, m, has_selector, selectors, relations, is_pseudo):
+        """Parse splitting tokens."""
+
+        if not has_selector:
+            raise ValueError("Cannot start or end selector with '{}'".format(m.group('relation')))
+        is_not = sel.is_not
+        if m.group('relation') == REL_NONE:
+            if not sel.tags and not is_pseudo:
+                # Implied `*`
+                sel.tags.append(SelectorTag('*', None))
+            sel.relation = relations[0] if relations else None
+            selectors.append(sel)
+            relations.clear()
+        else:
+            # In this particular case, we are attaching a relation to an element of interest.
+            # the `:not()` applies to the element of interest, not the ancestors. `:not()` is really only
+            # applied at the sub-selector level `Selector(is_not=False, selector=[Selector(is_not=True)])`
+            # We want to see if the element has the proper ancestry, and then apply the `:not()`.
+            # In the case of `:not(el1) > el2`, where the ancestor is evaluated with a not, you'd actually get:
+            # ```
+            # Selector(
+            #     tags=['el2'],
+            #     relations=[
+            #         [
+            #             Selector(
+            #                 tags=['*'],
+            #                 selectors=[
+            #                     Selector(
+            #                         tags=['el1'],
+            #                         is_not=True
+            #                     )
+            #                 ]
+            #             )
+            #         ]
+            #     ],
+            #     rel_type='>'
+            # )
+            # ```
+            sel.relation = relations[0] if relations else None
+            sel.rel_type = m.group('relation')
+            sel.is_not = False
+            relations.clear()
+            relations.append(sel)
+        sel = Selector(is_not=is_not)
+
+        has_selector = False
+        return has_selector, sel
+
+    def parse_classes(self, sel, m, has_selector):
+        """Parse classes."""
+
+        selector = m.group('class_id')
+        if selector.startswith('.'):
+            sel.classes.append(unescape(selector[1:]))
+            has_selector = True
+        else:
+            sel.ids.append(unescape(selector[1:]))
+            has_selector = True
+        return has_selector
+
+    def parse_selectors(self, iselector, is_pseudo=False, is_not=False, is_has=False):
         """Parse selectors."""
 
+        sel = Selector(is_not=is_not)
         selectors = []
         has_selector = False
-        tag = []
-        attributes = []
-        tag_id = []
-        classes = []
-        sub_selectors = []
         closed = False
-        is_root = False
         is_html = self.mode != 'xml'
+        relations = []
+        rel_type = REL_HAS_PARENT
+        split_last = False
+        if is_has:
+            selectors.append(Selector())
 
         try:
             while True:
@@ -203,99 +349,60 @@ class SelectorMatcher:
 
                 # Handle parts
                 if m.group('pseudo'):
-                    if m.group('pseudo')[1:] == 'root':
-                        is_root = True
-                        has_selector = True
+                    has_selector = self.parse_pseudo(sel, m, has_selector)
                 elif m.group('pseudo_open'):
-                    if is_pseudo and is_not:
-                        raise ValueError("Pseudo-elements cannot be represented by the negation pseudo-class")
-                    sub_selectors.extend(self.parse_selectors(iselector, True, m.group('pseudo_open')[1:-1] == 'not'))
-                    has_selector = True
+                    has_selector = self.parse_pseudo_open(sel, m, has_selector, iselector, is_pseudo)
                 elif m.group('pseudo_close'):
+                    if split_last:
+                        raise ValueError("Cannot end with a combining character")
                     if is_pseudo:
                         closed = True
                         break
                     else:
                         raise ValueError("Bad selector '{}'".format(m.group(0)))
                 elif m.group('split'):
-                    if not has_selector:
-                        raise ValueError("Cannot start selector with '{}'".format(m.group('relation')))
-                    if m.group('relation') == REL_NONE:
-                        if not tag and not is_pseudo:
-                            # Implied `*`
-                            tag.append(SelectorTag('*', None))
-                        selectors.append(
-                            Selector(
-                                tag,
-                                tag_id,
-                                tuple(classes),
-                                tuple(attributes),
-                                sub_selectors,
-                                is_not,
-                                relation,
-                                None,
-                                is_root
-                            )
+                    if split_last:
+                        raise ValueError("Cannot have combining character after a combining character")
+                    if is_has:
+                        has_selector, sel, rel_type = self.parse_has_split(
+                            sel, m, has_selector, selectors, is_pseudo, rel_type
                         )
                     else:
-                        relation = Selector(
-                            tag,
-                            tag_id,
-                            tuple(classes),
-                            tuple(attributes),
-                            sub_selectors,
-                            False,
-                            relation,
-                            m.group('relation'),
-                            is_root
-                        )
-                    has_selector = False
-                    tag = []
-                    attributes = []
-                    tag_id = []
-                    classes = []
-                    sub_selectors = []
-                    is_root = False
+                        has_selector, sel = self.parse_split(sel, m, has_selector, selectors, relations, is_pseudo)
+                    split_last = True
                     continue
                 elif m.group('ns_attr'):
-                    attributes.append(self.create_attribute_selector(m))
-                    has_selector = True
+                    has_selector = self.parse_attribute_selector(sel, m, has_selector)
                 elif m.group('ns_tag'):
-                    tag.append(self.parse_tag_pattern(m))
-                    has_selector = True
+                    has_selector = self.parse_tag_pattern(sel, m, has_selector)
                 elif is_html and m.group('class_id'):
-                    selector = m.group('class_id')
-                    if selector.startswith('.'):
-                        classes.append(unescape(selector[1:]))
-                        has_selector = True
-                    else:
-                        tag_id.append(unescape(selector[1:]))
-                        has_selector = True
+                    has_selector = self.parse_classes(sel, m, has_selector)
                 elif m.group('invalid'):
                     raise ValueError("Bad selector '{}'".format(m.group(0)))
+                split_last = False
         except StopIteration:
             pass
 
         if is_pseudo and not closed:
             raise ValueError("Unclosed `:pseudo()`")
 
+        if split_last:
+            raise ValueError("Cannot end with a combining character")
+
         if has_selector:
-            if not tag and not is_pseudo:
+            if not sel.tags and not is_pseudo:
                 # Implied `*`
-                tag.append(SelectorTag('*', None))
-            selectors.append(
-                Selector(
-                    tag,
-                    tag_id,
-                    tuple(classes),
-                    tuple(attributes),
-                    sub_selectors,
-                    is_not,
-                    relation,
-                    None,
-                    is_root
-                )
-            )
+                sel.tags.append(SelectorTag('*', None))
+            if is_has:
+                sel.rel_type = rel_type
+                selectors[-1].set_distant_relation(sel)
+            else:
+                sel.relation = relations[0] if relations else None
+                relations.clear()
+                selectors.append(sel)
+        elif is_has:
+            # We will always need to finish a selector when `:has()` is used as it leads with combining.
+            raise ValueError('Missing selectors after combining type.')
 
         return selectors
 
@@ -441,8 +548,8 @@ class SelectorMatcher:
                 break
         return match
 
-    def match_relations(self, el, relation):
-        """Match relationship to other elements."""
+    def match_past_relations(self, el, relation):
+        """Match past relationship."""
 
         found = False
         if relation.rel_type == REL_PARENT:
@@ -455,19 +562,77 @@ class SelectorMatcher:
             if parent:
                 found = self.match_selectors(parent, [relation])
         elif relation.rel_type == REL_SIBLING:
+            parent = el.parent
             sibling = el.previous_element
             while not found and sibling:
                 if not isinstance(sibling, TAG):
                     sibling = sibling.previous_element
                     continue
+                if sibling.parent is not parent:
+                    break
                 found = self.match_selectors(sibling, [relation])
                 sibling = sibling.previous_element
         elif relation.rel_type == REL_CLOSE_SIBLING:
+            parent = el.parent
             sibling = el.previous_element
             while sibling and not isinstance(sibling, TAG):
                 sibling = sibling.previous_element
-            if sibling and isinstance(sibling, TAG):
+            if sibling and sibling.parent is parent and isinstance(sibling, TAG):
                 found = self.match_selectors(sibling, [relation])
+        return found
+
+    def match_future_child(self, parent, relation, recursive=False):
+        """Match future child."""
+
+        match = False
+        for child in list(parent):
+            if not isinstance(child, TAG):
+                continue
+            match = self.match_selectors(child, [relation])
+            if not match and recursive:
+                match = self.match_future_child(child, relation, recursive)
+            if match:
+                break
+        return match
+
+    def match_future_relations(self, el, relation):
+        """Match future relationship."""
+
+        found = False
+        if relation.rel_type == REL_HAS_PARENT:
+            found = self.match_future_child(el, relation, True)
+        elif relation.rel_type == REL_HAS_CLOSE_PARENT:
+            found = self.match_future_child(el, relation)
+        elif relation.rel_type == REL_HAS_SIBLING:
+            parent = el.parent
+            sibling = el.next_element
+            while not found and sibling:
+                if not isinstance(sibling, TAG):
+                    sibling = sibling.next_element
+                    continue
+                if sibling.parent is not parent:
+                    break
+                found = self.match_selectors(sibling, [relation])
+                sibling = sibling.next_element
+        elif relation.rel_type == REL_HAS_CLOSE_SIBLING:
+            parent = el.parent
+            sibling = el.next_element
+            while sibling and not isinstance(sibling, TAG):
+                sibling = sibling.next_element
+            if sibling and sibling.parent is parent and isinstance(sibling, TAG):
+                found = self.match_selectors(sibling, [relation])
+        return found
+
+    def match_relations(self, el, relation):
+        """Match relationship to other elements."""
+
+        found = False
+
+        if relation.rel_type.startswith(':'):
+            found = self.match_future_relations(el, relation)
+        else:
+            found = self.match_past_relations(el, relation)
+
         return found
 
     def match_id(self, el, ids):
