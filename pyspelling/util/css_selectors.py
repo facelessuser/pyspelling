@@ -14,7 +14,7 @@ RE_HTML_SEL = re.compile(
     (?P<pseudo_open>:(?:not|matches|is|has)\() |                                  # optinal pseudo selector wrapper
     (?P<pseudo>:(?:root|last-child|last-of-type|first-child|first-of-type)) |     # Simple pseudo selector
     (?P<pseudo_nth>:(?:nth-child|nth-of-type|nth-last-child|nth-last-of-type)
-        \(\s*(?P<nth>{nth})\s*\)) |                                               # Pseudo `nth` selectors
+        \(\s*(?P<nth>{nth}|even|odd)\s*\)) |                                      # Pseudo `nth` selectors
     (?P<class_id>(?:\#|\.)(?:[-\w]|{esc})+) |                                     #.class and #id
     (?P<ns_tag>(?:(?:(?:[-\w]|{esc})+|\*)?\|)?(?:(?:[-\w]|{esc})+|\*)) |          # namespace:tag
     \[(?P<ns_attr>(?:(?:(?:[-\w]|{esc})+|\*)?\|)?(?:[-\w]|{esc})+)                # namespace:attributes
@@ -32,7 +32,7 @@ RE_XML_SEL = re.compile(
     (?P<pseudo_open>:(?:not|matches|is|has)\() |                                    # optinal pseudo selector wrapper
     (?P<pseudo>:(?:root|last-child|last-of-type|first-child|first-of-type)) |       # Simple pseudo selector
     (?P<pseudo_nth>:(?:nth-child|nth-of-type|nth-last-child|nth-last-of-type)
-        \(\s*(?P<nth>{nth})\s*\)) |                                                 # Pseudo `nth` selectors
+        \(\s*(?P<nth>{nth}|even|odd)\s*\)) |                                        # Pseudo `nth` selectors
     (?P<ns_tag>(?:(?:(?:[-\w.]|{esc})+|\*)?\|)?(?:(?:[-\w.]|{esc})+|\*)) |          # namespace:tag
     \[(?P<ns_attr>(?:(?:(?:[-\w]|{esc})+|\*)\|)?(?:[-\w.]|{esc})+)                  # namespace:attributes
     (?:(?P<cmp>[~^|*$]?=)                                                           # compare
@@ -258,23 +258,33 @@ class SelectorMatcher:
     def parse_pseudo_nth(self, sel, m, has_selector):
         """Parse `nth` pseudo."""
 
-        nth_parts = RE_NTH.match(m.group('nth'))
-        s1 = '-' if nth_parts.group('s1') and nth_parts.group('s1') == '-' else ''
-        a = nth_parts.group('a')
-        var = a.endswith('n')
-        if a.startswith('n'):
-            s1 += '1'
-        elif var:
-            s1 += a[:-1]
+        content = m.group('nth')
+        if content == 'even':
+            s1 = 2
+            s2 = 2
+            var = True
+        elif content == 'odd':
+            s1 = 2
+            s2 = 1
+            var = True
         else:
-            s1 += a
-        s2 = '-' if nth_parts.group('s2') and nth_parts.group('s2') == '-' else ''
-        if nth_parts.group('b'):
-            s2 += nth_parts.group('b')
-        else:
-            s2 = '0'
-        s1 = int(s1, 16)
-        s2 = int(s2, 16)
+            nth_parts = RE_NTH.match(content)
+            s1 = '-' if nth_parts.group('s1') and nth_parts.group('s1') == '-' else ''
+            a = nth_parts.group('a')
+            var = a.endswith('n')
+            if a.startswith('n'):
+                s1 += '1'
+            elif var:
+                s1 += a[:-1]
+            else:
+                s1 += a
+            s2 = '-' if nth_parts.group('s2') and nth_parts.group('s2') == '-' else ''
+            if nth_parts.group('b'):
+                s2 += nth_parts.group('b')
+            else:
+                s2 = '0'
+            s1 = int(s1, 16)
+            s2 = int(s2, 16)
 
         if m.group('pseudo_nth').startswith(':nth-child'):
             sel.nth.append(SelectorNth(s1, var, s2, SelectorTag('*', '*'), False))

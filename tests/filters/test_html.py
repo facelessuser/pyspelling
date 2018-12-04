@@ -324,6 +324,60 @@ class TestHtml5NthSelectors(util.PluginTestCase):
             ]
         )
 
+    def test_css_nth_odd(self):
+        """Test HTML."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: html_css
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.html:
+                  mode: html5
+                  ignores:
+                  - 'p:nth-child(odd)'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.html5.yml', config, 'utf-8')
+        self.assert_spellcheck(
+            '.html5.yml', [
+                'bbbb', 'cccc', 'dddd', 'eeee', 'ffff', 'gggg', 'hhhh', 'jjjj', 'llll'
+            ]
+        )
+
+    def test_css_nth_even(self):
+        """Test HTML."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: html_css
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.html:
+                  mode: html5
+                  ignores:
+                  - 'p:nth-child(even)'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.html5.yml', config, 'utf-8')
+        self.assert_spellcheck(
+            '.html5.yml', [
+                'aaaa', 'cccc', 'dddd', 'eeee', 'ffff', 'gggg', 'iiii', 'kkkk', 'llll'
+            ]
+        )
+
     def test_css_nth_child(self):
         """Test HTML."""
 
