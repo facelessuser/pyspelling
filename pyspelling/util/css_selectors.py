@@ -12,7 +12,10 @@ RE_ESC = re.compile(r'(?:(\\[a-fA-F0-9]{1,6}[ ]?)|(\\.))')
 RE_HTML_SEL = re.compile(
     r'''(?x)
     (?P<pseudo_open>:(?:not|matches|is|has)\() |                                  # optinal pseudo selector wrapper
-    (?P<pseudo>:(?:root|last-child|last-of-type|first-child|first-of-type)) |     # Simple pseudo selector
+    (?P<pseudo>:(?:
+        root|last-child|last-of-type|first-child|
+        first-of-type|only-child|only-of-type)
+    ) |                                                                           # Simple pseudo selector
     (?P<pseudo_nth>:(?:nth-child|nth-of-type|nth-last-child|nth-last-of-type)
         \(\s*(?P<nth>{nth}|even|odd)\s*\)) |                                      # Pseudo `nth` selectors
     (?P<class_id>(?:\#|\.)(?:[-\w]|{esc})+) |                                     #.class and #id
@@ -30,7 +33,10 @@ RE_HTML_SEL = re.compile(
 RE_XML_SEL = re.compile(
     r'''(?x)
     (?P<pseudo_open>:(?:not|matches|is|has)\() |                                    # optinal pseudo selector wrapper
-    (?P<pseudo>:(?:root|last-child|last-of-type|first-child|first-of-type)) |       # Simple pseudo selector
+    (?P<pseudo>:(?:
+        root|last-child|last-of-type|first-child|
+        first-of-type|only-child|only-of-type)
+    ) |                                                                             # Simple pseudo selector
     (?P<pseudo_nth>:(?:nth-child|nth-of-type|nth-last-child|nth-last-of-type)
         \(\s*(?P<nth>{nth}|even|odd)\s*\)) |                                        # Pseudo `nth` selectors
     (?P<ns_tag>(?:(?:(?:[-\w.]|{esc})+|\*)?\|)?(?:(?:[-\w.]|{esc})+|\*)) |          # namespace:tag
@@ -245,13 +251,27 @@ class SelectorMatcher:
             sel.is_root = True
             has_selector = True
         elif pseudo == 'first-child':
-            sel.nth.append(SelectorNth(1, False, 0, SelectorTag('*', '*'), False))
+            sel.nth.append(SelectorNth(1, False, 0, False, False))
         elif pseudo == 'last-child':
-            sel.nth.append(SelectorNth(1, False, 0, SelectorTag('*', '*'), True))
+            sel.nth.append(SelectorNth(1, False, 0, False, True))
         elif pseudo == 'first-of-type':
-            sel.nth.append(SelectorNth(1, False, 0, sel.tags[-1], False))
+            sel.nth.append(SelectorNth(1, False, 0, True, False))
         elif pseudo == 'last-of-type':
-            sel.nth.append(SelectorNth(1, False, 0, sel.tags[-1], True))
+            sel.nth.append(SelectorNth(1, False, 0, True, True))
+        elif pseudo == 'only-child':
+            sel.nth.extend(
+                [
+                    SelectorNth(1, False, 0, False, False),
+                    SelectorNth(1, False, 0, False, True)
+                ]
+            )
+        elif pseudo == 'only-of-type':
+            sel.nth.extend(
+                [
+                    SelectorNth(1, False, 0, True, False),
+                    SelectorNth(1, False, 0, True, True)
+                ]
+            )
 
         return has_selector
 
@@ -287,13 +307,13 @@ class SelectorMatcher:
             s2 = int(s2, 16)
 
         if m.group('pseudo_nth').startswith(':nth-child'):
-            sel.nth.append(SelectorNth(s1, var, s2, SelectorTag('*', '*'), False))
+            sel.nth.append(SelectorNth(s1, var, s2, False, False))
         elif m.group('pseudo_nth').startswith(':nth-last-child'):
-            sel.nth.append(SelectorNth(s1, var, s2, SelectorTag('*', '*'), True))
+            sel.nth.append(SelectorNth(s1, var, s2, False, True))
         elif m.group('pseudo_nth').startswith(':nth-of-type'):
-            sel.nth.append(SelectorNth(s1, var, s2, sel.tags[-1], False))
+            sel.nth.append(SelectorNth(s1, var, s2, True, False))
         elif m.group('pseudo_nth').startswith(':nth-last-of-type'):
-            sel.nth.append(SelectorNth(s1, var, s2, sel.tags[-1], True))
+            sel.nth.append(SelectorNth(s1, var, s2, True, True))
         return has_selector
 
     def parse_pseudo_open(self, sel, m, has_selector, iselector, is_pseudo):
@@ -724,8 +744,6 @@ class SelectorMatcher:
 
         for n in nth:
             matched = False
-            if not self.match_tag(el, [n.type]):
-                break
             if not el.parent:
                 break
             parent = el.parent
@@ -746,7 +764,8 @@ class SelectorMatcher:
                     index += factor
                     if not isinstance(child, TAG):
                         continue
-                    if not self.match_tag(child, [n.type]):
+                    # Need to handle namespace
+                    if n.type and child.name != (lower(el.name) if not self.is_xml() else el.name):
                         continue
                     relative_index += 1
                     if relative_index == idx:

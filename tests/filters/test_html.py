@@ -237,6 +237,94 @@ class TestHtml5AttrNamespace(util.PluginTestCase):
         self.assert_spellcheck('.html5.yml', ['cccc'])
 
 
+class TestHtml5OnlySelectors(util.PluginTestCase):
+    """Test CSS `nth` selectors."""
+
+    def setup_fs(self):
+        """Setup file system."""
+
+        template = self.dedent(
+            """
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+            </head>
+            <body>
+            <div>
+                <p>aaaa</p>
+            </div>
+            <span>bbbb</span>
+            <span>cccc</span>
+            <p>dddd</p>
+            <span>eeee</span>
+            <span>ffff</span>
+            <div>
+                <p>gggg</p>
+                <p>hhhh</p>
+            </div>
+            </body>
+            </html>
+            """
+        )
+
+        self.mktemp('test.txt', template, 'utf-8')
+
+    def test_css_only_child(self):
+        """Test HTML."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: html_css
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.html:
+                  mode: html5
+                  ignores:
+                  - 'p:only-child'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.html5.yml', config, 'utf-8')
+        self.assert_spellcheck(
+            '.html5.yml', [
+                'bbbb', 'cccc', 'dddd', 'eeee', 'ffff', 'gggg', 'hhhh'
+            ]
+        )
+
+    def test_css_only_type(self):
+        """Test HTML."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: html_css
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.html:
+                  mode: html5
+                  ignores:
+                  - 'p:only-of-type'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.html5.yml', config, 'utf-8')
+        self.assert_spellcheck(
+            '.html5.yml', [
+                'bbbb', 'cccc', 'eeee', 'ffff', 'gggg', 'hhhh'
+            ]
+        )
+
+
 class TestHtml5NthSelectors(util.PluginTestCase):
     """Test CSS `nth` selectors."""
 
@@ -321,6 +409,33 @@ class TestHtml5NthSelectors(util.PluginTestCase):
         self.assert_spellcheck(
             '.html5.yml', [
                 'bbbb', 'cccc', 'dddd', 'eeee', 'ffff', 'gggg', 'iiii', 'kkkk', 'llll'
+            ]
+        )
+
+    def test_css_nth_complex_type(self):
+        """Test HTML."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: html_css
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.html:
+                  mode: html5
+                  ignores:
+                  - ':nth-of-type(2n + 1):is(p, span)'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.html5.yml', config, 'utf-8')
+        self.assert_spellcheck(
+            '.html5.yml', [
+                'bbbb', 'dddd', 'ffff', 'iiii', 'kkkk', 'llll'
             ]
         )
 
