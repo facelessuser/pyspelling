@@ -8,7 +8,6 @@ CPP
 CSS
 Changelog
 Cygwin
-EmojiOne
 GitHub
 GitLab
 Homebrew
@@ -94,6 +93,7 @@ subtypes
 syntaxes
 trigraphs
 tuple
+un
 validator
 whitespace
 wildcard

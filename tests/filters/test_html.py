@@ -388,6 +388,67 @@ class TestHtml5OnlySelectors(util.PluginTestCase):
         )
 
 
+class TestHtml5NthOfSelectors(util.PluginTestCase):
+    """Test CSS `nth` selectors."""
+
+    def setup_fs(self):
+        """Setup file system."""
+
+        template = self.dedent(
+            """
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+            </head>
+            <body>
+            <p>aaaa</p>
+            <p>bbbb</p>
+            <span class="test">cccc</span>
+            <span>dddd</span>
+            <span class="test">eeee</span>
+            <span>ffff</span>
+            <span class="test">gggg</span>
+            <p>hhhh</p>
+            <p class="test">iiii</p>
+            <p>jjjj</p>
+            <p class="test">kkkk</p>
+            <span>llll</span>
+            </body>
+            </html>
+            """
+        )
+
+        self.mktemp('test.txt', template, 'utf-8')
+
+    def test_css_child_of_s(self):
+        """Test HTML."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: html_css
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.html:
+                  mode: html5
+                  ignores:
+                  - ':nth-child(2n + 1 of :is(p, span).test)'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.html5.yml', config, 'utf-8')
+        self.assert_spellcheck(
+            '.html5.yml', [
+                'aaaa', 'bbbb', 'dddd', 'eeee', 'ffff', 'hhhh', 'iiii', 'jjjj', 'llll'
+            ]
+        )
+
+
 class TestHtml5NthSelectors(util.PluginTestCase):
     """Test CSS `nth` selectors."""
 

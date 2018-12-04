@@ -26,49 +26,64 @@ matrix:
 
 ## Supported CSS Selectors
 
-The CSS selectors are based on a limited subset of CSS4 selectors. The same selectors that are available for HTML are available for XML except for classes and IDs.
+The CSS selectors are based on a limited subset of CSS4 selectors. Primarily support has been added for selectors that were feasible to implement and most likely to get practical use in context of how PySpelling uses them.
 
-Below shows accepted selectors. You must configure the CSS namespaces in the plugin options in order for them to work properly.
+Below shows accepted selectors. When speaking about namespaces, they only apply to XHTML or when dealing with recognized foreign tags in HTML5. You must configure the CSS namespaces in the plugin options in order for them to work properly.
 
-While an effort is made to mimic CSS selector behavior, there may be some differences or quirks. We do not support all CSS selector features, but enough to make the task of ignoring tags or selectively capturing tags easy. The only pseudo classes that are currently supported is `:not()` and `:matches()` as they are the most helpful in the task of ignoring or capturing tags.
+While an effort is made to mimic CSS selector behavior, there may be some differences or quirks, please report issues if any are found. We do not support all CSS selector features, but enough to make the task of ignoring tags or selectively capturing tags easy.
 
 Examples below are using HTML, but can be adapted for XML.
 
-Selector             | Example                       | Description
--------------------- | ----------------------------- | -----------
-`Element`            | `div`                         | Select the `<div>` element (will be under the default namespace if defined for XHTML).
-`Element, Element`   | `div, h1`                     | Select the `<div>` element and the `<h1>` element.
-`Element Element`    | `div p`                       | Select all `<p>` elements inside `<div>` elements.
-`Element>Element`    | `div > p`                     | Select all `<p>` elements where the parent is a `<div>` element.
-`Element+Element`    | `div + p`                     | Select all `<p>` elements that are placed immediately after `<div>` elements.
-`Element~Element`    | `p ~ ul`                      | Select every `<ul>` element that is preceded by a `<p>` element.
-`namespace|Element`  | `svg|circle`                  | Select the `<circle>` element which also has the namespace `svg`.
-`*|Element`          | `*|div`                       | Select the `<div>` element with or without a namespace.
-`namespace|*`        | `svg|*`                       | Select any element with the namespace `svg`.
-`|Element`           | `|div`                        | Select `<div>` elements without a namespace.
-`|*`                 | `|*`                          | Select any element without a namespace.
-`*|*`                | `*|*`                         | Select all elements with any or no namespace.
-`*`                  | `*`                           | Select all elements. If a default namespace is defined, it will be any element under the default namespace.
-`[attribute]`        | `[target]`                    | Selects all elements with a `target` attribute.
-`[ns|attribute]`     | `[xlink|href]`                | Selects elements with the attribute `href` and the namespace `xlink` (assuming it has been configured in the `namespaces` option).
-`[*|attribute]`      | `[*|name]`                    | Selects any element with a `name` attribute that has a namespace or not.
-`[|attribute]`       | `[|name]`                     | Selects any element with a `name` attribute. `[|name]` is equivalent to `[name]`.
-`[attribute=value]`  | `[target=_blank]`             | Selects all attributes with `target="_blank"`.
-`[attribute~=value]` | `[title~=flower]`             | Selects all elements with a `title` attribute containing the word `flower`.
-`[attribute|=value]` | `[lang|=en]`                  | Selects all elements with a `lang` attribute value starting with `en`.
-`[attribute^=value]` | `a[href^="https"]`            | Selects every `<a>` element whose `href` attribute value begins with `https`.
-`[attribute$=value]` | `a[href$=".pdf"]`             | Selects every `<a>` element whose `href` attribute value ends with `.pdf`.
-`[attribute*=value]` | `a[href*="sometext"]`         | Selects every `<a>` element whose `href` attribute value contains the substring `sometext`.
-`:not(sel, sel)`     | `:not(.some-class, #some-id)` | Selects elements that do not have class `some-class` and ID `some-id`.
-`:is(sel, sel)`      | `:is(div, .some-class)`       | Selects elements that are not `<div>` and do not have class `some-class`. The alias `:matches` is allowed as well.
-`:has(> sel, + sel)` | `:has(> div, + p)`            | Selects elements that have a direct child that is a `<div>` or that have sibling of `<p>` immediately following.
-`:root`              | `:root`                       | Selects the root element.
+Selector                        | Example                       | Description
+------------------------------- | ----------------------------- | -----------
+`Element`                       | `div`                         | Select the `<div>` element (will be under the default namespace if defined for XHTML).
+`Element, Element`              | `div, h1`                     | Select the `<div>` element and the `<h1>` element.
+`Element Element`               | `div p`                       | Select all `<p>` elements inside `<div>` elements.
+`Element>Element`               | `div > p`                     | Select all `<p>` elements where the parent is a `<div>` element.
+`Element+Element`               | `div + p`                     | Select all `<p>` elements that are placed immediately after `<div>` elements.
+`Element~Element`               | `p ~ ul`                      | Select every `<ul>` element that is preceded by a `<p>` element.
+`namespace|Element`             | `svg|circle`                  | Select the `<circle>` element which also has the namespace `svg`.
+`*|Element`                     | `*|div`                       | Select the `<div>` element with or without a namespace.
+`namespace|*`                   | `svg|*`                       | Select any element with the namespace `svg`.
+`|Element`                      | `|div`                        | Select `<div>` elements without a namespace.
+`|*`                            | `|*`                          | Select any element without a namespace.
+`*|*`                           | `*|*`                         | Select all elements with any or no namespace.
+`*`                             | `*`                           | Select all elements. If a default namespace is defined, it will be any element under the default namespace.
+`[attribute]`                   | `[target]`                    | Selects all elements with a `target` attribute.
+`[ns|attribute]`                | `[xlink|href]`                | Selects elements with the attribute `href` and the namespace `xlink` (assuming it has been configured in the `namespaces` option).
+`[*|attribute]`                 | `[*|name]`                    | Selects any element with a `name` attribute that has a namespace or not.
+`[|attribute]`                  | `[|name]`                     | Selects any element with a `name` attribute. `[|name]` is equivalent to `[name]`.
+`[attribute=value]`             | `[target=_blank]`             | Selects all attributes with `target="_blank"`.
+`[attribute~=value]`            | `[title~=flower]`             | Selects all elements with a `title` attribute containing the word `flower`.
+`[attribute|=value]`            | `[lang|=en]`                  | Selects all elements with a `lang` attribute value starting with `en`.
+`[attribute^=value]`            | `a[href^="https"]`            | Selects every `<a>` element whose `href` attribute value begins with `https`.
+`[attribute$=value]`            | `a[href$=".pdf"]`             | Selects every `<a>` element whose `href` attribute value ends with `.pdf`.
+`[attribute*=value]`            | `a[href*="sometext"]`         | Selects every `<a>` element whose `href` attribute value contains the substring `sometext`.
+`:not(sel, sel)`                | `:not(.some-class, #some-id)` | Selects elements that do not have class `some-class` and ID `some-id`.
+`:is(sel, sel)`                 | `:is(div, .some-class)`       | Selects elements that are not `<div>` and do not have class `some-class`. The alias `:matches` is allowed as well. In CSS4 `:where` is like `:is` except specificity is always zero. PySpelling doesn't care about specificity, so `:where` is exactly like `:is`.
+`:has(> sel, + sel)`            | `:has(> div, + p)`            | Selects elements that have a direct child that is a `<div>` or that have sibling of `<p>` immediately following.
+`:first-child`                  | `p:first-child`               | Selects every `<p>` element that is the first child of its parent.
+`:last-child`                   | `p:last-child`                | Selects every `<p>` element that is the last child of its parent.
+`:first-of-type`                | `p:first-of-type`             | Selects every `<p>` element that is the first `<p>` element of its parent.
+`:last-of-type`                 | `p:last-of-type`              | Selects every `<p>` element that is the last `<p>` element of its parent.
+`:only-child`                   | `p:only-child`                | Selects every `<p>` element that is the only child of its parent.
+`:only-of-type`                 | `p:only-of-type`              | Selects every `<p>` element that is the only `<p>` element of its parent.
+`:nth-child(an+b [of S]?)`      | `p:nth-child(2)`              | Selects every `<p>` element that is the second child of its parent. Please see CSS specification for more info on format.
+`:nth-last-child(an+b [of S]?)` | `p:nth-last-child(2)`         | Selects every `<p>` element that is the second child of its parent, counting from the last child. Please see CSS specification for more info on format.
+`:nth-of-type(an+b)`            | `p:nth-of-type(2)`            | Selects every `<p>` element that is the second `<p>` element of its parent. Please see CSS specification for more info on format.
+`:nth-last-of-type(an+b)`       | `p:nth-last-of-type(2)`       | Selects every `<p>` element that is the second `<p>` element of its parent, counting from the last child. Please see CSS specification for more info on format.
+`:root`                         | `:root`                       | Selects the root element. In HTML, this is usually the `<html>` element.
+`:empty`                        | `p:empty`                     | Selects every `<p>` element that has no children and either no text. Whitespace and comments are ignored.
 
-!!! new "New 2.1.0"
-    Support for `div p`, `div>p`, `div+p`, `div~p`, `:is()`, `:has()` and `:root`.
+!!! new "New"
+    Support for `div p`, `div>p`, `div+p`, `div~p`, `:is()`, `:has()` and `:root` was added in 2.1.0.
 
-!!! warning ":has()"
-    `:has()` implementation is experimental and may change. There are currently no reference implementation available in any browsers, so current implementation is based on our best interpretation.
+    Support for `:nth-*`, `:first-*`, `:last-*`, `:only-*`, and `:empty` was added in 2.2.0.
+
+!!! warning "Experimental Selectors"
+    `:has()` implementation is experimental and may change. There are currently no reference implementation available in any browsers, not to mention the CSS4 specifications have not been finalized, so current implementation is based on our best interpretation.
+
+    Recent addition of `:nth-*`, `:first-*`, `:last-*`, `:only-*`, is experimental. It has been implemented to the best of our understanding, especially `of S` support. Any issues with the should be reported.
 
 ## Options
 

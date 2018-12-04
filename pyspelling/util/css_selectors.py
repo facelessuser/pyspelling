@@ -7,19 +7,21 @@ TAG = bs4.element.Tag
 HAS_CHILD = (TAG, bs4.Doctype, bs4.Declaration, bs4.CData, bs4.ProcessingInstruction)
 
 CSS_ESCAPES = r'(?:\\[a-fA-F0-9]{1,6}[ ]?|\\.)'
-NTH = r'(?P<s1>[-+])?(?P<a>\d+n?|n)(?:(?<=n)\s*(?P<s2>[-+])\s*(?P<b>\d+))?'
+NTH = r'(?:[-+])?(?:\d+n?|n)(?:(?<=n)\s*(?:[-+])\s*(?:\d+))?'
 RE_ESC = re.compile(r'(?:(\\[a-fA-F0-9]{1,6}[ ]?)|(\\.))')
 RE_NOT_EMPTY = re.compile('[^ \t\r\n]')
 
 RE_HTML_SEL = re.compile(
     r'''(?x)
-    (?P<pseudo_open>:(?:not|matches|is|has)\() |                                  # optinal pseudo selector wrapper
+    (?P<pseudo_open>:(?:not|matches|is|has|where)\() |                            # optinal pseudo selector wrapper
     (?P<pseudo>:(?:
         root|empty|last-child|last-of-type|first-child|
         first-of-type|only-child|only-of-type)
     ) |                                                                           # Simple pseudo selector
-    (?P<pseudo_nth>:(?:nth-child|nth-of-type|nth-last-child|nth-last-of-type)
-        \(\s*(?P<nth>{nth}|even|odd)\s*\)) |                                      # Pseudo `nth` selectors
+    (?P<pseudo_nth_child>:nth-(?:last-)?child
+        \(\s*(?P<nth_child>{nth}|even|odd)\s*(?:\)|(?<=\s)of\s+)) |               # Pseudo `nth-child` selectors
+    (?P<pseudo_nth_type>:nth-(?:last-)?of-type
+        \(\s*(?P<nth_type>{nth}|even|odd)\s*\)) |                                 # Pseudo `nth-of-type` selectors
     (?P<class_id>(?:\#|\.)(?:[-\w]|{esc})+) |                                     #.class and #id
     (?P<ns_tag>(?:(?:(?:[-\w]|{esc})+|\*)?\|)?(?:(?:[-\w]|{esc})+|\*)) |          # namespace:tag
     \[(?P<ns_attr>(?:(?:(?:[-\w]|{esc})+|\*)?\|)?(?:[-\w]|{esc})+)                # namespace:attributes
@@ -34,13 +36,15 @@ RE_HTML_SEL = re.compile(
 
 RE_XML_SEL = re.compile(
     r'''(?x)
-    (?P<pseudo_open>:(?:not|matches|is|has)\() |                                    # optinal pseudo selector wrapper
+    (?P<pseudo_open>:(?:not|matches|is|has|where)\() |                              # optinal pseudo selector wrapper
     (?P<pseudo>:(?:
         root|empty|last-child|last-of-type|first-child|
         first-of-type|only-child|only-of-type)
     ) |                                                                             # Simple pseudo selector
-    (?P<pseudo_nth>:(?:nth-child|nth-of-type|nth-last-child|nth-last-of-type)
-        \(\s*(?P<nth>{nth}|even|odd)\s*\)) |                                        # Pseudo `nth` selectors
+    (?P<pseudo_nth_child>:nth-(?:last-)?child
+        \(\s*(?P<nth_child>{nth}|even|odd)\s*(?:\)|(?<=\s)of\s+)) |                 # Pseudo `nth-child` selectors
+    (?P<pseudo_nth_type>:nth-(?:last-)?of-type
+        \(\s*(?P<nth_type>{nth}|even|odd)\s*\)) |                                   # Pseudo `nth-of-type` selectors
     (?P<ns_tag>(?:(?:(?:[-\w.]|{esc})+|\*)?\|)?(?:(?:[-\w.]|{esc})+|\*)) |          # namespace:tag
     \[(?P<ns_attr>(?:(?:(?:[-\w]|{esc})+|\*)\|)?(?:[-\w.]|{esc})+)                  # namespace:attributes
     (?:(?P<cmp>[~^|*$]?=)                                                           # compare
@@ -52,7 +56,7 @@ RE_XML_SEL = re.compile(
     '''.format(**{'esc': CSS_ESCAPES, 'nth': NTH})
 )
 
-RE_NTH = re.compile(NTH)
+RE_NTH = re.compile(r'(?P<s1>[-+])?(?P<a>\d+n?|n)(?:(?<=n)\s*(?P<s2>[-+])\s*(?P<b>\d+))?')
 
 MODES = ('xml', 'html', 'html5', 'xhtml')
 
@@ -157,7 +161,7 @@ class SelectorAttribute(namedtuple('AttrRule', ['attribute', 'prefix', 'pattern'
     """Selector attribute rule."""
 
 
-class SelectorNth(namedtuple('SelectorNth', ['a', 'n', 'b', 'type', 'last'])):
+class SelectorNth(namedtuple('SelectorNth', ['a', 'n', 'b', 'type', 'last', 'selectors'])):
     """Selector nth type."""
 
 
@@ -256,34 +260,35 @@ class SelectorMatcher:
         elif pseudo == 'empty':
             sel.is_empty = True
         elif pseudo == 'first-child':
-            sel.nth.append(SelectorNth(1, False, 0, False, False))
+            sel.nth.append(SelectorNth(1, False, 0, False, False, []))
         elif pseudo == 'last-child':
-            sel.nth.append(SelectorNth(1, False, 0, False, True))
+            sel.nth.append(SelectorNth(1, False, 0, False, True, []))
         elif pseudo == 'first-of-type':
-            sel.nth.append(SelectorNth(1, False, 0, True, False))
+            sel.nth.append(SelectorNth(1, False, 0, True, False, []))
         elif pseudo == 'last-of-type':
-            sel.nth.append(SelectorNth(1, False, 0, True, True))
+            sel.nth.append(SelectorNth(1, False, 0, True, True, []))
         elif pseudo == 'only-child':
             sel.nth.extend(
                 [
-                    SelectorNth(1, False, 0, False, False),
-                    SelectorNth(1, False, 0, False, True)
+                    SelectorNth(1, False, 0, False, False, []),
+                    SelectorNth(1, False, 0, False, True, [])
                 ]
             )
         elif pseudo == 'only-of-type':
             sel.nth.extend(
                 [
-                    SelectorNth(1, False, 0, True, False),
-                    SelectorNth(1, False, 0, True, True)
+                    SelectorNth(1, False, 0, True, False, []),
+                    SelectorNth(1, False, 0, True, True, [])
                 ]
             )
 
         return has_selector
 
-    def parse_pseudo_nth(self, sel, m, has_selector):
+    def parse_pseudo_nth(self, sel, m, has_selector, iselector):
         """Parse `nth` pseudo."""
 
-        content = m.group('nth')
+        postfix = '_child' if m.group('pseudo_nth_child') else '_type'
+        content = m.group('nth' + postfix)
         if content == 'even':
             s1 = 2
             s2 = 2
@@ -311,14 +316,31 @@ class SelectorMatcher:
             s1 = int(s1, 16)
             s2 = int(s2, 16)
 
-        if m.group('pseudo_nth').startswith(':nth-child'):
-            sel.nth.append(SelectorNth(s1, var, s2, False, False))
-        elif m.group('pseudo_nth').startswith(':nth-last-child'):
-            sel.nth.append(SelectorNth(s1, var, s2, False, True))
-        elif m.group('pseudo_nth').startswith(':nth-of-type'):
-            sel.nth.append(SelectorNth(s1, var, s2, True, False))
-        elif m.group('pseudo_nth').startswith(':nth-last-of-type'):
-            sel.nth.append(SelectorNth(s1, var, s2, True, True))
+        if postfix == '_child':
+            if m.group('pseudo_nth' + postfix).startswith(':nth-child'):
+                sel.nth.append(SelectorNth(s1, var, s2, False, False, []))
+            elif m.group('pseudo_nth' + postfix).startswith(':nth-last-child'):
+                sel.nth.append(SelectorNth(s1, var, s2, False, True, []))
+            if m.group('pseudo_nth' + postfix).strip().endswith('of'):
+                # Parse the rest of `of S`.
+                temp_sel = iselector
+            else:
+                # Use default `*|*` for `of S`. Simulate un-closed pseudo.
+                temp_sel = self.re_sel.finditer('*|*)')
+            sel.nth[-1].selectors.extend(
+                self.parse_selectors(
+                    temp_sel,
+                    True,
+                    False,
+                    False
+                )
+            )
+        else:
+            if m.group('pseudo_nth' + postfix).startswith(':nth-of-type'):
+                sel.nth.append(SelectorNth(s1, var, s2, True, False, []))
+            elif m.group('pseudo_nth' + postfix).startswith(':nth-last-of-type'):
+                sel.nth.append(SelectorNth(s1, var, s2, True, True, []))
+        has_selector = True
         return has_selector
 
     def parse_pseudo_open(self, sel, m, has_selector, iselector, is_pseudo):
@@ -436,8 +458,8 @@ class SelectorMatcher:
                 # Handle parts
                 if m.group('pseudo'):
                     has_selector = self.parse_pseudo(sel, m, has_selector)
-                elif m.group('pseudo_nth'):
-                    has_selector = self.parse_pseudo_nth(sel, m, has_selector)
+                elif m.group('pseudo_nth_type') or m.group('pseudo_nth_child'):
+                    has_selector = self.parse_pseudo_nth(sel, m, has_selector, iselector)
                 elif m.group('pseudo_open'):
                     has_selector = self.parse_pseudo_open(sel, m, has_selector, iselector, is_pseudo)
                 elif m.group('pseudo_close'):
@@ -759,6 +781,8 @@ class SelectorMatcher:
             matched = False
             if not el.parent:
                 break
+            if n.selectors and not self.match_selectors(el, n.selectors):
+                break
             parent = el.parent
             last = n.last
             last_index = len(parent.contents) - 1
@@ -777,7 +801,10 @@ class SelectorMatcher:
                     index += factor
                     if not isinstance(child, TAG):
                         continue
-                    # Need to handle namespace
+                    # Handle `of S` in `nth-child`
+                    if n.selectors and not self.match_selectors(child, n.selectors):
+                        continue
+                    # Handle `of-type`
                     if n.type and not self.match_nth_tag_type(el, child):
                         continue
                     relative_index += 1

@@ -1,8 +1,12 @@
 # Changelog
 
+## 2.2.0
+
+- **NEW**: Add support for CSS4 selectors: `:empty`, `:first-child`, `:last-child`, `:only-child`, `:first-of-type`, `:last-of-type`, `:only-of-type`, `:nth-child(an+b [of S]?)`, `:nth-last-child(an+b [of S]?)`, `:nth-of-type(an+b)`, and `:nth-last-of-type(an+b)`. (#58)
+
 ## 2.1.1
 
-- **FIX**: CSS4 allows `:not()`, `:has()`, and `:is()` to be nested in `:not()`.
+- **FIX**: CSS4 allows `:not()`, `:has()`, and `:is()` to be nested in `:not()`. (#62)
 
 ## 2.1.0
 
