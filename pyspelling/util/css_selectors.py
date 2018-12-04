@@ -737,6 +737,14 @@ class SelectorMatcher:
         parent = el.parent
         return parent and not parent.parent
 
+    def match_nth_tag_type(self, el, child):
+        """Match tag type for `nth` matches."""
+
+        return(
+            (child.name == (lower(el.name) if not self.is_xml() else el.name)) and
+            (self.supports_namespaces() and self.get_namespace(child) == self.get_namespace(el))
+        )
+
     def match_nth(self, el, nth):
         """Match `nth` elements."""
 
@@ -765,7 +773,7 @@ class SelectorMatcher:
                     if not isinstance(child, TAG):
                         continue
                     # Need to handle namespace
-                    if n.type and child.name != (lower(el.name) if not self.is_xml() else el.name):
+                    if n.type and not self.match_nth_tag_type(el, child):
                         continue
                     relative_index += 1
                     if relative_index == idx:
