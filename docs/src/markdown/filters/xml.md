@@ -83,7 +83,7 @@ Selector                        | Example                       | Description
 !!! warning "Experimental Selectors"
     `:has()` implementation is experimental and may change. There are currently no reference implementation available in any browsers, not to mention the CSS4 specifications have not been finalized, so current implementation is based on our best interpretation.
 
-    Recent addition of `:nth-*`, `:first-*`, `:last-*`, `:only-*`, is experimental. It has been implemented to the best of our understanding, especially `of S` support. Any issues with the should be reported.
+    Recent addition of `:nth-*`, `:first-*`, `:last-*`, and `:only-*`, is experimental. It has been implemented to the best of our understanding, especially `of S` support. Any issues with the should be reported.
 
 ## Options
 
