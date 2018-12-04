@@ -6,12 +6,15 @@ import bs4
 TAG = bs4.element.Tag
 
 CSS_ESCAPES = r'(?:\\[a-fA-F0-9]{1,6}[ ]?|\\.)'
+NTH = r'(?P<s1>[-+])?(?P<a>\d+n?|n)(?:(?<=n)\s*(?P<s2>[-+])\s*(?P<b>\d+))?'
 RE_ESC = re.compile(r'(?:(\\[a-fA-F0-9]{1,6}[ ]?)|(\\.))')
 
 RE_HTML_SEL = re.compile(
     r'''(?x)
     (?P<pseudo_open>:(?:not|matches|is|has)\() |                                  # optinal pseudo selector wrapper
-    (?P<pseudo>:root) |                                                           # Simple pseudo selector
+    (?P<pseudo>:(?:root|last-child|last-of-type|first-child|first-of-type)) |     # Simple pseudo selector
+    (?P<pseudo_nth>:(?:nth-child|nth-of-type|nth-last-child|nth-last-of-type)
+        \(\s*(?P<nth>{nth})\s*\)) |                                               # Pseudo `nth` selectors
     (?P<class_id>(?:\#|\.)(?:[-\w]|{esc})+) |                                     #.class and #id
     (?P<ns_tag>(?:(?:(?:[-\w]|{esc})+|\*)?\|)?(?:(?:[-\w]|{esc})+|\*)) |          # namespace:tag
     \[(?P<ns_attr>(?:(?:(?:[-\w]|{esc})+|\*)?\|)?(?:[-\w]|{esc})+)                # namespace:attributes
@@ -21,13 +24,15 @@ RE_HTML_SEL = re.compile(
     (?P<pseudo_close>\)) |                                                        # optional pseudo selector close
     (?P<split>\s*?(?P<relation>[,+>~]|[ ](?![,+>~]))\s*) |                        # split multiple selectors
     (?P<invalid>).+                                                               # not proper syntax
-    '''.format(**{'esc': CSS_ESCAPES})
+    '''.format(**{'esc': CSS_ESCAPES, 'nth': NTH})
 )
 
 RE_XML_SEL = re.compile(
     r'''(?x)
     (?P<pseudo_open>:(?:not|matches|is|has)\() |                                    # optinal pseudo selector wrapper
-    (?P<pseudo>:root) |                                                             # Simple pseudo selector
+    (?P<pseudo>:(?:root|last-child|last-of-type|first-child|first-of-type)) |       # Simple pseudo selector
+    (?P<pseudo_nth>:(?:nth-child|nth-of-type|nth-last-child|nth-last-of-type)
+        \(\s*(?P<nth>{nth})\s*\)) |                                                 # Pseudo `nth` selectors
     (?P<ns_tag>(?:(?:(?:[-\w.]|{esc})+|\*)?\|)?(?:(?:[-\w.]|{esc})+|\*)) |          # namespace:tag
     \[(?P<ns_attr>(?:(?:(?:[-\w]|{esc})+|\*)\|)?(?:[-\w.]|{esc})+)                  # namespace:attributes
     (?:(?P<cmp>[~^|*$]?=)                                                           # compare
@@ -36,8 +41,10 @@ RE_XML_SEL = re.compile(
     (?P<pseudo_close>\)) |                                                          # optional pseudo selector close
     (?P<split>\s*?(?P<relation>[,+>~]|[ ](?![,+>~]))\s*) |                          # Split for multiple selectors
     (?P<invalid>.+)                                                                 # not proper syntax
-    '''.format(**{'esc': CSS_ESCAPES})
+    '''.format(**{'esc': CSS_ESCAPES, 'nth': NTH})
 )
+
+RE_NTH = re.compile(NTH)
 
 MODES = ('xml', 'html', 'html5', 'xhtml')
 
@@ -101,6 +108,7 @@ class Selector:
         self.ids = kwargs.get('ids', [])
         self.classes = kwargs.get('classes', [])
         self.attributes = kwargs.get('attributes', [])
+        self.nth = kwargs.get('nth', [])
         self.selectors = kwargs.get('selectors', [])
         self.is_not = kwargs.get('is_not', False)
         self.relation = kwargs.get('relation', None)
@@ -138,6 +146,10 @@ class SelectorTag(namedtuple('SelectorTag', ['name', 'prefix'])):
 
 class SelectorAttribute(namedtuple('AttrRule', ['attribute', 'prefix', 'pattern'])):
     """Selector attribute rule."""
+
+
+class SelectorNth(namedtuple('SelectorNth', ['a', 'n', 'b', 'type', 'last'])):
+    """Selector nth type."""
 
 
 class SelectorMatcher:
@@ -228,9 +240,50 @@ class SelectorMatcher:
     def parse_pseudo(self, sel, m, has_selector):
         """Parse pseudo."""
 
-        if m.group('pseudo')[1:] == 'root':
+        pseudo = m.group('pseudo')[1:]
+        if pseudo == 'root':
             sel.is_root = True
             has_selector = True
+        elif pseudo == 'first-child':
+            sel.nth.append(SelectorNth(1, False, 0, SelectorTag('*', '*'), False))
+        elif pseudo == 'last-child':
+            sel.nth.append(SelectorNth(1, False, 0, SelectorTag('*', '*'), True))
+        elif pseudo == 'first-of-type':
+            sel.nth.append(SelectorNth(1, False, 0, sel.tags[-1], False))
+        elif pseudo == 'last-of-type':
+            sel.nth.append(SelectorNth(1, False, 0, sel.tags[-1], True))
+
+        return has_selector
+
+    def parse_pseudo_nth(self, sel, m, has_selector):
+        """Parse `nth` pseudo."""
+
+        nth_parts = RE_NTH.match(m.group('nth'))
+        s1 = '-' if nth_parts.group('s1') and nth_parts.group('s1') == '-' else ''
+        a = nth_parts.group('a')
+        var = a.endswith('n')
+        if a.startswith('n'):
+            s1 += '1'
+        elif var:
+            s1 += a[:-1]
+        else:
+            s1 += a
+        s2 = '-' if nth_parts.group('s2') and nth_parts.group('s2') == '-' else ''
+        if nth_parts.group('b'):
+            s2 += nth_parts.group('b')
+        else:
+            s2 = '0'
+        s1 = int(s1, 16)
+        s2 = int(s2, 16)
+
+        if m.group('pseudo_nth').startswith(':nth-child'):
+            sel.nth.append(SelectorNth(s1, var, s2, SelectorTag('*', '*'), False))
+        elif m.group('pseudo_nth').startswith(':nth-last-child'):
+            sel.nth.append(SelectorNth(s1, var, s2, SelectorTag('*', '*'), True))
+        elif m.group('pseudo_nth').startswith(':nth-of-type'):
+            sel.nth.append(SelectorNth(s1, var, s2, sel.tags[-1], False))
+        elif m.group('pseudo_nth').startswith(':nth-last-of-type'):
+            sel.nth.append(SelectorNth(s1, var, s2, sel.tags[-1], True))
         return has_selector
 
     def parse_pseudo_open(self, sel, m, has_selector, iselector, is_pseudo):
@@ -348,6 +401,8 @@ class SelectorMatcher:
                 # Handle parts
                 if m.group('pseudo'):
                     has_selector = self.parse_pseudo(sel, m, has_selector)
+                elif m.group('pseudo_nth'):
+                    has_selector = self.parse_pseudo_nth(sel, m, has_selector)
                 elif m.group('pseudo_open'):
                     has_selector = self.parse_pseudo_open(sel, m, has_selector, iselector, is_pseudo)
                 elif m.group('pseudo_close'):
@@ -372,6 +427,8 @@ class SelectorMatcher:
                 elif m.group('ns_attr'):
                     has_selector = self.parse_attribute_selector(sel, m, has_selector)
                 elif m.group('ns_tag'):
+                    if has_selector:
+                        raise ValueError("Tag must come first")
                     has_selector = self.parse_tag_pattern(sel, m, has_selector)
                 elif is_html and m.group('class_id'):
                     has_selector = self.parse_classes(sel, m, has_selector)
@@ -650,6 +707,57 @@ class SelectorMatcher:
         parent = el.parent
         return parent and not parent.parent
 
+    def match_nth(self, el, nth):
+        """Match `nth` elements."""
+
+        matched = True
+
+        for n in nth:
+            matched = False
+            if not self.match_tag(el, [n.type]):
+                break
+            if not el.parent:
+                break
+            parent = el.parent
+            last = n.last
+            last_index = len(parent.contents) - 1
+            relative_index = 0
+            factor = -1 if last else 1
+            index = len(parent.contents) - 1 if last else 0
+            a = n.a
+            b = n.b
+            var = n.n
+            count = 0
+            idx = last_idx = a * count + b if var else a
+            while 0 <= idx <= last_index:
+                child = None
+                while 0 <= index <= last_index:
+                    child = parent.contents[index]
+                    index += factor
+                    if not isinstance(child, TAG):
+                        continue
+                    if not self.match_tag(child, [n.type]):
+                        continue
+                    relative_index += 1
+                    if relative_index == idx:
+                        if child is el:
+                            matched = True
+                        else:
+                            break
+                    if child is el:
+                        break
+                if child is el:
+                    break
+                last_idx = idx
+                count += 1
+                idx = a * count + b if var else a
+                if last_idx == idx:
+                    break
+            if not matched:
+                break
+
+        return matched
+
     def match_selectors(self, el, selectors):
         """Check if element matches one of the selectors."""
 
@@ -659,6 +767,9 @@ class SelectorMatcher:
             match = selector.is_not
             # Verify tag matches
             if not self.match_tag(el, selector.tags):
+                continue
+            # Verify `nth` matches
+            if not self.match_nth(el, selector.nth):
                 continue
             # Verify id matches
             if is_html and selector.ids and not self.match_id(el, selector.ids):

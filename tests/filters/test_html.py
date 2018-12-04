@@ -237,6 +237,256 @@ class TestHtml5AttrNamespace(util.PluginTestCase):
         self.assert_spellcheck('.html5.yml', ['cccc'])
 
 
+class TestHtml5NthSelectors(util.PluginTestCase):
+    """Test CSS `nth` selectors."""
+
+    def setup_fs(self):
+        """Setup file system."""
+
+        template = self.dedent(
+            """
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+            </head>
+            <body>
+            <p>aaaa</p>
+            <p>bbbb</p>
+            <span>cccc</span>
+            <span>dddd</span>
+            <span>eeee</span>
+            <span>ffff</span>
+            <span>gggg</span>
+            <p>hhhh</p>
+            <p>iiii</p>
+            <p>jjjj</p>
+            <p>kkkk</p>
+            <span>llll</span>
+            </body>
+            </html>
+            """
+        )
+
+        self.mktemp('test.txt', template, 'utf-8')
+
+    def test_css_first_child(self):
+        """Test HTML."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: html_css
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.html:
+                  mode: html5
+                  ignores:
+                  - 'p:first-child'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.html5.yml', config, 'utf-8')
+        self.assert_spellcheck(
+            '.html5.yml', [
+                'bbbb', 'cccc', 'dddd', 'eeee', 'ffff', 'gggg', 'hhhh', 'iiii', 'jjjj', 'kkkk', 'llll'
+            ]
+        )
+
+    def test_css_nth_type(self):
+        """Test HTML."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: html_css
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.html:
+                  mode: html5
+                  ignores:
+                  - 'p:nth-of-type(2n + 1)'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.html5.yml', config, 'utf-8')
+        self.assert_spellcheck(
+            '.html5.yml', [
+                'bbbb', 'cccc', 'dddd', 'eeee', 'ffff', 'gggg', 'iiii', 'kkkk', 'llll'
+            ]
+        )
+
+    def test_css_nth_child(self):
+        """Test HTML."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: html_css
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.html:
+                  mode: html5
+                  ignores:
+                  - 'p:nth-child(2n + 1)'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.html5.yml', config, 'utf-8')
+        self.assert_spellcheck(
+            '.html5.yml', [
+                'bbbb', 'cccc', 'dddd', 'eeee', 'ffff', 'gggg', 'hhhh', 'jjjj', 'llll'
+            ]
+        )
+
+    def test_css_nth_last_type(self):
+        """Test HTML."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: html_css
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.html:
+                  mode: html5
+                  ignores:
+                  - 'p:nth-last-of-type(2n + 1)'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.html5.yml', config, 'utf-8')
+        self.assert_spellcheck(
+            '.html5.yml', [
+                'aaaa', 'cccc', 'dddd', 'eeee', 'ffff', 'gggg', 'jjjj', 'hhhh', 'llll'
+            ]
+        )
+
+    def test_css_nth_last_child(self):
+        """Test HTML."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: html_css
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.html:
+                  mode: html5
+                  ignores:
+                  - 'p:nth-last-child(2n + 1)'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.html5.yml', config, 'utf-8')
+        self.assert_spellcheck(
+            '.html5.yml', [
+                'aaaa', 'cccc', 'dddd', 'eeee', 'ffff', 'gggg', 'iiii', 'kkkk', 'llll'
+            ]
+        )
+
+    def test_css_first_type(self):
+        """Test HTML."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: html_css
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.html:
+                  mode: html5
+                  ignores:
+                  - 'span:first-of-type'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.html5.yml', config, 'utf-8')
+        self.assert_spellcheck(
+            '.html5.yml', [
+                'aaaa', 'bbbb', 'dddd', 'eeee', 'ffff', 'gggg', 'hhhh', 'iiii', 'jjjj', 'kkkk', 'llll'
+            ]
+        )
+
+    def test_css_last_child(self):
+        """Test HTML."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: html_css
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.html:
+                  mode: html5
+                  ignores:
+                  - 'span:last-child'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.html5.yml', config, 'utf-8')
+        self.assert_spellcheck(
+            '.html5.yml', [
+                'aaaa', 'bbbb', 'cccc', 'dddd', 'eeee', 'ffff', 'gggg', 'hhhh', 'iiii', 'jjjj', 'kkkk'
+            ]
+        )
+
+    def test_css_last_type(self):
+        """Test HTML."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: html_css
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.html:
+                  mode: html5
+                  ignores:
+                  - 'p:last-of-type'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.html5.yml', config, 'utf-8')
+        self.assert_spellcheck(
+            '.html5.yml', [
+                'aaaa', 'bbbb', 'cccc', 'dddd', 'eeee', 'ffff', 'gggg', 'hhhh', 'iiii', 'jjjj', 'llll'
+            ]
+        )
+
+
 class TestHtml5AdvancedSelectors(util.PluginTestCase):
     """Test advanced CSS selectors."""
 
