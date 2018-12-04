@@ -4,16 +4,18 @@ from collections import namedtuple
 import bs4
 
 TAG = bs4.element.Tag
+HAS_CHILD = (TAG, bs4.Doctype, bs4.Declaration, bs4.CData, bs4.ProcessingInstruction)
 
 CSS_ESCAPES = r'(?:\\[a-fA-F0-9]{1,6}[ ]?|\\.)'
 NTH = r'(?P<s1>[-+])?(?P<a>\d+n?|n)(?:(?<=n)\s*(?P<s2>[-+])\s*(?P<b>\d+))?'
 RE_ESC = re.compile(r'(?:(\\[a-fA-F0-9]{1,6}[ ]?)|(\\.))')
+RE_NOT_EMPTY = re.compile('[^ \t\r\n]')
 
 RE_HTML_SEL = re.compile(
     r'''(?x)
     (?P<pseudo_open>:(?:not|matches|is|has)\() |                                  # optinal pseudo selector wrapper
     (?P<pseudo>:(?:
-        root|last-child|last-of-type|first-child|
+        root|empty|last-child|last-of-type|first-child|
         first-of-type|only-child|only-of-type)
     ) |                                                                           # Simple pseudo selector
     (?P<pseudo_nth>:(?:nth-child|nth-of-type|nth-last-child|nth-last-of-type)
@@ -34,7 +36,7 @@ RE_XML_SEL = re.compile(
     r'''(?x)
     (?P<pseudo_open>:(?:not|matches|is|has)\() |                                    # optinal pseudo selector wrapper
     (?P<pseudo>:(?:
-        root|last-child|last-of-type|first-child|
+        root|empty|last-child|last-of-type|first-child|
         first-of-type|only-child|only-of-type)
     ) |                                                                             # Simple pseudo selector
     (?P<pseudo_nth>:(?:nth-child|nth-of-type|nth-last-child|nth-last-of-type)
@@ -117,6 +119,7 @@ class Selector:
         self.nth = kwargs.get('nth', [])
         self.selectors = kwargs.get('selectors', [])
         self.is_not = kwargs.get('is_not', False)
+        self.is_empty = kwargs.get('is_empty', False)
         self.relation = kwargs.get('relation', None)
         self.rel_type = kwargs.get('rel_type', None)
         self.is_root = kwargs.get('is_root', False)
@@ -250,6 +253,8 @@ class SelectorMatcher:
         if pseudo == 'root':
             sel.is_root = True
             has_selector = True
+        elif pseudo == 'empty':
+            sel.is_empty = True
         elif pseudo == 'first-child':
             sel.nth.append(SelectorNth(1, False, 0, False, False))
         elif pseudo == 'last-child':
@@ -795,6 +800,21 @@ class SelectorMatcher:
 
         return matched
 
+    def has_child(self, el):
+        """Check if element has child."""
+
+        found_child = False
+        for child in el.children:
+            if isinstance(child, HAS_CHILD):
+                found_child = True
+                break
+        return found_child
+
+    def match_empty(self, el, is_empty):
+        """Check if element is empty (if requested)."""
+
+        return not is_empty or (RE_NOT_EMPTY.search(el.text) is None and not self.has_child(el))
+
     def match_selectors(self, el, selectors):
         """Check if element matches one of the selectors."""
 
@@ -807,6 +827,8 @@ class SelectorMatcher:
                 continue
             # Verify `nth` matches
             if not self.match_nth(el, selector.nth):
+                continue
+            if not self.match_empty(el, selector.is_empty):
                 continue
             # Verify id matches
             if is_html and selector.ids and not self.match_id(el, selector.ids):

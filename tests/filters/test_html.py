@@ -237,6 +237,69 @@ class TestHtml5AttrNamespace(util.PluginTestCase):
         self.assert_spellcheck('.html5.yml', ['cccc'])
 
 
+class TestHtml5EmptySelectors(util.PluginTestCase):
+    """Test CSS empty selectors."""
+
+    def setup_fs(self):
+        """Setup file system."""
+
+        template = self.dedent(
+            """
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+            </head>
+            <body>
+            <span>aaaa</span>
+            <span> <!-- comment --> </span>
+            <span>bbbb</span>
+            <span>cccc</span>
+            <span>  </span>
+            <p>dddd</p>
+            <span>eeee</span>
+            <span>ffff</span>
+            <div>
+                <p>gggg</p>
+                <span>
+                </span>
+                <p>hhhh</p>
+            </div>
+            </body>
+            </html>
+            """
+        )
+
+        self.mktemp('test.txt', template, 'utf-8')
+
+    def test_css_empty(self):
+        """Test HTML."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: html_css
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.html:
+                  mode: html5
+                  ignores:
+                  - 'span:empty + *'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.html5.yml', config, 'utf-8')
+        self.assert_spellcheck(
+            '.html5.yml', [
+                'aaaa', 'cccc', 'eeee', 'ffff', 'gggg'
+            ]
+        )
+
+
 class TestHtml5OnlySelectors(util.PluginTestCase):
     """Test CSS `nth` selectors."""
 
