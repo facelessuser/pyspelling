@@ -794,40 +794,42 @@ class SelectorMatcher:
             count_incr = 1
             factor = -1 if last else 1
             index = len(parent.contents) - 1 if last else 0
-
-            # Abort if our nth index is out of bounds and only getting further out of bounds as we increment.
-            # Otherwise, increment to try to get in bounds.
             idx = last_idx = a * count + b if var else a
-            while idx < 1 or idx > last_index:
-                diff_low = 0 - idx
-                if idx < 0:
-                    count += count_incr
-                    idx = last_idx = a * count + b if var else a
-                    diff = 0 - idx
-                    if diff > diff_low:
-                        break
-                    diff_low = diff
-                diff_high = idx - last_index
-                if idx > last_index:
-                    count += count_incr
-                    idx = last_idx = a * count + b if var else a
-                    diff = idx - last_index
-                    if diff > diff_high:
-                        break
-                    diff_high = diff
 
-            # If a < 0, our count is working backwards, so floor the index by increasing the count.
-            # Find the count that yields the lowest, in bound value and use that.
-            # Lastly reverse count increment so that we'll increase our index.
-            lowest = count
-            if a < 0:
-                while idx >= 1:
-                    lowest = count
-                    count += count_incr
-                    idx = last_idx = a * count + b if var else a
-                count_incr = -1
-            count = lowest
-            idx = last_idx = a * count + b if var else a
+            # We can only adjust bounds within a variable index
+            if var:
+                # Abort if our nth index is out of bounds and only getting further out of bounds as we increment.
+                # Otherwise, increment to try to get in bounds.
+                while idx < 1 or idx > last_index:
+                    diff_low = 0 - idx
+                    if idx < 0:
+                        count += count_incr
+                        idx = last_idx = a * count + b if var else a
+                        diff = 0 - idx
+                        if diff >= diff_low:
+                            break
+                        diff_low = diff
+                    diff_high = idx - last_index
+                    if idx > last_index:
+                        count += count_incr
+                        idx = last_idx = a * count + b if var else a
+                        diff = idx - last_index
+                        if diff >= diff_high:
+                            break
+                        diff_high = diff
+
+                # If a < 0, our count is working backwards, so floor the index by increasing the count.
+                # Find the count that yields the lowest, in bound value and use that.
+                # Lastly reverse count increment so that we'll increase our index.
+                lowest = count
+                if a < 0:
+                    while idx >= 1:
+                        lowest = count
+                        count += count_incr
+                        idx = last_idx = a * count + b if var else a
+                    count_incr = -1
+                count = lowest
+                idx = last_idx = a * count + b if var else a
 
             # Evaluate elements while our calculated nth index is still in range
             while 1 <= idx <= last_index:
