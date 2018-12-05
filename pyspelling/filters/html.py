@@ -9,6 +9,7 @@ import codecs
 import html
 from . import xml
 from ..util.css_selectors import SelectorMatcher, lower
+from collections import deque
 
 RE_HTML_ENCODE = re.compile(
     br'''(?xi)
@@ -63,7 +64,6 @@ class HtmlFilter(xml.XmlFilter):
     def setup(self):
         """Setup."""
 
-        self.ancestry = []
         self.user_break_tags = set(self.config['break_tags'])
         self.comments = self.config.get('comments', True) is True
         self.attributes = set(self.config['attributes'])
@@ -72,10 +72,10 @@ class HtmlFilter(xml.XmlFilter):
             self.type = 'html'
         self.parser = MODE[self.type]
         self.ignores = SelectorMatcher(
-            self.config['ignores'], self.type, self.config['namespaces']
+            ','.join(self.config['ignores']), self.type, self.config['namespaces']
         )
         self.captures = SelectorMatcher(
-            self.config['captures'], self.type, self.config['namespaces']
+            ','.join(self.config['captures']), self.type, self.config['namespaces']
         )
 
     def header_check(self, content):
@@ -111,10 +111,10 @@ class HtmlFilter(xml.XmlFilter):
         else:
             return [c for c in el.attrs.get('class', '').strip().split(' ') if c]
 
-    def store_blocks(self, el, blocks, text, is_root):
+    def store_blocks(self, el, blocks, text, force_root):
         """Store the text as desired."""
 
-        if is_root or self.is_break_tag(el):
+        if force_root or el.parent is None or self.is_break_tag(el):
             content = html.unescape(''.join(text))
             if content:
                 blocks.append((content, self.construct_selector(el)))
@@ -124,12 +124,12 @@ class HtmlFilter(xml.XmlFilter):
     def construct_selector(self, el, attr=''):
         """Construct an selector for context."""
 
-        selector = []
-        for ancestor in self.ancestry:
+        selector = deque()
+        ancestor = el
+        while ancestor and ancestor.parent:
             if ancestor is not el:
-                if ancestor.name != '[document]':
-                    selector.append(ancestor.name)
-            elif ancestor.name != '[document]':
+                selector.appendleft(ancestor.name)
+            else:
                 tag = ancestor.name
                 prefix = ancestor.prefix
                 classes = self.get_classes(ancestor)
@@ -144,7 +144,8 @@ class HtmlFilter(xml.XmlFilter):
                     sel += '.' + '.'.join(classes)
                 if attr:
                     sel += '[%s]' % attr
-                selector.append(sel)
+                selector.appendleft(sel)
+            ancestor = ancestor.parent
         return '>'.join(selector)
 
 

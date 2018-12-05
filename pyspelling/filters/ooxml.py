@@ -17,17 +17,17 @@ DOC_PARAMS = {
     'docx': {
         'filepattern': 'word/{document,header*,footer*,footnotes,endnotes}.xml',
         'namespaces': {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'},
-        'captures': ['w|t']
+        'captures': 'w|t'
     },
     'pptx': {
         'filepattern': 'ppt/slides/slide*.xml',
         'namespaces': {'a': 'http://schemas.openxmlformats.org/drawingml/2006/main'},
-        'captures': ['a|t']
+        'captures': 'a|t'
     },
     'xlsx': {
         'filepattern': 'xl/sharedStrings.xml',
         'namespaces': {'': 'http://schemas.openxmlformats.org/spreadsheetml/2006/main'},
-        'captures': ['t']
+        'captures': 't'
     }
 }
 
@@ -58,13 +58,12 @@ class OoxmlFilter(odf.OdfFilter):
         """Setup."""
 
         self.additional_context = ''
-        self.ancestry = []
         self.comments = False
         self.attributes = []
         self.parser = 'xml'
         self.type = None
         self.filepattern = ''
-        self.ignores = SelectorMatcher([], 'xml', {})
+        self.ignores = SelectorMatcher('', 'xml', {})
         self.captures = None
 
     def has_bom(self, filestream):
@@ -129,11 +128,6 @@ class OoxmlFilter(odf.OdfFilter):
 
         should_break = False
         return should_break
-
-    def extract_tag_metadata(self, el):
-        """Extract meta data."""
-
-        self.ancestry.append(el)
 
     def get_context(self, filename):
         """Get context."""
