@@ -4,14 +4,24 @@ from collections import namedtuple
 import bs4
 
 TAG = bs4.element.Tag
+HAS_CHILD = (TAG, bs4.Doctype, bs4.Declaration, bs4.CData, bs4.ProcessingInstruction)
 
 CSS_ESCAPES = r'(?:\\[a-fA-F0-9]{1,6}[ ]?|\\.)'
+NTH = r'(?:[-+])?(?:\d+n?|n)(?:(?<=n)\s*(?:[-+])\s*(?:\d+))?'
 RE_ESC = re.compile(r'(?:(\\[a-fA-F0-9]{1,6}[ ]?)|(\\.))')
+RE_NOT_EMPTY = re.compile('[^ \t\r\n]')
 
 RE_HTML_SEL = re.compile(
     r'''(?x)
-    (?P<pseudo_open>:(?:not|matches|is|has)\() |                                  # optinal pseudo selector wrapper
-    (?P<pseudo>:root) |                                                           # Simple pseudo selector
+    (?P<pseudo_open>:(?:not|matches|is|has|where)\() |                            # optinal pseudo selector wrapper
+    (?P<pseudo>:(?:
+        root|empty|last-child|last-of-type|first-child|
+        first-of-type|only-child|only-of-type)
+    ) |                                                                           # Simple pseudo selector
+    (?P<pseudo_nth_child>:nth-(?:last-)?child
+        \(\s*(?P<nth_child>{nth}|even|odd)\s*(?:\)|(?<=\s)of\s+)) |               # Pseudo `nth-child` selectors
+    (?P<pseudo_nth_type>:nth-(?:last-)?of-type
+        \(\s*(?P<nth_type>{nth}|even|odd)\s*\)) |                                 # Pseudo `nth-of-type` selectors
     (?P<class_id>(?:\#|\.)(?:[-\w]|{esc})+) |                                     #.class and #id
     (?P<ns_tag>(?:(?:(?:[-\w]|{esc})+|\*)?\|)?(?:(?:[-\w]|{esc})+|\*)) |          # namespace:tag
     \[(?P<ns_attr>(?:(?:(?:[-\w]|{esc})+|\*)?\|)?(?:[-\w]|{esc})+)                # namespace:attributes
@@ -21,13 +31,20 @@ RE_HTML_SEL = re.compile(
     (?P<pseudo_close>\)) |                                                        # optional pseudo selector close
     (?P<split>\s*?(?P<relation>[,+>~]|[ ](?![,+>~]))\s*) |                        # split multiple selectors
     (?P<invalid>).+                                                               # not proper syntax
-    '''.format(**{'esc': CSS_ESCAPES})
+    '''.format(**{'esc': CSS_ESCAPES, 'nth': NTH})
 )
 
 RE_XML_SEL = re.compile(
     r'''(?x)
-    (?P<pseudo_open>:(?:not|matches|is|has)\() |                                    # optinal pseudo selector wrapper
-    (?P<pseudo>:root) |                                                             # Simple pseudo selector
+    (?P<pseudo_open>:(?:not|matches|is|has|where)\() |                              # optinal pseudo selector wrapper
+    (?P<pseudo>:(?:
+        root|empty|last-child|last-of-type|first-child|
+        first-of-type|only-child|only-of-type)
+    ) |                                                                             # Simple pseudo selector
+    (?P<pseudo_nth_child>:nth-(?:last-)?child
+        \(\s*(?P<nth_child>{nth}|even|odd)\s*(?:\)|(?<=\s)of\s+)) |                 # Pseudo `nth-child` selectors
+    (?P<pseudo_nth_type>:nth-(?:last-)?of-type
+        \(\s*(?P<nth_type>{nth}|even|odd)\s*\)) |                                   # Pseudo `nth-of-type` selectors
     (?P<ns_tag>(?:(?:(?:[-\w.]|{esc})+|\*)?\|)?(?:(?:[-\w.]|{esc})+|\*)) |          # namespace:tag
     \[(?P<ns_attr>(?:(?:(?:[-\w]|{esc})+|\*)\|)?(?:[-\w.]|{esc})+)                  # namespace:attributes
     (?:(?P<cmp>[~^|*$]?=)                                                           # compare
@@ -36,8 +53,10 @@ RE_XML_SEL = re.compile(
     (?P<pseudo_close>\)) |                                                          # optional pseudo selector close
     (?P<split>\s*?(?P<relation>[,+>~]|[ ](?![,+>~]))\s*) |                          # Split for multiple selectors
     (?P<invalid>.+)                                                                 # not proper syntax
-    '''.format(**{'esc': CSS_ESCAPES})
+    '''.format(**{'esc': CSS_ESCAPES, 'nth': NTH})
 )
+
+RE_NTH = re.compile(r'(?P<s1>[-+])?(?P<a>\d+n?|n)(?:(?<=n)\s*(?P<s2>[-+])\s*(?P<b>\d+))?')
 
 MODES = ('xml', 'html', 'html5', 'xhtml')
 
@@ -101,8 +120,10 @@ class Selector:
         self.ids = kwargs.get('ids', [])
         self.classes = kwargs.get('classes', [])
         self.attributes = kwargs.get('attributes', [])
+        self.nth = kwargs.get('nth', [])
         self.selectors = kwargs.get('selectors', [])
         self.is_not = kwargs.get('is_not', False)
+        self.is_empty = kwargs.get('is_empty', False)
         self.relation = kwargs.get('relation', None)
         self.rel_type = kwargs.get('rel_type', None)
         self.is_root = kwargs.get('is_root', False)
@@ -138,6 +159,10 @@ class SelectorTag(namedtuple('SelectorTag', ['name', 'prefix'])):
 
 class SelectorAttribute(namedtuple('AttrRule', ['attribute', 'prefix', 'pattern'])):
     """Selector attribute rule."""
+
+
+class SelectorNth(namedtuple('SelectorNth', ['a', 'n', 'b', 'type', 'last', 'selectors'])):
+    """Selector nth type."""
 
 
 class SelectorMatcher:
@@ -228,9 +253,94 @@ class SelectorMatcher:
     def parse_pseudo(self, sel, m, has_selector):
         """Parse pseudo."""
 
-        if m.group('pseudo')[1:] == 'root':
+        pseudo = m.group('pseudo')[1:]
+        if pseudo == 'root':
             sel.is_root = True
             has_selector = True
+        elif pseudo == 'empty':
+            sel.is_empty = True
+        elif pseudo == 'first-child':
+            sel.nth.append(SelectorNth(1, False, 0, False, False, []))
+        elif pseudo == 'last-child':
+            sel.nth.append(SelectorNth(1, False, 0, False, True, []))
+        elif pseudo == 'first-of-type':
+            sel.nth.append(SelectorNth(1, False, 0, True, False, []))
+        elif pseudo == 'last-of-type':
+            sel.nth.append(SelectorNth(1, False, 0, True, True, []))
+        elif pseudo == 'only-child':
+            sel.nth.extend(
+                [
+                    SelectorNth(1, False, 0, False, False, []),
+                    SelectorNth(1, False, 0, False, True, [])
+                ]
+            )
+        elif pseudo == 'only-of-type':
+            sel.nth.extend(
+                [
+                    SelectorNth(1, False, 0, True, False, []),
+                    SelectorNth(1, False, 0, True, True, [])
+                ]
+            )
+
+        return has_selector
+
+    def parse_pseudo_nth(self, sel, m, has_selector, iselector):
+        """Parse `nth` pseudo."""
+
+        postfix = '_child' if m.group('pseudo_nth_child') else '_type'
+        content = m.group('nth' + postfix)
+        if content == 'even':
+            s1 = 2
+            s2 = 2
+            var = True
+        elif content == 'odd':
+            s1 = 2
+            s2 = 1
+            var = True
+        else:
+            nth_parts = RE_NTH.match(content)
+            s1 = '-' if nth_parts.group('s1') and nth_parts.group('s1') == '-' else ''
+            a = nth_parts.group('a')
+            var = a.endswith('n')
+            if a.startswith('n'):
+                s1 += '1'
+            elif var:
+                s1 += a[:-1]
+            else:
+                s1 += a
+            s2 = '-' if nth_parts.group('s2') and nth_parts.group('s2') == '-' else ''
+            if nth_parts.group('b'):
+                s2 += nth_parts.group('b')
+            else:
+                s2 = '0'
+            s1 = int(s1, 16)
+            s2 = int(s2, 16)
+
+        if postfix == '_child':
+            if m.group('pseudo_nth' + postfix).startswith(':nth-child'):
+                sel.nth.append(SelectorNth(s1, var, s2, False, False, []))
+            elif m.group('pseudo_nth' + postfix).startswith(':nth-last-child'):
+                sel.nth.append(SelectorNth(s1, var, s2, False, True, []))
+            if m.group('pseudo_nth' + postfix).strip().endswith('of'):
+                # Parse the rest of `of S`.
+                temp_sel = iselector
+            else:
+                # Use default `*|*` for `of S`. Simulate un-closed pseudo.
+                temp_sel = self.re_sel.finditer('*|*)')
+            sel.nth[-1].selectors.extend(
+                self.parse_selectors(
+                    temp_sel,
+                    True,
+                    False,
+                    False
+                )
+            )
+        else:
+            if m.group('pseudo_nth' + postfix).startswith(':nth-of-type'):
+                sel.nth.append(SelectorNth(s1, var, s2, True, False, []))
+            elif m.group('pseudo_nth' + postfix).startswith(':nth-last-of-type'):
+                sel.nth.append(SelectorNth(s1, var, s2, True, True, []))
+        has_selector = True
         return has_selector
 
     def parse_pseudo_open(self, sel, m, has_selector, iselector, is_pseudo):
@@ -348,6 +458,8 @@ class SelectorMatcher:
                 # Handle parts
                 if m.group('pseudo'):
                     has_selector = self.parse_pseudo(sel, m, has_selector)
+                elif m.group('pseudo_nth_type') or m.group('pseudo_nth_child'):
+                    has_selector = self.parse_pseudo_nth(sel, m, has_selector, iselector)
                 elif m.group('pseudo_open'):
                     has_selector = self.parse_pseudo_open(sel, m, has_selector, iselector, is_pseudo)
                 elif m.group('pseudo_close'):
@@ -372,6 +484,8 @@ class SelectorMatcher:
                 elif m.group('ns_attr'):
                     has_selector = self.parse_attribute_selector(sel, m, has_selector)
                 elif m.group('ns_tag'):
+                    if has_selector:
+                        raise ValueError("Tag must come first")
                     has_selector = self.parse_tag_pattern(sel, m, has_selector)
                 elif is_html and m.group('class_id'):
                     has_selector = self.parse_classes(sel, m, has_selector)
@@ -560,22 +674,18 @@ class SelectorMatcher:
             if parent:
                 found = self.match_selectors(parent, [relation])
         elif relation.rel_type == REL_SIBLING:
-            parent = el.parent
-            sibling = el.previous_element
+            sibling = el.previous_sibling
             while not found and sibling:
                 if not isinstance(sibling, TAG):
-                    sibling = sibling.previous_element
+                    sibling = sibling.previous_sibling
                     continue
-                if sibling.parent is not parent:
-                    break
                 found = self.match_selectors(sibling, [relation])
-                sibling = sibling.previous_element
+                sibling = sibling.previous_sibling
         elif relation.rel_type == REL_CLOSE_SIBLING:
-            parent = el.parent
-            sibling = el.previous_element
+            sibling = el.previous_sibling
             while sibling and not isinstance(sibling, TAG):
-                sibling = sibling.previous_element
-            if sibling and sibling.parent is parent and isinstance(sibling, TAG):
+                sibling = sibling.previous_sibling
+            if sibling and isinstance(sibling, TAG):
                 found = self.match_selectors(sibling, [relation])
         return found
 
@@ -583,12 +693,10 @@ class SelectorMatcher:
         """Match future child."""
 
         match = False
-        for child in list(parent):
+        for child in (parent.descendants if recursive else parent.children):
             if not isinstance(child, TAG):
                 continue
             match = self.match_selectors(child, [relation])
-            if not match and recursive:
-                match = self.match_future_child(child, relation, recursive)
             if match:
                 break
         return match
@@ -602,22 +710,18 @@ class SelectorMatcher:
         elif relation.rel_type == REL_HAS_CLOSE_PARENT:
             found = self.match_future_child(el, relation)
         elif relation.rel_type == REL_HAS_SIBLING:
-            parent = el.parent
-            sibling = el.next_element
+            sibling = el.next_sibling
             while not found and sibling:
                 if not isinstance(sibling, TAG):
-                    sibling = sibling.next_element
+                    sibling = sibling.next_sibling
                     continue
-                if sibling.parent is not parent:
-                    break
                 found = self.match_selectors(sibling, [relation])
-                sibling = sibling.next_element
+                sibling = sibling.next_sibling
         elif relation.rel_type == REL_HAS_CLOSE_SIBLING:
-            parent = el.parent
-            sibling = el.next_element
+            sibling = el.next_sibling
             while sibling and not isinstance(sibling, TAG):
-                sibling = sibling.next_element
-            if sibling and sibling.parent is parent and isinstance(sibling, TAG):
+                sibling = sibling.next_sibling
+            if sibling and isinstance(sibling, TAG):
                 found = self.match_selectors(sibling, [relation])
         return found
 
@@ -660,6 +764,125 @@ class SelectorMatcher:
         parent = el.parent
         return parent and not parent.parent
 
+    def match_nth_tag_type(self, el, child):
+        """Match tag type for `nth` matches."""
+
+        return(
+            (child.name == (lower(el.name) if not self.is_xml() else el.name)) and
+            (self.supports_namespaces() and self.get_namespace(child) == self.get_namespace(el))
+        )
+
+    def match_nth(self, el, nth):
+        """Match `nth` elements."""
+
+        matched = True
+
+        for n in nth:
+            matched = False
+            if not el.parent:
+                break
+            if n.selectors and not self.match_selectors(el, n.selectors):
+                break
+            parent = el.parent
+            last = n.last
+            last_index = len(parent.contents) - 1
+            relative_index = 0
+            a = n.a
+            b = n.b
+            var = n.n
+            count = 0
+            count_incr = 1
+            factor = -1 if last else 1
+            index = len(parent.contents) - 1 if last else 0
+            idx = last_idx = a * count + b if var else a
+
+            # We can only adjust bounds within a variable index
+            if var:
+                # Abort if our nth index is out of bounds and only getting further out of bounds as we increment.
+                # Otherwise, increment to try to get in bounds.
+                while idx < 1 or idx > last_index:
+                    diff_low = 0 - idx
+                    if idx < 0:
+                        count += count_incr
+                        idx = last_idx = a * count + b if var else a
+                        diff = 0 - idx
+                        if diff >= diff_low:
+                            break
+                        diff_low = diff
+                    diff_high = idx - last_index
+                    if idx > last_index:
+                        count += count_incr
+                        idx = last_idx = a * count + b if var else a
+                        diff = idx - last_index
+                        if diff >= diff_high:
+                            break
+                        diff_high = diff
+
+                # If a < 0, our count is working backwards, so floor the index by increasing the count.
+                # Find the count that yields the lowest, in bound value and use that.
+                # Lastly reverse count increment so that we'll increase our index.
+                lowest = count
+                if a < 0:
+                    while idx >= 1:
+                        lowest = count
+                        count += count_incr
+                        idx = last_idx = a * count + b if var else a
+                    count_incr = -1
+                count = lowest
+                idx = last_idx = a * count + b if var else a
+
+            # Evaluate elements while our calculated nth index is still in range
+            while 1 <= idx <= last_index:
+                child = None
+                # Evaluate while our child index is still range.
+                while 0 <= index <= last_index:
+                    child = parent.contents[index]
+                    index += factor
+                    if not isinstance(child, TAG):
+                        continue
+                    # Handle `of S` in `nth-child`
+                    if n.selectors and not self.match_selectors(child, n.selectors):
+                        continue
+                    # Handle `of-type`
+                    if n.type and not self.match_nth_tag_type(el, child):
+                        continue
+                    relative_index += 1
+                    if relative_index == idx:
+                        if child is el:
+                            matched = True
+                        else:
+                            break
+                    if child is el:
+                        break
+                if child is el:
+                    break
+                last_idx = idx
+                count += count_incr
+                if count < 0:
+                    # Count is counting down and has now ventured into invalid territory.
+                    break
+                idx = a * count + b if var else a
+                if last_idx == idx:
+                    break
+            if not matched:
+                break
+        return matched
+
+    def has_child(self, el):
+        """Check if element has child."""
+
+        found_child = False
+        for child in el.children:
+            if isinstance(child, HAS_CHILD):
+                found_child = True
+                break
+        return found_child
+
+    def match_empty(self, el, is_empty):
+        """Check if element is empty (if requested)."""
+
+        return not is_empty or (RE_NOT_EMPTY.search(el.text) is None and not self.has_child(el))
+
     def match_selectors(self, el, selectors):
         """Check if element matches one of the selectors."""
 
@@ -669,6 +892,11 @@ class SelectorMatcher:
             match = selector.is_not
             # Verify tag matches
             if not self.match_tag(el, selector.tags):
+                continue
+            # Verify `nth` matches
+            if not self.match_nth(el, selector.nth):
+                continue
+            if not self.match_empty(el, selector.is_empty):
                 continue
             # Verify id matches
             if is_html and selector.ids and not self.match_id(el, selector.ids):

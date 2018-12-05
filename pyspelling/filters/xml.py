@@ -201,7 +201,7 @@ class XmlFilter(filters.Filter):
                         attributes.append((html.unescape(value), sel))
 
             # Walk children
-            for child in list(tree):
+            for child in tree.children:
                 string = str(child).strip()
                 is_comment = isinstance(child, bs4.Comment)
                 if isinstance(child, bs4.element.Tag):
