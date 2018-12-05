@@ -10,6 +10,7 @@ import codecs
 import bs4
 import html
 from ..util.css_selectors import SelectorMatcher
+from collections import deque
 
 NON_CONTENT = (bs4.Doctype, bs4.Declaration, bs4.CData, bs4.ProcessingInstruction)
 
@@ -58,17 +59,16 @@ class XmlFilter(filters.Filter):
     def setup(self):
         """Setup."""
 
-        self.ancestry = []
         self.user_break_tags = set(self.config['break_tags'])
         self.comments = self.config['comments']
         self.attributes = set(self.config['attributes'])
         self.parser = 'xml'
         self.type = 'xml'
         self.ignores = SelectorMatcher(
-            self.config['ignores'], self.type, self.config['namespaces']
+            ','.join(self.config['ignores']), self.type, self.config['namespaces']
         )
         self.captures = SelectorMatcher(
-            self.config['captures'], self.type, self.config['namespaces']
+            ','.join(self.config['captures']), self.type, self.config['namespaces']
         )
 
     def _has_xml_encode(self, content):
@@ -129,10 +129,10 @@ class XmlFilter(filters.Filter):
         name = el.name
         return name in self.break_tags or name in self.user_break_tags
 
-    def store_blocks(self, el, blocks, text, is_root):
+    def store_blocks(self, el, blocks, text, force_root):
         """Store the text as desired."""
 
-        if is_root or self.is_break_tag(el):
+        if force_root or el.parent is None or self.is_break_tag(el):
             content = html.unescape(''.join(text))
             if content:
                 blocks.append((content, self.construct_selector(el)))
@@ -142,13 +142,13 @@ class XmlFilter(filters.Filter):
     def construct_selector(self, el, attr=''):
         """Construct an selector for context."""
 
-        selector = []
+        selector = deque()
 
-        for ancestor in self.ancestry:
+        ancestor = el
+        while ancestor and ancestor.parent:
             if ancestor is not el:
-                if ancestor.name != '[document]':
-                    selector.append(ancestor.name)
-            elif ancestor.name != '[document]':
+                selector.appendleft(ancestor.name)
+            else:
                 tag = ancestor.name
                 prefix = ancestor.prefix
                 sel = ''
@@ -157,25 +157,17 @@ class XmlFilter(filters.Filter):
                 sel = tag
                 if attr:
                     sel += '[%s]' % attr
-                selector.append(sel)
+                selector.appendleft(sel)
+            ancestor = ancestor.parent
         return '>'.join(selector)
 
     def extract_tag_metadata(self, el):
         """Extract meta data."""
 
-        self.ancestry.append(el)
-
-    def pop_tag_metadata(self):
-        """Clear tag metadata."""
-
-        self.ancestry.pop()
-
     def reset(self):
         """Reset."""
 
-        self.ancestry = []
-
-    def to_text(self, tree, root=False):
+    def to_text(self, tree, force_root=False):
         """
         Extract text from tags.
 
@@ -190,10 +182,11 @@ class XmlFilter(filters.Filter):
         comments = []
         blocks = []
 
-        if root or not self.ignores.match(tree):
+        if not self.ignores.match(tree):
+            # The root of the document is the BeautifulSoup object
             capture = self.captures.match(tree)
             # Check attributes for normal tags
-            if not root and capture:
+            if capture:
                 for attr in self.attributes:
                     value = tree.attrs.get(attr, '').strip()
                     if value:
@@ -220,12 +213,17 @@ class XmlFilter(filters.Filter):
                         elif capture:
                             text.append(string)
                             text.append(' ')
+        elif self.comments:
+            for child in tree.descendants:
+                if isinstance(child, bs4.Comment):
+                    string = str(child).strip()
+                    if string:
+                        sel = self.construct_selector(tree) + '<!--comment-->'
+                        comments.append((html.unescape(string), sel))
 
-        text = self.store_blocks(tree, blocks, text, root)
+        text = self.store_blocks(tree, blocks, text, force_root)
 
-        self.pop_tag_metadata()
-
-        if root:
+        if tree.parent is None or force_root:
             return blocks, attributes, comments
         else:
             return text, blocks, attributes, comments
@@ -234,7 +232,7 @@ class XmlFilter(filters.Filter):
         """Filter the source text."""
 
         content = []
-        blocks, attributes, comments = self.to_text(bs4.BeautifulSoup(text, self.parser), True)
+        blocks, attributes, comments = self.to_text(bs4.BeautifulSoup(text, self.parser))
         if self.comments:
             for c, desc in comments:
                 content.append(filters.SourceText(c, context + ': ' + desc, encoding, self.type + 'comment'))

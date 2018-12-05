@@ -42,7 +42,6 @@ class OdfFilter(xml.XmlFilter):
         """Setup."""
 
         self.additional_context = ''
-        self.ancestry = []
         self.comments = False
         self.attributes = []
         self.parser = 'xml'
@@ -53,10 +52,10 @@ class OdfFilter(xml.XmlFilter):
             'draw': 'urn:oasis:names:tc:opendocument:xmlns:drawing:1.0'
         }
         self.ignores = SelectorMatcher(
-            [], 'xml', self.namespaces
+            '', 'xml', []
         )
         self.captures = SelectorMatcher(
-            self.default_capture, 'xml', self.namespaces
+            ','.join(self.default_capture), 'xml', self.namespaces
         )
 
     def has_bom(self, filestream):
@@ -113,12 +112,12 @@ class OdfFilter(xml.XmlFilter):
         if el.name == 'p' and el.namespace and el.namespace == self.namespaces["text"]:
             text.append('\n')
 
-    def store_blocks(self, el, blocks, text, is_root):
+    def store_blocks(self, el, blocks, text, force_root):
         """Store the text as desired."""
 
         self.soft_break(el, text)
 
-        if is_root or self.content_break(el):
+        if force_root or el.parent is None or self.content_break(el):
             content = html.unescape(''.join(text))
             if content:
                 blocks.append((content, self.additional_context + self.construct_selector(el)))
@@ -157,7 +156,7 @@ class OdfFilter(xml.XmlFilter):
         content = []
         soup = bs4.BeautifulSoup(text, self.parser)
         soup = self.get_sub_node(soup)
-        blocks, attributes, comments = self.to_text(soup, True)
+        blocks, attributes, comments = self.to_text(soup, force_root=not isinstance(soup, bs4.BeautifulSoup))
         if self.comments:
             for c, desc in comments:
                 content.append(filters.SourceText(c, context + ': ' + desc, encoding, self.type + 'comment'))

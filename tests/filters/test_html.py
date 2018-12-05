@@ -1379,7 +1379,12 @@ class TestXHTML(util.PluginTestCase):
             <p>{}<code>kjaljw aljwk</code><img src="./image.png" alt="{}"/></p>
             <pre>uouqei euowuw
             </pre>
-            <p><span class="some-class">dksj dkjsk</span><span id="some-id">ksjk akjsks</span>
+            <p><span class="some-class">dksj dkjsk</span><span id="some-id">ksjk akjsks</span></p>
+            <pre>
+              <div>
+                 <p><span><!-- xxxx --></span></p>
+              </div>
+            </pre>
             </body>
             </html>
             """
@@ -1388,6 +1393,7 @@ class TestXHTML(util.PluginTestCase):
             ' '.join(bad_content_words + good_words),
             ' '.join(bad_attr_words + good_words)
         )
+        bad_words.append('xxxx')
 
         self.mktemp('test.txt', template, 'utf-8')
         self.assert_spellcheck('.xhtml.yml', bad_words)

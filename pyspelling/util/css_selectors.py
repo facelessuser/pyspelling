@@ -3,59 +3,45 @@ import re
 from collections import namedtuple
 import bs4
 
+DOC = bs4.BeautifulSoup
 TAG = bs4.element.Tag
 HAS_CHILD = (TAG, bs4.Doctype, bs4.Declaration, bs4.CData, bs4.ProcessingInstruction)
 
+# Selector patterns
 CSS_ESCAPES = r'(?:\\[a-fA-F0-9]{1,6}[ ]?|\\.)'
 NTH = r'(?:[-+])?(?:\d+n?|n)(?:(?<=n)\s*(?:[-+])\s*(?:\d+))?'
-RE_ESC = re.compile(r'(?:(\\[a-fA-F0-9]{1,6}[ ]?)|(\\.))')
-RE_NOT_EMPTY = re.compile('[^ \t\r\n]')
-
-RE_HTML_SEL = re.compile(
-    r'''(?x)
-    (?P<pseudo_open>:(?:not|matches|is|has|where)\() |                            # optinal pseudo selector wrapper
-    (?P<pseudo>:(?:
-        root|empty|last-child|last-of-type|first-child|
-        first-of-type|only-child|only-of-type)
-    ) |                                                                           # Simple pseudo selector
+HTML_SELECTORS = r"""
+(?P<class_id>(?:\#|\.)(?:[-\w]|{esc})+) |                            #.class and #id
+(?P<ns_tag>(?:(?:(?:[-\w]|{esc})+|\*)?\|)?(?:(?:[-\w]|{esc})+|\*)) | # namespace:tag
+\[(?P<ns_attr>(?:(?:(?:[-\w]|{esc})+|\*)?\|)?(?:[-\w]|{esc})+)
+""".format(esc=CSS_ESCAPES)
+XML_SELECTORS = r"""
+(?P<ns_tag>(?:(?:(?:[-\w.]|{esc})+|\*)?\|)?(?:(?:[-\w.]|{esc})+|\*)) | # namespace:tag
+\[(?P<ns_attr>(?:(?:(?:[-\w]|{esc})+|\*)\|)?(?:[-\w.]|{esc})+)         # namespace:attributes
+""".format(esc=CSS_ESCAPES)
+SELECTORS = r'''(?x)
+    (?P<pseudo_open>:(?:has|is|matches|not|where)\() |                            # optinal pseudo selector wrapper
+    (?P<pseudo>:(?:empty|root|(?:first|last|only)-(?:child|of-type))) |           # Simple pseudo selector
     (?P<pseudo_nth_child>:nth-(?:last-)?child
         \(\s*(?P<nth_child>{nth}|even|odd)\s*(?:\)|(?<=\s)of\s+)) |               # Pseudo `nth-child` selectors
     (?P<pseudo_nth_type>:nth-(?:last-)?of-type
         \(\s*(?P<nth_type>{nth}|even|odd)\s*\)) |                                 # Pseudo `nth-of-type` selectors
-    (?P<class_id>(?:\#|\.)(?:[-\w]|{esc})+) |                                     #.class and #id
-    (?P<ns_tag>(?:(?:(?:[-\w]|{esc})+|\*)?\|)?(?:(?:[-\w]|{esc})+|\*)) |          # namespace:tag
-    \[(?P<ns_attr>(?:(?:(?:[-\w]|{esc})+|\*)?\|)?(?:[-\w]|{esc})+)                # namespace:attributes
+    {doc_specific}
     (?:(?P<cmp>[~^|*$]?=)                                                         # compare
     (?P<value>"(\\.|[^\\"]+)*?"|'(\\.|[^\\']+)*?'|(?:[^'"\[\] \t\r\n]|{esc})+))?  # attribute value
     (?P<i>[ ]+i)? \] |                                                            # case insensitive
     (?P<pseudo_close>\)) |                                                        # optional pseudo selector close
     (?P<split>\s*?(?P<relation>[,+>~]|[ ](?![,+>~]))\s*) |                        # split multiple selectors
     (?P<invalid>).+                                                               # not proper syntax
-    '''.format(**{'esc': CSS_ESCAPES, 'nth': NTH})
-)
+'''
+RE_HTML_SEL = re.compile(SELECTORS.format(esc=CSS_ESCAPES, nth=NTH, doc_specific=HTML_SELECTORS))
+RE_XML_SEL = re.compile(SELECTORS.format(esc=CSS_ESCAPES, nth=NTH, doc_specific=XML_SELECTORS))
 
-RE_XML_SEL = re.compile(
-    r'''(?x)
-    (?P<pseudo_open>:(?:not|matches|is|has|where)\() |                              # optinal pseudo selector wrapper
-    (?P<pseudo>:(?:
-        root|empty|last-child|last-of-type|first-child|
-        first-of-type|only-child|only-of-type)
-    ) |                                                                             # Simple pseudo selector
-    (?P<pseudo_nth_child>:nth-(?:last-)?child
-        \(\s*(?P<nth_child>{nth}|even|odd)\s*(?:\)|(?<=\s)of\s+)) |                 # Pseudo `nth-child` selectors
-    (?P<pseudo_nth_type>:nth-(?:last-)?of-type
-        \(\s*(?P<nth_type>{nth}|even|odd)\s*\)) |                                   # Pseudo `nth-of-type` selectors
-    (?P<ns_tag>(?:(?:(?:[-\w.]|{esc})+|\*)?\|)?(?:(?:[-\w.]|{esc})+|\*)) |          # namespace:tag
-    \[(?P<ns_attr>(?:(?:(?:[-\w]|{esc})+|\*)\|)?(?:[-\w.]|{esc})+)                  # namespace:attributes
-    (?:(?P<cmp>[~^|*$]?=)                                                           # compare
-    (?P<value>"(\\.|[^\\"]+)*?"|'(?:\\.|[^\\']+)*?'|(?:[^'"\[\] \t\r\n]|{esc})+))?  # attribute value
-    (?P<i>[ ]+i)?\] |                                                               # case insensitive
-    (?P<pseudo_close>\)) |                                                          # optional pseudo selector close
-    (?P<split>\s*?(?P<relation>[,+>~]|[ ](?![,+>~]))\s*) |                          # Split for multiple selectors
-    (?P<invalid>.+)                                                                 # not proper syntax
-    '''.format(**{'esc': CSS_ESCAPES, 'nth': NTH})
-)
-
+# Empty tag pattern (whitespace okay)
+RE_NOT_EMPTY = re.compile('[^ \t\r\n]')
+# CSS escape pattern
+RE_ESC = re.compile(r'(?:(\\[a-fA-F0-9]{1,6}[ ]?)|(\\.))')
+# Pattern to break up `nth` specifiers
 RE_NTH = re.compile(r'(?P<s1>[-+])?(?P<a>\d+n?|n)(?:(?<=n)\s*(?P<s2>[-+])\s*(?P<b>\d+))?')
 
 MODES = ('xml', 'html', 'html5', 'xhtml')
@@ -72,7 +58,7 @@ REL_CLOSE_PARENT = '>'
 REL_SIBLING = '~'
 REL_CLOSE_SIBLING = '+'
 
-# Relationships
+# Relationships for :has() (forward looking)
 REL_HAS_PARENT = ': '
 REL_HAS_CLOSE_PARENT = ':>'
 REL_HAS_SIBLING = ':~'
@@ -168,13 +154,13 @@ class SelectorNth(namedtuple('SelectorNth', ['a', 'n', 'b', 'type', 'last', 'sel
 class SelectorMatcher:
     """Match tags in Beautiful Soup with CSS selectors."""
 
-    def __init__(self, selectors, mode='html', namespaces=None):
+    def __init__(self, selector, mode='html', namespaces=None):
         """Initialize."""
 
         self.mode = mode
         self.re_sel = RE_HTML_SEL if self.mode != 'xml' else RE_XML_SEL
         self.namespaces = namespaces if namespaces else {}
-        self.selectors = self.process_selectors(*selectors)
+        self.selectors = self.process_selectors(selector)
 
     def get_namespace(self, el):
         """Get the namespace for the element."""
@@ -518,7 +504,7 @@ class SelectorMatcher:
 
         return selectors
 
-    def process_selectors(self, *args):
+    def process_selectors(self, selector):
         """
         Process selectors.
 
@@ -528,10 +514,8 @@ class SelectorMatcher:
         """
 
         selectors = []
-
-        for selector in args:
-            iselector = self.re_sel.finditer(selector)
-            selectors.extend(self.parse_selectors(iselector))
+        iselector = self.re_sel.finditer(selector)
+        selectors.extend(self.parse_selectors(iselector))
         return selectors
 
     def get_attribute(self, el, attr, prefix):
@@ -923,4 +907,39 @@ class SelectorMatcher:
     def match(self, el):
         """Match."""
 
-        return self.match_selectors(el, self.selectors)
+        return isinstance(el, TAG) and self.match_selectors(el, self.selectors)
+
+
+def _select(tree, captures, ignores):  # pragma: no cover
+    """Recursively return selected tags."""
+
+    if ignores.match(tree):
+        if comments:
+            for child in tree.descendants:
+                if isinstance(child, bs4.Comment):
+                    yield child
+    else:
+        if captures.match(tree):
+            yield tree
+
+        # Walk children
+        for child in tree.children:
+            if isinstance(child, bs4.element.Tag):
+                yield from _select(child, captures, ignores, comments)
+            elif comments and isinstance(child, bs4.Comment):
+                yield child
+
+
+def comments(tree, mode="html"):  # pragma: no cover
+    """Get comments only."""
+
+    select(tree, "", "", mode, None, True)
+
+
+def select(tree, select, ignore="", mode='html', namespaces=None, comments=False):  # pragma: no cover
+    """Select the specified tags filtering out if a filter pattern is provided."""
+
+    captures = SelectorMatcher(select, mode, namespaces)
+    ignores = SelectorMatcher(ignore, mode, namespaces)
+
+    yield from _select(tree, captures, ignores, comments)
