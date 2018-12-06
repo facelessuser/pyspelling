@@ -1,8 +1,8 @@
-"""Test CSS selector library."""
+"""Test `soupsieve` CSS selector library."""
 import unittest
 import bs4
 import html
-from pyspelling.util import css_selectors as cs
+from pyspelling.util import soupsieve as ssv
 
 
 class TestCssSelectors(unittest.TestCase):
@@ -15,7 +15,7 @@ class TestCssSelectors(unittest.TestCase):
         c = []
         tag_ids = []
 
-        for el in cs.select(soup, select, ignore, ns, flags):
+        for el in ssv.select(soup, select, ignore, ns, flags=flags):
             self.assertTrue(isinstance(el, (bs4.element.Tag, bs4.Comment)))
 
             if isinstance(el, bs4.Comment):
@@ -47,7 +47,7 @@ class TestCssSelectors(unittest.TestCase):
         """
 
         soup = bs4.BeautifulSoup(text, 'html5lib')
-        comments = [str(c).strip() for c in cs.comments(soup, cs.HTML5)]
+        comments = [str(c).strip() for c in ssv.comments(soup, flags=ssv.HTML5)]
         self.assertEqual(sorted(comments), sorted(['before header', 'comment', "don't ignore"]))
 
     def test_is(self):
@@ -75,7 +75,7 @@ class TestCssSelectors(unittest.TestCase):
             "pre.ignore",
             ['2', '4', '5', 'some-id'],
             ['comment', "don't ignore"],
-            flags=cs.COMMENTS
+            flags=ssv.COMMENTS
         )
 
     def test_attributes(self):
@@ -112,7 +112,7 @@ class TestCssSelectors(unittest.TestCase):
             ['4', '8'],
             [],
             ns={'xlink': 'http://www.w3.org/1999/xlink'},
-            flags=cs.HTML5
+            flags=ssv.HTML5
         )
 
         self.assert_selectors(
@@ -122,7 +122,7 @@ class TestCssSelectors(unittest.TestCase):
             ['2', '8'],
             [],
             ns={'xlink': 'http://www.w3.org/1999/xlink'},
-            flags=cs.HTML5
+            flags=ssv.HTML5
         )
 
         self.assert_selectors(
@@ -134,5 +134,5 @@ class TestCssSelectors(unittest.TestCase):
             ['1', '4', '6'],
             [],
             ns={'xlink': 'http://www.w3.org/1999/xlink'},
-            flags=cs.HTML5
+            flags=ssv.HTML5
         )

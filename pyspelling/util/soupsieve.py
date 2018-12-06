@@ -1,10 +1,36 @@
-"""CSS selector matcher."""
+"""
+Soup Sieve.
+
+A CSS selector filter for BeautifulSoup4.
+
+MIT License
+
+Copyright (c) 2018 Isaac Muse
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
 import re
 from collections import namedtuple
 import bs4
 from ..__meta__ import Version
 
-__version_info__ = Version(0, 2, 0, 'final')
+__version_info__ = Version(0, 3, 0, 'final')
 __version__ = __version_info__._get_canonical()
 
 __all__ = (
@@ -20,7 +46,7 @@ XML = 0x8
 COMMENTS = 0x100
 
 DOC = bs4.BeautifulSoup
-TAG = bs4.element.Tag
+TAG = bs4.Tag
 HAS_CHILD = (TAG, bs4.Doctype, bs4.Declaration, bs4.CData, bs4.ProcessingInstruction)
 
 # Selector patterns
@@ -929,7 +955,7 @@ class SelectorMatcher:
         return isinstance(el, TAG) and self.match_selectors(el, self.selectors)
 
 
-def _select(tree, captures, ignores, comments):  # pragma: no cover
+def _select(tree, captures, ignores, comments):
     """Recursively return selected tags."""
 
     if ignores.match(tree):
@@ -949,20 +975,17 @@ def _select(tree, captures, ignores, comments):  # pragma: no cover
                 yield child
 
 
-def icomments(tree, flags=0):
+def comments(tree, limit=0, flags=0):
     """Get comments only."""
 
-    yield from select(tree, "", "", None, flags | COMMENTS)
+    yield from select(tree, "", "", None, limit, flags | COMMENTS)
 
 
-def comments(tree, flags=0):
-    """Get comments only."""
-
-    return list(icomments(tree, flags))
-
-
-def iselect(tree, select, ignore="", namespaces=None, flags=0):
+def select(tree, select, ignore="", namespaces=None, limit=0, flags=0):
     """Select the specified tags filtering out if a filter pattern is provided."""
+
+    if limit < 1:
+        limit = None
 
     comments = flags & COMMENTS
     if comments:
@@ -970,10 +993,9 @@ def iselect(tree, select, ignore="", namespaces=None, flags=0):
     captures = SelectorMatcher(select, namespaces, flags)
     ignores = SelectorMatcher(ignore, namespaces, flags)
 
-    yield from _select(tree, captures, ignores, comments)
-
-
-def select(tree, select, ignore="", namespaces=None, flags=0):
-    """Select the specified tags filtering out if a filter pattern is provided."""
-
-    return list(iselect(tree, select, ignore, namespaces, flags))
+    for child in _select(tree, captures, ignores, comments):
+        yield child
+        if limit is not None:
+            limit -= 1
+            if limit < 1:
+                break

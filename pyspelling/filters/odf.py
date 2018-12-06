@@ -12,7 +12,7 @@ import codecs
 from .. import filters
 from . import xml
 from wcmatch import glob
-from ..util import css_selectors as cs
+from ..util import soupsieve as ssv
 
 MIMEMAP = {
     'application/vnd.oasis.opendocument.spreadsheet': 'ods',
@@ -51,8 +51,8 @@ class OdfFilter(xml.XmlFilter):
             'text': 'urn:oasis:names:tc:opendocument:xmlns:text:1.0',
             'draw': 'urn:oasis:names:tc:opendocument:xmlns:drawing:1.0'
         }
-        self.ignores = cs.SelectorMatcher('', {}, cs.XML)
-        self.captures = cs.SelectorMatcher(','.join(self.default_capture), self.namespaces, cs.XML)
+        self.ignores = ssv.SelectorMatcher('', {}, ssv.XML)
+        self.captures = ssv.SelectorMatcher(','.join(self.default_capture), self.namespaces, ssv.XML)
 
     def has_bom(self, filestream):
         """Check if has BOM."""

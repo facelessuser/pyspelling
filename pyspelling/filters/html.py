@@ -8,7 +8,7 @@ import re
 import codecs
 import html
 from . import xml
-from ..util import css_selectors as cs
+from ..util import soupsieve as ssv
 from collections import deque
 
 RE_HTML_ENCODE = re.compile(
@@ -18,7 +18,7 @@ RE_HTML_ENCODE = re.compile(
 )
 
 MODE = {'html': 'lxml', 'xhtml': 'xml', 'html5': 'html5lib'}
-CS_FLAG = {"html": cs.HTML, "html5": cs.HTML5, "xhtml": cs.XHTML}
+CS_FLAG = {"html": ssv.HTML, "html5": ssv.HTML5, "xhtml": ssv.XHTML}
 
 
 class HtmlFilter(xml.XmlFilter):
@@ -72,10 +72,10 @@ class HtmlFilter(xml.XmlFilter):
         if self.type not in MODE:
             self.type = 'html'
         self.parser = MODE[self.type]
-        self.ignores = cs.SelectorMatcher(
+        self.ignores = ssv.SelectorMatcher(
             ','.join(self.config['ignores']), self.config['namespaces'], CS_FLAG[self.type]
         )
-        self.captures = cs.SelectorMatcher(
+        self.captures = ssv.SelectorMatcher(
             ','.join(self.config['captures']), self.config['namespaces'], CS_FLAG[self.type]
         )
 
@@ -101,7 +101,7 @@ class HtmlFilter(xml.XmlFilter):
     def is_break_tag(self, el):
         """Check if tag is an element we should break on."""
 
-        name = cs.lower(el.name) if self.type != 'xhtml' else el.name
+        name = ssv.lower(el.name) if self.type != 'xhtml' else el.name
         return name in self.break_tags or name in self.user_break_tags
 
     def get_classes(self, el):
