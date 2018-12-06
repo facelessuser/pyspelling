@@ -8,14 +8,14 @@ from pyspelling.util import soupsieve as ssv
 class TestCssSelectors(unittest.TestCase):
     """Test CSS selectors."""
 
-    def assert_selectors(self, text, select, ignore, ids, comments, ns=None, flags=0):
+    def assert_selectors(self, text, select, ignore, ids, comments, ns=None, mode=0, flags=0):
         """Assert selector matches."""
 
         soup = bs4.BeautifulSoup(text, 'html5lib')
         c = []
         tag_ids = []
 
-        for el in ssv.select(soup, select, ignore, ns, flags=flags):
+        for el in ssv.select(soup, select, ignore, ns, mode=mode, flags=flags):
             self.assertTrue(isinstance(el, (bs4.element.Tag, bs4.Comment)))
 
             if isinstance(el, bs4.Comment):
@@ -47,7 +47,7 @@ class TestCssSelectors(unittest.TestCase):
         """
 
         soup = bs4.BeautifulSoup(text, 'html5lib')
-        comments = [str(c).strip() for c in ssv.comments(soup, flags=ssv.HTML5)]
+        comments = [str(c).strip() for c in ssv.comments(soup, mode=ssv.HTML5)]
         self.assertEqual(sorted(comments), sorted(['before header', 'comment', "don't ignore"]))
 
     def test_is(self):
@@ -112,7 +112,7 @@ class TestCssSelectors(unittest.TestCase):
             ['4', '8'],
             [],
             ns={'xlink': 'http://www.w3.org/1999/xlink'},
-            flags=ssv.HTML5
+            mode=ssv.HTML5
         )
 
         self.assert_selectors(
@@ -122,7 +122,7 @@ class TestCssSelectors(unittest.TestCase):
             ['2', '8'],
             [],
             ns={'xlink': 'http://www.w3.org/1999/xlink'},
-            flags=ssv.HTML5
+            mode=ssv.HTML5
         )
 
         self.assert_selectors(
@@ -134,5 +134,5 @@ class TestCssSelectors(unittest.TestCase):
             ['1', '4', '6'],
             [],
             ns={'xlink': 'http://www.w3.org/1999/xlink'},
-            flags=ssv.HTML5
+            mode=ssv.HTML5
         )

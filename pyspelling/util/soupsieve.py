@@ -35,7 +35,7 @@ __version__ = __version_info__._get_canonical()
 
 __all__ = (
     'HTML', 'HTML5', 'XHTML', 'XML', 'COMMENTS',
-    'SelectorMatcher', 'comments', 'select'
+    'SoupSieve', 'SelectorMatcher', 'comments', 'select'
 )
 
 HTML = 0x1
@@ -43,7 +43,7 @@ HTML5 = 0x2
 XHTML = 0x4
 XML = 0x8
 
-COMMENTS = 0x100
+COMMENTS = 0x1
 
 DOC = bs4.BeautifulSoup
 TAG = bs4.Tag
@@ -167,18 +167,60 @@ class Selector:
         else:
             self.relation = value
 
+    def freeze(self):
+        """Freeze self."""
+
+        return FrozenSelector(
+            _freeze(self.tags),
+            _freeze(self.ids),
+            _freeze(self.classes),
+            _freeze(self.attributes),
+            _freeze(self.nth),
+            _freeze(self.selectors),
+            self.is_not,
+            self.is_empty,
+            self.relation.freeze() if self.relation is not None else None,
+            self.rel_type,
+            self.is_root
+        )
+
     def __str__(self):
         """String representation."""
 
         return (
-            'Selector(tags=%r, ids=%r, classes=%r, attributes=%r, selectors=%r, '
+            'Selector(tags=%r, ids=%r, classes=%r, attributes=%r, nth=%r, selectors=%r, '
             'is_not=%r, relation=%r, rel_type=%r, is_root=%r)'
         ) % (
-            self.tags, self.ids, self.classes, self.attributes, self.selectors,
+            self.tags, self.ids, self.classes, self.attributes, self.nth, self.selectors,
             self.is_not, self.relation, self.rel_type, self.is_root
         )
 
     __repr__ = __str__
+
+
+def _freeze(chain):
+    """Create an immutable selector chain."""
+
+    index = 0
+    for item in chain:
+        if isinstance(item, list):
+            chain[index] = _freeze(item)
+        elif isinstance(item, Selector):
+            chain[index] = item.freeze()
+        index += 1
+    return tuple(chain)
+
+
+class FrozenSelector(
+    namedtuple(
+        'FrozenSelector',
+        [
+            'tags', 'ids', 'classes', 'attributes', 'nth', 'selectors',
+            'is_not', 'is_empty', 'relation', 'rel_type', 'is_root'
+        ]
+    )
+):
+    """Frozen selector."""
 
 
 class SelectorTag(namedtuple('SelectorTag', ['name', 'prefix'])):
@@ -196,13 +238,16 @@ class SelectorNth(namedtuple('SelectorNth', ['a', 'n', 'b', 'type', 'last', 'sel
 class SelectorMatcher:
     """Match tags in Beautiful Soup with CSS selectors."""
 
-    def __init__(self, selector, namespaces=None, flags=0):
+    def __init__(self, selector, namespaces=None, mode=0):
         """Initialize."""
 
-        if flags in (HTML, HTML5, XML, XHTML) or flags == 0:
-            self.mode = flags
+        if mode == 0:
+            mode = HTML
+
+        if mode in (HTML, HTML5, XML, XHTML):
+            self.mode = mode
         else:
-            raise ValueError("Invalid SelectorMatcher flag(s) '{}'".format(flags))
+            raise ValueError("Invalid SelectorMatcher flag(s) '{}'".format(mode))
         self.re_sel = RE_HTML_SEL if self.mode != XML else RE_XML_SEL
         self.namespaces = namespaces if namespaces else {}
         self.selectors = self.process_selectors(selector)
@@ -291,25 +336,25 @@ class SelectorMatcher:
         elif pseudo == 'empty':
             sel.is_empty = True
         elif pseudo == 'first-child':
-            sel.nth.append(SelectorNth(1, False, 0, False, False, []))
+            sel.nth.append(SelectorNth(1, False, 0, False, False, tuple()))
         elif pseudo == 'last-child':
-            sel.nth.append(SelectorNth(1, False, 0, False, True, []))
+            sel.nth.append(SelectorNth(1, False, 0, False, True, tuple()))
         elif pseudo == 'first-of-type':
-            sel.nth.append(SelectorNth(1, False, 0, True, False, []))
+            sel.nth.append(SelectorNth(1, False, 0, True, False, tuple()))
         elif pseudo == 'last-of-type':
-            sel.nth.append(SelectorNth(1, False, 0, True, True, []))
+            sel.nth.append(SelectorNth(1, False, 0, True, True, tuple()))
         elif pseudo == 'only-child':
             sel.nth.extend(
                 [
-                    SelectorNth(1, False, 0, False, False, []),
-                    SelectorNth(1, False, 0, False, True, [])
+                    SelectorNth(1, False, 0, False, False, tuple()),
+                    SelectorNth(1, False, 0, False, True, tuple())
                 ]
             )
         elif pseudo == 'only-of-type':
             sel.nth.extend(
                 [
-                    SelectorNth(1, False, 0, True, False, []),
-                    SelectorNth(1, False, 0, True, True, [])
+                    SelectorNth(1, False, 0, True, False, tuple()),
+                    SelectorNth(1, False, 0, True, True, tuple())
                 ]
             )
 
@@ -348,17 +393,13 @@ class SelectorMatcher:
             s2 = int(s2, 16)
 
         if postfix == '_child':
-            if m.group('pseudo_nth' + postfix).startswith(':nth-child'):
-                sel.nth.append(SelectorNth(s1, var, s2, False, False, []))
-            elif m.group('pseudo_nth' + postfix).startswith(':nth-last-child'):
-                sel.nth.append(SelectorNth(s1, var, s2, False, True, []))
             if m.group('pseudo_nth' + postfix).strip().endswith('of'):
                 # Parse the rest of `of S`.
                 temp_sel = iselector
             else:
                 # Use default `*|*` for `of S`. Simulate un-closed pseudo.
                 temp_sel = self.re_sel.finditer('*|*)')
-            sel.nth[-1].selectors.extend(
+            nth_sel = tuple(
                 self.parse_selectors(
                     temp_sel,
                     True,
@@ -366,11 +407,15 @@ class SelectorMatcher:
                     False
                 )
             )
+            if m.group('pseudo_nth' + postfix).startswith(':nth-child'):
+                sel.nth.append(SelectorNth(s1, var, s2, False, False, nth_sel))
+            elif m.group('pseudo_nth' + postfix).startswith(':nth-last-child'):
+                sel.nth.append(SelectorNth(s1, var, s2, False, True, nth_sel))
         else:
             if m.group('pseudo_nth' + postfix).startswith(':nth-of-type'):
-                sel.nth.append(SelectorNth(s1, var, s2, True, False, []))
+                sel.nth.append(SelectorNth(s1, var, s2, True, False, tuple()))
             elif m.group('pseudo_nth' + postfix).startswith(':nth-last-of-type'):
-                sel.nth.append(SelectorNth(s1, var, s2, True, True, []))
+                sel.nth.append(SelectorNth(s1, var, s2, True, True, tuple()))
         has_selector = True
         return has_selector
 
@@ -561,7 +606,7 @@ class SelectorMatcher:
         selectors = []
         iselector = self.re_sel.finditer(selector)
         selectors.extend(self.parse_selectors(iselector))
-        return selectors
+        return _freeze(selectors)
 
     def get_attribute(self, el, attr, prefix):
         """Get attribute from element if it exists."""
@@ -955,47 +1000,69 @@ class SelectorMatcher:
         return isinstance(el, TAG) and self.match_selectors(el, self.selectors)
 
 
-def _select(tree, captures, ignores, comments):
-    """Recursively return selected tags."""
+class SoupSieve:
+    """Soup sieve CSS selector class."""
 
-    if ignores.match(tree):
-        if comments:
-            for child in tree.descendants:
-                if isinstance(child, bs4.Comment):
+    def __init__(self, mode=0):
+        """Initialize mode."""
+
+        if mode == 0:
+            mode = HTML
+
+        if mode in (HTML, HTML5, XML, XHTML):
+            self.mode = mode
+        else:
+            raise ValueError("Invalid SoupSieve document mode '{}'".format(mode))
+
+    def _select(self, node):
+        """Recursively return selected tags."""
+
+        if self.ignores.match(node):
+            if self.comments:
+                for child in node.descendants:
+                    if isinstance(child, bs4.Comment):
+                        yield child
+        else:
+            if self.captures.match(node):
+                yield node
+
+            # Walk children
+            for child in node.children:
+                if isinstance(child, bs4.element.Tag):
+                    yield from self._select(child)
+                elif self.comments and isinstance(child, bs4.Comment):
                     yield child
-    else:
-        if captures.match(tree):
-            yield tree
 
-        # Walk children
-        for child in tree.children:
-            if isinstance(child, bs4.element.Tag):
-                yield from _select(child, captures, ignores, comments)
-            elif comments and isinstance(child, bs4.Comment):
-                yield child
+    def comments(self, node, limit=0):
+        """Get comments only."""
+
+        yield from self.select(node, "", "", None, limit, COMMENTS)
+
+    def select(self, node, select="", ignore="", namespaces=None, limit=0, flags=0):
+        """Select the specified tags filtering out an tags if 'ignores' is provided."""
+
+        if limit < 1:
+            limit = None
+
+        self.comments = flags & COMMENTS
+        self.captures = SelectorMatcher(select, namespaces, self.mode)
+        self.ignores = SelectorMatcher(ignore, namespaces, self.mode)
+
+        for child in self._select(node):
+            yield child
+            if limit is not None:
+                limit -= 1
+                if limit < 1:
+                    break
 
 
-def comments(tree, limit=0, flags=0):
+def comments(node, limit=0, mode=0):
     """Get comments only."""
 
-    yield from select(tree, "", "", None, limit, flags | COMMENTS)
+    yield from SoupSieve(mode).comments(node, limit)
 
 
-def select(tree, select, ignore="", namespaces=None, limit=0, flags=0):
+def select(node, select="", ignore="", namespaces=None, limit=0, mode=0, flags=0):
     """Select the specified tags filtering out if a filter pattern is provided."""
 
-    if limit < 1:
-        limit = None
-
-    comments = flags & COMMENTS
-    if comments:
-        flags ^= COMMENTS
-    captures = SelectorMatcher(select, namespaces, flags)
-    ignores = SelectorMatcher(ignore, namespaces, flags)
-
-    for child in _select(tree, captures, ignores, comments):
-        yield child
-        if limit is not None:
-            limit -= 1
-            if limit < 1:
-                break
+    yield from SoupSieve(mode).select(node, select, ignore, namespaces, limit, flags)
