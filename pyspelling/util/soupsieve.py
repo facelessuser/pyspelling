@@ -35,7 +35,7 @@ __version__ = __version_info__._get_canonical()
 
 __all__ = (
     'HTML', 'HTML5', 'XHTML', 'XML', 'COMMENTS',
-    'SelectorMatcher', 'comments', 'icomments', 'select', 'iselect'
+    'SelectorMatcher', 'comments', 'select'
 )
 
 HTML = 0x1
