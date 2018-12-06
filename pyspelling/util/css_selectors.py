@@ -2,6 +2,22 @@
 import re
 from collections import namedtuple
 import bs4
+from ..__meta__ import Version
+
+__version_info__ = Version(0, 2, 0, 'final')
+__version__ = __version_info__._get_canonical()
+
+__all__ = (
+    'HTML', 'HTML5', 'XHTML', 'XML', 'COMMENTS',
+    'SelectorMatcher', 'comments', 'icomments', 'select', 'iselect'
+)
+
+HTML = 0x1
+HTML5 = 0x2
+XHTML = 0x4
+XML = 0x8
+
+COMMENTS = 0x100
 
 DOC = bs4.BeautifulSoup
 TAG = bs4.element.Tag
@@ -154,11 +170,14 @@ class SelectorNth(namedtuple('SelectorNth', ['a', 'n', 'b', 'type', 'last', 'sel
 class SelectorMatcher:
     """Match tags in Beautiful Soup with CSS selectors."""
 
-    def __init__(self, selector, mode='html', namespaces=None):
+    def __init__(self, selector, namespaces=None, flags=0):
         """Initialize."""
 
-        self.mode = mode
-        self.re_sel = RE_HTML_SEL if self.mode != 'xml' else RE_XML_SEL
+        if flags in (HTML, HTML5, XML, XHTML) or flags == 0:
+            self.mode = flags
+        else:
+            raise ValueError("Invalid SelectorMatcher flag(s) '{}'".format(flags))
+        self.re_sel = RE_HTML_SEL if self.mode != XML else RE_XML_SEL
         self.namespaces = namespaces if namespaces else {}
         self.selectors = self.process_selectors(selector)
 
@@ -174,12 +193,12 @@ class SelectorMatcher:
     def supports_namespaces(self):
         """Check if namespaces are supported in the HTML type."""
 
-        return self.mode in ('html5', 'xhtml', 'xml')
+        return self.mode in (HTML5, XHTML, XML)
 
     def is_xml(self):
         """Check if document is an XML type."""
 
-        return self.mode in ('xml', 'xhtml')
+        return self.mode in (XHTML, XML)
 
     def parse_attribute_selector(self, sel, m, has_selector):
         """Create attribute selector from the returned regex match."""
@@ -430,7 +449,7 @@ class SelectorMatcher:
         selectors = []
         has_selector = False
         closed = False
-        is_html = self.mode != 'xml'
+        is_html = self.mode != XML
         relations = []
         rel_type = REL_HAS_PARENT
         split_last = False
@@ -574,7 +593,7 @@ class SelectorMatcher:
     def get_classes(self, el):
         """Get classes."""
 
-        if self.mode not in ('xhtml', 'xml'):
+        if self.mode not in (XHTML, XML):
             return el.attrs.get('class', [])
         else:
             return [c for c in el.attrs.get('class', '').strip().split(' ') if c]
@@ -871,7 +890,7 @@ class SelectorMatcher:
         """Check if element matches one of the selectors."""
 
         match = False
-        is_html = self.mode != 'xml'
+        is_html = self.mode != XML
         for selector in selectors:
             match = selector.is_not
             # Verify tag matches
@@ -910,7 +929,7 @@ class SelectorMatcher:
         return isinstance(el, TAG) and self.match_selectors(el, self.selectors)
 
 
-def _select(tree, captures, ignores):  # pragma: no cover
+def _select(tree, captures, ignores, comments):  # pragma: no cover
     """Recursively return selected tags."""
 
     if ignores.match(tree):
@@ -930,16 +949,31 @@ def _select(tree, captures, ignores):  # pragma: no cover
                 yield child
 
 
-def comments(tree, mode="html"):  # pragma: no cover
+def icomments(tree, flags=0):
     """Get comments only."""
 
-    select(tree, "", "", mode, None, True)
+    yield from select(tree, "", "", None, flags | COMMENTS)
 
 
-def select(tree, select, ignore="", mode='html', namespaces=None, comments=False):  # pragma: no cover
+def comments(tree, flags=0):
+    """Get comments only."""
+
+    return list(icomments(tree, flags))
+
+
+def iselect(tree, select, ignore="", namespaces=None, flags=0):
     """Select the specified tags filtering out if a filter pattern is provided."""
 
-    captures = SelectorMatcher(select, mode, namespaces)
-    ignores = SelectorMatcher(ignore, mode, namespaces)
+    comments = flags & COMMENTS
+    if comments:
+        flags ^= COMMENTS
+    captures = SelectorMatcher(select, namespaces, flags)
+    ignores = SelectorMatcher(ignore, namespaces, flags)
 
     yield from _select(tree, captures, ignores, comments)
+
+
+def select(tree, select, ignore="", namespaces=None, flags=0):
+    """Select the specified tags filtering out if a filter pattern is provided."""
+
+    return list(iselect(tree, select, ignore, namespaces, flags))

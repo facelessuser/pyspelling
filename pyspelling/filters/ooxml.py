@@ -11,7 +11,7 @@ import bs4
 from . import odf
 import re
 from .. import filters
-from ..util.css_selectors import SelectorMatcher
+from ..util import css_selectors as cs
 
 DOC_PARAMS = {
     'docx': {
@@ -63,7 +63,7 @@ class OoxmlFilter(odf.OdfFilter):
         self.parser = 'xml'
         self.type = None
         self.filepattern = ''
-        self.ignores = SelectorMatcher('', 'xml', {})
+        self.ignores = cs.SelectorMatcher('', {}, cs.XML)
         self.captures = None
 
     def has_bom(self, filestream):
@@ -111,7 +111,9 @@ class OoxmlFilter(odf.OdfFilter):
                     break
         self.filepattern = DOC_PARAMS[self.type]['filepattern']
         self.namespaces = DOC_PARAMS[self.type]['namespaces']
-        self.captures = SelectorMatcher(DOC_PARAMS[self.type]['captures'], 'xml', DOC_PARAMS[self.type]['namespaces'])
+        self.captures = cs.SelectorMatcher(
+            DOC_PARAMS[self.type]['captures'], DOC_PARAMS[self.type]['namespaces'], cs.XML
+        )
 
     def soft_break(self, el, text):
         """Apply soft break."""
