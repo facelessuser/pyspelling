@@ -63,7 +63,7 @@ class OoxmlFilter(odf.OdfFilter):
         self.parser = 'xml'
         self.type = None
         self.filepattern = ''
-        self.ignores = ssv.SelectorMatcher('', {}, ssv.XML)
+        self.ignores = ssv.compile('', {}, ssv.XML)
         self.captures = None
 
     def has_bom(self, filestream):
@@ -111,7 +111,7 @@ class OoxmlFilter(odf.OdfFilter):
                     break
         self.filepattern = DOC_PARAMS[self.type]['filepattern']
         self.namespaces = DOC_PARAMS[self.type]['namespaces']
-        self.captures = ssv.SelectorMatcher(
+        self.captures = ssv.compile(
             DOC_PARAMS[self.type]['captures'], DOC_PARAMS[self.type]['namespaces'], ssv.XML
         )
 

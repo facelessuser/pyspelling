@@ -64,8 +64,8 @@ class XmlFilter(filters.Filter):
         self.attributes = set(self.config['attributes'])
         self.parser = 'xml'
         self.type = 'xml'
-        self.ignores = ssv.SelectorMatcher(','.join(self.config['ignores']), self.config['namespaces'], ssv.XML)
-        self.captures = ssv.SelectorMatcher(','.join(self.config['captures']), self.config['namespaces'], ssv.XML)
+        self.ignores = ssv.compile(','.join(self.config['ignores']), self.config['namespaces'], ssv.XML)
+        self.captures = ssv.compile(','.join(self.config['captures']), self.config['namespaces'], ssv.XML)
 
     def _has_xml_encode(self, content):
         """Check XML encoding."""

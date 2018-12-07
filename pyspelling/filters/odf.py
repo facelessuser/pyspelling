@@ -51,8 +51,8 @@ class OdfFilter(xml.XmlFilter):
             'text': 'urn:oasis:names:tc:opendocument:xmlns:text:1.0',
             'draw': 'urn:oasis:names:tc:opendocument:xmlns:drawing:1.0'
         }
-        self.ignores = ssv.SelectorMatcher('', {}, ssv.XML)
-        self.captures = ssv.SelectorMatcher(','.join(self.default_capture), self.namespaces, ssv.XML)
+        self.ignores = ssv.compile('', {}, ssv.XML)
+        self.captures = ssv.compile(','.join(self.default_capture), self.namespaces, ssv.XML)
 
     def has_bom(self, filestream):
         """Check if has BOM."""
