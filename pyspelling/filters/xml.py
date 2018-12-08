@@ -9,7 +9,7 @@ import re
 import codecs
 import bs4
 import html
-from ..util.css_selectors import SelectorMatcher
+import soupsieve as sv
 from collections import deque
 
 NON_CONTENT = (bs4.Doctype, bs4.Declaration, bs4.CData, bs4.ProcessingInstruction)
@@ -64,12 +64,8 @@ class XmlFilter(filters.Filter):
         self.attributes = set(self.config['attributes'])
         self.parser = 'xml'
         self.type = 'xml'
-        self.ignores = SelectorMatcher(
-            ','.join(self.config['ignores']), self.type, self.config['namespaces']
-        )
-        self.captures = SelectorMatcher(
-            ','.join(self.config['captures']), self.type, self.config['namespaces']
-        )
+        self.ignores = sv.compile(','.join(self.config['ignores']), self.config['namespaces'], sv.XML)
+        self.captures = sv.compile(','.join(self.config['captures']), self.config['namespaces'], sv.XML)
 
     def _has_xml_encode(self, content):
         """Check XML encoding."""
@@ -214,12 +210,11 @@ class XmlFilter(filters.Filter):
                             text.append(string)
                             text.append(' ')
         elif self.comments:
-            for child in tree.descendants:
-                if isinstance(child, bs4.Comment):
-                    string = str(child).strip()
-                    if string:
-                        sel = self.construct_selector(tree) + '<!--comment-->'
-                        comments.append((html.unescape(string), sel))
+            for child in self.captures.commentsiter(tree):
+                string = str(child).strip()
+                if string:
+                    sel = self.construct_selector(tree) + '<!--comment-->'
+                    comments.append((html.unescape(string), sel))
 
         text = self.store_blocks(tree, blocks, text, force_root)
 

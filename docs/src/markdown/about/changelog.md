@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.2
+
+- **FIX**: Fix `:empty` and `:root` and `:nth-*` selectors not working properly without a tag name specified before. This is now done via our external lib called `soupsieve` which is the same homegrown CSS library that we were using internally.
+
 ## 2.2.1
 
 - **FIX**: Comments in HTML/XML should be returned regardless of whether they are in an ignored tag or not.

@@ -10,6 +10,7 @@ Changelog
 Cygwin
 GitHub
 GitLab
+Hashable
 Homebrew
 JSDoc
 MERCHANTABILITY

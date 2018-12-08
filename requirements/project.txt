@@ -1,4 +1,4 @@
-beautifulsoup4
+soupsieve
 markdown
 pyyaml
 wcmatch>=2.0.3

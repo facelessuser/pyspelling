@@ -103,3 +103,5 @@ docs/src/dictionary/hunspell
 
 # pytest
 .pytest_cache/
+
+@test*

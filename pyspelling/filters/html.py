@@ -7,8 +7,8 @@ from __future__ import unicode_literals
 import re
 import codecs
 import html
+import soupsieve as sv
 from . import xml
-from ..util.css_selectors import SelectorMatcher, lower
 from collections import deque
 
 RE_HTML_ENCODE = re.compile(
@@ -18,6 +18,7 @@ RE_HTML_ENCODE = re.compile(
 )
 
 MODE = {'html': 'lxml', 'xhtml': 'xml', 'html5': 'html5lib'}
+SV_MODE = {"html": sv.HTML, "html5": sv.HTML5, "xhtml": sv.XHTML}
 
 
 class HtmlFilter(xml.XmlFilter):
@@ -71,12 +72,8 @@ class HtmlFilter(xml.XmlFilter):
         if self.type not in MODE:
             self.type = 'html'
         self.parser = MODE[self.type]
-        self.ignores = SelectorMatcher(
-            ','.join(self.config['ignores']), self.type, self.config['namespaces']
-        )
-        self.captures = SelectorMatcher(
-            ','.join(self.config['captures']), self.type, self.config['namespaces']
-        )
+        self.ignores = sv.compile(','.join(self.config['ignores']), self.config['namespaces'], SV_MODE[self.type])
+        self.captures = sv.compile(','.join(self.config['captures']), self.config['namespaces'], SV_MODE[self.type])
 
     def header_check(self, content):
         """Special HTML encoding check."""
@@ -100,7 +97,7 @@ class HtmlFilter(xml.XmlFilter):
     def is_break_tag(self, el):
         """Check if tag is an element we should break on."""
 
-        name = lower(el.name) if self.type != 'xhtml' else el.name
+        name = sv.util.lower(el.name) if self.type != 'xhtml' else el.name
         return name in self.break_tags or name in self.user_break_tags
 
     def get_classes(self, el):
