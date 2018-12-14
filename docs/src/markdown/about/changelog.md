@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.2.3
+
+- **FIX**: There is no need to un-escape content for HTML/XML as it is already un-escaped in the `bs4` objects.
+- **FIX**: Upgrade to latest beta of Soup Sieve.
+
 ## 2.2.2
 
 - **FIX**: Fix `:empty` and `:root` and `:nth-*` selectors not working properly without a tag name specified before. This is now done via our external lib called `soupsieve` which is the same homegrown CSS library that we were using internally.

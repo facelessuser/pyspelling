@@ -1,4 +1,4 @@
-soupsieve
+soupsieve>=1.0b2
 markdown
 pyyaml
 wcmatch>=2.0.3

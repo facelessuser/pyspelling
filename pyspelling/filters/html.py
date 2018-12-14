@@ -18,7 +18,6 @@ RE_HTML_ENCODE = re.compile(
 )
 
 MODE = {'html': 'lxml', 'xhtml': 'xml', 'html5': 'html5lib'}
-SV_MODE = {"html": sv.HTML, "html5": sv.HTML5, "xhtml": sv.XHTML}
 
 
 class HtmlFilter(xml.XmlFilter):
@@ -72,8 +71,8 @@ class HtmlFilter(xml.XmlFilter):
         if self.type not in MODE:
             self.type = 'html'
         self.parser = MODE[self.type]
-        self.ignores = sv.compile(','.join(self.config['ignores']), self.config['namespaces'], SV_MODE[self.type])
-        self.captures = sv.compile(','.join(self.config['captures']), self.config['namespaces'], SV_MODE[self.type])
+        self.ignores = sv.compile(','.join(self.config['ignores']), self.config['namespaces'])
+        self.captures = sv.compile(','.join(self.config['captures']), self.config['namespaces'])
 
     def header_check(self, content):
         """Special HTML encoding check."""
