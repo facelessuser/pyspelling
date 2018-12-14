@@ -8,7 +8,6 @@ from .. import filters
 import re
 import codecs
 import bs4
-import html
 import soupsieve as sv
 from collections import deque
 
@@ -64,8 +63,8 @@ class XmlFilter(filters.Filter):
         self.attributes = set(self.config['attributes'])
         self.parser = 'xml'
         self.type = 'xml'
-        self.ignores = sv.compile(','.join(self.config['ignores']), self.config['namespaces'], sv.XML)
-        self.captures = sv.compile(','.join(self.config['captures']), self.config['namespaces'], sv.XML)
+        self.ignores = sv.compile(','.join(self.config['ignores']), self.config['namespaces'])
+        self.captures = sv.compile(','.join(self.config['captures']), self.config['namespaces'])
 
     def _has_xml_encode(self, content):
         """Check XML encoding."""
@@ -129,7 +128,7 @@ class XmlFilter(filters.Filter):
         """Store the text as desired."""
 
         if force_root or el.parent is None or self.is_break_tag(el):
-            content = html.unescape(''.join(text))
+            content = ''.join(text)
             if content:
                 blocks.append((content, self.construct_selector(el)))
             text = []
@@ -187,7 +186,7 @@ class XmlFilter(filters.Filter):
                     value = tree.attrs.get(attr, '').strip()
                     if value:
                         sel = self.construct_selector(tree, attr=attr)
-                        attributes.append((html.unescape(value), sel))
+                        attributes.append((value, sel))
 
             # Walk children
             for child in tree.children:
@@ -205,7 +204,7 @@ class XmlFilter(filters.Filter):
                     if string:
                         if is_comment:
                             sel = self.construct_selector(tree) + '<!--comment-->'
-                            comments.append((html.unescape(string), sel))
+                            comments.append((string, sel))
                         elif capture:
                             text.append(string)
                             text.append(' ')
@@ -214,7 +213,7 @@ class XmlFilter(filters.Filter):
                 string = str(child).strip()
                 if string:
                     sel = self.construct_selector(tree) + '<!--comment-->'
-                    comments.append((html.unescape(string), sel))
+                    comments.append((string, sel))
 
         text = self.store_blocks(tree, blocks, text, force_root)
 

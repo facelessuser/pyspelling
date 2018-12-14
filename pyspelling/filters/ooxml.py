@@ -63,7 +63,7 @@ class OoxmlFilter(odf.OdfFilter):
         self.parser = 'xml'
         self.type = None
         self.filepattern = ''
-        self.ignores = sv.compile('', {}, sv.XML)
+        self.ignores = sv.compile('', {})
         self.captures = None
 
     def has_bom(self, filestream):
@@ -111,7 +111,7 @@ class OoxmlFilter(odf.OdfFilter):
                     break
         self.filepattern = DOC_PARAMS[self.type]['filepattern']
         self.namespaces = DOC_PARAMS[self.type]['namespaces']
-        self.captures = sv.compile(DOC_PARAMS[self.type]['captures'], DOC_PARAMS[self.type]['namespaces'], sv.XML)
+        self.captures = sv.compile(DOC_PARAMS[self.type]['captures'], DOC_PARAMS[self.type]['namespaces'])
 
     def soft_break(self, el, text):
         """Apply soft break."""
