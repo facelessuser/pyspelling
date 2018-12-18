@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.4
+
+- **FIX**: Explicitly require Beautiful Soup 4 dependency.
+
 ## 2.2.3
 
 - **FIX**: There is no need to un-escape content for HTML/XML as it is already un-escaped in the `bs4` objects.
