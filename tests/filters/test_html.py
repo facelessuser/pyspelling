@@ -204,7 +204,7 @@ class TestHtml5AttrNamespace(util.PluginTestCase):
                   ignores:
                   - '[xlink|href*=forw]'
                   - '[xlink|href="images/sprites.svg#icon-redo"]'
-                  - '[viewbox~=20]'
+                  - '[viewbox~="20"]'
             """
         ).format(self.tempdir)
         self.mktemp('.html5.yml', config, 'utf-8')
@@ -230,7 +230,7 @@ class TestHtml5AttrNamespace(util.PluginTestCase):
                     xlink: http://www.w3.org/1999/xlink
                   ignores:
                   - '[data1]'
-                  - '[data|=100]'
+                  - '[data|="100"]'
             """
         ).format(self.tempdir)
         self.mktemp('.html5.yml', config, 'utf-8')
