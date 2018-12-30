@@ -33,6 +33,7 @@ PyYaml's
 SCSS
 SVG
 Stylesheets
+stylesheets
 TODO
 Tox
 UTF

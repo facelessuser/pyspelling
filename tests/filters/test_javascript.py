@@ -84,7 +84,7 @@ class TestJavaScriptStrings(util.PluginTestCase):
         self.mktemp('.javascript.yml', config, 'utf-8')
 
     def test_javascript_strings(self):
-        """Test CPP."""
+        """Test JavaScript strings."""
 
         bad_string1 = ['helo', 'begn']
         bad_string2 = ['adn', 'highight']
@@ -109,7 +109,7 @@ class TestJavaScriptStrings(util.PluginTestCase):
         self.assert_spellcheck('.javascript.yml', bad_words)
 
     def test_javascript_temp_strings(self):
-        """Test CPP."""
+        """Test JavaScript."""
 
         bad_string1 = ['helo', 'begn']
         bad_string2 = ['adn', 'highight']
@@ -175,7 +175,7 @@ class TestJavaScriptGroupedComments(util.PluginTestCase):
         self.mktemp('.javascript.yml', config, 'utf-8')
 
     def test_javascript_grouped_comments(self):
-        """Test CPP."""
+        """Test JavaScript grouped comments."""
 
         template = self.dedent(
             r"""
@@ -224,7 +224,7 @@ class TestJavaScriptChained(util.PluginTestCase):
         self.mktemp('.javascript.yml', config, 'utf-8')
 
     def test_javascript_after_text(self):
-        """Test javascript after text."""
+        """Test JavaScript after text."""
 
         bad_docstring = ['helo', 'begn']
         bad_block = ['adn', 'highight']

@@ -83,7 +83,7 @@ matrix:
 - name: python
   sources:
   - setup.py
-  - pyspelling/**/*.py
+  - '{pyspelling,tests,tools}/**/*.py'
   hunspell:
     d: docs/src/dictionary/hunspell/en_US
   aspell:
