@@ -527,7 +527,7 @@ class TestCPPChained(util.PluginTestCase):
         self.mktemp('.cpp.yml', config, 'utf-8')
 
     def test_cpp_after_text(self):
-        """Test cpp after text."""
+        """Test CPP after text."""
 
         bad_block = ['helo', 'begn']
         bad_comments = ['flga', 'graet']

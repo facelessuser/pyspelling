@@ -70,9 +70,9 @@ class PluginTestCase(unittest.TestCase):
 
     def dedent(self, content):
         """
-        Dedent text.
+        Normalize indentation of text.
 
-        When dedenting text, you often leave a new line at the start, so strip it as well.
+        When normalizing indentation of text, you often leave a new line at the start, so strip it as well.
         """
 
         return dedent(content).replace('\n', '', 1)

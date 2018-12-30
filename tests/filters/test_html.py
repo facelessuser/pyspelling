@@ -97,7 +97,7 @@ class TestCSSEscapes(util.PluginTestCase):
         self.mktemp('test.txt', template, 'utf-8')
 
     def test_css_escapes(self):
-        """Test css escapes."""
+        """Test CSS escapes."""
 
         config = self.dedent(
             """
