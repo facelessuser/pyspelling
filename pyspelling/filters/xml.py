@@ -50,7 +50,7 @@ class XmlFilter(filters.Filter):
             "comments": True,
             "attributes": [],
             "break_tags": [],
-            "ignores": [],
+            "ignores": [':not(*|*)'],
             "captures": self.default_capture,
             "namespaces": {}
         }
@@ -209,11 +209,12 @@ class XmlFilter(filters.Filter):
                             text.append(string)
                             text.append(' ')
         elif self.comments:
-            for child in self.captures.icomments(tree):
-                string = str(child).strip()
-                if string:
-                    sel = self.construct_selector(tree) + '<!--comment-->'
-                    comments.append((string, sel))
+            for child in tree.descendants:
+                if isinstance(child, bs4.Comment):
+                    string = str(child).strip()
+                    if string:
+                        sel = self.construct_selector(tree) + '<!--comment-->'
+                        comments.append((string, sel))
 
         text = self.store_blocks(tree, blocks, text, force_root)
 

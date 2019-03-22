@@ -49,7 +49,7 @@ class HtmlFilter(xml.XmlFilter):
             "mode": "html",
             "attributes": [],
             "break_tags": [],
-            "ignores": [],
+            "ignores": [':not(*|*)'],
             "captures": self.default_capture,
             "namespaces": {}
         }

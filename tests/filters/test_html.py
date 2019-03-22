@@ -115,7 +115,7 @@ class TestCSSEscapes(util.PluginTestCase):
                   namespaces:
                     xlink: http://www.w3.org/1999/xlink
                   ignores:
-                  - '[xlink|href\\:colon^=images]'
+                  - '[xlink\\:href\\:colon^=images]'
                   - '[xlink|\\68r\\65 f^=other]'
             """
         ).format(self.tempdir)

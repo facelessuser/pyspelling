@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.2.5
+
+- **FIX**: Rework comment extraction in XML plugin.
+- **FIX**: Newer versions of Soup Sieve will not compile an empty string, so use `:not(*|*)` for the default ignore.
+
 ## 2.2.4
 
 - **FIX**: Explicitly require Beautiful Soup 4 dependency.
