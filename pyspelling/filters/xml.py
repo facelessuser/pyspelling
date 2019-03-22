@@ -209,11 +209,12 @@ class XmlFilter(filters.Filter):
                             text.append(string)
                             text.append(' ')
         elif self.comments:
-            for child in self.captures.icomments(tree):
-                string = str(child).strip()
-                if string:
-                    sel = self.construct_selector(tree) + '<!--comment-->'
-                    comments.append((string, sel))
+            for child in tree.descendants:
+                if isinstance(child, bs4.Comment):
+                    string = str(child).strip()
+                    if string:
+                        sel = self.construct_selector(tree) + '<!--comment-->'
+                        comments.append((string, sel))
 
         text = self.store_blocks(tree, blocks, text, force_root)
 

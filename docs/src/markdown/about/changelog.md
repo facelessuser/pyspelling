@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.5
+
+- **FIX**: Rework comment extraction in XML plugin.
+
 ## 2.2.4
 
 - **FIX**: Explicitly require Beautiful Soup 4 dependency.
