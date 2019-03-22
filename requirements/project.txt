@@ -1,5 +1,5 @@
 beautifulsoup4
-soupsieve>=1.0
+soupsieve>=1.8
 markdown
 pyyaml
 wcmatch>=2.0.3

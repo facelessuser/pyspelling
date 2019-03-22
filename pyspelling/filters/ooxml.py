@@ -63,7 +63,7 @@ class OoxmlFilter(odf.OdfFilter):
         self.parser = 'xml'
         self.type = None
         self.filepattern = ''
-        self.ignores = sv.compile('', {})
+        self.ignores = sv.compile(':not(*|*)', {})
         self.captures = None
 
     def has_bom(self, filestream):

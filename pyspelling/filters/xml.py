@@ -50,7 +50,7 @@ class XmlFilter(filters.Filter):
             "comments": True,
             "attributes": [],
             "break_tags": [],
-            "ignores": [],
+            "ignores": [':not(*|*)'],
             "captures": self.default_capture,
             "namespaces": {}
         }
