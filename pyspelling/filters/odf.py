@@ -51,7 +51,7 @@ class OdfFilter(xml.XmlFilter):
             'text': 'urn:oasis:names:tc:opendocument:xmlns:text:1.0',
             'draw': 'urn:oasis:names:tc:opendocument:xmlns:drawing:1.0'
         }
-        self.ignores = sv.compile(':not(*|*)', {})
+        self.ignores = None
         self.captures = sv.compile(','.join(self.default_capture), self.namespaces)
 
     def has_bom(self, filestream):

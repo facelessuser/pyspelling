@@ -50,7 +50,7 @@ class XmlFilter(filters.Filter):
             "comments": True,
             "attributes": [],
             "break_tags": [],
-            "ignores": [':not(*|*)'],
+            "ignores": [],
             "captures": self.default_capture,
             "namespaces": {}
         }
@@ -63,8 +63,10 @@ class XmlFilter(filters.Filter):
         self.attributes = set(self.config['attributes'])
         self.parser = 'xml'
         self.type = 'xml'
-        self.ignores = sv.compile(','.join(self.config['ignores']), self.config['namespaces'])
-        self.captures = sv.compile(','.join(self.config['captures']), self.config['namespaces'])
+        ignores = ','.join(self.config['ignores'])
+        self.ignores = sv.compile(ignores, self.config['namespaces']) if ignores.strip() else None
+        captures = ','.join(self.config['captures'])
+        self.captures = sv.compile(captures, self.config['namespaces']) if captures.strip() else None
 
     def _has_xml_encode(self, content):
         """Check XML encoding."""
@@ -177,9 +179,9 @@ class XmlFilter(filters.Filter):
         comments = []
         blocks = []
 
-        if not self.ignores.match(tree):
+        if not (self.ignores.match(tree) if self.ignores else None):
             # The root of the document is the BeautifulSoup object
-            capture = self.captures.match(tree)
+            capture = self.captures.match(tree) if self.captures is not None else None
             # Check attributes for normal tags
             if capture:
                 for attr in self.attributes:

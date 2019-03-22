@@ -49,7 +49,7 @@ class HtmlFilter(xml.XmlFilter):
             "mode": "html",
             "attributes": [],
             "break_tags": [],
-            "ignores": [':not(*|*)'],
+            "ignores": [],
             "captures": self.default_capture,
             "namespaces": {}
         }
@@ -71,8 +71,10 @@ class HtmlFilter(xml.XmlFilter):
         if self.type not in MODE:
             self.type = 'html'
         self.parser = MODE[self.type]
-        self.ignores = sv.compile(','.join(self.config['ignores']), self.config['namespaces'])
-        self.captures = sv.compile(','.join(self.config['captures']), self.config['namespaces'])
+        ignores = ','.join(self.config['ignores'])
+        self.ignores = sv.compile(ignores, self.config['namespaces']) if ignores.strip() else None
+        captures = ','.join(self.config['captures'])
+        self.captures = sv.compile(captures, self.config['namespaces']) if captures.strip() else None
 
     def header_check(self, content):
         """Special HTML encoding check."""

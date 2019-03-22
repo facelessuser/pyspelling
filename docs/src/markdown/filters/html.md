@@ -38,7 +38,7 @@ Options      | Type     | Default                           | Description
 ------------ | -------- | --------------------------------- | -----------
 `comments`   | bool     | `#!py3 True`                      | Include comment text in the output.
 `attributes` | [string] | `#!py3 []`                        | Attributes whose content should be included in the output.
-`ignores`    | [string] | `#!py3 [':not(*|*)']`             | CSS style selectors that identify tags to ignore. Child tags will not be crawled.
+`ignores`    | [string] | `#!py3 []`                        | CSS style selectors that identify tags to ignore. Child tags will not be crawled.
 `captures`   | [string] | `#!py3 ['*|*:not(script,style)']` | CSS style selectors used to narrow which tags that text is collected from. Unlike `ignores`, tags which text is not captured from still have their children crawled.
 `mode`       | string   | `#!py3 'html`                     | Mode to use when parsing HTML: `html`, `xhtml`, `html5`.
 `namespaces` | dict     | `#!py3 {}`                        | Dictionary containing key value pairs of namespaces to use for CSS selectors (equivalent to `@namespace` in CSS). Use the an empty string for the key to define default the namespace. See below for example.

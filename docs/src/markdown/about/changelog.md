@@ -3,7 +3,7 @@
 ## 2.2.5
 
 - **FIX**: Rework comment extraction in XML plugin.
-- **FIX**: Newer versions of Soup Sieve will not compile an empty string, so use `:not(*|*)` for the default ignore.
+- **FIX**: Newer versions of Soup Sieve will not compile an empty string, so adjust XML and HTML plugin logic to account for this behavior.
 
 ## 2.2.4
 
