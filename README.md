@@ -19,7 +19,7 @@ Extension documentation is found here: http://facelessuser.github.io/pyspelling/
 
 ## License
 
-Rummage is released under the MIT license.
+PySpelling is released under the MIT license.
 
 Copyright (c) 2017 - 2019 Isaac Muse <isaacmuse@gmail.com>
 
