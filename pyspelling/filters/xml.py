@@ -168,10 +168,13 @@ class XmlFilter(filters.Filter):
     def get_last_descendant(self, node):
         """Get the last descendant."""
 
-        last_child = node
-        while isinstance(last_child, bs4.Tag) and last_child.contents:
-            last_child = last_child.contents[-1]
-        last_descendant = last_child.next_element
+        if node.next_sibling is not None:
+            last_descendant = node.next_sibling
+        else:
+            last_child = node
+            while isinstance(last_child, bs4.Tag) and last_child.contents:
+                last_child = last_child.contents[-1]
+            last_descendant = last_child.next_element
 
         return last_descendant
 
