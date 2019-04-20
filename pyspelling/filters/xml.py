@@ -9,7 +9,7 @@ import re
 import codecs
 import bs4
 import soupsieve as sv
-from collections import deque
+from collections import deque, OrderedDict
 
 NON_CONTENT = (bs4.Doctype, bs4.Declaration, bs4.CData, bs4.ProcessingInstruction)
 
@@ -41,6 +41,7 @@ class XmlFilter(filters.Filter):
     def __init__(self, options, default_encoding='utf-8'):
         """Initialization."""
 
+        self.user_break_tags = set()
         super().__init__(options, default_encoding)
 
     def get_default_config(self):
@@ -126,15 +127,15 @@ class XmlFilter(filters.Filter):
         name = el.name
         return name in self.break_tags or name in self.user_break_tags
 
-    def store_blocks(self, el, blocks, text, force_root):
-        """Store the text as desired."""
+    def format_blocks(self):
+        """Format the text as for a block."""
 
-        if force_root or el.parent is None or self.is_break_tag(el):
+        block_text = []
+        for el, text in self._block_text.items():
             content = ''.join(text)
             if content:
-                blocks.append((content, self.construct_selector(el)))
-            text = []
-        return text
+                block_text.append((content, self.construct_selector(el)))
+        return block_text
 
     def construct_selector(self, el, attr=''):
         """Construct an selector for context."""
@@ -164,66 +165,130 @@ class XmlFilter(filters.Filter):
     def reset(self):
         """Reset."""
 
-    def to_text(self, tree, force_root=False):
-        """
-        Extract text from tags.
+    def get_last_descendant(self, node):
+        """Get the last descendant."""
 
-        Skip any selectors specified and include attributes if specified.
-        Ignored tags will not have their attributes scanned either.
-        """
+        last_child = node
+        while isinstance(last_child, bs4.Tag) and last_child.contents:
+            last_child = last_child.contents[-1]
+        last_descendant = last_child.next_element
 
-        self.extract_tag_metadata(tree)
+        return last_descendant
 
-        text = []
-        attributes = []
-        comments = []
-        blocks = []
+    def extract_attributes(self, node):
+        """Extract attribute values."""
 
-        if not (self.ignores.match(tree) if self.ignores else None):
-            # The root of the document is the BeautifulSoup object
-            capture = self.captures.match(tree) if self.captures is not None else None
-            # Check attributes for normal tags
+        for attr in self.attributes:
+            value = node.attrs.get(attr, '').strip()
+            if value:
+                sel = self.construct_selector(node, attr=attr)
+                self._attributes.append((value, sel))
+
+    def extract_string(self, node, is_comments):
+        """Extract string."""
+
+        string = str(node).strip()
+        if string:
+            if is_comments:
+                sel = self.construct_selector(node.parent) + '<!--comment-->'
+                self._comments.append((string, sel))
+            else:
+                self._block_text[self._current_block].append(string)
+                self._block_text[self._current_block].append(' ')
+
+    def set_block(self, node, force=False):
+        """Set the current block."""
+
+        if not force and node is self._block_stack[-1][1]:
+            self._block_stack.pop(-1)
+            self._current_block = self._block_stack[-1][0]
+
+        if force or self.is_break_tag(node):
+            self._block_stack.append((node, self.get_last_descendant(node)))
+            self._block_text[node] = []
+            self._current_block = node
+
+    def to_text(self, root):
+        """Extract text from the document node."""
+
+        last_capture = None
+        last_capture_value = False
+        next_good = None
+
+        self._attributes = []
+        self._comments = []
+        self._block_text = OrderedDict()
+        self._block_stack = []
+        self.set_block(root, force=True)
+        self.extract_tag_metadata(root)
+
+        if not (self.ignores.match(root) if self.ignores else None):
+            capture = self.captures.match(root) if self.captures is not None else None
+            last_capture = root
+            last_capture_value = capture
+
             if capture:
-                for attr in self.attributes:
-                    value = tree.attrs.get(attr, '').strip()
-                    if value:
-                        sel = self.construct_selector(tree, attr=attr)
-                        attributes.append((value, sel))
+                self.extract_attributes(root)
 
-            # Walk children
-            for child in tree.children:
-                string = str(child).strip()
-                is_comment = isinstance(child, bs4.Comment)
-                if isinstance(child, bs4.element.Tag):
-                    t, b, a, c = self.to_text(child)
-                    text.extend(t)
-                    attributes.extend(a)
-                    comments.extend(c)
-                    blocks.extend(b)
-                # Get content if not the root and not a comment (unless we want comments).
-                elif not isinstance(child, NON_CONTENT) and (not is_comment or self.comments):
-                    string = str(child).strip()
-                    if string:
-                        if is_comment:
-                            sel = self.construct_selector(tree) + '<!--comment-->'
-                            comments.append((string, sel))
-                        elif capture:
-                            text.append(string)
-                            text.append(' ')
+            for node in root.descendants:
+
+                if next_good is not None:
+                    # We are currently ignoring nodes from an ignored tag.
+                    # When we see the first tag that is not a child of the ignored tag,
+                    # we can start analyzing tags and text again. Comments are excluded
+                    # from ignored, and are captured regardless.
+                    if node is not next_good:
+                        if self.comments and isinstance(node, bs4.Comment):
+                            self.extract_string(node, True)
+                        continue
+                    next_good = None
+
+                if isinstance(node, bs4.Tag):
+                    # Handle tags
+                    self.extract_tag_metadata(node)
+                    self.set_block(node)
+
+                    if not (self.ignores.match(node) if self.ignores else None):
+                        # Handle tags that are not ignored
+                        capture = self.captures.match(node) if self.captures is not None else None
+                        last_capture = node
+                        last_capture_value = capture
+                        # Elements that are scheduled to be captured should be checked for attributes to check
+                        if capture:
+                            self.extract_attributes(node)
+                    else:
+                        # Handle ignored tags by calculating their last descendant
+                        # so we know how long we should ignore nodes
+                        next_good = self.get_last_descendant(node)
+                        if next_good is None:
+                            break
+                else:
+                    # Handle test nodes: normal text and comments
+                    is_comments = isinstance(node, bs4.Comment)
+                    if (self.comments and is_comments) or (not is_comments and not isinstance(node, NON_CONTENT)):
+                        # Nodes are parsed in order, so sometimes we will descend into another child tag before
+                        # all text nodes of the current tag are processed. So we track whether text of the parent
+                        # tag should be captured. If we process multiple text nodes of a given tag, we don't
+                        # have to recalculate. This allows us to capture text from desired tags.
+                        parent = node.parent
+                        if is_comments:
+                            capture = True
+                        elif parent is last_capture:
+                            capture = last_capture_value
+                        elif not (self.captures.match(parent) if self.captures is not None else None):
+                            capture = self.captures.match(parent) if self.captures is not None else None
+                            last_capture = parent
+                            last_capture_value = capture
+
+                        if capture:
+                            self.extract_string(node, is_comments)
         elif self.comments:
-            for child in tree.descendants:
-                if isinstance(child, bs4.Comment):
-                    string = str(child).strip()
-                    if string:
-                        sel = self.construct_selector(tree) + '<!--comment-->'
-                        comments.append((string, sel))
+            # If the root tag is ignored, but comments is enabled, parse the comments
+            for node in root.descendants:
+                if isinstance(node, bs4.Comment):
+                    self.extract_string(node, True)
 
-        text = self.store_blocks(tree, blocks, text, force_root)
-
-        if tree.parent is None or force_root:
-            return blocks, attributes, comments
-        else:
-            return text, blocks, attributes, comments
+        return self.format_blocks(), self._attributes, self._comments
 
     def _filter(self, text, context, encoding):
         """Filter the source text."""
