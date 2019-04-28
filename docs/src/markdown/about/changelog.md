@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.6
+
+- **FIX**: Require `wcmatch` 3.0 for `glob` related fixes.
+
 ## 2.2.5
 
 - **FIX**: Rework comment extraction in XML plugin.

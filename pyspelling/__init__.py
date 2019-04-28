@@ -45,7 +45,9 @@ class SpellChecker:
         "EXTGLOB": glob.E,
         "E": glob.E,
         "BRACE": glob.B,
-        "B": glob.B
+        "B": glob.B,
+        "FOLLOW": glob.L,
+        "L": glob.L
     }
 
     def __init__(self, config, binary='', verbose=0, debug=False):
@@ -163,8 +165,7 @@ class SpellChecker:
         """Walk source and parse files."""
 
         for target in targets:
-            patterns = glob.globsplit(target, flags=flags)
-            for f in glob.iglob(patterns, flags=flags):
+            for f in glob.iglob(target, flags=flags | glob.S):
                 if not os.path.isdir(f):
                     self.log('', 2)
                     self.log('> Processing: %s' % f, 1)
