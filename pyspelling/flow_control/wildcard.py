@@ -6,7 +6,7 @@ from wcmatch import fnmatch
 class WildcardFlowControl(flow_control.FlowControl):
     """Control flow of objects in the pipeline with wildcard patterns."""
 
-    FNMATCH_FLAGS = fnmatch.N | fnmatch.B | fnmatch.I
+    FNMATCH_FLAGS = fnmatch.N | fnmatch.B | fnmatch.I | fnmatch.S
 
     def __init__(self, options):
         """Initialization."""
@@ -33,7 +33,7 @@ class WildcardFlowControl(flow_control.FlowControl):
     def match(self, category, pattern):
         """Match the category."""
 
-        return fnmatch.fnmatch(category, fnmatch.fnsplit(pattern, flags=self.FNMATCH_FLAGS), flags=self.FNMATCH_FLAGS)
+        return fnmatch.fnmatch(category, pattern, flags=self.FNMATCH_FLAGS)
 
     def adjust_flow(self, category):
         """Adjust the flow of source control objects."""

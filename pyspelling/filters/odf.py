@@ -24,7 +24,7 @@ MIMEMAP = {
 class OdfFilter(xml.XmlFilter):
     """Spelling Python."""
 
-    FLAGS = glob.G | glob.N | glob.B
+    FLAGS = glob.G | glob.N | glob.B | glob.S
 
     default_capture = ['text|*']
 
@@ -78,7 +78,7 @@ class OdfFilter(xml.XmlFilter):
         with zipfile.ZipFile(filename, 'r') as z:
             self.determine_file_type(z)
             for item in z.infolist():
-                if glob.globmatch(item.filename, glob.globsplit(self.filepattern, flags=self.FLAGS), flags=self.FLAGS):
+                if glob.globmatch(item.filename, self.filepattern, flags=self.FLAGS):
                     yield z.read(item.filename), item.filename
 
     def get_content(self, zipbundle):
