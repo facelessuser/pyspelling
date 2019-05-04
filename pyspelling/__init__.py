@@ -47,7 +47,16 @@ class SpellChecker:
         "BRACE": glob.B,
         "B": glob.B,
         "FOLLOW": glob.L,
-        "L": glob.L
+        "L": glob.L,
+        "MATCHBASE": glob.X,
+        "X": glob.X,
+        "NEGATEALL": glob.A,
+        "A": glob.A,
+        # We will accept these, but we already force them on
+        "SPLIT": glob.S,
+        "S": glob.S,
+        "NODIR": glob.O,
+        "O": glob.O
     }
 
     def __init__(self, config, binary='', verbose=0, debug=False):
@@ -165,29 +174,29 @@ class SpellChecker:
         """Walk source and parse files."""
 
         for target in targets:
-            for f in glob.iglob(target, flags=flags | glob.S):
-                if not os.path.isdir(f):
-                    self.log('', 2)
-                    self.log('> Processing: %s' % f, 1)
-                    if pipeline:
-                        try:
-                            yield pipeline[0]._run_first(f)
-                        except Exception as e:
-                            err = self.get_error(e)
-                            yield [filters.SourceText('', f, '', '', err)]
-                    else:
-                        try:
-                            if self.default_encoding:
-                                encoding = filters.PYTHON_ENCODING_NAMES.get(
-                                    self.default_encoding, self.default_encoding
-                                ).lower()
-                                encoding = codecs.lookup(encoding).name
-                            else:
-                                encoding = self.default_encoding
-                            yield [filters.SourceText('', f, encoding, 'file')]
-                        except Exception as e:
-                            err = self.get_error(e)
-                            yield [filters.SourceText('', f, '', '', err)]
+            # Glob using `S` for patterns wit `|` and `O` to exclude directories.
+            for f in glob.iglob(target, flags=flags | glob.S | glob.O):
+                self.log('', 2)
+                self.log('> Processing: %s' % f, 1)
+                if pipeline:
+                    try:
+                        yield pipeline[0]._run_first(f)
+                    except Exception as e:
+                        err = self.get_error(e)
+                        yield [filters.SourceText('', f, '', '', err)]
+                else:
+                    try:
+                        if self.default_encoding:
+                            encoding = filters.PYTHON_ENCODING_NAMES.get(
+                                self.default_encoding, self.default_encoding
+                            ).lower()
+                            encoding = codecs.lookup(encoding).name
+                        else:
+                            encoding = self.default_encoding
+                        yield [filters.SourceText('', f, encoding, 'file')]
+                    except Exception as e:
+                        err = self.get_error(e)
+                        yield [filters.SourceText('', f, '', '', err)]
 
     def setup_spellchecker(self, task):
         """Setup spell checker."""

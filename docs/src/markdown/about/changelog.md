@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.0
+
+- **NEW**: Support new `wcmatch` glob feature flags and upgrade to `wcmatch` 4.0.
+
 ## 2.2.6
 
 - **FIX**: Require `wcmatch` 3.0 for `glob` related fixes.
