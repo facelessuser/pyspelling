@@ -24,7 +24,7 @@ MIMEMAP = {
 class OdfFilter(xml.XmlFilter):
     """Spelling Python."""
 
-    FLAGS = glob.G | glob.N | glob.B | glob.S
+    FLAGS = glob.G | glob.N | glob.B | glob.S | glob.O
 
     default_capture = ['text|*']
 
