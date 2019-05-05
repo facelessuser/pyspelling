@@ -92,7 +92,7 @@ class OdfFilter(xml.XmlFilter):
                 text = b.read().decode(encoding)
             yield text, filename, encoding
 
-    def content_break(self, el):
+    def is_break_tag(self, el):
         """Break on specified boundaries."""
 
         should_break = False
@@ -115,7 +115,7 @@ class OdfFilter(xml.XmlFilter):
             self.soft_break(el, text)
             content = ''.join(text)
             if content:
-                block_text.append((content, self.construct_selector(el)))
+                block_text.append((content, self.additional_context + self.construct_selector(el)))
         return block_text
 
     def extract_tag_metadata(self, el):
