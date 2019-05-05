@@ -6,7 +6,6 @@ Parse the `text` namespace in `content.xml` in ODF zip files.
 from __future__ import unicode_literals
 import zipfile
 import io
-import html
 import bs4
 import codecs
 from .. import filters
@@ -93,7 +92,7 @@ class OdfFilter(xml.XmlFilter):
                 text = b.read().decode(encoding)
             yield text, filename, encoding
 
-    def content_break(self, el):
+    def is_break_tag(self, el):
         """Break on specified boundaries."""
 
         should_break = False
@@ -108,17 +107,16 @@ class OdfFilter(xml.XmlFilter):
         if el.name == 'p' and el.namespace and el.namespace == self.namespaces["text"]:
             text.append('\n')
 
-    def store_blocks(self, el, blocks, text, force_root):
-        """Store the text as desired."""
+    def format_blocks(self):
+        """Format the text as for a block."""
 
-        self.soft_break(el, text)
-
-        if force_root or el.parent is None or self.content_break(el):
-            content = html.unescape(''.join(text))
+        block_text = []
+        for el, text in self._block_text.items():
+            self.soft_break(el, text)
+            content = ''.join(text)
             if content:
-                blocks.append((content, self.additional_context + self.construct_selector(el)))
-            text = []
-        return text
+                block_text.append((content, self.additional_context + self.construct_selector(el)))
+        return block_text
 
     def extract_tag_metadata(self, el):
         """Extract meta data."""
@@ -152,7 +150,7 @@ class OdfFilter(xml.XmlFilter):
         content = []
         soup = bs4.BeautifulSoup(text, self.parser)
         soup = self.get_sub_node(soup)
-        blocks, attributes, comments = self.to_text(soup, force_root=not isinstance(soup, bs4.BeautifulSoup))
+        blocks, attributes, comments = self.to_text(soup)
         if self.comments:
             for c, desc in comments:
                 content.append(filters.SourceText(c, context + ': ' + desc, encoding, self.type + 'comment'))

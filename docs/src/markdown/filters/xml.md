@@ -62,5 +62,5 @@ Category         | Description
 `xml-comment`   | Text captured from XML comments.
 
 --8<--
-refs.md
+refs.txt
 --8<--

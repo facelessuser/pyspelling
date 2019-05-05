@@ -68,5 +68,5 @@ Category         | Description
 `html-comment`   | Text captured from HTML comments.
 
 --8<--
-refs.md
+refs.txt
 --8<--

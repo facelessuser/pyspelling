@@ -123,7 +123,7 @@ class OoxmlFilter(odf.OdfFilter):
         if self.type == 'pptx' and el.namespace == self.namespaces['a'] and el.name == 'p':
             text.append('\n')
 
-    def content_break(self, el):
+    def is_break_tag(self, el):
         """Break on specified boundaries."""
 
         should_break = False

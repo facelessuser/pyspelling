@@ -3,6 +3,7 @@
 ## 2.3.0
 
 - **NEW**: Support new `wcmatch` glob feature flags and upgrade to `wcmatch` 4.0.
+- **FIX**: Don't use recursion when parsing XML or HTML documents.
 
 ## 2.2.6
 

@@ -6,7 +6,6 @@ Detect encoding from HTML header.
 from __future__ import unicode_literals
 import re
 import codecs
-import html
 import soupsieve as sv
 from . import xml
 from collections import deque
@@ -109,15 +108,15 @@ class HtmlFilter(xml.XmlFilter):
         else:
             return [c for c in el.attrs.get('class', '').strip().split(' ') if c]
 
-    def store_blocks(self, el, blocks, text, force_root):
-        """Store the text as desired."""
+    def format_blocks(self):
+        """Format the text as for a block."""
 
-        if force_root or el.parent is None or self.is_break_tag(el):
-            content = html.unescape(''.join(text))
+        block_text = []
+        for el, text in self._block_text.items():
+            content = ''.join(text)
             if content:
-                blocks.append((content, self.construct_selector(el)))
-            text = []
-        return text
+                block_text.append((content, self.construct_selector(el)))
+        return block_text
 
     def construct_selector(self, el, attr=''):
         """Construct an selector for context."""
