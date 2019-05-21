@@ -50,6 +50,28 @@ class TestPython(util.PluginTestCase):
         self.mktemp('test.txt', template, 'utf-8')
         self.assert_spellcheck('.python.yml', bad_words)
 
+    def test_same_line(self):
+        """Test docstrings in environment with single line functions."""
+
+        content = self.dedent(
+            r'''
+            """ffskdjalksd."""
+            class Example:
+                def function1(self): return False
+
+                def function2(self): return False
+
+                def function3(self):
+                    """wahtej."""
+
+                def function4(self): return False
+                """ajsflas"""
+            '''
+        )
+        bad_words = ['ffskdjalksd', 'wahtej']
+        self.mktemp('test.txt', content, 'utf-8')
+        self.assert_spellcheck('.python.yml', bad_words)
+
 
 class TestPythonStrings(util.PluginTestCase):
     """Test Python plugin."""
