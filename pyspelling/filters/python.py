@@ -246,6 +246,17 @@ class PythonFilter(filters.Filter):
 
         return textwrap.dedent(RE_NON_PRINTABLE.sub('\n', string) if is_bytes else string), is_bytes
 
+    def catch_same_level(self, stack, indent):
+        """Test if in current class or function level."""
+
+        same_level = False
+        last_indent = stack[-1][1]
+        if last_indent == indent:
+            if len(stack) > 1 and indent <= stack[-1][1]:
+                stack.pop()
+                same_level = True
+        return same_level
+
     def _filter(self, text, context, encoding):
         """Retrieve the Python docstrings."""
 
@@ -275,6 +286,7 @@ class PythonFilter(filters.Filter):
                 possible_fmt_str = None
                 if value in ('def', 'class'):
                     name = value
+                    self.catch_same_level(stack, len(indent))
                 elif name:
                     parent = stack[-1][2]
                     prefix = ''
@@ -310,9 +322,14 @@ class PythonFilter(filters.Filter):
                 # Capture docstrings.
                 # If we captured an `INDENT` or `NEWLINE` previously we probably have a docstring.
                 # `NL` means end of line, but not the end of the Python code line (line continuation).
+
+                same_level = self.catch_same_level(stack, len(indent))
                 if (
-                    (prev_token_type in PREV_DOC_TOKENS) or
-                    (possible_fmt_str and possible_fmt_str[0] in PREV_DOC_TOKENS)
+                    not same_level and
+                    (
+                        (prev_token_type in PREV_DOC_TOKENS) or
+                        (possible_fmt_str and possible_fmt_str[0] in PREV_DOC_TOKENS)
+                    )
                 ):
                     if self.docstrings:
                         value = value.strip()

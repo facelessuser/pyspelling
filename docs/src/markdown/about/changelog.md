@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.1
+
+- **FIX**: Properly handle docstring content and detection in files that have single line functions.
+
 ## 2.3.0
 
 - **NEW**: Support new `wcmatch` glob feature flags and upgrade to `wcmatch` 4.0.
