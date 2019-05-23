@@ -443,6 +443,9 @@ class Aspell(SpellChecker):
             'rem-texinfo-ignore', 'add-texinfo-ignore-env', 'rem-texinfo-ignore-env', 'filter'
         }
 
+        if 'mode' not in options:
+            options['mode'] = 'none'
+
         for k, v in options.items():
             if k in allowed:
                 key = ('-%s' if len(k) == 1 else '--%s') % k
