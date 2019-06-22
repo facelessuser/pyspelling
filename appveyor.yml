@@ -20,7 +20,6 @@ init:
 
 install:
   # Setup Python test tools
-  - "SET STATIC_DEPS=true"
   - SET PATH=%PYTHON%;%PYTHON%\Scripts;C:\msys64\usr\bin;%PATH%
   - "python -m pip install --user -U pip"
   - "python -m pip install -U setuptools wheel"
