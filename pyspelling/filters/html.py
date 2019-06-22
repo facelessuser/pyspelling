@@ -3,7 +3,6 @@ HTML filter.
 
 Detect encoding from HTML header.
 """
-from __future__ import unicode_literals
 import re
 import codecs
 import soupsieve as sv

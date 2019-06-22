@@ -5,7 +5,6 @@ Extract text from `docx`, `pptx`, and `xlsx` files.
 
 Specification: http://officeopenxml.com
 """
-from __future__ import unicode_literals
 import io
 import bs4
 from . import odf

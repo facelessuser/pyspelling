@@ -3,7 +3,6 @@ Open Document Format (ODF) filter.
 
 Parse the `text` namespace in `content.xml` in ODF zip files.
 """
-from __future__ import unicode_literals
 import zipfile
 import io
 import bs4
