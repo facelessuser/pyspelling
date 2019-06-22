@@ -22,6 +22,7 @@ init:
 
 install:
   # Setup Python test tools
+  - "%PYTHON%/Scripts/pip.exe install -U pip"
   - "%PYTHON%/Scripts/pip.exe install -U setuptools wheel"
   - "%PYTHON%/Scripts/pip.exe install -U virtualenv tox codecov"
   # Add Python and MSYS2 to the path
