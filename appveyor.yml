@@ -4,8 +4,6 @@ clone_depth: 5
 
 environment:
   matrix:
-    - PYTHON: "C:/Python34"
-      TOXENV: "py34"
     - PYTHON: "C:/Python35"
       TOXENV: "py35"
     - PYTHON: "C:/Python36"
@@ -22,11 +20,11 @@ init:
 
 install:
   # Setup Python test tools
-  - "%PYTHON%/Scripts/pip.exe install virtualenv"
-  - "%PYTHON%/Scripts/pip.exe install tox"
-  - "%PYTHON%/Scripts/pip.exe install codecov"
-  # Add Python and MSYS2 to the path
   - SET PATH=%PYTHON%;%PYTHON%\Scripts;C:\msys64\usr\bin;%PATH%
+  - "python -m pip install --user -U pip"
+  - "python -m pip install -U setuptools wheel"
+  - "python -m pip install -U virtualenv tox codecov"
+  # Add Python and MSYS2 to the path
   # Setup MSYS2 environment and setup TOX_SPELL_PATH so our tests will know to look there for the spell checkers.
   - bash -lc "pacman --version"
   - bash -lc "pacman -S --noconfirm mingw-w64-x86_64-aspell mingw-w64-x86_64-aspell-en mingw-w64-x86_64-hunspell mingw-w64-x86_64-hunspell-en"
