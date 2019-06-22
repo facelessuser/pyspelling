@@ -22,9 +22,8 @@ init:
 
 install:
   # Setup Python test tools
-  - "%PYTHON%/Scripts/pip.exe install virtualenv"
-  - "%PYTHON%/Scripts/pip.exe install tox"
-  - "%PYTHON%/Scripts/pip.exe install codecov"
+  - "%PYTHON%/Scripts/pip.exe install -U setuptools wheel"
+  - "%PYTHON%/Scripts/pip.exe install -U virtualenv tox codecov"
   # Add Python and MSYS2 to the path
   - SET PATH=%PYTHON%;%PYTHON%\Scripts;C:\msys64\usr\bin;%PATH%
   # Setup MSYS2 environment and setup TOX_SPELL_PATH so our tests will know to look there for the spell checkers.
