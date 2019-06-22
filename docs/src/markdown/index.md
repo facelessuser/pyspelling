@@ -138,6 +138,11 @@ index d0cccb3..4258f85 100644
 
 PySpelling is also tested on Aspell 0.60+ (which is recommended), but should also work on the 0.50 series. 0.60+ is recommended as spell checking is better in the 0.60 series.
 
+PySpelling disables all native Aspell filters by default. If you need to enable Aspell's native filters, you can do so via Aspell's builtin options. For more information, see [Aspell configuration options](./configuration.md#spell-checker-options).
+
+!!! new "New in 2.4.0"
+    Starting in 2.4.0, PySpelling ensures filters that are native to the spell checker are disabled by default.
+
 ## Usage in Linux
 
 Aspell and Hunspell is most likely available in your distro's package manager. You need to install both the spell checker and the dictionaries, or provide your own custom dictionaries. The option to build manually is always available as well. See your preferred spell checker's manual for more information on building manually.
