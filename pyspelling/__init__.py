@@ -1,5 +1,4 @@
 """Spell check with Aspell or Hunspell."""
-from __future__ import unicode_literals
 import os
 import importlib
 from . import util

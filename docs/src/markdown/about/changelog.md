@@ -1,5 +1,9 @@
 # Changelog
 
+## Current
+
+- **FIX**: Throw an exception with a helpful message if no configuration is found or there is some other issue.
+
 ## 2.3.1
 
 - **FIX**: Properly handle docstring content and detection in files that have single line functions.

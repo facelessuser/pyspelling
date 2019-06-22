@@ -1,5 +1,4 @@
 """URL filter."""
-from __future__ import unicode_literals
 from .. import filters
 import codecs
 import re
