@@ -2,7 +2,7 @@
 
 ## 2.4.0
 
-- **NEW**: Disable Aspell filters by default. Users must explicitly set the `mode` parameter to a filter mode under `aspell` option if they'd like to enable it.
+- **NEW**: Disable Aspell filters by default. Users must explicitly set the `mode` parameter under the `aspell` option to enable default Aspell filters.
 - **FIX**: Throw an exception with a helpful message if no configuration is found or there is some other issue.
 
 ## 2.3.1
