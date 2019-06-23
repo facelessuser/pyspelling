@@ -620,7 +620,10 @@ def spellcheck(config_file, names=None, groups=None, binary='', checker='', sour
     if (len(names) != 1 and len(sources)):
         sources = []
 
+    processed_tasks = 0
     for task in iter_tasks(matrix, names, groups):
+
+        processed_tasks += 1
 
         if not checker:
             checker = preferred_checker
@@ -642,3 +645,9 @@ def spellcheck(config_file, names=None, groups=None, binary='', checker='', sour
             spellchecker.log('Context: %s' % result.context, 2)
             yield result
         spellchecker.log("", 1)
+
+    if processed_tasks == 0:
+        raise ValueError(
+            'There are either no tasks in the configuration file'
+            ' or the specified name or group can not be found.'
+        )
