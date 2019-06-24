@@ -1,5 +1,4 @@
 """Utilities."""
-from __future__ import unicode_literals, print_function
 import subprocess
 import os
 import sys
@@ -170,6 +169,7 @@ def yaml_load(source, loader=yaml.Loader):
 def read_config(file_name):
     """Read configuration."""
 
+    config = None
     for name in (['.pyspelling.yml', '.spelling.yml'] if not file_name else [file_name]):
         if os.path.exists(name):
             if not file_name and name == '.spelling.yml':
@@ -177,15 +177,17 @@ def read_config(file_name):
                     "Using '.spelling.yml' as the default is deprecated. Default config is now '.pyspelling.yml'"
                 )
             with codecs.open(name, 'r', encoding='utf-8') as f:
-                return yaml_load(f.read())
-    if not file_name:
-        file_name = '.pyspelling.yml'
-    print(
-        'Unable to load pyspelling configuration from %s, for more'
-        ' details on configuration please read'
-        ' https://facelessuser.github.io/pyspelling/configuration/' % (
-            file_name,
-        ),
-        file=sys.stderr,
-    )
-    sys.exit(1)
+                config = yaml_load(f.read())
+            break
+    # If configuration is still None, or we happened to get an object other than a dictionary (such as a list),
+    # raise an exception.
+    if config is None or not isinstance(config, dict):
+        name = ' from {}'.format(file_name if file_name else '.pyspelling.yml')
+        raise ValueError(
+            (
+                'Unable to find or load pyspelling configuration{}, for more'
+                ' details on configuration please read'
+                ' https://facelessuser.github.io/pyspelling/configuration/'
+            ).format(name)
+        )
+    return config

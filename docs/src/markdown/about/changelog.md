@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.4.0
+
+- **NEW**: Disable Aspell filters by default. Users must explicitly set the `mode` parameter under the `aspell` option to enable default Aspell filters.
+- **FIX**: Throw an exception with a helpful message if no configuration is found or there is some other issue.
+- **FIX**: Throw an exception with a helpful message when no tasks are found in the matrix or when no tasks match a given name or group.
+
 ## 2.3.1
 
 - **FIX**: Properly handle docstring content and detection in files that have single line functions.

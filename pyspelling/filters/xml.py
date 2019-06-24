@@ -3,7 +3,6 @@ XML filter.
 
 Detect encoding from XML header.
 """
-from __future__ import unicode_literals
 from .. import filters
 import re
 import codecs
