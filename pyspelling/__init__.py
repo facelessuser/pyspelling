@@ -173,8 +173,10 @@ class SpellChecker:
         """Walk source and parse files."""
 
         for target in targets:
+            found_something = False
             # Glob using `S` for patterns wit `|` and `O` to exclude directories.
             for f in glob.iglob(target, flags=flags | glob.S | glob.O):
+                found_something = True
                 self.log('', 2)
                 self.log('> Processing: %s' % f, 1)
                 if pipeline:
@@ -196,6 +198,10 @@ class SpellChecker:
                     except Exception as e:
                         err = self.get_error(e)
                         yield [filters.SourceText('', f, '', '', err)]
+            if not found_something:
+                raise ValueError(
+                    'The source target "{}" from the configuration did not match any files.'
+                )
 
     def setup_spellchecker(self, task):
         """Setup spell checker."""
