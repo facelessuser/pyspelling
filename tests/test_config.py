@@ -134,3 +134,9 @@ class TestNameGroup(util.PluginTestCase):
         self.assert_spellcheck(
             '.source.yml', self.bad_words2, names=['name', 'other_name'], sources=[self.tempdir + '/**/test1.txt']
         )
+
+    def test_no_matrix(self):
+        """Test a Value error is raised if the configuration has no matrix"""
+        self.mktemp('.source.yml', "", 'utf-8')
+        with self.assertRaises(ValueError):
+            self.assert_spellcheck('.source.yml', [])
