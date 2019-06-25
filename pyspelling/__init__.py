@@ -202,7 +202,7 @@ class SpellChecker:
                 raise ValueError(
                     'None of the source targets {} from the configuration'
                     ' match any files.'.format(', '.join(
-                        '"%s"'.format(target) for target in targets
+                        '"{}"'.format(target) for target in targets
                     ))
                 )
 
