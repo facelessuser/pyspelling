@@ -100,6 +100,7 @@ class TestNameGroup(util.PluginTestCase):
               default_encoding: utf-8
               sources:
               - '{temp}/**/test3.txt'
+              - '{temp}/**/test4.txt'
               aspell:
                 lang: en
               hunspell:
