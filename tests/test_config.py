@@ -100,6 +100,7 @@ class TestNameGroup(util.PluginTestCase):
               default_encoding: utf-8
               sources:
               - '{temp}/**/test3.txt'
+              - '{temp}/**/test4.txt'
               aspell:
                 lang: en
               hunspell:
@@ -122,6 +123,28 @@ class TestNameGroup(util.PluginTestCase):
         """Test group works."""
 
         self.assert_spellcheck('.source.yml', self.bad_words1 + self.bad_words3, groups=['group1'])
+
+    def test_no_sources(self):
+        """Test missing source match raises a `ValueError`."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: name
+              group: group1
+              default_encoding: utf-8
+              sources:
+              - '{temp}/**/test4.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+            """
+        ).format(temp=self.tempdir)
+        self.mktemp('.nosource.yml', config, 'utf-8')
+        with self.assertRaises(ValueError) as excctxt:
+            self.assert_spellcheck('.nosource.yml', [])
+        self.assertIn('test4.txt', str(excctxt.exception))
 
     def test_sources(self):
         """Test source override."""
