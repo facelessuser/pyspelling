@@ -612,6 +612,13 @@ def spellcheck(config_file, names=None, groups=None, binary='', checker='', sour
         matrix = config.get('documents', [])
         if matrix:
             util.warn_deprecated("'documents' key in config is deprecated. 'matrix' should be used going forward.")
+        else:
+            raise ValueError(
+                'Unable to find or load matrix from pyspelling'
+                ' configuration, for more'
+                ' details on configuration please read'
+                ' https://facelessuser.github.io/pyspelling/configuration/'
+            )
 
     groups = set() if groups is None else set(groups)
     names = set() if names is None else set(names)
