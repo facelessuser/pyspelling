@@ -97,7 +97,6 @@ trigraphs
 tuple
 un
 validator
-ValueError
 whitespace
 wildcard
 wordlist
