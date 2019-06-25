@@ -200,9 +200,9 @@ class SpellChecker:
                         yield [filters.SourceText('', f, '', '', err)]
         if not found_something:
             raise ValueError(
-                'None of the source targets {} from the configuration'
-                ' match any files.'.format(', '.join(
-                    '"{}"'.format(target) for target in targets
+                'None of the source targets from the configuration'
+                ' match any files:\n{}'.format('\n'.join(
+                    '- {}'.format(target) for target in targets
                 ))
             )
 
