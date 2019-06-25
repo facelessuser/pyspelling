@@ -124,7 +124,7 @@ class TestNameGroup(util.PluginTestCase):
         self.assert_spellcheck('.source.yml', self.bad_words1 + self.bad_words3, groups=['group1'])
 
     def test_no_sources(self):
-        """Test missing source match raises a ValueError."""
+        """Test missing source match raises a `ValueError`."""
 
         config = self.dedent(
             """
@@ -141,8 +141,9 @@ class TestNameGroup(util.PluginTestCase):
             """
         ).format(temp=self.tempdir)
         self.mktemp('.nosource.yml', config, 'utf-8')
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as excctxt:
             self.assert_spellcheck('.nosource.yml', [])
+        self.assertIn('test4.txt', str(excctxt.exception))
 
     def test_sources(self):
         """Test source override."""
