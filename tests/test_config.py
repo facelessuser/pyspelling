@@ -177,9 +177,10 @@ class TestNameGroup(util.PluginTestCase):
         config = self.dedent(
             """
             matrix:
+            - name: other
             """
         )
-        self.mktemp('.source.yml', "", 'utf-8')
+        self.mktemp('.source.yml', config, 'utf-8')
         with self.assertRaises(ValueError):
             self.assert_spellcheck('.source.yml', [], names=['name'])
 
@@ -190,7 +191,7 @@ class TestNameGroup(util.PluginTestCase):
             """
             matrix:
             """
-        ).format(temp=self.tempdir)
-        self.mktemp('.source.yml', "", 'utf-8')
+        )
+        self.mktemp('.source.yml', config, 'utf-8')
         with self.assertRaises(ValueError):
             self.assert_spellcheck('.source.yml', [])
