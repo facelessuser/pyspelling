@@ -163,7 +163,7 @@ class TestNameGroup(util.PluginTestCase):
 
         config = self.dedent(
             """
-            something:
+            something: []
             """
         )
 
@@ -189,7 +189,7 @@ class TestNameGroup(util.PluginTestCase):
 
         config = self.dedent(
             """
-            matrix:
+            matrix: []
             """
         )
         self.mktemp('.source.yml', config, 'utf-8')

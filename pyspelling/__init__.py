@@ -614,11 +614,11 @@ def spellcheck(config_file, names=None, groups=None, binary='', checker='', sour
     if sources is None:
         sources = []
 
-    matrix = config.get('matrix', [])
+    matrix = config.get('matrix')
     preferred_checker = config.get('spellchecker', 'aspell')
-    if not matrix:
-        matrix = config.get('documents', [])
-        if matrix:
+    if matrix is None:
+        matrix = config.get('documents')
+        if matrix is not None:
             util.warn_deprecated("'documents' key in config is deprecated. 'matrix' should be used going forward.")
         else:
             raise KeyError(
