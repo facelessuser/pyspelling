@@ -199,11 +199,10 @@ class SpellChecker:
                         err = self.get_error(e)
                         yield [filters.SourceText('', f, '', '', err)]
         if not found_something:
-            raise ValueError(
-                'None of the source targets from the configuration'
-                ' match any files:\n{}'.format('\n'.join(
-                    '- {}'.format(target) for target in targets
-                ))
+            raise RuntimeError(
+                'None of the source targets from the configuration match any files:\n{}'.format(
+                    '\n'.join('- {}'.format(target) for target in targets)
+                )
             )
 
     def setup_spellchecker(self, task):
@@ -615,14 +614,14 @@ def spellcheck(config_file, names=None, groups=None, binary='', checker='', sour
     if sources is None:
         sources = []
 
-    matrix = config.get('matrix', [])
+    matrix = config.get('matrix')
     preferred_checker = config.get('spellchecker', 'aspell')
-    if not matrix:
-        matrix = config.get('documents', [])
-        if matrix:
+    if matrix is None:
+        matrix = config.get('documents')
+        if matrix is not None:
             util.warn_deprecated("'documents' key in config is deprecated. 'matrix' should be used going forward.")
         else:
-            raise ValueError(
+            raise KeyError(
                 'Unable to find or load matrix from pyspelling'
                 ' configuration, for more'
                 ' details on configuration please read'

@@ -3,8 +3,9 @@
 ## 2.4.0
 
 - **NEW**: Disable Aspell filters by default. Users must explicitly set the `mode` parameter under the `aspell` option to enable default Aspell filters.
-- **FIX**: Throw an exception with a helpful message if no configuration is found or there is some other issue.
-- **FIX**: Throw an exception with a helpful message when no tasks are found in the matrix or when no tasks match a given name or group.
+- **New**: Throw an exception with a message if no configuration is found or there is some other issue.
+- **New**: Throw an exception with a message when no tasks are found in the matrix or when no tasks match a given name or group.
+- **New**: Throw an exception with a message when a task is run but no files are found.
 
 ## 2.3.1
 
