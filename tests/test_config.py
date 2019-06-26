@@ -161,7 +161,13 @@ class TestNameGroup(util.PluginTestCase):
     def test_no_matrix(self):
         """Test a `ValueError` is raised if the configuration has no matrix."""
 
-        self.mktemp('.source.yml', "", 'utf-8')
+        config = self.dedent(
+            """
+            something:
+            """
+        )
+
+        self.mktemp('.source.yml', config, 'utf-8')
         with self.assertRaises(KeyError):
             self.assert_spellcheck('.source.yml', [])
 
@@ -172,7 +178,7 @@ class TestNameGroup(util.PluginTestCase):
             """
             matrix:
             """
-        ).format(temp=self.tempdir)
+        )
         self.mktemp('.source.yml', "", 'utf-8')
         with self.assertRaises(ValueError):
             self.assert_spellcheck('.source.yml', [], names=['name'])
