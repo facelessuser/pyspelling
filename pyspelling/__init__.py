@@ -300,8 +300,7 @@ class SpellChecker:
             source_patterns = task.get('sources', [])
 
         expect_match = task.get('expect_match', True)
-        for sources in self._walk_src(source_patterns, glob_flags, self.pipeline_steps,
-                                      expect_match,):
+        for sources in self._walk_src(source_patterns, glob_flags, self.pipeline_steps, expect_match):
             if self.pipeline_steps is not None:
                 yield from self._spelling_pipeline(sources, options, personal_dict)
             else:
