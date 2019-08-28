@@ -20,10 +20,16 @@ matrix:
     env:
     - TOXENV=py37
     - TOX_SPELL_REQUIRE=aspell
-  - python: 3.6
+  - python: 3.8-dev
+    env:
+    - TOXENV=py38
+    - TOX_SPELL_REQUIRE=aspell
+  - python: 3.7
     env: TOXENV=lint
-  - python: 3.6
+  - python: 3.7
     env: TOXENV=documents
+  allow_failures:
+  - python: 3.8-dev
 
 addons:
   apt:
