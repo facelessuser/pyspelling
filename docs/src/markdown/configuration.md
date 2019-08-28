@@ -147,7 +147,7 @@ matrix:
 When processing the sources field it is expected to find at least
 one matching file. If no files are located it can be helpful to raise an error
 and this is the default behaviour. If it is not expected to always find a file
-then the `expect\_match` configuration can be used to suppress the error.
+then the `expect_match` configuration can be used to suppress the error.
 
 ```yaml
 matrix:
