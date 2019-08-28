@@ -142,6 +142,24 @@ matrix:
   - pyspelling/**/*.py
 ```
 
+### Expect Match
+
+When processing the sources field it is expected to find at least
+one matching file. If no files are located it can be helpful to raise an error
+and this is the default behaviour. If it is not expected to always find a file
+then the `expect_match` configuration can be used to suppress the error.
+
+```yaml
+matrix:
+- name: markdown
+  pipeline:
+  - pyspelling.filters.text
+  sources:
+  - '**/*.md'
+  expect_match: false
+  default_encoding: utf-8
+```
+
 ### Pipeline
 
 PySpelling allows you to define tasks that outline what kind of files you want to spell check, and then sends them down a pipeline that filters the content returning chunks of text with some associated context. Each chunk is sent down each step of the pipeline until it reaches the final step, the spell check step. Between filter steps, you can also insert flow control steps that allow you to have certain text chunks skip specific steps. All of this is done with [pipeline plugins](./pipeline.md).

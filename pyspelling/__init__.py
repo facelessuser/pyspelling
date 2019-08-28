@@ -169,7 +169,7 @@ class SpellChecker:
     def compile_dictionary(self, lang, wordlists, output):
         """Compile user dictionary."""
 
-    def _walk_src(self, targets, flags, pipeline):
+    def _walk_src(self, targets, flags, pipeline, expect_match):
         """Walk source and parse files."""
 
         found_something = False
@@ -198,7 +198,7 @@ class SpellChecker:
                     except Exception as e:
                         err = self.get_error(e)
                         yield [filters.SourceText('', f, '', '', err)]
-        if not found_something:
+        if not found_something and expect_match:
             raise RuntimeError(
                 'None of the source targets from the configuration match any files:\n{}'.format(
                     '\n'.join('- {}'.format(target) for target in targets)
@@ -299,8 +299,9 @@ class SpellChecker:
         if not source_patterns:
             source_patterns = task.get('sources', [])
 
-        for sources in self._walk_src(source_patterns, glob_flags, self.pipeline_steps):
-
+        expect_match = task.get('expect_match', True)
+        for sources in self._walk_src(source_patterns, glob_flags, self.pipeline_steps,
+                                      expect_match,):
             if self.pipeline_steps is not None:
                 yield from self._spelling_pipeline(sources, options, personal_dict)
             else:
