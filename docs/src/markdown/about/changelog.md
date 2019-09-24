@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.5.0
+
+- **NEW**: Add `expect_match` option to prevent a rule from failing if it finds no matching files.
+
 ## 2.4.0
 
 - **NEW**: Disable Aspell filters by default. Users must explicitly set the `mode` parameter under the `aspell` option to enable default Aspell filters.
