@@ -3,6 +3,7 @@
 ## 2.5.0
 
 - **NEW**: Add `expect_match` option to prevent a rule from failing if it finds no matching files.
+- **NEW**: Formally support Python 3.8.
 
 ## 2.4.0
 
