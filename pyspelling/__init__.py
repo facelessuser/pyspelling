@@ -6,10 +6,13 @@ from .__meta__ import __version__, __version_info__  # noqa: F401
 from . import flow_control
 from . import filters
 from wcmatch import glob
+import wcmatch
 import codecs
 from collections import namedtuple
 
 __all__ = ("spellcheck",)
+
+CASE_SUPPORT = wcmatch.__version_info__ >= (5, 0)
 
 
 class Results(namedtuple('Results', ['words', 'context', 'category', 'error'])):
@@ -27,8 +30,8 @@ class SpellChecker:
     DICTIONARY = 'dictionary.dic'
 
     GLOB_FLAG_MAP = {
-        "FORECECASE": glob.F,
-        "F": glob.F,
+        ("CASE" if CASE_SUPPORT else "FORCECASE"): (glob.C if CASE_SUPPORT else glob.F),
+        ("C" if CASE_SUPPORT else "F"): (glob.C if CASE_SUPPORT else glob.F),
         "IGNORECASE": glob.I,
         "I": glob.I,
         "RAWCHARS": glob.R,
