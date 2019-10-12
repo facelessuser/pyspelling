@@ -1,0 +1,1191 @@
+
+
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      <meta http-equiv="x-ua-compatible" content="ie=edge">
+      
+        <meta name="description" content="Python spell checker.">
+      
+      
+        <link rel="canonical" href="https://facelessuser.github.io/pyspelling/configuration/">
+      
+      
+      
+        <meta name="lang:clipboard.copy" content="Copy to clipboard">
+      
+        <meta name="lang:clipboard.copied" content="Copied to clipboard">
+      
+        <meta name="lang:search.language" content="en">
+      
+        <meta name="lang:search.pipeline.stopwords" content="True">
+      
+        <meta name="lang:search.pipeline.trimmer" content="True">
+      
+        <meta name="lang:search.result.none" content="No matching documents">
+      
+        <meta name="lang:search.result.one" content="1 matching document">
+      
+        <meta name="lang:search.result.other" content="# matching documents">
+      
+        <meta name="lang:search.tokenizer" content="[\s\-]+">
+      
+      <link rel="shortcut icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.4.3">
+    
+    
+      
+        <title>Configuration - PySpelling</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/application.30686662.css">
+      
+        <link rel="stylesheet" href="../assets/stylesheets/application-palette.a8b3c06d.css">
+      
+      
+        
+        
+        <meta name="theme-color" content="#2196f3">
+      
+    
+    
+      <script src="../assets/javascripts/modernizr.74668098.js"></script>
+    
+    
+      
+        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono&display=fallback">
+        <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
+      
+    
+    <link rel="stylesheet" href="../assets/fonts/material-icons.css">
+    
+    
+      <link rel="stylesheet" href="../extra-30d8e6755c.css">
+    
+    
+      
+    
+    
+  </head>
+  
+    
+    
+    <body dir="ltr" data-md-color-primary="blue" data-md-color-accent="blue">
+  
+    <svg class="md-svg">
+      <defs>
+        
+        
+          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg>
+        
+      </defs>
+    </svg>
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
+    
+      <a href="#configuration" tabindex="1" class="md-skip">
+        Skip to content
+      </a>
+    
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href="https://facelessuser.github.io/pyspelling" title="PySpelling" class="md-header-nav__button md-logo">
+          
+            <i class="md-icon">description</i>
+          
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          
+            <span class="md-header-nav__topic">
+              PySpelling
+            </span>
+            <span class="md-header-nav__topic">
+              
+                Configuration
+              
+            </span>
+          
+        </div>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        
+          <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
+          
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="__search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        
+      </div>
+      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
+            
+
+
+  
+
+<a href="https://github.com/facelessuser/pyspelling/" title="Go to repository" class="md-source" data-md-source="github">
+  
+    <div class="md-source__icon">
+      <svg viewBox="0 0 24 24" width="24" height="24">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
+    </div>
+  
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+          </div>
+        </div>
+      
+    </div>
+  </nav>
+</header>
+    
+    <div class="md-container">
+      
+        
+      
+      
+        
+
+  
+
+<nav class="md-tabs md-tabs--active" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+    <li class="md-tabs__item">
+      
+        <a href=".." class="md-tabs__link md-tabs__link--active">
+          Usage
+        </a>
+      
+    </li>
+  
+
+      
+        
+  
+  
+    <li class="md-tabs__item">
+      
+        <a href="../filters/context/" class="md-tabs__link">
+          Filters
+        </a>
+      
+    </li>
+  
+
+      
+        
+  
+  
+    <li class="md-tabs__item">
+      
+        <a href="../flow_control/wildcard/" class="md-tabs__link">
+          Flow Control
+        </a>
+      
+    </li>
+  
+
+      
+        
+  
+  
+    <li class="md-tabs__item">
+      
+        <a href="../about/contributing/" class="md-tabs__link">
+          About
+        </a>
+      
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+      
+      <main class="md-main" role="main">
+        <div class="md-main__inner md-grid" data-md-component="container">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="__drawer">
+    <a href="https://facelessuser.github.io/pyspelling" title="PySpelling" class="md-nav__button md-logo">
+      
+        <i class="md-icon">description</i>
+      
+    </a>
+    PySpelling
+  </label>
+  
+    <div class="md-nav__source">
+      
+
+
+  
+
+<a href="https://github.com/facelessuser/pyspelling/" title="Go to repository" class="md-source" data-md-source="github">
+  
+    <div class="md-source__icon">
+      <svg viewBox="0 0 24 24" width="24" height="24">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
+    </div>
+  
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-1" type="checkbox" id="nav-1" checked>
+    
+    <label class="md-nav__link" for="nav-1">
+      Usage
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-1">
+        Usage
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href=".." title="Basic Usage" class="md-nav__link">
+      Basic Usage
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Configuration
+      </label>
+    
+    <a href="./" title="Configuration" class="md-nav__link md-nav__link--active">
+      Configuration
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-file" class="md-nav__link">
+    Configuration File
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#name" class="md-nav__link">
+    Name
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#groups" class="md-nav__link">
+    Groups
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hidden" class="md-nav__link">
+    Hidden
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#default-encoding" class="md-nav__link">
+    Default Encoding
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sources" class="md-nav__link">
+    Sources
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expect-match" class="md-nav__link">
+    Expect Match
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pipeline" class="md-nav__link">
+    Pipeline
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dictionaries-and-personal-wordlists" class="md-nav__link">
+    Dictionaries and Personal Wordlists
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#spell-checker-options" class="md-nav__link">
+    Spell Checker Options
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../pipeline/" title="Spelling Pipeline" class="md-nav__link">
+      Spelling Pipeline
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../api/" title="Plugin API" class="md-nav__link">
+      Plugin API
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2">
+    
+    <label class="md-nav__link" for="nav-2">
+      Filters
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-2">
+        Filters
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../filters/context/" title="Context" class="md-nav__link">
+      Context
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../filters/cpp/" title="CPP" class="md-nav__link">
+      CPP
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../filters/html/" title="HTML" class="md-nav__link">
+      HTML
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../filters/javascript/" title="JavaScript" class="md-nav__link">
+      JavaScript
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../filters/markdown/" title="Markdown" class="md-nav__link">
+      Markdown
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../filters/odf/" title="ODF" class="md-nav__link">
+      ODF
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../filters/ooxml/" title="OOXML" class="md-nav__link">
+      OOXML
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../filters/python/" title="Python" class="md-nav__link">
+      Python
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../filters/stylesheets/" title="Stylesheets" class="md-nav__link">
+      Stylesheets
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../filters/text/" title="Text" class="md-nav__link">
+      Text
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../filters/url/" title="URL" class="md-nav__link">
+      URL
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../filters/xml/" title="XML" class="md-nav__link">
+      XML
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3">
+    
+    <label class="md-nav__link" for="nav-3">
+      Flow Control
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-3">
+        Flow Control
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../flow_control/wildcard/" title="Wildcard" class="md-nav__link">
+      Wildcard
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4">
+    
+    <label class="md-nav__link" for="nav-4">
+      About
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-4">
+        About
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../about/contributing/" title="Contributing & Support" class="md-nav__link">
+      Contributing &amp; Support
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../about/development/" title="Development" class="md-nav__link">
+      Development
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../about/changelog/" title="Changelog" class="md-nav__link">
+      Changelog
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../about/license/" title="License" class="md-nav__link">
+      License
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-file" class="md-nav__link">
+    Configuration File
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#name" class="md-nav__link">
+    Name
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#groups" class="md-nav__link">
+    Groups
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hidden" class="md-nav__link">
+    Hidden
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#default-encoding" class="md-nav__link">
+    Default Encoding
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sources" class="md-nav__link">
+    Sources
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expect-match" class="md-nav__link">
+    Expect Match
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pipeline" class="md-nav__link">
+    Pipeline
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dictionaries-and-personal-wordlists" class="md-nav__link">
+    Dictionaries and Personal Wordlists
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#spell-checker-options" class="md-nav__link">
+    Spell Checker Options
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/facelessuser/pyspelling/tree/master/docs/src/markdown/configuration.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                
+                
+                <h1 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link"></a></h1>
+<h2 id="configuration-file">Configuration File<a class="headerlink" href="#configuration-file" title="Permanent link"></a></h2>
+<p>PySpelling requires a YAML configuration file. The file defines the various spelling tasks along with their individual filters and options.</p>
+<p>You can optionally specify the preferred spell checker as a global option (<code>aspell</code> is the default if not specified). This can be overridden on the command line.</p>
+<div class="codehilite"><pre><span></span><span class="nt">spellchecker</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">hunspell</span>
+</pre></div>
+
+<p>All of the spelling tasks are contained under the keyword <code>matrix</code> and are organized in a list:</p>
+<div class="codehilite"><pre><span></span><span class="nt">matrix</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">task1</span>
+
+<span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">task2</span>
+</pre></div>
+
+<p>Each task requires, at the very least, a <code>name</code> and <code>sources</code> to search.</p>
+<p>Depending on your setup, you may need to set the dictionary to use as well. Each spell checker specifies their dictionary/language differently which is covered in more details in <a href="#spell-checker-options">Spell Checker Options</a>.</p>
+<div class="codehilite"><pre><span></span><span class="nt">matrix</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Python Source</span>
+  <span class="nt">aspell</span><span class="p">:</span>
+    <span class="nt">lang</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">en</span>
+  <span class="nt">sources</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">pyspelling/**/*.py</span>
+</pre></div>
+
+<p>You can also define more complicated tasks which will run your text through various filters before performing the spell checking by providing a custom pipeline.  You can also add your own custom wordlists to extend the dictionary.</p>
+<div class="codehilite"><pre><span></span><span class="nt">matrix</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Python Source</span>
+  <span class="nt">sources</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">pyspelling/**/*.py</span>
+  <span class="nt">aspell</span><span class="p">:</span>
+    <span class="nt">lang</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">en</span>
+  <span class="nt">dictionary</span><span class="p">:</span>
+    <span class="nt">wordlists</span><span class="p">:</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">docs/src/dictionary/en-custom.txt</span>
+    <span class="nt">output</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">build/dictionary/python.dic</span>
+  <span class="nt">pipeline</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">pyspelling.filters.python</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">pyspelling.filters.context</span><span class="p">:</span>
+      <span class="nt">context_visible_first</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+      <span class="nt">escapes</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">\\[\\`~]</span>
+      <span class="nt">delimiters</span><span class="p">:</span>
+      <span class="c1"># Ignore multiline content between fences (fences can have 3 or more back ticks)</span>
+      <span class="c1"># ```</span>
+      <span class="c1"># content</span>
+      <span class="c1"># ```</span>
+      <span class="p p-Indicator">-</span> <span class="nt">open</span><span class="p">:</span> <span class="s">&#39;(?s)^(?P&lt;open&gt;</span><span class="nv"> </span><span class="s">*`{3,})$&#39;</span>
+        <span class="nt">close</span><span class="p">:</span> <span class="s">&#39;^(?P=open)$&#39;</span>
+      <span class="c1"># Ignore text between inline back ticks</span>
+      <span class="p p-Indicator">-</span> <span class="nt">open</span><span class="p">:</span> <span class="s">&#39;(?P&lt;open&gt;`+)&#39;</span>
+        <span class="nt">close</span><span class="p">:</span> <span class="s">&#39;(?P=open)&#39;</span>
+</pre></div>
+
+<h3 id="name">Name<a class="headerlink" href="#name" title="Permanent link"></a></h3>
+<p>Each spelling tasks <em>should</em> have a unique name and is defined with the <code>name</code> key.</p>
+<p>When using the command line <code>--name</code> option, the task with the matching name will be run.</p>
+<div class="codehilite"><pre><span></span><span class="nt">matrix</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">python</span>
+</pre></div>
+
+<div class="admonition new">
+<p class="admonition-title">New Behavior 2.0</p>
+<p>In <code>1.0</code>, names doubled as identifiers and groups. It became apparent for certain features that a unique name is desirable for targeting different tasks, while a group specifier should be implemented separately. In <code>2.0</code>, if multiple tasks have the same name, the last defined one will be the targeted task when requesting a named task. Use groups to target multiple grouped tasks.</p>
+</div>
+<h3 id="groups">Groups<a class="headerlink" href="#groups" title="Permanent link"></a></h3>
+<p>Each task can be assigned to a group. The group name can be shared with multiple tasks. All tasks in a group can be run by specifying the <code>--group</code> option with the name of the group on the command line. This option is only available in version <code>1.1</code> of the configuration file.</p>
+<div class="codehilite"><pre><span></span><span class="nt">matrix</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">python</span>
+  <span class="nt">group</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">some_name</span>
+</pre></div>
+
+<div class="admonition new">
+<p class="admonition-title">New 2.0</p>
+<p><code>group</code> was added in version <code>2.0</code>.</p>
+</div>
+<h3 id="hidden">Hidden<a class="headerlink" href="#hidden" title="Permanent link"></a></h3>
+<p>All tasks in a configuration file will be run if no <code>name</code> is specified. In version <code>1.1</code> of the configuration file, If a task enables the option <code>hidden</code> by setting it to <code>true</code>, that task will <em>not</em> be run automatically when no <code>name</code> is specified. <code>hidden</code> tasks will only be run if they are specifically mentioned by <code>name</code>.</p>
+<div class="codehilite"><pre><span></span><span class="nt">matrix</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">python</span>
+  <span class="nt">hidden</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+</pre></div>
+
+<div class="admonition new">
+<p class="admonition-title">New 2.0</p>
+<p><code>group</code> was added in version <code>2.0</code>.</p>
+</div>
+<h3 id="default-encoding">Default Encoding<a class="headerlink" href="#default-encoding" title="Permanent link"></a></h3>
+<p>When parsing a file, the encoding detection and translation of the data into Unicode is performed by the first filter in the pipeline. For instance, if HTML is the first, it may check for a BOM or look at the file's header to find the <code>meta</code> tag that specifies the file's encoding. If all encoding checks fail, the filter will usually apply an appropriate default encoding for the file content type (usually UTF-8, but check the specific filter's documentation to be sure). If needed, the filter's default encoding can be overridden in the task via the <code>default_encoding</code> key. After the first step in the pipeline, the text is passed around as Unicode which requires no Unicode detection.</p>
+<div class="codehilite"><pre><span></span><span class="nt">matrix</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">markdown</span>
+  <span class="nt">pipeline</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">pyspelling.filters.text</span>
+  <span class="nt">sources</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="s">&#39;**/*.md&#39;</span>
+  <span class="nt">default_encoding</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">utf-8</span>
+</pre></div>
+
+<p>Once all filtering is complete, the text will be passed to the spell checker as byte strings, usually with the originally detected encoding (unless a filter specifically alters the encoding). The supported spell checkers are limited to very specific encodings, so if your file is using an unsupported encoding, it will fail.</p>
+<p>UTF-16 and UTF-32 is not really supported by Aspell and Hunspell, so at the end of the spell check pipeline, Unicode strings that have the associated encoding of UTF-16 or UTF-32 will be encoded with the compatible UTF-8. This does not apply to files being processed with a the pipeline disabled. When the pipeline is disabled, files are sent directly to the spell checker with no modifications.</p>
+<div class="admonition tip">
+<p class="admonition-title">Unsupported Encodings</p>
+<p>If you are trying to spell check a file in an unsupported encoding, you can use the builtin text filter to convert the content to a more appropriate encoding. In general, it is recommended to work in, or convert to UTF-8.</p>
+</div>
+<h3 id="sources">Sources<a class="headerlink" href="#sources" title="Permanent link"></a></h3>
+<p>Each spelling task must define a list of sources to search via the <code>sources</code> key. Each source should be a glob pattern that should match one or more files. PySpelling will perform a search with these patterns to determine which files should be spell checked.</p>
+<p>You can also have multiple patterns on one line separated with <code>|</code>. When multiple patterns are defined like this, they are evaluated simultaneously. This is useful if you'd like to provide an exclusion pattern along with your file pattern. For instance, if we wanted to scan all python files in our folder, but exclude any in the build folder, we could provide the following pattern: <code>**/*.py|!build/*</code>.</p>
+<p>PySpelling uses <a href="https://facelessuser.github.io/wcmatch/glob/">Wildcard Match's <code>glob</code> library</a> to perform the file globbing.  By default, it uses the <code>NEGATE</code>, <code>GLOBSTAR</code>, and <code>BRACE</code> flags, but you can override the flag options with the <code>glob_flags</code> option. You can specify the flags by either their long name <code>GLOBSTAR</code> or their short name <code>G</code>. See <a href="https://facelessuser.github.io/wcmatch/glob/">Wildcard Match's documentation</a> for more information on the available flags and what they do.</p>
+<div class="codehilite"><pre><span></span><span class="nt">matrix</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">python</span>
+  <span class="nt">pipeline</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">pyspelling.filters.python</span><span class="p">:</span>
+      <span class="nt">comments</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+  <span class="nt">glob_flags</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">N|G|B</span>
+  <span class="nt">sources</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">pyspelling/**/*.py</span>
+</pre></div>
+
+<h3 id="expect-match">Expect Match<a class="headerlink" href="#expect-match" title="Permanent link"></a></h3>
+<p>When processing the sources field it is expected to find at least
+one matching file. If no files are located it can be helpful to raise an error
+and this is the default behaviour. If it is not expected to always find a file
+then the <code>expect_match</code> configuration can be used to suppress the error.</p>
+<div class="codehilite"><pre><span></span><span class="nt">matrix</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">markdown</span>
+  <span class="nt">pipeline</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">pyspelling.filters.text</span>
+  <span class="nt">sources</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="s">&#39;**/*.md&#39;</span>
+  <span class="nt">expect_match</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+  <span class="nt">default_encoding</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">utf-8</span>
+</pre></div>
+
+<h3 id="pipeline">Pipeline<a class="headerlink" href="#pipeline" title="Permanent link"></a></h3>
+<p>PySpelling allows you to define tasks that outline what kind of files you want to spell check, and then sends them down a pipeline that filters the content returning chunks of text with some associated context. Each chunk is sent down each step of the pipeline until it reaches the final step, the spell check step. Between filter steps, you can also insert flow control steps that allow you to have certain text chunks skip specific steps. All of this is done with <a href="../pipeline/">pipeline plugins</a>.</p>
+<p>Let's say you had some Markdown files and wanted to convert them to HTML, and then filter out specific tags. You could just use the Markdown filter to convert the file to HTML and then pass it through the HTML filter to extract the text from the HTML tags.</p>
+<div class="codehilite"><pre><span></span><span class="nt">matrix</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">markdown</span>
+  <span class="nt">sources</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">README.md</span>
+  <span class="nt">pipeline</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">pyspelling.filters.markdown</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">pyspelling.filters.html</span><span class="p">:</span>
+      <span class="nt">comments</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+      <span class="nt">attributes</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">title</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">alt</span>
+      <span class="nt">ignores</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">code</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">pre</span>
+</pre></div>
+
+<p>If needed, you can also insert flow control steps before certain filter steps. Each text chunk that is passed between filters has a category assigned to it from the previous filter. Flow control steps allow you to restrict the next filter to specific categories, or exclude specific categories from the next step. This is covered in more depth in <a href="../pipeline/#flow-control">Flow Control</a>.</p>
+<p>If for some reason you need to send the file directly to the spell checker without using PySpelling's pipeline, simply set <code>pipeline</code> to <code>null</code>. This sends file directly to the spell checker without evaluating the encoding or passing through any filters. Specifically with Hunspell, it also sends the spell checker the filename instead of piping the content as Hunspell has certain features that don't work when piping the data, such as OpenOffice ODF input. </p>
+<p>Below is an example where we send an OpenOffice ODF file directly to Hunspell in order to use Hunspell's <code>-O</code> option to parse the ODF file. Keep in mind that when doing this, no encoding is sent to the spell checker unless you define <code>default_encoding</code>. If <code>default_encoding</code> is not defined, PySpelling will decode the returned content with the terminal's encoding (or what it thinks the terminal's encoding is).</p>
+<div class="codehilite"><pre><span></span><span class="nt">matrix</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">openoffice_ODF</span>
+  <span class="nt">sources</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">file.odt</span>
+  <span class="nt">hunspell</span><span class="p">:</span>
+    <span class="nt">d</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">en_US</span>
+    <span class="nt">O</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+  <span class="nt">pipeline</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">null</span>
+</pre></div>
+
+<h3 id="dictionaries-and-personal-wordlists">Dictionaries and Personal Wordlists<a class="headerlink" href="#dictionaries-and-personal-wordlists" title="Permanent link"></a></h3>
+<p>By default, PySpelling sets your main dictionary to <code>en</code> for Aspell and <code>en_US</code> for Hunspell. If you do not desire an American English dictionary, or these dictionaries are not installed in their expected default locations, you will need to configure PySpelling so it can find your preferred dictionary. Since dictionary configuring varies for each spell checker, the main dictionary is configuration (and virtually any spell checker specific option) is performed via <a href="#spell-checker-options">Spell Checker Options</a>.</p>
+<p>For Aspell, you would use the command line option <code>--lang</code> or <code>-l</code>, which in the YAML configuration file is <code>lang</code> or <code>l</code> respectively. You can see we are just removing the leading <code>-</code> characters.</p>
+<div class="codehilite"><pre><span></span><span class="nt">matrix</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">python</span>
+  <span class="nt">aspell</span><span class="p">:</span>
+    <span class="nt">lang</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">en</span>
+</pre></div>
+
+<p>For Hunspell, you would use the command line option <code>-d</code>, which in the YAML configuration file is <code>d</code>:</p>
+<div class="codehilite"><pre><span></span><span class="nt">matrix</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">python</span>
+  <span class="nt">hunspell</span><span class="p">:</span>
+    <span class="nt">d</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">en_US</span>
+</pre></div>
+
+<p>While the dictionaries cover a number of commonly used words, they are usually not sufficient. Luckily, both Aspell and Hunspell allow for adding custom wordlists. You can have as many wordlists as you like, and they can be included in a list under the key <code>wordlists</code> which is also found under the key <code>dictionary</code>. While Hunspell doesn't directly compile the wordlists, Aspell does, and it uses the main dictionary that you have specified to accomplish this.</p>
+<p>All the wordlists are combined into one custom dictionary file whose output name and location is defined via the <code>output</code> key which is also found under the <code>dictionary</code> key.</p>
+<p>Lastly, you can set the encoding to be used during compilation via the <code>encoding</code> under <code>dictionary</code>. The encoding should generally match the encoding of your main dictionary. The default encoding is <code>utf-8</code>, and only Aspell uses this option.</p>
+<div class="codehilite"><pre><span></span><span class="nt">matrix</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">python</span>
+  <span class="nt">sources</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">pyspelling/**/*.py</span>
+  <span class="nt">aspell</span><span class="p">:</span>
+    <span class="nt">lang</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">en</span>
+  <span class="nt">dictionary</span><span class="p">:</span>
+    <span class="nt">wordlists</span><span class="p">:</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">docs/src/dictionary/en-custom.txt</span>
+    <span class="nt">output</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">build/dictionary/python.dic</span>
+    <span class="nt">encoding</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">utf-8</span>
+  <span class="nt">pipeline</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">pyspelling.filters.python</span><span class="p">:</span>
+      <span class="nt">comments</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+</pre></div>
+
+<h3 id="spell-checker-options">Spell Checker Options<a class="headerlink" href="#spell-checker-options" title="Permanent link"></a></h3>
+<p>Since PySpelling is a wrapper around both Aspell and Hunspell, there are a number of spell checker specific options. As only a few options are present in both, it was decided to expose them via spell checker specific keywords: <code>aspell</code> and <code>hunspell</code> for Aspell and Hunspell respectively. Here you can set options like the default dictionary and search options. Not all options are exposed though, only relevant search options are passed directly to the spell checker. Things like replace options (which aren't relevant in PySpelling) and encoding (which are handled internally by PySpelling) are not accessible.</p>
+<p>Spell checker specific options basically translate directly to the spell checker's command line options and only requires you to remove the leading <code>-</code>s you would normally specify on the command line. For instance, a short form option such as <code>-l</code> would simply be represented with the keyword <code>l</code>, and the long name form of the same option <code>--lang</code> would be represented as <code>lang</code>. Following the key, you would provide the appropriate value depending on it's requirement.</p>
+<p>Boolean flags would be set to <code>true</code>.</p>
+<div class="codehilite"><pre><span></span><span class="nt">matrix</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">html</span>
+  <span class="nt">sources</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">docs/**/*.html</span>
+  <span class="nt">aspell</span><span class="p">:</span>
+    <span class="nt">H</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+  <span class="nt">pipeline</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">pyspelling.filters.html</span>
+</pre></div>
+
+<p>Other options would be set to a string or an integer value.</p>
+<div class="codehilite"><pre><span></span><span class="nt">matrix</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">python</span>
+  <span class="nt">sources</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">pyspelling/**/*.py</span>
+  <span class="nt">aspell</span><span class="p">:</span>
+    <span class="nt">lang</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">en</span>
+  <span class="nt">pipeline</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">pyspelling.filters.python</span><span class="p">:</span>
+      <span class="nt">strings</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+      <span class="nt">comments</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+</pre></div>
+
+<p>Lastly, if you have an option that can be used multiple times, just set the value up as an array, and the option will be added for each value in the array. Assuming you had multiple pre-compiled dictionaries, you could add them under Aspell's <code>--add-extra-dicts</code> option:</p>
+<div class="codehilite"><pre><span></span><span class="nt">matrix</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Python Source</span>
+  <span class="nt">sources</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">pyspelling/**/*.py</span>
+  <span class="nt">aspell</span><span class="p">:</span>
+    <span class="nt">add-extra-dicts</span><span class="p">:</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">my-dictionary.dic</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">my-other-dictionary.dic</span>
+  <span class="nt">pipeline</span><span class="p">:</span>
+</pre></div>
+
+<p>The above options would be equivalent to doing this from the command line:</p>
+<div class="codehilite"><pre><span></span>aspell --add-extra-dicts my-dictionary.doc --add-extra-dicts my-other-dictionary.dic
+</pre></div>
+                
+                  
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+        
+          <a href=".." title="Basic Usage" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+            </div>
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Basic Usage
+              </span>
+            </div>
+          </a>
+        
+        
+          <a href="../pipeline/" title="Spelling Pipeline" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Spelling Pipeline
+              </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+          <div class="md-footer-copyright__highlight">
+            Copyright &copy; 2017 - 2019 <a href="https://github.com/facelessuser">Isaac Muse</a>
+<br><span class="md-footer-custom-text">emoji provided free by <a href="http://www.emojione.com">EmojiOne</a></span>
+
+          </div>
+        
+        powered by
+        <a href="https://www.mkdocs.org">MkDocs</a>
+        and
+        <a href="https://squidfunk.github.io/mkdocs-material/">
+          Material for MkDocs</a>
+      </div>
+      
+  <div class="md-footer-social">
+    <link rel="stylesheet" href="../assets/fonts/font-awesome.css">
+    
+      <a href="https://github.com/facelessuser" class="md-footer-social__link fa fa-github"></a>
+    
+  </div>
+
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../assets/javascripts/application.ac79c3b0.js"></script>
+      
+      <script>app.initialize({version:"1.0.4",url:{base:".."}})</script>
+      
+        <script src="../extra-0b9b22dd13.js"></script>
+      
+    
+  </body>
+</html>
