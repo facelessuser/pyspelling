@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.5.1
+
+- **FIX**: Add workaround for `wcmatch` version `5.0`.
+
 ## 2.5.0
 
 - **NEW**: Add `expect_match` option to prevent a rule from failing if it finds no matching files.
