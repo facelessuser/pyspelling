@@ -25,6 +25,12 @@ matrix:
     - TOXENV=py38
     - TOX_SPELL_REQUIRE=aspell
 
+addons:
+  apt:
+    packages:
+    - aspell
+    - aspell-en
+
 install:
 - pip install tox
 - pip install codecov
