@@ -43,7 +43,7 @@ install:
   - bash -lc "${TOX_SPELL_PATH}/hunspell --version"
 
 test_script:
-  - pip --version
+  - python -m pip --version
   - virtualenv --version
   - tox --version
   - tox
