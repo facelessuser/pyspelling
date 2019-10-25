@@ -1,0 +1,239 @@
+# Wildcard labels
+
+brace_expansion: true
+extended_glob: true
+
+rules:
+  - labels: [infrastructure]
+    patterns: ['*|@(requirements|.github)/**|-README.md']
+
+  - labels: [source]
+    patterns: ['pyspelling/**']
+
+  - labels: [docs]
+    patterns: ['README.md|docs/**']
+
+  - labels: [tests]
+    patterns: ['tests/**']
+
+  - labels: [plugins]
+    patterns: ['pyspelling/@(filters|flow_control)/**|pyspelling/plugin.py']
+
+  - labels: [wildcard-flow-control]
+    patterns: ['@(tests|docs|pyspelling)/**/?(test_)wildcard@(.py|.md)']
+
+  - labels: [context-filter]
+    patterns: ['@(tests|docs|pyspelling)/**/?(test_)context@(.py|.md)']
+
+  - labels: [cpp-filter]
+    patterns: ['@(tests|docs|pyspelling)/**/?(test_)cpp@(.py|.md)']
+
+  - labels: [html-filter]
+    patterns: ['@(tests|docs|pyspelling)/**/?(test_)html@(.py|.md)']
+
+  - labels: [javascript-filter]
+    patterns: ['@(tests|docs|pyspelling)/**/?(test_)javascript@(.py|.md)']
+
+  - labels: [markdown-filter]
+    patterns: ['@(tests|docs|pyspelling)/**/?(test_)markdown@(.py|.md)']
+
+  - labels: [odf-filter]
+    patterns: ['@(tests|docs|pyspelling)/**/?(test_)odf@(.py|.md)']
+
+  - labels: [ooxml-filter]
+    patterns: ['@(tests|docs|pyspelling)/**/?(test_)ooxml@(.py|.md)']
+
+  - labels: [python-filter]
+    patterns: ['@(tests|docs|pyspelling)/**/?(test_)python@(.py|.md)']
+
+  - labels: [stylesheets-filter]
+    patterns: ['@(tests|docs|pyspelling)/**/?(test_)stylesheets@(.py|.md)']
+
+  - labels: [text-filter]
+    patterns: ['@(tests|docs|pyspelling)/**/?(test_)text@(.py|.md)']
+
+  - labels: [url-filter]
+    patterns: ['@(tests|docs|pyspelling)/**/?(test_)url@(.py|.md)']
+
+  - labels: [xml-filter]
+    patterns: ['@(tests|docs|pyspelling)/**/?(test_)xml@(.py|.md)']
+
+# WIP
+
+wip:
+  - work-in-progress
+  - needs-review
+  - needs-decision
+  - needs-confirmation
+  - requires-changes
+  - rejected
+
+# Label management
+
+delete_labels: true
+
+colors:
+    bug: '#c45b46'
+    feature: '#7b17d8'
+    support: '#efbe62'
+    maintenance: '#b2ffeb'
+    category: '#709ad8'
+    subcategory: '#bfd4f2'
+    pending: '#f0f49a'
+    rejected: '#f7c7be'
+    approved: '#beed6d'
+    low: '#dddddd'
+    bot: '#000000'
+
+labels:
+- name: bug
+  color: bug
+  description: Bug report.
+
+- name: feature
+  color: feature
+  description: Feature request.
+
+- name: maintenance
+  color: maintenance
+  description: Maintenance chore.
+
+- name: support
+  color: support
+  description: Support request.
+
+- name: tests
+  color: category
+  description: Related to testing.
+
+- name: infrastructure
+  color: category
+  description: Related to project infrastructure.
+
+- name: source
+  color: category
+  description: Related to source code.
+
+- name: docs
+  color: category
+  description: Related to documentation.
+
+- name: plugins
+  color: subcategory
+  description: Related to general plugin code.
+
+- name: wildcard-flow-control
+  color: pending
+  description: Wildcard flow control.
+
+- name: context-filter
+  color: subcategory
+  description: Related to the context filter.
+
+- name: cpp-filter
+  color: subcategory
+  description: Related to the cpp filter.
+
+- name: html-filter
+  color: subcategory
+  description: Related to the html filter.
+
+- name: javascript-filter
+  color: subcategory
+  description: Related to the javascript filter.
+
+- name: markdown-filter
+  color: subcategory
+  description: Related to the markdown filter.
+
+- name: odf-filter
+  color: subcategory
+  description: Related to the odf filter.
+
+- name: ooxml-filter
+  color: subcategory
+  description: Related to the ooxml filter.
+
+- name: python-filter
+  color: subcategory
+  description: Related to the python filter.
+
+- name: stylesheets-filter
+  color: subcategory
+  description: Related to the stylesheets filter.
+
+- name: text-filter
+  color: subcategory
+  description: Related to the text filter.
+
+- name: url-filter
+  color: subcategory
+  description: Related to the url filter.
+
+- name: xml-filter
+  color: subcategory
+  description: Related to the xml filter.
+
+- name: more-info-needed
+  color: pending
+  description: More information is required.
+
+- name: needs-confirmation
+  color: pending
+  description: The alleged behavior needs to be confirmed.
+
+- name: needs-decision
+  color: pending
+  description: A decision needs to be made regarding request.
+
+- name: confirmed
+  color: approved
+  description: Confirmed bug report or approved feature request.
+
+- name: maybe
+  color: low
+  description: Pending approval of low priority request.
+
+- name: duplicate
+  color: rejected
+  description: The issue has been previously reported.
+
+- name: wontfix
+  color: rejected
+  description: The issue will not be fixed for the stated reasons.
+
+- name: invalid
+  color: rejected
+  description: Invalid report (user error, upstream issue, etc).
+
+- name: triage
+  color: pending
+  description: Issue needs triage.
+
+- name: work-in-progress
+  color: pending
+  description: A partial solution. More changes will be coming.
+
+- name: needs-review
+  color: pending
+  description: Needs to be reviewed and/or approved.
+
+- name: requires-changes
+  color: pending
+  description: Awaiting updates after a review.
+
+- name: approved
+  color: approved
+  description: The pull request is ready to be merged.
+
+- name: rejected
+  color: rejected
+  description: The pull request is rejected for the stated reasons.
+
+- name: skip-triage
+  color: bot
+  description: Tells bot to not tag a new issue with 'triage'.
+
+- name: skip-review
+  color: bot
+  description: Tells bot to not tag a reviews with 'needs-review'.

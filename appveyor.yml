@@ -10,8 +10,6 @@ environment:
       TOXENV: "py36"
     - PYTHON: "C:/Python37"
       TOXENV: "py37"
-    - PYTHON: "C:/Python37"
-      TOXENV: "lint"
 
 init:
   - "ECHO %TOXENV%"
@@ -43,13 +41,13 @@ install:
   - bash -lc "${TOX_SPELL_PATH}/hunspell --version"
 
 test_script:
-  - pip --version
+  - python -m pip --version
   - virtualenv --version
   - tox --version
   - tox
 
 after_test:
-  - if not ("%TOXENV%" == "lint") if not ("%TOXENV%" == "documents") codecov
+  - codecov
 
 matrix:
   fast_finish: true
