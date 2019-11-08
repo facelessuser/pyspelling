@@ -6,115 +6,129 @@ brace_expansion: true
 extended_glob: true
 
 rules:
-  - labels: [infrastructure]
+  - labels: ['C: infrastructure']
     patterns: ['*|@(requirements|.github)/**|-*.md']
 
-  - labels: [source]
+  - labels: ['C: source']
     patterns: ['pyspelling/**']
 
-  - labels: [docs]
+  - labels: ['C: docs']
     patterns: ['*.md|docs/**']
 
-  - labels: [tests]
+  - labels: ['C: tests']
     patterns: ['tests/**']
 
-  - labels: [plugins]
+  - labels: ['C: plugins']
     patterns: ['pyspelling/@(filters|flow_control)/**|pyspelling/plugin.py']
 
-  - labels: [wildcard-flow-control]
+  - labels: ['C: wildcard-flow-control']
     patterns: ['@(tests|pyspelling)/**/?(test_)wildcard.py']
 
-  - labels: [context-filter]
+  - labels: ['C: context-filter']
     patterns: ['@(tests|pyspelling)/**/?(test_)context.py']
 
-  - labels: [cpp-filter]
+  - labels: ['C: cpp-filter']
     patterns: ['@(tests|pyspelling)/**/?(test_)cpp.py']
 
-  - labels: [html-filter]
+  - labels: ['C: html-filter']
     patterns: ['@(tests|pyspelling)/**/?(test_)html.py']
 
-  - labels: [javascript-filter]
+  - labels: ['C: javascript-filter']
     patterns: ['@(tests|pyspelling)/**/?(test_)javascript.py']
 
-  - labels: [markdown-filter]
+  - labels: ['C: markdown-filter']
     patterns: ['@(tests|pyspelling)/**/?(test_)markdown.py']
 
-  - labels: [odf-filter]
+  - labels: ['C: odf-filter']
     patterns: ['@(tests|pyspelling)/**/?(test_)odf.py']
 
-  - labels: [ooxml-filter]
+  - labels: ['C: ooxml-filter']
     patterns: ['@(tests|pyspelling)/**/?(test_)ooxml.py']
 
-  - labels: [python-filter]
+  - labels: ['C: python-filter']
     patterns: ['@(tests|pyspelling)/**/?(test_)python.py']
 
-  - labels: [stylesheets-filter]
+  - labels: ['C: stylesheets-filter']
     patterns: ['@(tests|pyspelling)/**/?(test_)stylesheets.py']
 
-  - labels: [text-filter]
+  - labels: ['C: text-filter']
     patterns: ['@(tests|pyspelling)/**/?(test_)text.py']
 
-  - labels: [url-filter]
+  - labels: ['C: url-filter']
     patterns: ['@(tests|pyspelling)/**/?(test_)url.py']
 
-  - labels: [xml-filter]
+  - labels: ['C: xml-filter']
     patterns: ['@(tests|pyspelling)/**/?(test_)xml.py']
 
 # Label management
 
 labels:
-- name: plugins
+- name: 'C: plugins'
+  renamed: plugins
   color: subcategory
   description: Related to general plugin code.
 
-- name: wildcard-flow-control
+- name: 'C: wildcard-flow-control'
+  renamed: wildcard-flow-control
   color: pending
   description: Wildcard flow control.
 
-- name: context-filter
+- name: 'C: context-filter'
+  renamed: context-filter
   color: subcategory
   description: Related to the context filter.
 
-- name: cpp-filter
+- name: 'C: cpp-filter'
+  renamed: cpp-filter
   color: subcategory
   description: Related to the cpp filter.
 
-- name: html-filter
+- name: 'C: html-filter'
+  renamed: html-filter
   color: subcategory
   description: Related to the html filter.
 
-- name: javascript-filter
+- name: 'C: javascript-filter'
+  renamed: javascript-filter
   color: subcategory
   description: Related to the javascript filter.
 
-- name: markdown-filter
+- name: 'C: markdown-filter'
+  renamed: markdown-filter
   color: subcategory
   description: Related to the markdown filter.
 
-- name: odf-filter
+- name: 'C: odf-filter'
+  renamed: odf-filter
   color: subcategory
   description: Related to the odf filter.
 
-- name: ooxml-filter
+- name: 'C: ooxml-filter'
+  renamed: ooxml-filter
   color: subcategory
   description: Related to the ooxml filter.
 
-- name: python-filter
+- name: 'C: python-filter'
+  renamed: python-filter
   color: subcategory
   description: Related to the python filter.
 
-- name: stylesheets-filter
+- name: 'C: stylesheets-filter'
+  renamed: stylesheets-filter
   color: subcategory
   description: Related to the stylesheets filter.
 
-- name: text-filter
+- name: 'C: text-filter'
+  renamed: text-filter
   color: subcategory
   description: Related to the text filter.
 
-- name: url-filter
+- name: 'C: url-filter'
+  renamed: url-filter
   color: subcategory
   description: Related to the url filter.
 
-- name: xml-filter
+- name: 'C: xml-filter'
+  renamed: xml-filter
   color: subcategory
   description: Related to the xml filter.
