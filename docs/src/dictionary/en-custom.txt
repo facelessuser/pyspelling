@@ -33,9 +33,9 @@ PyYaml's
 SCSS
 SVG
 Stylesheets
-stylesheets
 TODO
 Tox
+Twemoji
 UTF
 Unescape
 Virtualenv
@@ -87,6 +87,7 @@ shebang
 sortable
 squidfunk
 stylesheet
+stylesheets
 subclassed
 subclassing
 sublicense
