@@ -1,3 +1,4 @@
+[![Gitter][gitter-image]][gitter-link]
 [![Build][github-ci-image]][github-ci-link]
 [![Unix Build Status][travis-image]][travis-link]
 [![Windows Build Status][appveyor-image]][appveyor-link]
@@ -32,6 +33,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 [aspell]: http://aspell.net/
 [hunspell]: https://hunspell.github.io/
 
+[gitter-image]: https://img.shields.io/gitter/room/facelessuser/pyspelling.svg?logo=gitter&color=fuchsia&logoColor=cccccc
+[gitter-link]: https://gitter.im/facelessuser/pyspelling
 [github-ci-image]: https://github.com/facelessuser/pyspelling/workflows/build/badge.svg
 [github-ci-link]: https://github.com/facelessuser/pyspelling/actions?workflow=build
 [codecov-image]: https://img.shields.io/codecov/c/github/facelessuser/pyspelling/master.svg?logo=codecov&logoColor=cccccc
