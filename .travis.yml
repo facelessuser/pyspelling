@@ -20,7 +20,7 @@ matrix:
     env:
     - TOXENV=py37
     - TOX_SPELL_REQUIRE=aspell
-  - python: 3.8-dev
+  - python: 3.8
     env:
     - TOXENV=py38
     - TOX_SPELL_REQUIRE=aspell
