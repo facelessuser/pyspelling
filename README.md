@@ -1,10 +1,11 @@
+[![Gitter][gitter-image]][gitter-link]
+[![Build][github-ci-image]][github-ci-link]
 [![Unix Build Status][travis-image]][travis-link]
 [![Windows Build Status][appveyor-image]][appveyor-link]
 [![Coverage Status][codecov-image]][codecov-link]
-[![Requirements Status][requires-image]][requires-link]
 [![PyPI Version][pypi-image]][pypi-link]
+[![PyPI - Python Version][python-image]][pypi-link]
 ![License][license-image-mit]
-
 # PySpelling
 
 ## Overview
@@ -15,7 +16,7 @@ Aspell and Hunspell are very good spell checking tools. Aspell particularly come
 
 ## Documentation
 
-Extension documentation is found here: http://facelessuser.github.io/pyspelling/.
+Extension documentation is found here: https://facelessuser.github.io/pyspelling/.
 
 ## License
 
@@ -30,16 +31,19 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 [aspell]: http://aspell.net/
-[hunspell]: http://hunspell.github.io/
+[hunspell]: https://hunspell.github.io/
 
-[codecov-image]: https://img.shields.io/codecov/c/github/facelessuser/pyspelling/master.svg
+[gitter-image]: https://img.shields.io/gitter/room/facelessuser/pyspelling.svg?logo=gitter&color=fuchsia&logoColor=cccccc
+[gitter-link]: https://gitter.im/facelessuser/pyspelling
+[github-ci-image]: https://github.com/facelessuser/pyspelling/workflows/build/badge.svg
+[github-ci-link]: https://github.com/facelessuser/pyspelling/actions?workflow=build
+[codecov-image]: https://img.shields.io/codecov/c/github/facelessuser/pyspelling/master.svg?logo=codecov&logoColor=cccccc
 [codecov-link]: https://codecov.io/github/facelessuser/pyspelling
-[travis-image]: https://img.shields.io/travis/facelessuser/pyspelling/master.svg?label=Unix%20Build&logo=travis
-[travis-link]: https://travis-ci.org/facelessuser/pyspelling
-[appveyor-image]: https://img.shields.io/appveyor/ci/facelessuser/pyspelling/master.svg?label=Windows%20Build&logo=appveyor
+[appveyor-image]: https://img.shields.io/appveyor/ci/facelessuser/pyspelling/master.svg?label=appveyor&logo=appveyor&logoColor=cccccc
 [appveyor-link]: https://ci.appveyor.com/project/facelessuser/pyspelling
-[requires-image]: https://img.shields.io/requires/github/facelessuser/pyspelling/master.svg
-[requires-link]: https://requires.io/github/facelessuser/pyspelling/requirements/?branch=master
-[pypi-image]: https://img.shields.io/pypi/v/pyspelling.svg?logo=python&logoColor=white
+[travis-image]: https://img.shields.io/travis/facelessuser/pyspelling/master.svg?label=travis&logo=travis%20ci&logoColor=cccccc
+[travis-link]: https://travis-ci.org/facelessuser/pyspelling
+[pypi-image]: https://img.shields.io/pypi/v/pyspelling.svg?logo=pypi&logoColor=cccccc
 [pypi-link]: https://pypi.python.org/pypi/pyspelling
+[python-image]: https://img.shields.io/pypi/pyversions/pyspelling?logo=python&logoColor=cccccc
 [license-image-mit]: https://img.shields.io/badge/license-MIT-blue.svg
