@@ -2,7 +2,9 @@
 
 ## Usage
 
-The Wildcard plugin is a flow control plugin. It uses [Wildcard Match's `fnmatch` library][fnmatch] to perform wildcard matches on categories passed to it from the pipeline in order to determine if the text should be passed to the next filter.
+The Wildcard plugin is a flow control plugin. It uses [Wildcard Match's `fnmatch` library][fnmatch] to perform wildcard
+matches on categories passed to it from the pipeline in order to determine if the text should be passed to the next
+filter.
 
 You can define patterns for the following cases:
 
@@ -10,11 +12,18 @@ You can define patterns for the following cases:
 - `skip`: the chunk of text should skip the next filter.
 - `halt`: halts the progress of the text chunk(s) down the pipeline and sends it directly to the spell checker.
 
-Under each option, you can define a list of different patterns. The plugin will loop through the patterns until it has determined what should be done with the text.
+Under each option, you can define a list of different patterns. The plugin will loop through the patterns until it has
+determined what should be done with the text.
 
-The `fnmatch` library is configured with the `NEGATE`, `BRACE` and `IGNORECASE` flags. It also allows you to specify multiple patterns on one line separated with `|`.  See [Wildcard Match's documentation][fnmatch] to learn more about its behavior in regards to features and flags.
+The `fnmatch` library is configured with the `NEGATE`, `BRACE` and `IGNORECASE` flags. It also allows you to specify
+multiple patterns on one line separated with `|`.  See [Wildcard Match's documentation][fnmatch] to learn more about its
+behavior in regards to features and flags.
 
-In this example, we wish to specifically target inline Python text and ignore `noqa`, `pragma`, and `shebang` lines.  So after the Python step, which returns both docstrings and inline comments, we specify that we only want to allow `py-comment` categories in the next filter. The context filter removes the lines that start with the aforementioned things, and passes the text down the pipe.  The last filter step receives both the `context` text objects **and** the `py-docstrings` from earlier.
+In this example, we wish to specifically target inline Python text and ignore `noqa`, `pragma`, and `shebang` lines.  So
+after the Python step, which returns both docstrings and inline comments, we specify that we only want to allow
+`py-comment` categories in the next filter. The context filter removes the lines that start with the aforementioned
+things, and passes the text down the pipe.  The last filter step receives both the `context` text objects **and** the
+`py-docstrings` from earlier.
 
 ```yaml
 matrix:

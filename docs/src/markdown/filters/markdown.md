@@ -2,7 +2,9 @@
 
 ## Usage
 
-The Markdown filter converts a text file's buffer using Python Markdown and returns a single `SourceText` object containing the text as HTML. It can be included via `pyspelling.filters.markdown`. When first in the chain, the file's default, assumed encoding is `utf-8` unless otherwise overridden by the user.
+The Markdown filter converts a text file's buffer using Python Markdown and returns a single `SourceText` object
+containing the text as HTML. It can be included via `pyspelling.filters.markdown`. When first in the chain, the file's
+default, assumed encoding is `utf-8` unless otherwise overridden by the user.
 
 ```yaml
 matrix:

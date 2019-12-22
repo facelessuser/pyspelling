@@ -4,3 +4,4 @@
 [hunspell]: https://hunspell.github.io/
 [soup-sieve]: https://facelessuser.github.io/soupsieve/
 [win-unicode-console]: https://github.com/Drekin/win-unicode-console
+[wsl]: https://docs.microsoft.com/en-us/windows/wsl/install-win10

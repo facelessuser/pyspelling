@@ -11,9 +11,11 @@
 
 ## 2.4.0
 
-- **NEW**: Disable Aspell filters by default. Users must explicitly set the `mode` parameter under the `aspell` option to enable default Aspell filters.
+- **NEW**: Disable Aspell filters by default. Users must explicitly set the `mode` parameter under the `aspell` option
+  to enable default Aspell filters.
 - **New**: Throw an exception with a message if no configuration is found or there is some other issue.
-- **New**: Throw an exception with a message when no tasks are found in the matrix or when no tasks match a given name or group.
+- **New**: Throw an exception with a message when no tasks are found in the matrix or when no tasks match a given name
+  or group.
 - **New**: Throw an exception with a message when a task is run but no files are found.
 
 ## 2.3.1
@@ -32,7 +34,8 @@
 ## 2.2.5
 
 - **FIX**: Rework comment extraction in XML plugin.
-- **FIX**: Newer versions of Soup Sieve will not compile an empty string, so adjust XML and HTML plugin logic to account for this behavior.
+- **FIX**: Newer versions of Soup Sieve will not compile an empty string, so adjust XML and HTML plugin logic to account
+  for this behavior.
 
 ## 2.2.4
 
@@ -45,7 +48,9 @@
 
 ## 2.2.2
 
-- **FIX**: Fix `:empty` and `:root` and `:nth-*` selectors not working properly without a tag name specified before. This is now done via our external lib called `soupsieve` which is the same homegrown CSS library that we were using internally.
+- **FIX**: Fix `:empty` and `:root` and `:nth-*` selectors not working properly without a tag name specified before.
+  This is now done via our external lib called `soupsieve` which is the same homegrown CSS library that we were using
+  internally.
 
 - **FIX**: Potential infinite loop when using `:nth-child()`.
 
@@ -55,7 +60,9 @@
 
 ## 2.2.0
 
-- **NEW**: Add support for CSS4 selectors: `:empty`, `:first-child`, `:last-child`, `:only-child`, `:first-of-type`, `:last-of-type`, `:only-of-type`, `:nth-child(an+b [of S]?)`, `:nth-last-child(an+b [of S]?)`, `:nth-of-type(an+b)`, and `:nth-last-of-type(an+b)`. (#58)
+- **NEW**: Add support for CSS4 selectors: `:empty`, `:first-child`, `:last-child`, `:only-child`, `:first-of-type`,
+  `:last-of-type`, `:only-of-type`, `:nth-child(an+b [of S]?)`, `:nth-last-child(an+b [of S]?)`, `:nth-of-type(an+b)`,
+  and `:nth-last-of-type(an+b)`. (#58)
 
 ## 2.1.1
 
@@ -66,13 +73,17 @@
 - **NEW**: Add support for `div p`, `div>p`, `div+p`, `div~p` in the HTML/XML filter's CSS selectors. (#51)
 - **NEW**: Add support for the `:root` CSS selector. (#57)
 - **NEW**: Add support for experimental `:has()` selector. (#54)
-- **FIX**: According to CSS4 specification, `:is()` is the final name for `:matches()` but the `:matches()` is an allowed alias. (#53)
+- **FIX**: According to CSS4 specification, `:is()` is the final name for `:matches()` but the `:matches()` is an
+  allowed alias. (#53)
 - **FIX**: Allow `:not()` to be nested in `:is()`/`:matches()`. (#56)
 
 ## 2.0.0
 
-- **NEW**: (Breaking change) Task names should be unique and using `--name` from the command line will only target one `name` (the last task defined with that name). If you were not using `name` to run a group of tasks, you will not notice any changes.
-- **NEW**: Task option `group` has been added to target multiple tasks with the `--group` command line option. `group` name can be shared across different tasks.
+- **NEW**: (Breaking change) Task names should be unique and using `--name` from the command line will only target one
+  `name` (the last task defined with that name). If you were not using `name` to run a group of tasks, you will not
+  notice any changes.
+- **NEW**: Task option `group` has been added to target multiple tasks with the `--group` command line option. `group`
+  name can be shared across different tasks.
 - **NEW**: Add XML filter (PySpelling now has a dependency on `lxml`).
 - **NEW**: Add Open Document Format (ODF) filter for `.odt`, `.ods`, and `.odp` files.
 - **NEW**: Add Office Open XML format (newer Microsoft document format) for `.docx`, `.xlsx`, and `.pptx` files.
@@ -81,29 +92,37 @@
 - **NEW**: CSS selectors now support `i` in attribute selectors: `[attr=value i]`.
 - **NEW**: CSS selectors now support namespaces (some configuration required).
 - **NEW**: For better HTML context, display a tag's ancestry (just tag name of parents).
-- **NEW**: Captured tags are now configurable via `captures`, but tags that are not captured still have their children crawled unless they are under `ignores`.
+- **NEW**: Captured tags are now configurable via `captures`, but tags that are not captured still have their children
+  crawled unless they are under `ignores`.
 - **NEW**: Support modes added for HTML filter: `html`, `html5`, and `xhtml`.
 - **NEW**: `CHECK_BOM` plugin attribute has been deprecated in favor of overriding the exposed `has_bom` function.
-- **NEW**: Tasks can be hidden with the `hidden` configuration option. Tasks with `hidden` enabled will only run if they are explicitly called by name.
+- **NEW**: Tasks can be hidden with the `hidden` configuration option. Tasks with `hidden` enabled will only run if they
+  are explicitly called by name.
 - **NEW**: Add normal string support to Python filter.
 - **NEW**: Add string and template literal support for JavaScript filter.
 - **NEW**: Add string support for CPP filter.
 - **NEW**: Add `generic_mode` option to CPP to allow for generic C/C++ comment style capture from non C/C++ file types.
 - **NEW**: Context will normalize line endings before applying context (can be disabled).
 - **NEW**: CPP, Stylesheet, and JavaScript plugins now normalize line endings of block comments.
-- **NEW**: UTF-16 and UTF-32 is not really supported by Aspell and Hunspell, so at the end of the pipeline, Unicode strings that have the associated encoding of UTF-16 or UTF-32 will encoding with the compatible UTF-8. This does not apply to files being processed with a disabled pipeline. When the pipeline is disabled, files are sent directly to the spell checker with no modifications.
+- **NEW**: UTF-16 and UTF-32 is not really supported by Aspell and Hunspell, so at the end of the pipeline, Unicode
+  strings that have the associated encoding of UTF-16 or UTF-32 will encoding with the compatible UTF-8. This does not
+  apply to files being processed with a disabled pipeline. When the pipeline is disabled, files are sent directly to the
+  spell checker with no modifications.
 - **FIX**: Case related issues when comparing tags and attributes in HTML.
 - **FIX**: CSS selectors should only compare case insensitive for ASCII characters A-Z and a-z.
 - **FIX**: Allow CSS escapes in selectors.
-- **FIX**: Don't send empty (or strings that are just whitespace) to spell checker to prevent Aspell 0.50 series from crashing (also to increase performance).
+- **FIX**: Don't send empty (or strings that are just whitespace) to spell checker to prevent Aspell 0.50 series from
+  crashing (also to increase performance).
 - **FIX**: Catch and bubble up errors better.
 - **FIX**: Fix issue where Python module docstrings would not get spell checked if they followed a shebang.
 
 ## 1.1.0
 
 - **NEW**: Add URL/email address filter. (#30)
-- **NEW**: If `pipeline` configuration key is set to `null`, do not use any filters, and send the filename, not the content, to the spell checker.
-- **NEW**: Add `encoding` option to `dictionary` configuration for the purpose of communicating what encoding the main dictionary is when compiling wordlists (only Aspell takes advantage of this).
+- **NEW**: If `pipeline` configuration key is set to `null`, do not use any filters, and send the filename, not the
+  content, to the spell checker.
+- **NEW**: Add `encoding` option to `dictionary` configuration for the purpose of communicating what encoding the main
+  dictionary is when compiling wordlists (only Aspell takes advantage of this).
 - **FIX**: Fix Hunspell `-O` option which was mistakenly `-o`. (#31)
 
 ## 1.0.0
@@ -121,17 +140,24 @@
 
 ## 1.0.0b1
 
-- **NEW**: Better context for HTML elements. HTML is now returned by block level elements, and the elements selector is given as context. Attributes also return a selector as context and are returned individually. HTML comments are returned as individual hunks.
+- **NEW**: Better context for HTML elements. HTML is now returned by block level elements, and the elements selector is
+  given as context. Attributes also return a selector as context and are returned individually. HTML comments are
+  returned as individual hunks.
 - **NEW**: Add Stylesheet and CPP filters (#17)
 - **NEW**: JavaScript is now derived from CPP.
 - **NEW**: PySpelling looks for `.spelling.yml` or `.pyspelling.yml` with a priority for the latter. (#12)
-- **NEW**: Spelling pipeline adjustments: you can now explicitly allow only certain categories, skip categories, or halt them in the pipeline. Pipeline flow control is now done via a new `FlowControl` plugin. When avoiding, including, or skipping categories, they are now done with wildcard patterns. (#16)
+- **NEW**: Spelling pipeline adjustments: you can now explicitly allow only certain categories, skip categories, or halt
+  them in the pipeline. Pipeline flow control is now done via a new `FlowControl` plugin. When avoiding, including, or
+  skipping categories, they are now done with wildcard patterns. (#16)
 - **NEW**: Drop scanning python normal strings in plugin.
 - **NEW**: Use `get_plugin` instead of `get_filter`, but allow a backwards compatible path for now.
-- **NEW**: In configuration, `documents` is now `matrix` and `filters` is now `pipeline`, but a deprecation path has been added. (#15)
-- **NEW**: Provide a class attribute that will cause a Filter object to avoid BOM detection if it is not appropriate for the given file.
+- **NEW**: In configuration, `documents` is now `matrix` and `filters` is now `pipeline`, but a deprecation path has
+  been added. (#15)
+- **NEW**: Provide a class attribute that will cause a Filter object to avoid BOM detection if it is not appropriate for
+  the given file.
 - **NEW**: Wordlists should get the desired language/dictionary from the spell checker specific options.
-- **NEW**: Add global configuration option to specify the preferred spell checker, but it is still overridable via command line.
+- **NEW**: Add global configuration option to specify the preferred spell checker, but it is still overridable via
+  command line.
 - **FIX**: Internal cleanup in regards to error handling and debug.
 - **FIX**: Fix context issue when no escapes are defined.
 

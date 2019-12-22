@@ -2,7 +2,10 @@
 
 ## Usage
 
-The ODF filter provides support for the Open Document Format. It supports documents (`odt`), spreadsheets (`ods`), and presentations (`odp`). It also supports their flat format as well: `fodt`, `fods`, and `fodp`. In general, it will return one chunk containing all the checkable strings in the file. In the case of presentations, it will actually send multiple chunks, one for each slide.
+The ODF filter provides support for the Open Document Format. It supports documents (`odt`), spreadsheets (`ods`), and
+presentations (`odp`). It also supports their flat format as well: `fodt`, `fods`, and `fodp`. In general, it will
+return one chunk containing all the checkable strings in the file. In the case of presentations, it will actually send
+multiple chunks, one for each slide.
 
 ```yaml
 - name: odf

@@ -2,7 +2,10 @@
 
 ## Usage
 
-This is a filter that simply retrieves the buffer's text and returns it as Unicode.  It takes a file or file buffer and returns a single `SourceText` object containing all the text in the file.  It is the default filter when there is no filter specified, though it can be manually included via `pyspelling.filters.text`. When first in the chain, the file's default, assumed encoding is `utf-8` unless otherwise overridden by the user.
+This is a filter that simply retrieves the buffer's text and returns it as Unicode.  It takes a file or file buffer and
+returns a single `SourceText` object containing all the text in the file.  It is the default filter when there is no
+filter specified, though it can be manually included via `pyspelling.filters.text`. When first in the chain, the file's
+default, assumed encoding is `utf-8` unless otherwise overridden by the user.
 
 The Text filter can also be used convert from one encoding to another.
 
