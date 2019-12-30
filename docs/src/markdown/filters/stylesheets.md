@@ -2,7 +2,10 @@
 
 ## Usage
 
-The Stylesheets plugin is designed to find and return comments in CSS, SCSS, and SASS (CSS does not support inline comments). When first in the chain, the filter uses no special encoding detection. It will assume `utf-8` if no encoding BOM is found, and the user has not overridden the fallback encoding. Text is returned in chunks based on the context of the text: block or inline.
+The Stylesheets plugin is designed to find and return comments in CSS, SCSS, and SASS (CSS does not support inline
+comments). When first in the chain, the filter uses no special encoding detection. It will assume `utf-8` if no encoding
+BOM is found, and the user has not overridden the fallback encoding. Text is returned in chunks based on the context of
+the text: block or inline.
 
 You can specify `sass` or `scss` in the option `stylesheets` if you need to capture inline comments.
 
@@ -35,7 +38,8 @@ Options          | Type     | Default       | Description
 
 ## Categories
 
-Stylesheets returns text with the following categories depending on what stylesheet mode is enabled. Categories prefixed with `css` are for CSS etc.
+Stylesheets returns text with the following categories depending on what stylesheet mode is enabled. Categories prefixed
+with `css` are for CSS etc.
 
 Category             | Description
 -------------------- | -----------

@@ -1,5 +1,6 @@
 API
 Accessors
+AppVeyor
 BOM
 BOMs
 BeautifulSoup
@@ -77,6 +78,7 @@ namespaces
 overridable
 parsers
 pre
+preprocessing
 prerelease
 prereleases
 pycqa

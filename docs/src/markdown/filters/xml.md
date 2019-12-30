@@ -2,13 +2,18 @@
 
 ## Usage
 
-The XML filter is designed to capture XML content, comments, and even attributes. It allows for filtering out specific tags, and you can even filter them out with CSS selectors (even though this is XML content :slightly_smiling:).
+The XML filter is designed to capture XML content, comments, and even attributes. It allows for filtering out specific
+tags, and you can even filter them out with CSS selectors (even though this is XML content :slightly_smiling:).
 
-When first in the chain, the XML filter will look for the encoding of the file in its header and convert the buffer to Unicode. It will assume `utf-8` if no encoding header is found, and the user has not overridden the fallback encoding.
+When first in the chain, the XML filter will look for the encoding of the file in its header and convert the buffer to
+Unicode. It will assume `utf-8` if no encoding header is found, and the user has not overridden the fallback encoding.
 
-The HTML filter uses BeautifulSoup4 to convert the Unicode content to XML structure. Tag content is as one block for the whole file. If enabled, the XML filter will also return chunks for comments and even attributes. Each type of text chunk is returned with their own category type.
+The HTML filter uses BeautifulSoup4 to convert the Unicode content to XML structure. Tag content is as one block for the
+whole file. If enabled, the XML filter will also return chunks for comments and even attributes. Each type of text chunk
+is returned with their own category type.
 
-Tags can be captured or ignored with the `captures` and `ignores` options. These options work by employing CSS selectors to target the tags. The CSS selectors are based on a limited subset of CSS4 selectors.
+Tags can be captured or ignored with the `captures` and `ignores` options. These options work by employing CSS selectors
+to target the tags. The CSS selectors are based on a limited subset of CSS4 selectors.
 
 ```yaml
 matrix:
@@ -26,7 +31,8 @@ matrix:
 
 ## Supported CSS Selectors
 
-The CSS selectors are based on a limited subset of CSS4 selectors. Support is provided via Soup Sieve. Please reference [Soup Sieve's documentation][soup-sieve] for more info.
+The CSS selectors are based on a limited subset of CSS4 selectors. Support is provided via Soup Sieve. Please reference
+[Soup Sieve's documentation][soup-sieve] for more info.
 
 ## Options
 
