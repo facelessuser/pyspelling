@@ -36,7 +36,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.4.3">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.6.0">
     
     
       
@@ -44,7 +44,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.30686662.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.1b62728e.css">
       
         <link rel="stylesheet" href="../../assets/stylesheets/application-palette.a8b3c06d.css">
       
@@ -55,19 +55,19 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.268332fc.js"></script>
     
     
       
         <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono&display=fallback">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
         <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
       
     
     <link rel="stylesheet" href="../../assets/fonts/material-icons.css">
     
     
-      <link rel="stylesheet" href="../../extra-30d8e6755c.css">
+      <link rel="stylesheet" href="../../extra-174a536342.css">
     
     
       
@@ -750,9 +750,18 @@
                 
                 <h1 id="context">Context<a class="headerlink" href="#context" title="Permanent link"></a></h1>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link"></a></h2>
-<p>The Context filter is used to create regular expression context delimiters for filtering out content you want from content you don't want. Depending on how the filter is configured, the opening delimiter will swap from ignoring text to gathering text. When the closing delimiter is met, the filter will swap back from gathering text to ignoring text.  If <code>context_visible_first</code> is set to <code>true</code>, the logic will be reversed.</p>
-<p>Regular expressions are compiled with the MULTILINE flag so that <code>^</code> represents the start of a line and <code>$</code> represents the end of a line. <code>\A</code> and <code>\Z</code> would represent the start and end of the buffer.</p>
-<p>Delimiters require an <code>open</code> and a <code>close</code> pattern. You can optionally define a <code>content</code> pattern, but if you don't, it is <code>.*?</code> by default. The three patterns are used to create a single regular expression in the form <code class="codehilite"><span class="sa">r</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">(?P&lt;special_group_name&gt;</span><span class="si">{1}</span><span class="s1">)(?:</span><span class="si">{2}</span><span class="s1">|\Z)&#39;</span></code>, where <code>{0}</code> is the opening pattern is inserted, <code>{1}</code> is the content pattern , and <code>{2}</code> is the closing pattern. <code>special_group_name</code> is randomly generated to ensure it doesn't conflict with anything in the pattern. Keeping in mind that these are all compiled into one pattern, you are able to define capture group names in opening, and reference them in the closing if needed.</p>
+<p>The Context filter is used to create regular expression context delimiters for filtering out content you want from
+content you don't want. Depending on how the filter is configured, the opening delimiter will swap from ignoring text to
+gathering text. When the closing delimiter is met, the filter will swap back from gathering text to ignoring text.  If
+<code>context_visible_first</code> is set to <code>true</code>, the logic will be reversed.</p>
+<p>Regular expressions are compiled with the MULTILINE flag so that <code>^</code> represents the start of a line and <code>$</code> represents
+the end of a line. <code>\A</code> and <code>\Z</code> would represent the start and end of the buffer.</p>
+<p>Delimiters require an <code>open</code> and a <code>close</code> pattern. You can optionally define a <code>content</code> pattern, but if you don't, it
+is <code>.*?</code> by default. The three patterns are used to create a single regular expression in the form
+<code class="codehilite"><span class="sa">r</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">(?P&lt;special_group_name&gt;</span><span class="si">{1}</span><span class="s1">)(?:</span><span class="si">{2}</span><span class="s1">|\Z)&#39;</span></code>, where <code>{0}</code> is the opening pattern is inserted, <code>{1}</code> is the
+content pattern , and <code>{2}</code> is the closing pattern. <code>special_group_name</code> is randomly generated to ensure it doesn't
+conflict with anything in the pattern. Keeping in mind that these are all compiled into one pattern, you are able to
+define capture group names in opening, and reference them in the closing if needed.</p>
 <p>You can also able to define a global escape pattern to prevent escaped delimiters from being captured.</p>
 <p>The filter can be included via <code>pyspelling.filters.context</code>.</p>
 <div class="codehilite"><pre><span></span><span class="nt">matrix</span><span class="p">:</span>
@@ -827,6 +836,7 @@
                 
                   
                 
+                
               
               
                 
@@ -882,7 +892,8 @@
         
           <div class="md-footer-copyright__highlight">
             Copyright &copy; 2017 - 2019 <a href="https://github.com/facelessuser">Isaac Muse</a>
-<br><span class="md-footer-custom-text">emoji provided free by <a href="http://www.emojione.com">EmojiOne</a></span>
+<br><span class="md-footer-custom-text">emoji provided free by </span>
+<a href="https://github.com/twitter/twemoji">Twemoji</a>
 
           </div>
         
@@ -906,11 +917,11 @@
       
     </div>
     
-      <script src="../../assets/javascripts/application.ac79c3b0.js"></script>
+      <script src="../../assets/javascripts/application.808e90bb.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       
-        <script src="../../extra-0b9b22dd13.js"></script>
+        <script src="../../extra-0d9305e748.js"></script>
       
     
   </body>

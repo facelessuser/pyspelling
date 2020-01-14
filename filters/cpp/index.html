@@ -36,7 +36,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.4.3">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.6.0">
     
     
       
@@ -44,7 +44,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.30686662.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.1b62728e.css">
       
         <link rel="stylesheet" href="../../assets/stylesheets/application-palette.a8b3c06d.css">
       
@@ -55,19 +55,19 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.268332fc.js"></script>
     
     
       
         <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono&display=fallback">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
         <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
       
     
     <link rel="stylesheet" href="../../assets/fonts/material-icons.css">
     
     
-      <link rel="stylesheet" href="../../extra-30d8e6755c.css">
+      <link rel="stylesheet" href="../../extra-174a536342.css">
     
     
       
@@ -778,8 +778,15 @@
                 
                 <h1 id="cpp">CPP<a class="headerlink" href="#cpp" title="Permanent link"></a></h1>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link"></a></h2>
-<p>The CPP plugin is designed to find and return C/C++ style comments. When first in the chain, the CPP filter uses no special encoding detection. It will assume <code>utf-8</code> if no encoding BOM is found, and the user has not overridden the fallback encoding. Text is returned in chunks based on the context of the text: block, inline, or string (if enabled).</p>
-<p>When the <code>strings</code> <a href="#options">option</a> is enabled, content will be extracted from strings (not character constants). Support is available for all the modern C++ strings shown below. CPP will also handle decoding string escapes as well, but as string character width and encoding can be dependent on implementation and configuration, some additional setup may be required via <a href="#options">option</a>. Strings will be returned with the specified encoding, even if it differs from the file's encoding (this is the associated encoding specified in the <code>SourceText</code> object, the content itself is still in Unicode).</p>
+<p>The CPP plugin is designed to find and return C/C++ style comments. When first in the chain, the CPP filter uses no
+special encoding detection. It will assume <code>utf-8</code> if no encoding BOM is found, and the user has not overridden the
+fallback encoding. Text is returned in chunks based on the context of the text: block, inline, or string (if enabled).</p>
+<p>When the <code>strings</code> <a href="#options">option</a> is enabled, content will be extracted from strings (not character constants).
+Support is available for all the modern C++ strings shown below. CPP will also handle decoding string escapes as well,
+but as string character width and encoding can be dependent on implementation and configuration, some additional setup
+may be required via <a href="#options">option</a>. Strings will be returned with the specified encoding, even if it differs from
+the file's encoding (this is the associated encoding specified in the <code>SourceText</code> object, the content itself is still
+in Unicode).</p>
 <div class="codehilite"><pre><span></span>    <span class="k">auto</span> <span class="n">s0</span> <span class="o">=</span>    <span class="s">&quot;Narrow character string&quot;</span><span class="p">;</span>                   <span class="c1">// char</span>
     <span class="k">auto</span> <span class="n">s1</span> <span class="o">=</span>   <span class="sa">L</span><span class="s">&quot;Wide character string&quot;</span><span class="p">;</span>                     <span class="c1">// wchar_t</span>
     <span class="k">auto</span> <span class="n">s2</span> <span class="o">=</span>  <span class="sa">u8</span><span class="s">&quot;UTF-8 strings&quot;</span><span class="p">;</span>                             <span class="c1">// char</span>
@@ -793,7 +800,9 @@
     <span class="k">auto</span> <span class="n">R6</span> <span class="o">=</span>  <span class="n">UR</span><span class="s">&quot;(&quot;</span><span class="n">Raw</span> <span class="n">UTF</span><span class="o">-</span><span class="mi">32</span> <span class="n">strings</span><span class="s">&quot;)&quot;</span><span class="p">;</span>                    <span class="c1">// const char32_t*, encoded as UTF-32</span>
 </pre></div>
 
-<p>As C++ style comments are fairly common convention in other languages, this filter can often be used for other languages as well using <code>generic_mode</code>. In Generic Mode, many C/C++ specific considerations and options will be disabled. See [Generic Mode] for more information.</p>
+<p>As C++ style comments are fairly common convention in other languages, this filter can often be used for other languages
+as well using <code>generic_mode</code>. In Generic Mode, many C/C++ specific considerations and options will be disabled. See
+<a href="#generic-mode">Generic Mode</a> for more information.</p>
 <div class="codehilite"><pre><span></span><span class="nt">matrix</span><span class="p">:</span>
 <span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">cpp</span>
   <span class="nt">pipeline</span><span class="p">:</span>
@@ -804,18 +813,30 @@
 </pre></div>
 
 <h2 id="filtering-string-types">Filtering String types<a class="headerlink" href="#filtering-string-types" title="Permanent link"></a></h2>
-<p>When <code>strings</code> is enabled, you can specify which strings you want to allow via the <code>string_types</code> option. Valid string types are <code>S</code> for standard, <code>L</code> for long/wide, <code>U</code> for Unicode (all variants), and <code>R</code> for raw.  Case is not important, and the default value is <code>sul</code>.  </p>
-<p>If specifying <code>R</code>, you must also specify either <code>U</code>, <code>L</code>, or <code>S</code> as raw strings are also either <code>S</code>, <code>L</code>, or <code>S</code> strings. Selecting <code>UR</code> will select both Unicode strings and Unicode raw strings. If you need to target just raw strings, you can use <code>R*</code> which will target all raw string types: raw Unicode, raw wide, and raw standard. You can use <code>*</code> for other types as well. You can also just specify <code>*</code> by itself to target all string types.</p>
+<p>When <code>strings</code> is enabled, you can specify which strings you want to allow via the <code>string_types</code> option. Valid string
+types are <code>S</code> for standard, <code>L</code> for long/wide, <code>U</code> for Unicode (all variants), and <code>R</code> for raw.  Case is not important,
+and the default value is <code>sul</code>.  </p>
+<p>If specifying <code>R</code>, you must also specify either <code>U</code>, <code>L</code>, or <code>S</code> as raw strings are also either <code>S</code>, <code>L</code>, or <code>S</code>
+strings. Selecting <code>UR</code> will select both Unicode strings and Unicode raw strings. If you need to target just raw
+strings, you can use <code>R*</code> which will target all raw string types: raw Unicode, raw wide, and raw standard. You can use
+<code>*</code> for other types as well. You can also just specify <code>*</code> by itself to target all string types.</p>
 <h2 id="generic-mode">Generic Mode<a class="headerlink" href="#generic-mode" title="Permanent link"></a></h2>
-<p>C/C++ style comments are not exclusive to C/C++. Many different file types have adopted similar style comments. The CPP filter has a generic mode which allows for a C/C++ style comment extraction without all the C/C++ specific considerations. Simply enable <code>generic_mode</code> via the <a href="#options">options</a>.</p>
-<p>Generic Mode disables the C/C++ specific nuance of allowing multiline comments via escaping newlines. This is a very C/C++ specific thing that is rarely carried over by others that have adopted C/C++ style comments:</p>
+<p>C/C++ style comments are not exclusive to C/C++. Many different file types have adopted similar style comments. The CPP
+filter has a generic mode which allows for a C/C++ style comment extraction without all the C/C++ specific
+considerations. Simply enable <code>generic_mode</code> via the <a href="#options">options</a>.</p>
+<p>Generic Mode disables the C/C++ specific nuance of allowing multiline comments via escaping newlines. This is a very
+C/C++ specific thing that is rarely carried over by others that have adopted C/C++ style comments:</p>
 <div class="codehilite"><pre><span></span><span class="c1">// Generic mode will \</span>
 <span class="c1">   not allow this.</span>
 </pre></div>
 
-<p>Generic Mode will not decode any character escapes in strings when enabled. C/C++ has very specific rules for handling string escapes, only a handful of which may translate to other languages. Generic Mode is mainly meant for comments and not strings, but will return content of single quoted and double quoted strings if <code>strings</code> is enabled. All related escape decoding options do not apply to Generic Mode.</p>
+<p>Generic Mode will not decode any character escapes in strings when enabled. C/C++ has very specific rules for handling
+string escapes, only a handful of which may translate to other languages. Generic Mode is mainly meant for comments and
+not strings, but will return content of single quoted and double quoted strings if <code>strings</code> is enabled. All related
+escape decoding options do not apply to Generic Mode.</p>
 <p>Trigraphs are very C/C++ specific, and will never be evaluated in Generic Mode.</p>
-<p>Lastly, when using this filter in Generic Mode, you can also adjust the category prefix from <code>cpp</code> to whatever you would like via the <code>prefix</code> <a href="#options">option</a>.</p>
+<p>Lastly, when using this filter in Generic Mode, you can also adjust the category prefix from <code>cpp</code> to whatever you would
+like via the <code>prefix</code> <a href="#options">option</a>.</p>
 <h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link"></a></h2>
 <table>
 <thead>
@@ -934,6 +955,7 @@
                 
                   
                 
+                
               
               
                 
@@ -989,7 +1011,8 @@
         
           <div class="md-footer-copyright__highlight">
             Copyright &copy; 2017 - 2019 <a href="https://github.com/facelessuser">Isaac Muse</a>
-<br><span class="md-footer-custom-text">emoji provided free by <a href="http://www.emojione.com">EmojiOne</a></span>
+<br><span class="md-footer-custom-text">emoji provided free by </span>
+<a href="https://github.com/twitter/twemoji">Twemoji</a>
 
           </div>
         
@@ -1013,11 +1036,11 @@
       
     </div>
     
-      <script src="../../assets/javascripts/application.ac79c3b0.js"></script>
+      <script src="../../assets/javascripts/application.808e90bb.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       
-        <script src="../../extra-0b9b22dd13.js"></script>
+        <script src="../../extra-0d9305e748.js"></script>
       
     
   </body>

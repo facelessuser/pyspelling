@@ -36,7 +36,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.4.3">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.6.0">
     
     
       
@@ -44,7 +44,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.30686662.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.1b62728e.css">
       
         <link rel="stylesheet" href="../../assets/stylesheets/application-palette.a8b3c06d.css">
       
@@ -55,19 +55,19 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.268332fc.js"></script>
     
     
       
         <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono&display=fallback">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
         <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
       
     
     <link rel="stylesheet" href="../../assets/fonts/material-icons.css">
     
     
-      <link rel="stylesheet" href="../../extra-30d8e6755c.css">
+      <link rel="stylesheet" href="../../extra-174a536342.css">
     
     
       
@@ -818,7 +818,8 @@
                 
                 <h1 id="development">Development<a class="headerlink" href="#development" title="Permanent link"></a></h1>
 <h2 id="project-layout">Project Layout<a class="headerlink" href="#project-layout" title="Permanent link"></a></h2>
-<p>There are a number of files for build, test, and continuous integration in the root of the project, but in general, the project is broken up like so.</p>
+<p>There are a number of files for build, test, and continuous integration in the root of the project, but in general, the
+project is broken up like so.</p>
 <div class="codehilite"><pre><span></span>├── docs
 │   └── src
 │       ├── dictionary
@@ -854,7 +855,10 @@
 </tbody>
 </table>
 <h2 id="coding-standards">Coding Standards<a class="headerlink" href="#coding-standards" title="Permanent link"></a></h2>
-<p>When writing code, the code should roughly conform to PEP8 and PEP257 suggestions.  The project utilizes the Flake8 linter (with some additional plugins) to ensure code conforms (give or take some of the rules).  When in doubt, follow the formatting hints of existing code when adding or modifying files. existing files.  Listed below are the modules used:</p>
+<p>When writing code, the code should roughly conform to PEP8 and PEP257 suggestions.  The project utilizes the Flake8
+linter (with some additional plugins) to ensure code conforms (give or take some of the rules).  When in doubt, follow
+the formatting hints of existing code when adding or modifying files. existing files.  Listed below are the modules
+used:</p>
 <ul>
 <li><a class="magiclink magiclink-gitlab magiclink-repository" href="https://gitlab.com/pycqa/flake8" title="GitLab Repository: pycqa/flake8">pycqa/flake8</a></li>
 <li><a class="magiclink magiclink-gitlab magiclink-repository" href="https://gitlab.com/pycqa/flake8-docstrings" title="GitLab Repository: pycqa/flake8-docstrings">pycqa/flake8-docstrings</a></li>
@@ -864,46 +868,65 @@
 </ul>
 <p>Usually this can be automated with Tox (assuming it is installed): <code>tox -elint</code>.</p>
 <h2 id="building-and-editing-documents">Building and Editing Documents<a class="headerlink" href="#building-and-editing-documents" title="Permanent link"></a></h2>
-<p>Documents are in Markdown (with with some additional syntax provided by extensions) and are converted to HTML via Python Markdown. If you would like to build and preview the documentation, you must have these packages installed:</p>
+<p>Documents are in Markdown (with with some additional syntax provided by extensions) and are converted to HTML via Python
+Markdown. If you would like to build and preview the documentation, you must have these packages installed:</p>
 <ul>
 <li><a class="magiclink magiclink-github magiclink-repository" href="https://github.com/Python-Markdown/markdown" title="GitHub Repository: Python-Markdown/markdown">Python-Markdown/markdown</a>: the Markdown parser.</li>
 <li><a class="magiclink magiclink-github magiclink-repository" href="https://github.com/mkdocs/mkdocs" title="GitHub Repository: mkdocs/mkdocs">mkdocs/mkdocs</a>: the document site generator.</li>
 <li><a class="magiclink magiclink-github magiclink-repository" href="https://github.com/squidfunk/mkdocs-material" title="GitHub Repository: squidfunk/mkdocs-material">squidfunk/mkdocs-material</a>: a material theme for MkDocs.</li>
 <li><a class="magiclink magiclink-github magiclink-repository" href="https://github.com/facelessuser/pymdown-extensions" title="GitHub Repository: facelessuser/pymdown-extensions">facelessuser/pymdown-extensions</a>: this Python Markdown extension bundle.</li>
 </ul>
-<p>In order to build and preview the documents, just run the command below from the root of the project and you should be able to view the documents at <code>localhost:8000</code> in your browser. After that, you should be able to update the documents and have your browser preview update live.</p>
+<p>In order to build and preview the documents, just run the command below from the root of the project and you should be
+able to view the documents at <code>localhost:8000</code> in your browser. After that, you should be able to update the documents
+and have your browser preview update live.</p>
 <div class="codehilite"><pre><span></span>mkdocs serve
 </pre></div>
 
 <h2 id="spell-checking-documents">Spell Checking Documents<a class="headerlink" href="#spell-checking-documents" title="Permanent link"></a></h2>
-<p>During validation we build the docs and spell check various files in the project. This project is used to spell check itself, but <a href="http://aspell.net/">Aspell</a> must be installed.  Currently this project uses one of the more recent versions of Aspell.  Since the latest Aspell is not available on Windows, and this has not been tested with older versions, it is not expected that everyone will install and run Aspell locally, but it will be run in CI tests for pull requests.</p>
-<p>In order to perform the spell check, it is expected you are setup to build the documents, and that you have Aspell installed in your system path (if needed you can use the <code>--binary</code> option to point to the location of your Aspell binary). It is also expected that you have the <code>en</code> dictionary installed as well. To initiate the spell check, run the following command from the root of the project.</p>
+<p>During validation we build the docs and spell check various files in the project. This project is used to spell check
+itself, but <a href="http://aspell.net/">Aspell</a> must be installed.  Currently this project uses one of the more recent versions of Aspell.
+Since the latest Aspell is not available on Windows, and this has not been tested with older versions, it is not
+expected that everyone will install and run Aspell locally, but it will be run in CI tests for pull requests.</p>
+<p>In order to perform the spell check, it is expected you are setup to build the documents, and that you have Aspell
+installed in your system path (if needed you can use the <code>--binary</code> option to point to the location of your Aspell
+binary). It is also expected that you have the <code>en</code> dictionary installed as well. To initiate the spell check, run the
+following command from the root of the project.</p>
 <p>You will need to make sure the documents are built first:</p>
 <div class="codehilite"><pre><span></span>mkdocs build --clean
 </pre></div>
 
-<p>And then run the spell checker. Using <code>python -m</code> from the project root will load your checked out version of PySpelling instead of your system installed version:</p>
+<p>And then run the spell checker. Using <code>python -m</code> from the project root will load your checked out version of PySpelling
+instead of your system installed version:</p>
 <div class="codehilite"><pre><span></span>python -m pyspelling
 </pre></div>
 
-<p>It should print out the files with the misspelled words if any are found.  If you find it prints words that are not misspelled, you can add them in <code>docs/src/dictionary/en-custom.text</code>.</p>
+<p>It should print out the files with the misspelled words if any are found.  If you find it prints words that are not
+misspelled, you can add them in <code>docs/src/dictionary/en-custom.text</code>.</p>
 <h2 id="validation-tests">Validation Tests<a class="headerlink" href="#validation-tests" title="Permanent link"></a></h2>
-<p>In order to preserve good code health, a test suite has been put together with pytest (<a class="magiclink magiclink-github magiclink-repository" href="https://github.com/pytest-dev/pytest" title="GitHub Repository: pytest-dev/pytest">pytest-dev/pytest</a>). There are currently two kinds of tests: syntax and targeted.  To run these tests, you can use the following command:</p>
+<p>In order to preserve good code health, a test suite has been put together with pytest (<a class="magiclink magiclink-github magiclink-repository" href="https://github.com/pytest-dev/pytest" title="GitHub Repository: pytest-dev/pytest">pytest-dev/pytest</a>). There are
+currently two kinds of tests: syntax and targeted.  To run these tests, you can use the following command:</p>
 <div class="codehilite"><pre><span></span>python run_tests.py
 </pre></div>
 
 <h3 id="running-validation-with-tox">Running Validation With Tox<a class="headerlink" href="#running-validation-with-tox" title="Permanent link"></a></h3>
-<p>Tox (<a class="magiclink magiclink-github magiclink-repository" href="https://github.com/tox-dev/tox" title="GitHub Repository: tox-dev/tox">tox-dev/tox</a>) is a great way to run the validation tests, spelling checks, and linting in virtual environments so as not to mess with your current working environment. Tox will use the specified Python version for the given environment and create a virtual environment and install all the needed requirements (minus Aspell).  You could also setup your own virtual environments with the Virtualenv module without Tox, and manually do the same.</p>
+<p>Tox (<a class="magiclink magiclink-github magiclink-repository" href="https://github.com/tox-dev/tox" title="GitHub Repository: tox-dev/tox">tox-dev/tox</a>) is a great way to run the validation tests, spelling checks, and linting in virtual environments so
+as not to mess with your current working environment. Tox will use the specified Python version for the given
+environment and create a virtual environment and install all the needed requirements (minus Aspell).  You could also
+setup your own virtual environments with the Virtualenv module without Tox, and manually do the same.</p>
 <p>First, you need to have Tox installed:</p>
 <div class="codehilite"><pre><span></span>pip install tox
 </pre></div>
 
-<p>By running Tox, it will walk through all the environments and create them (assuming you have all the python versions on your machine) and run the related tests.  See <code>tox.ini</code> to learn more.</p>
+<p>By running Tox, it will walk through all the environments and create them (assuming you have all the python versions on
+your machine) and run the related tests.  See <code>tox.ini</code> to learn more.</p>
 <div class="codehilite"><pre><span></span>tox
 </pre></div>
 
-<p>If you don't have all the Python versions needed to test all the environments, those entries will fail.  You can ignore those.  Spelling will also fail if you don't have the correct version of Aspell.</p>
-<p>As most people will not have all the Python versions on their machine, it makes more sense to target specific environments. To target a specific environment to test, you use the <code>-e</code> option to select the environment of interest.  To select lint:</p>
+<p>If you don't have all the Python versions needed to test all the environments, those entries will fail.  You can ignore
+those.  Spelling will also fail if you don't have the correct version of Aspell.</p>
+<p>As most people will not have all the Python versions on their machine, it makes more sense to target specific
+environments. To target a specific environment to test, you use the <code>-e</code> option to select the environment of interest.
+To select lint:</p>
 <div class="codehilite"><pre><span></span>tox -elint
 </pre></div>
 
@@ -916,14 +939,19 @@
 </pre></div>
 
 <h2 id="code-coverage">Code Coverage<a class="headerlink" href="#code-coverage" title="Permanent link"></a></h2>
-<p>When running the validation tests through Tox, it is setup to track code coverage via the Coverage (<a class="magiclink magiclink-bitbucket magiclink-repository" href="https://bitbucket.org/ned/coveragepy" title="Bitbucket Repository: ned/coveragepy">ned/coveragepy</a>) module.  Coverage is run on each <code>pyxx</code> environment.  If you've made changes to the code, you can clear the old coverage data:</p>
+<p>When running the validation tests through Tox, it is setup to track code coverage via the Coverage
+(<a class="magiclink magiclink-bitbucket magiclink-repository" href="https://bitbucket.org/ned/coveragepy" title="Bitbucket Repository: ned/coveragepy">ned/coveragepy</a>) module.  Coverage is run on each <code>pyxx</code> environment.  If you've made changes to the code,
+you can clear the old coverage data:</p>
 <div class="codehilite"><pre><span></span>coverage erase
 </pre></div>
 
-<p>Then run each unit test environment to and coverage will be calculated. All the data from each run is merged together.  HTML is output for each file in <code>.tox/pyXX/tmp</code>.  You can use these to see areas that are not covered/exercised yet with testing.</p>
+<p>Then run each unit test environment to and coverage will be calculated. All the data from each run is merged together.
+HTML is output for each file in <code>.tox/pyXX/tmp</code>.  You can use these to see areas that are not covered/exercised yet with
+testing.</p>
 <p>You can checkout <code>tox.ini</code> to see how this is accomplished.</p>
                 
                   
+                
                 
               
               
@@ -980,7 +1008,8 @@
         
           <div class="md-footer-copyright__highlight">
             Copyright &copy; 2017 - 2019 <a href="https://github.com/facelessuser">Isaac Muse</a>
-<br><span class="md-footer-custom-text">emoji provided free by <a href="http://www.emojione.com">EmojiOne</a></span>
+<br><span class="md-footer-custom-text">emoji provided free by </span>
+<a href="https://github.com/twitter/twemoji">Twemoji</a>
 
           </div>
         
@@ -1004,11 +1033,11 @@
       
     </div>
     
-      <script src="../../assets/javascripts/application.ac79c3b0.js"></script>
+      <script src="../../assets/javascripts/application.808e90bb.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       
-        <script src="../../extra-0b9b22dd13.js"></script>
+        <script src="../../extra-0d9305e748.js"></script>
       
     
   </body>

@@ -36,7 +36,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.4.3">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.6.0">
     
     
       
@@ -44,7 +44,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.30686662.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.1b62728e.css">
       
         <link rel="stylesheet" href="../../assets/stylesheets/application-palette.a8b3c06d.css">
       
@@ -55,19 +55,19 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.268332fc.js"></script>
     
     
       
         <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono&display=fallback">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
         <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
       
     
     <link rel="stylesheet" href="../../assets/fonts/material-icons.css">
     
     
-      <link rel="stylesheet" href="../../extra-30d8e6755c.css">
+      <link rel="stylesheet" href="../../extra-174a536342.css">
     
     
       
@@ -736,16 +736,25 @@
                 
                 <h1 id="wildcard">Wildcard<a class="headerlink" href="#wildcard" title="Permanent link"></a></h1>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link"></a></h2>
-<p>The Wildcard plugin is a flow control plugin. It uses <a href="https://facelessuser.github.io/wcmatch/fnmatch">Wildcard Match's <code>fnmatch</code> library</a> to perform wildcard matches on categories passed to it from the pipeline in order to determine if the text should be passed to the next filter.</p>
+<p>The Wildcard plugin is a flow control plugin. It uses <a href="https://facelessuser.github.io/wcmatch/fnmatch">Wildcard Match's <code>fnmatch</code> library</a> to perform wildcard
+matches on categories passed to it from the pipeline in order to determine if the text should be passed to the next
+filter.</p>
 <p>You can define patterns for the following cases:</p>
 <ul>
 <li><code>allow</code>: the chunk of text is allowed to be evaluated by the next filter.</li>
 <li><code>skip</code>: the chunk of text should skip the next filter.</li>
 <li><code>halt</code>: halts the progress of the text chunk(s) down the pipeline and sends it directly to the spell checker.</li>
 </ul>
-<p>Under each option, you can define a list of different patterns. The plugin will loop through the patterns until it has determined what should be done with the text.</p>
-<p>The <code>fnmatch</code> library is configured with the <code>NEGATE</code>, <code>BRACE</code> and <code>IGNORECASE</code> flags. It also allows you to specify multiple patterns on one line separated with <code>|</code>.  See <a href="https://facelessuser.github.io/wcmatch/fnmatch">Wildcard Match's documentation</a> to learn more about its behavior in regards to features and flags.</p>
-<p>In this example, we wish to specifically target inline Python text and ignore <code>noqa</code>, <code>pragma</code>, and <code>shebang</code> lines.  So after the Python step, which returns both docstrings and inline comments, we specify that we only want to allow <code>py-comment</code> categories in the next filter. The context filter removes the lines that start with the aforementioned things, and passes the text down the pipe.  The last filter step receives both the <code>context</code> text objects <strong>and</strong> the <code>py-docstrings</code> from earlier.</p>
+<p>Under each option, you can define a list of different patterns. The plugin will loop through the patterns until it has
+determined what should be done with the text.</p>
+<p>The <code>fnmatch</code> library is configured with the <code>NEGATE</code>, <code>BRACE</code> and <code>IGNORECASE</code> flags. It also allows you to specify
+multiple patterns on one line separated with <code>|</code>.  See <a href="https://facelessuser.github.io/wcmatch/fnmatch">Wildcard Match's documentation</a> to learn more about its
+behavior in regards to features and flags.</p>
+<p>In this example, we wish to specifically target inline Python text and ignore <code>noqa</code>, <code>pragma</code>, and <code>shebang</code> lines.  So
+after the Python step, which returns both docstrings and inline comments, we specify that we only want to allow
+<code>py-comment</code> categories in the next filter. The context filter removes the lines that start with the aforementioned
+things, and passes the text down the pipe.  The last filter step receives both the <code>context</code> text objects <strong>and</strong> the
+<code>py-docstrings</code> from earlier.</p>
 <div class="codehilite"><pre><span></span><span class="nt">matrix</span><span class="p">:</span>
 <span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">python</span>
   <span class="nt">sources</span><span class="p">:</span>
@@ -820,6 +829,7 @@
                 
                   
                 
+                
               
               
                 
@@ -875,7 +885,8 @@
         
           <div class="md-footer-copyright__highlight">
             Copyright &copy; 2017 - 2019 <a href="https://github.com/facelessuser">Isaac Muse</a>
-<br><span class="md-footer-custom-text">emoji provided free by <a href="http://www.emojione.com">EmojiOne</a></span>
+<br><span class="md-footer-custom-text">emoji provided free by </span>
+<a href="https://github.com/twitter/twemoji">Twemoji</a>
 
           </div>
         
@@ -899,11 +910,11 @@
       
     </div>
     
-      <script src="../../assets/javascripts/application.ac79c3b0.js"></script>
+      <script src="../../assets/javascripts/application.808e90bb.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       
-        <script src="../../extra-0b9b22dd13.js"></script>
+        <script src="../../extra-0d9305e748.js"></script>
       
     
   </body>

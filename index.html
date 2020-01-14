@@ -36,7 +36,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.4.3">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.6.0">
     
     
       
@@ -44,7 +44,7 @@
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/application.30686662.css">
+      <link rel="stylesheet" href="assets/stylesheets/application.1b62728e.css">
       
         <link rel="stylesheet" href="assets/stylesheets/application-palette.a8b3c06d.css">
       
@@ -55,19 +55,19 @@
       
     
     
-      <script src="assets/javascripts/modernizr.74668098.js"></script>
+      <script src="assets/javascripts/modernizr.268332fc.js"></script>
     
     
       
         <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono&display=fallback">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
         <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
       
     
     <link rel="stylesheet" href="assets/fonts/material-icons.css">
     
     
-      <link rel="stylesheet" href="extra-30d8e6755c.css">
+      <link rel="stylesheet" href="extra-174a536342.css">
     
     
       
@@ -391,6 +391,13 @@
         <li class="md-nav__item">
   <a href="#usage-in-windows" class="md-nav__link">
     Usage in Windows
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage-in-ci" class="md-nav__link">
+    Usage in CI
   </a>
   
 </li>
@@ -799,6 +806,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#usage-in-ci" class="md-nav__link">
+    Usage in CI
+  </a>
+  
+</li>
+      
       
       
       
@@ -820,8 +834,18 @@
                 
                 <h1 id="basic-usage">Basic Usage<a class="headerlink" href="#basic-usage" title="Permanent link"></a></h1>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link"></a></h2>
-<p>PySpelling is a module to help with automating spell checking in a project with <a href="http://aspell.net/">Aspell</a> or <a href="http://hunspell.github.io/">Hunspell</a>. It is essentially a wrapper around the command line utility of these two spell checking tools, and allows you to setup different spelling tasks for different file types. You can apply specific and different filters and options to each task. PySpelling can also be used in CI environments to fail the build if there are misspelled words.</p>
-<p>Aspell and Hunspell are very good spell checking tools. Aspell particularly comes with a couple of filters, but the filters are limited in types and aren't extremely flexible. PySpelling was created to work around Aspell's and Hunspell's filtering shortcomings by creating a wrapper around them that could be extended to handle more kinds of file formats and provide more advanced filtering. If you need to filter out specific HTML tags with specific IDs or class names, PySpelling can do it. If you want to scan Python files for docstrings, but also avoid specific content within the docstring, you can do that as well. If PySpelling doesn't have a filter you need, with access to so many available Python modules, you can easily write your own.</p>
+<p>PySpelling is a module to help with automating spell checking in a project with <a href="http://aspell.net/">Aspell</a> or
+<a href="https://hunspell.github.io/">Hunspell</a>. It is essentially a wrapper around the command line utility of these two spell checking tools,
+and allows you to setup different spelling tasks for different file types. You can apply specific and different filters
+and options to each task. PySpelling can also be used in CI environments to fail the build if there are misspelled
+words.</p>
+<p>Aspell and Hunspell are very good spell checking tools. Aspell particularly comes with a couple of filters, but the
+filters are limited in types and aren't extremely flexible. PySpelling was created to work around Aspell's and
+Hunspell's filtering shortcomings by creating a wrapper around them that could be extended to handle more kinds of file
+formats and provide more advanced filtering. If you need to filter out specific HTML tags with specific IDs or class
+names, PySpelling can do it. If you want to scan Python files for docstrings, but also avoid specific content within the
+docstring, you can do that as well. If PySpelling doesn't have a filter you need, with access to so many available
+Python modules, you can easily write your own.</p>
 <div class="codehilite"><pre><span></span><span class="gp">Computer:pyspelling facelessuser$</span> pyspelling
 <span class="go">Misspelled words:</span>
 <span class="go">&lt;html-content&gt; site/index.html: P</span>
@@ -841,7 +865,10 @@
 </pre></div>
 
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link"></a></h2>
-<p>PySpelling is a wrapper around either Aspell or Hunspell. If you do not have a working Aspell or Hunspell on your system, PySpelling will <strong>not</strong> work. It is up to the user to either build locally or acquire via a package manager a working spell checker installation. PySpelling pre-processes files with Python filters, and then sends the resulting text to the preferred spell checker via command line.</p>
+<p>PySpelling is a wrapper around either Aspell or Hunspell. If you do not have a working Aspell or Hunspell on your
+system, PySpelling will <strong>not</strong> work. It is up to the user to either build locally or acquire via a package manager a
+working spell checker installation. PySpelling pre-processes files with Python filters, and then sends the resulting
+text to the preferred spell checker via command line.</p>
 <h2 id="installing">Installing<a class="headerlink" href="#installing" title="Permanent link"></a></h2>
 <p>Installation is easy with pip:</p>
 <div class="codehilite"><pre><span></span>pip install pyspelling
@@ -867,11 +894,13 @@ optional arguments:
                         Choose between aspell and hunspell
 </pre></div>
 
-<p>PySpelling can be run with the command below (assuming your Python bin/script folder is in your path).  By default it will look for the spelling configuration file <code>.pyspelling.yml</code>.</p>
+<p>PySpelling can be run with the command below (assuming your Python bin/script folder is in your path).  By default it
+will look for the spelling configuration file <code>.pyspelling.yml</code>.</p>
 <div class="codehilite"><pre><span></span>pyspelling
 </pre></div>
 
-<p>If you have multiple Python versions, you can run the PySpelling associated with that Python version by appending the Python major and minor version:</p>
+<p>If you have multiple Python versions, you can run the PySpelling associated with that Python version by appending the
+Python major and minor version:</p>
 <div class="codehilite"><pre><span></span>pyspelling3.7
 </pre></div>
 
@@ -879,19 +908,23 @@ optional arguments:
 <div class="codehilite"><pre><span></span>pyspelling -c myconfig.yml
 </pre></div>
 
-<p>To run a specific spelling task in your configuration file by name, you can use the <code>name</code> option. You can even specify multiple names if desired. You cannot use <code>name</code> and <code>group</code> together:</p>
+<p>To run a specific spelling task in your configuration file by name, you can use the <code>name</code> option. You can even specify
+multiple names if desired. You cannot use <code>name</code> and <code>group</code> together:</p>
 <div class="codehilite"><pre><span></span>pyspelling -n my_task -n my_task2
 </pre></div>
 
-<p>If you've specified groups for your tasks, you can run all tasks in a group with the <code>group</code> option. You can specify multiple groups if desired. You cannot use <code>name</code> and <code>group</code> together.</p>
+<p>If you've specified groups for your tasks, you can run all tasks in a group with the <code>group</code> option. You can specify
+multiple groups if desired. You cannot use <code>name</code> and <code>group</code> together.</p>
 <div class="codehilite"><pre><span></span>pyspelling -g my_group -g my_group2
 </pre></div>
 
-<p>If you've specified exactly one name via the <code>name</code> option, you can override that named task's source patterns with the <code>source</code> option. You can specify multiple <code>source</code> patterns if desired.</p>
+<p>If you've specified exactly one name via the <code>name</code> option, you can override that named task's source patterns with the
+<code>source</code> option. You can specify multiple <code>source</code> patterns if desired.</p>
 <div class="codehilite"><pre><span></span>pyspelling -n my_task -S &quot;this/specific/file.txt&quot; -S &quot;these/specific/files_{a,b}.txt&quot;
 </pre></div>
 
-<p>To run a more verbose output, use the <code>-v</code> flag. You can increase verbosity level by including more <code>v</code>s: <code>-vv</code>.  You can currently go up to four levels.</p>
+<p>To run a more verbose output, use the <code>-v</code> flag. You can increase verbosity level by including more <code>v</code>s: <code>-vv</code>.  You
+can currently go up to four levels.</p>
 <div class="codehilite"><pre><span></span>pyspelling -v
 </pre></div>
 
@@ -899,13 +932,18 @@ optional arguments:
 <div class="codehilite"><pre><span></span>pyspelling -b &quot;path/to/aspell&quot;
 </pre></div>
 
-<p>You can specify the spell checker type by specifying it on the command line. PySpelling supports <code>hunspell</code> and <code>aspell</code>, but defaults to <code>aspell</code>. This will override the preferred <code>spellchecker</code> setting in the configuration file.</p>
+<p>You can specify the spell checker type by specifying it on the command line. PySpelling supports <code>hunspell</code> and
+<code>aspell</code>, but defaults to <code>aspell</code>. This will override the preferred <code>spellchecker</code> setting in the configuration file.</p>
 <div class="codehilite"><pre><span></span>pyspelling -s hunspell
 </pre></div>
 
 <h2 id="supported-spell-check-versions">Supported Spell Check Versions<a class="headerlink" href="#supported-spell-check-versions" title="Permanent link"></a></h2>
-<p>PySpelling is tested with Hunspell 1.6+, and recommends using only 1.6 and above. Some lower versions might work, but none have been tested, and related issues will probably not be addressed.</p>
-<p>I usually patch the English Hunspell dictionary that I use to add apostrophes, if not present. Apostrophe support is a must for me. I also prefer to not include numbers as word characters (like Aspell) does as I find them problematic, but this is just my personal preference. Below is a patch I use on an OpenOffice dictionary set (<a href="https://anongit.freedesktop.org/git/libreoffice/dictionaries.git/"><code>git://anongit.freedesktop.org/libreoffice/dictionaries</code></a>).</p>
+<p>PySpelling is tested with Hunspell 1.6+, and recommends using only 1.6 and above. Some lower versions might work, but
+none have been tested, and related issues will probably not be addressed.</p>
+<p>I usually patch the English Hunspell dictionary that I use to add apostrophes, if not present. Apostrophe support is a
+must for me. I also prefer to not include numbers as word characters (like Aspell) does as I find them problematic, but
+this is just my personal preference. Below is a patch I use on an OpenOffice dictionary set
+(<a href="https://anongit.freedesktop.org/git/libreoffice/dictionaries.git/"><code>git://anongit.freedesktop.org/libreoffice/dictionaries</code></a>).</p>
 <div class="codehilite"><pre><span></span><span class="gh">diff --git a/en/en_US.aff b/en/en_US.aff</span>
 <span class="gh">index d0cccb3..4258f85 100644</span>
 <span class="gd">--- a/en/en_US.aff</span>
@@ -921,14 +959,19 @@ optional arguments:
  PFX A   0     re   
 </pre></div>
 
-<p>PySpelling is also tested on Aspell 0.60+ (which is recommended), but should also work on the 0.50 series. 0.60+ is recommended as spell checking is better in the 0.60 series.</p>
-<p>PySpelling disables all native Aspell filters by default. If you need to enable Aspell's native filters, you can do so via Aspell's builtin options. For more information, see <a href="configuration/#spell-checker-options">Aspell configuration options</a>.</p>
+<p>PySpelling is also tested on Aspell 0.60+ (which is recommended), but should also work on the 0.50 series. 0.60+ is
+recommended as spell checking is better in the 0.60 series.</p>
+<p>PySpelling disables all native Aspell filters by default. If you need to enable Aspell's native filters, you can do so
+via Aspell's builtin options. For more information, see
+<a href="configuration/#spell-checker-options">Aspell configuration options</a>.</p>
 <div class="admonition new">
 <p class="admonition-title">New in 2.4.0</p>
 <p>Starting in 2.4.0, PySpelling ensures filters that are native to the spell checker are disabled by default.</p>
 </div>
 <h2 id="usage-in-linux">Usage in Linux<a class="headerlink" href="#usage-in-linux" title="Permanent link"></a></h2>
-<p>Aspell and Hunspell is most likely available in your distro's package manager. You need to install both the spell checker and the dictionaries, or provide your own custom dictionaries. The option to build manually is always available as well. See your preferred spell checker's manual for more information on building manually.</p>
+<p>Aspell and Hunspell is most likely available in your distro's package manager. You need to install both the spell
+checker and the dictionaries, or provide your own custom dictionaries. The option to build manually is always available
+as well. See your preferred spell checker's manual for more information on building manually.</p>
 <p>Ubuntu Aspell install example:</p>
 <div class="codehilite"><pre><span></span>sudo apt-get install aspell aspell-en
 </pre></div>
@@ -938,7 +981,9 @@ optional arguments:
 </pre></div>
 
 <h2 id="usage-in-macos">Usage in macOS<a class="headerlink" href="#usage-in-macos" title="Permanent link"></a></h2>
-<p>Aspell and Hunspell can be included via package managers such as Homebrew. You need to install both the spell checker and the dictionaries, or provide your own custom dictionaries. The option to build manually is always available as well. See your preferred spell checker's manual for more information on building manually.</p>
+<p>Aspell and Hunspell can be included via package managers such as Homebrew. You need to install both the spell checker
+and the dictionaries, or provide your own custom dictionaries. The option to build manually is always available as well.
+See your preferred spell checker's manual for more information on building manually.</p>
 <p>Homebrew Aspell install examples:</p>
 <div class="codehilite"><pre><span></span>brew install aspell
 </pre></div>
@@ -949,19 +994,82 @@ optional arguments:
 
 <p>Don't forget to download dictionaries and put them to <code>/Library/Spelling/</code>.</p>
 <h2 id="usage-in-windows">Usage in Windows<a class="headerlink" href="#usage-in-windows" title="Permanent link"></a></h2>
-<p>Installing Aspell and/or Hunspell in Windows is traditionally done through either a Cygwin or MSYS2/MinGW environment. If using MYSYS2/MinGW, you can usually install both packages via Pacman. You need to install both the spell checker and the dictionaries, or provide your own custom dictionaries. The option to build manually is always available as well. See your preferred spell checker's manual for more information on building manually.</p>
+<p>Installing Aspell and/or Hunspell in Windows is traditionally done through either a Cygwin or MSYS2/MinGW environment.
+If using MYSYS2/MinGW, you can usually install both packages via Pacman. You need to install both the spell checker and
+the dictionaries, or provide your own custom dictionaries. The option to build manually is always available as well. See
+your preferred spell checker's manual for more information on building manually.</p>
 <p>Pacman Aspell install example:</p>
 <div class="codehilite"><pre><span></span>pacman -S mingw-w64-x86_64-aspell mingw-w64-x86_64-aspell-en
 </pre></div>
 
-<p>For Aspell, it has been noted that the way the default configuration is configured, builtin Aspell filters are often inaccessible as the configuration seems to configure paths with mixed, incompatible slash style (backslash and forward slash). By creating your own override configuration, and using forward slashes only can fix the issue. You must manually specify a proper <code>data-dir</code> and <code>dict-dir</code> override path.  This is done in our <code>appveyor.yml</code> file for our own personal tests, so you can check it out to see what is done. After fixing the configuration file, you should have everything working.</p>
+<p>For Aspell, it has been noted that the way the default configuration is configured, builtin Aspell filters are often
+inaccessible as the configuration seems to configure paths with mixed, incompatible slash style (backslash and forward
+slash). By creating your own override configuration, and using forward slashes only can fix the issue. You must manually
+specify a proper <code>data-dir</code> and <code>dict-dir</code> override path.  This is done in our <code>appveyor.yml</code> file for our own personal
+tests, so you can check it out to see what is done. After fixing the configuration file, you should have everything
+working.</p>
 <p>Pacman Hunspell install example:</p>
 <div class="codehilite"><pre><span></span>pacman -S mingw-w64-x86_64-hunspell mingw-w64-x86_64-hunspell-en
 </pre></div>
 
-<p>If you are dealing with Unicode text, Windows often has difficulty showing it in the console. Using <a href="https://github.com/Drekin/win-unicode-console">Windows Unicode Console</a> to patch your Windows install can help. On Python 3.6+ it might not be needed at all. Certain specialty consoles on Windows may report confusing information related to what encoding is used in the console. It is left to the user to resolve console Unicode issues, though proposals for better ways to handle this would be considered.</p>
+<p>If you are dealing with Unicode text, Windows often has difficulty showing it in the console. Using
+<a href="https://github.com/Drekin/win-unicode-console">Windows Unicode Console</a> to patch your Windows install can help. On Python 3.6+ it might not be
+needed at all. Certain specialty consoles on Windows may report confusing information related to what encoding is used
+in the console. It is left to the user to resolve console Unicode issues, though proposals for better ways to handle
+this would be considered.</p>
+<p>Alternatively, you can just setup PySpelling in a <a href="https://docs.microsoft.com/en-us/windows/wsl/install-win10">Windows Subsystem for Linux</a> environment and just use the
+<a href="#usage-in-linux">Linux instructions</a>.</p>
+<h2 id="usage-in-ci">Usage in CI<a class="headerlink" href="#usage-in-ci" title="Permanent link"></a></h2>
+<p>PySpelling was originally written so that it could be used to automate tests in a CI environment. Any automated CI
+can use PySpelling assuming the environment is setup appropriately. On most systems it can be pretty straight forward,
+on systems like Windows, it may be a bit more complicated as you will have to also setup a Cygwin, MSYS2/MinGW, Windows
+Subsystem for Linux environment.</p>
+<p>We won't go into all possible CI environments in this documentation, but we will cover how to get PySpelling up and
+running on GitHub's CI environment. In the past, PySpelling has successfully been used in Travis CI, AppVeyor, and many
+others.</p>
+<p>In order to get running in GitHub's CI, you can follow the steps below:</p>
+<ol>
+<li>Create a <code>spelling</code> task under <code>jobs</code>.</li>
+<li>Specify a Linux environment as it is one of the easiest to configure and get running.</li>
+<li>Use the <code>actions/checkout</code> action to checkout your project.</li>
+<li>Setup your Python environment using the <code>actions/setup-python</code> action.</li>
+<li>Install dependencies you may need. Below, we update <code>pip</code> and <code>setuptools</code> and install <code>pyspelling</code>. You may require
+  additional dependencies depending on spelling extensions used, or if pre-building of documents is needed.</li>
+<li>Install Aspell and Aspell dictionaries. You are also free to use Hunspell if preferred.</li>
+<li>Below we've allowed for a <code>Build documents</code> step where you can build documentations are do any other file
+  preprocessing that is required for your specific environment.</li>
+<li>Lastly, run PySpelling.</li>
+</ol>
+<div class="codehilite"><pre><span></span>jobs:
+  spelling:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip setuptools
+        python -m pip install pyspelling
+        # Install any additional libraries required: additional plugins, documentation building libraries, etc.
+    - name: Install Aspell
+      run: |
+        sudo apt-get install aspell aspell-en
+    - name: Build documents
+      run: |
+        # Perform any documentation building that might be required
+    - name: Spell check
+       run: |
+         python -m pyspelling
+</pre></div>
+
+<p>In <em>this</em> project, we actually use <code>tox</code> to make running our tests locally and in CI easier. If you would like to use
+<code>tox</code> as well, you can check out how this project does it by taking a look at the source.</p>
                 
                   
+                
                 
               
               
@@ -1004,7 +1112,8 @@ optional arguments:
         
           <div class="md-footer-copyright__highlight">
             Copyright &copy; 2017 - 2019 <a href="https://github.com/facelessuser">Isaac Muse</a>
-<br><span class="md-footer-custom-text">emoji provided free by <a href="http://www.emojione.com">EmojiOne</a></span>
+<br><span class="md-footer-custom-text">emoji provided free by </span>
+<a href="https://github.com/twitter/twemoji">Twemoji</a>
 
           </div>
         
@@ -1028,11 +1137,11 @@ optional arguments:
       
     </div>
     
-      <script src="assets/javascripts/application.ac79c3b0.js"></script>
+      <script src="assets/javascripts/application.808e90bb.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"."}})</script>
       
-        <script src="extra-0b9b22dd13.js"></script>
+        <script src="extra-0d9305e748.js"></script>
       
     
   </body>

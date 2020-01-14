@@ -36,7 +36,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.4.3">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.6.0">
     
     
       
@@ -44,7 +44,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.30686662.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.1b62728e.css">
       
         <link rel="stylesheet" href="../../assets/stylesheets/application-palette.a8b3c06d.css">
       
@@ -55,19 +55,19 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.268332fc.js"></script>
     
     
       
         <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono&display=fallback">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
         <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
       
     
     <link rel="stylesheet" href="../../assets/fonts/material-icons.css">
     
     
-      <link rel="stylesheet" href="../../extra-30d8e6755c.css">
+      <link rel="stylesheet" href="../../extra-174a536342.css">
     
     
       
@@ -764,10 +764,16 @@
                 
                 <h1 id="html">HTML<a class="headerlink" href="#html" title="Permanent link"></a></h1>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link"></a></h2>
-<p>The HTML filter is designed to capture HTML content, comments, and even attributes. It allows for filtering out specific tags, and you can even filter them out with basic selectors.</p>
-<p>When first in the chain, the HTML filter will look for the encoding of the HTML in its header and convert the buffer to Unicode. It will assume <code>utf-8</code> if no encoding header is found, and the user has not overridden the fallback encoding.</p>
-<p>The HTML filter uses BeautifulSoup4 to convert the Unicode content to HTML. Content is returned in individual chunks by block tags. While this causes more overhead, as each block is processed individually through the command line tool, it provides context for where the spelling errors are. If enabled, the HTML filter will also return chunks for comments and even attributes. Each type of text chunk is returned with their own category type.</p>
-<p>Tags can be captured or ignored with the <code>captures</code> and <code>ignores</code> options. These options work by employing CSS selectors to target the tags. The CSS selectors are based on a limited subset of CSS4 selectors.</p>
+<p>The HTML filter is designed to capture HTML content, comments, and even attributes. It allows for filtering out specific
+tags, and you can even filter them out with basic selectors.</p>
+<p>When first in the chain, the HTML filter will look for the encoding of the HTML in its header and convert the buffer to
+Unicode. It will assume <code>utf-8</code> if no encoding header is found, and the user has not overridden the fallback encoding.</p>
+<p>The HTML filter uses BeautifulSoup4 to convert the Unicode content to HTML. Content is returned in individual chunks by
+block tags. While this causes more overhead, as each block is processed individually through the command line tool, it
+provides context for where the spelling errors are. If enabled, the HTML filter will also return chunks for comments and
+even attributes. Each type of text chunk is returned with their own category type.</p>
+<p>Tags can be captured or ignored with the <code>captures</code> and <code>ignores</code> options. These options work by employing CSS selectors
+to target the tags. The CSS selectors are based on a limited subset of CSS4 selectors.</p>
 <div class="codehilite"><pre><span></span><span class="nt">matrix</span><span class="p">:</span>
 <span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">html</span>
   <span class="nt">pipeline</span><span class="p">:</span>
@@ -786,7 +792,8 @@
 </pre></div>
 
 <h2 id="supported-css-selectors">Supported CSS Selectors<a class="headerlink" href="#supported-css-selectors" title="Permanent link"></a></h2>
-<p>The CSS selectors are based on a limited subset of CSS4 selectors. Support is provided via Soup Sieve. Please reference <a href="https://facelessuser.github.io/soupsieve/">Soup Sieve's documentation</a> for more info.</p>
+<p>The CSS selectors are based on a limited subset of CSS4 selectors. Support is provided via Soup Sieve. Please reference
+<a href="https://facelessuser.github.io/soupsieve/">Soup Sieve's documentation</a> for more info.</p>
 <h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link"></a></h2>
 <table>
 <thead>
@@ -883,6 +890,7 @@
                 
                   
                 
+                
               
               
                 
@@ -938,7 +946,8 @@
         
           <div class="md-footer-copyright__highlight">
             Copyright &copy; 2017 - 2019 <a href="https://github.com/facelessuser">Isaac Muse</a>
-<br><span class="md-footer-custom-text">emoji provided free by <a href="http://www.emojione.com">EmojiOne</a></span>
+<br><span class="md-footer-custom-text">emoji provided free by </span>
+<a href="https://github.com/twitter/twemoji">Twemoji</a>
 
           </div>
         
@@ -962,11 +971,11 @@
       
     </div>
     
-      <script src="../../assets/javascripts/application.ac79c3b0.js"></script>
+      <script src="../../assets/javascripts/application.808e90bb.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       
-        <script src="../../extra-0b9b22dd13.js"></script>
+        <script src="../../extra-0d9305e748.js"></script>
       
     
   </body>

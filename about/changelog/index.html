@@ -36,7 +36,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.4.3">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.6.0">
     
     
       
@@ -44,7 +44,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.30686662.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.1b62728e.css">
       
         <link rel="stylesheet" href="../../assets/stylesheets/application-palette.a8b3c06d.css">
       
@@ -55,19 +55,19 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.268332fc.js"></script>
     
     
       
         <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono&display=fallback">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
         <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
       
     
     <link rel="stylesheet" href="../../assets/fonts/material-icons.css">
     
     
-      <link rel="stylesheet" href="../../extra-30d8e6755c.css">
+      <link rel="stylesheet" href="../../extra-174a536342.css">
     
     
       
@@ -1082,9 +1082,11 @@
 </ul>
 <h2 id="240">2.4.0<a class="headerlink" href="#240" title="Permanent link"></a></h2>
 <ul>
-<li><strong>NEW</strong>: Disable Aspell filters by default. Users must explicitly set the <code>mode</code> parameter under the <code>aspell</code> option to enable default Aspell filters.</li>
+<li><strong>NEW</strong>: Disable Aspell filters by default. Users must explicitly set the <code>mode</code> parameter under the <code>aspell</code> option
+  to enable default Aspell filters.</li>
 <li><strong>New</strong>: Throw an exception with a message if no configuration is found or there is some other issue.</li>
-<li><strong>New</strong>: Throw an exception with a message when no tasks are found in the matrix or when no tasks match a given name or group.</li>
+<li><strong>New</strong>: Throw an exception with a message when no tasks are found in the matrix or when no tasks match a given name
+  or group.</li>
 <li><strong>New</strong>: Throw an exception with a message when a task is run but no files are found.</li>
 </ul>
 <h2 id="231">2.3.1<a class="headerlink" href="#231" title="Permanent link"></a></h2>
@@ -1103,7 +1105,8 @@
 <h2 id="225">2.2.5<a class="headerlink" href="#225" title="Permanent link"></a></h2>
 <ul>
 <li><strong>FIX</strong>: Rework comment extraction in XML plugin.</li>
-<li><strong>FIX</strong>: Newer versions of Soup Sieve will not compile an empty string, so adjust XML and HTML plugin logic to account for this behavior.</li>
+<li><strong>FIX</strong>: Newer versions of Soup Sieve will not compile an empty string, so adjust XML and HTML plugin logic to account
+  for this behavior.</li>
 </ul>
 <h2 id="224">2.2.4<a class="headerlink" href="#224" title="Permanent link"></a></h2>
 <ul>
@@ -1117,7 +1120,9 @@
 <h2 id="222">2.2.2<a class="headerlink" href="#222" title="Permanent link"></a></h2>
 <ul>
 <li>
-<p><strong>FIX</strong>: Fix <code>:empty</code> and <code>:root</code> and <code>:nth-*</code> selectors not working properly without a tag name specified before. This is now done via our external lib called <code>soupsieve</code> which is the same homegrown CSS library that we were using internally.</p>
+<p><strong>FIX</strong>: Fix <code>:empty</code> and <code>:root</code> and <code>:nth-*</code> selectors not working properly without a tag name specified before.
+  This is now done via our external lib called <code>soupsieve</code> which is the same homegrown CSS library that we were using
+  internally.</p>
 </li>
 <li>
 <p><strong>FIX</strong>: Potential infinite loop when using <code>:nth-child()</code>.</p>
@@ -1129,7 +1134,9 @@
 </ul>
 <h2 id="220">2.2.0<a class="headerlink" href="#220" title="Permanent link"></a></h2>
 <ul>
-<li><strong>NEW</strong>: Add support for CSS4 selectors: <code>:empty</code>, <code>:first-child</code>, <code>:last-child</code>, <code>:only-child</code>, <code>:first-of-type</code>, <code>:last-of-type</code>, <code>:only-of-type</code>, <code>:nth-child(an+b [of S]?)</code>, <code>:nth-last-child(an+b [of S]?)</code>, <code>:nth-of-type(an+b)</code>, and <code>:nth-last-of-type(an+b)</code>. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/facelessuser/pymdown-extensions/issues/58" title="GitHub Issue: facelessuser/pymdown-extensions#58">#58</a>)</li>
+<li><strong>NEW</strong>: Add support for CSS4 selectors: <code>:empty</code>, <code>:first-child</code>, <code>:last-child</code>, <code>:only-child</code>, <code>:first-of-type</code>,
+  <code>:last-of-type</code>, <code>:only-of-type</code>, <code>:nth-child(an+b [of S]?)</code>, <code>:nth-last-child(an+b [of S]?)</code>, <code>:nth-of-type(an+b)</code>,
+  and <code>:nth-last-of-type(an+b)</code>. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/facelessuser/pymdown-extensions/issues/58" title="GitHub Issue: facelessuser/pymdown-extensions#58">#58</a>)</li>
 </ul>
 <h2 id="211">2.1.1<a class="headerlink" href="#211" title="Permanent link"></a></h2>
 <ul>
@@ -1140,13 +1147,17 @@
 <li><strong>NEW</strong>: Add support for <code>div p</code>, <code>div&gt;p</code>, <code>div+p</code>, <code>div~p</code> in the HTML/XML filter's CSS selectors. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/facelessuser/pymdown-extensions/issues/51" title="GitHub Issue: facelessuser/pymdown-extensions#51">#51</a>)</li>
 <li><strong>NEW</strong>: Add support for the <code>:root</code> CSS selector. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/facelessuser/pymdown-extensions/issues/57" title="GitHub Issue: facelessuser/pymdown-extensions#57">#57</a>)</li>
 <li><strong>NEW</strong>: Add support for experimental <code>:has()</code> selector. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/facelessuser/pymdown-extensions/issues/54" title="GitHub Issue: facelessuser/pymdown-extensions#54">#54</a>)</li>
-<li><strong>FIX</strong>: According to CSS4 specification, <code>:is()</code> is the final name for <code>:matches()</code> but the <code>:matches()</code> is an allowed alias. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/facelessuser/pymdown-extensions/issues/53" title="GitHub Issue: facelessuser/pymdown-extensions#53">#53</a>)</li>
+<li><strong>FIX</strong>: According to CSS4 specification, <code>:is()</code> is the final name for <code>:matches()</code> but the <code>:matches()</code> is an
+  allowed alias. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/facelessuser/pymdown-extensions/issues/53" title="GitHub Issue: facelessuser/pymdown-extensions#53">#53</a>)</li>
 <li><strong>FIX</strong>: Allow <code>:not()</code> to be nested in <code>:is()</code>/<code>:matches()</code>. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/facelessuser/pymdown-extensions/issues/56" title="GitHub Issue: facelessuser/pymdown-extensions#56">#56</a>)</li>
 </ul>
 <h2 id="200">2.0.0<a class="headerlink" href="#200" title="Permanent link"></a></h2>
 <ul>
-<li><strong>NEW</strong>: (Breaking change) Task names should be unique and using <code>--name</code> from the command line will only target one <code>name</code> (the last task defined with that name). If you were not using <code>name</code> to run a group of tasks, you will not notice any changes.</li>
-<li><strong>NEW</strong>: Task option <code>group</code> has been added to target multiple tasks with the <code>--group</code> command line option. <code>group</code> name can be shared across different tasks.</li>
+<li><strong>NEW</strong>: (Breaking change) Task names should be unique and using <code>--name</code> from the command line will only target one
+  <code>name</code> (the last task defined with that name). If you were not using <code>name</code> to run a group of tasks, you will not
+  notice any changes.</li>
+<li><strong>NEW</strong>: Task option <code>group</code> has been added to target multiple tasks with the <code>--group</code> command line option. <code>group</code>
+  name can be shared across different tasks.</li>
 <li><strong>NEW</strong>: Add XML filter (PySpelling now has a dependency on <code>lxml</code>).</li>
 <li><strong>NEW</strong>: Add Open Document Format (ODF) filter for <code>.odt</code>, <code>.ods</code>, and <code>.odp</code> files.</li>
 <li><strong>NEW</strong>: Add Office Open XML format (newer Microsoft document format) for <code>.docx</code>, <code>.xlsx</code>, and <code>.pptx</code> files.</li>
@@ -1155,29 +1166,37 @@
 <li><strong>NEW</strong>: CSS selectors now support <code>i</code> in attribute selectors: <code>[attr=value i]</code>.</li>
 <li><strong>NEW</strong>: CSS selectors now support namespaces (some configuration required).</li>
 <li><strong>NEW</strong>: For better HTML context, display a tag's ancestry (just tag name of parents).</li>
-<li><strong>NEW</strong>: Captured tags are now configurable via <code>captures</code>, but tags that are not captured still have their children crawled unless they are under <code>ignores</code>.</li>
+<li><strong>NEW</strong>: Captured tags are now configurable via <code>captures</code>, but tags that are not captured still have their children
+  crawled unless they are under <code>ignores</code>.</li>
 <li><strong>NEW</strong>: Support modes added for HTML filter: <code>html</code>, <code>html5</code>, and <code>xhtml</code>.</li>
 <li><strong>NEW</strong>: <code>CHECK_BOM</code> plugin attribute has been deprecated in favor of overriding the exposed <code>has_bom</code> function.</li>
-<li><strong>NEW</strong>: Tasks can be hidden with the <code>hidden</code> configuration option. Tasks with <code>hidden</code> enabled will only run if they are explicitly called by name.</li>
+<li><strong>NEW</strong>: Tasks can be hidden with the <code>hidden</code> configuration option. Tasks with <code>hidden</code> enabled will only run if they
+  are explicitly called by name.</li>
 <li><strong>NEW</strong>: Add normal string support to Python filter.</li>
 <li><strong>NEW</strong>: Add string and template literal support for JavaScript filter.</li>
 <li><strong>NEW</strong>: Add string support for CPP filter.</li>
 <li><strong>NEW</strong>: Add <code>generic_mode</code> option to CPP to allow for generic C/C++ comment style capture from non C/C++ file types.</li>
 <li><strong>NEW</strong>: Context will normalize line endings before applying context (can be disabled).</li>
 <li><strong>NEW</strong>: CPP, Stylesheet, and JavaScript plugins now normalize line endings of block comments.</li>
-<li><strong>NEW</strong>: UTF-16 and UTF-32 is not really supported by Aspell and Hunspell, so at the end of the pipeline, Unicode strings that have the associated encoding of UTF-16 or UTF-32 will encoding with the compatible UTF-8. This does not apply to files being processed with a disabled pipeline. When the pipeline is disabled, files are sent directly to the spell checker with no modifications.</li>
+<li><strong>NEW</strong>: UTF-16 and UTF-32 is not really supported by Aspell and Hunspell, so at the end of the pipeline, Unicode
+  strings that have the associated encoding of UTF-16 or UTF-32 will encoding with the compatible UTF-8. This does not
+  apply to files being processed with a disabled pipeline. When the pipeline is disabled, files are sent directly to the
+  spell checker with no modifications.</li>
 <li><strong>FIX</strong>: Case related issues when comparing tags and attributes in HTML.</li>
 <li><strong>FIX</strong>: CSS selectors should only compare case insensitive for ASCII characters A-Z and a-z.</li>
 <li><strong>FIX</strong>: Allow CSS escapes in selectors.</li>
-<li><strong>FIX</strong>: Don't send empty (or strings that are just whitespace) to spell checker to prevent Aspell 0.50 series from crashing (also to increase performance).</li>
+<li><strong>FIX</strong>: Don't send empty (or strings that are just whitespace) to spell checker to prevent Aspell 0.50 series from
+  crashing (also to increase performance).</li>
 <li><strong>FIX</strong>: Catch and bubble up errors better.</li>
 <li><strong>FIX</strong>: Fix issue where Python module docstrings would not get spell checked if they followed a shebang.</li>
 </ul>
 <h2 id="110">1.1.0<a class="headerlink" href="#110" title="Permanent link"></a></h2>
 <ul>
 <li><strong>NEW</strong>: Add URL/email address filter. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/facelessuser/pymdown-extensions/issues/30" title="GitHub Issue: facelessuser/pymdown-extensions#30">#30</a>)</li>
-<li><strong>NEW</strong>: If <code>pipeline</code> configuration key is set to <code>null</code>, do not use any filters, and send the filename, not the content, to the spell checker.</li>
-<li><strong>NEW</strong>: Add <code>encoding</code> option to <code>dictionary</code> configuration for the purpose of communicating what encoding the main dictionary is when compiling wordlists (only Aspell takes advantage of this).</li>
+<li><strong>NEW</strong>: If <code>pipeline</code> configuration key is set to <code>null</code>, do not use any filters, and send the filename, not the
+  content, to the spell checker.</li>
+<li><strong>NEW</strong>: Add <code>encoding</code> option to <code>dictionary</code> configuration for the purpose of communicating what encoding the main
+  dictionary is when compiling wordlists (only Aspell takes advantage of this).</li>
 <li><strong>FIX</strong>: Fix Hunspell <code>-O</code> option which was mistakenly <code>-o</code>. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/facelessuser/pymdown-extensions/issues/31" title="GitHub Issue: facelessuser/pymdown-extensions#31">#31</a>)</li>
 </ul>
 <h2 id="100">1.0.0<a class="headerlink" href="#100" title="Permanent link"></a></h2>
@@ -1195,17 +1214,24 @@
 </ul>
 <h2 id="100b1">1.0.0b1<a class="headerlink" href="#100b1" title="Permanent link"></a></h2>
 <ul>
-<li><strong>NEW</strong>: Better context for HTML elements. HTML is now returned by block level elements, and the elements selector is given as context. Attributes also return a selector as context and are returned individually. HTML comments are returned as individual hunks.</li>
+<li><strong>NEW</strong>: Better context for HTML elements. HTML is now returned by block level elements, and the elements selector is
+  given as context. Attributes also return a selector as context and are returned individually. HTML comments are
+  returned as individual hunks.</li>
 <li><strong>NEW</strong>: Add Stylesheet and CPP filters (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/facelessuser/pymdown-extensions/issues/17" title="GitHub Issue: facelessuser/pymdown-extensions#17">#17</a>)</li>
 <li><strong>NEW</strong>: JavaScript is now derived from CPP.</li>
 <li><strong>NEW</strong>: PySpelling looks for <code>.spelling.yml</code> or <code>.pyspelling.yml</code> with a priority for the latter. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/facelessuser/pymdown-extensions/issues/12" title="GitHub Issue: facelessuser/pymdown-extensions#12">#12</a>)</li>
-<li><strong>NEW</strong>: Spelling pipeline adjustments: you can now explicitly allow only certain categories, skip categories, or halt them in the pipeline. Pipeline flow control is now done via a new <code>FlowControl</code> plugin. When avoiding, including, or skipping categories, they are now done with wildcard patterns. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/facelessuser/pymdown-extensions/issues/16" title="GitHub Issue: facelessuser/pymdown-extensions#16">#16</a>)</li>
+<li><strong>NEW</strong>: Spelling pipeline adjustments: you can now explicitly allow only certain categories, skip categories, or halt
+  them in the pipeline. Pipeline flow control is now done via a new <code>FlowControl</code> plugin. When avoiding, including, or
+  skipping categories, they are now done with wildcard patterns. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/facelessuser/pymdown-extensions/issues/16" title="GitHub Issue: facelessuser/pymdown-extensions#16">#16</a>)</li>
 <li><strong>NEW</strong>: Drop scanning python normal strings in plugin.</li>
 <li><strong>NEW</strong>: Use <code>get_plugin</code> instead of <code>get_filter</code>, but allow a backwards compatible path for now.</li>
-<li><strong>NEW</strong>: In configuration, <code>documents</code> is now <code>matrix</code> and <code>filters</code> is now <code>pipeline</code>, but a deprecation path has been added. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/facelessuser/pymdown-extensions/issues/15" title="GitHub Issue: facelessuser/pymdown-extensions#15">#15</a>)</li>
-<li><strong>NEW</strong>: Provide a class attribute that will cause a Filter object to avoid BOM detection if it is not appropriate for the given file.</li>
+<li><strong>NEW</strong>: In configuration, <code>documents</code> is now <code>matrix</code> and <code>filters</code> is now <code>pipeline</code>, but a deprecation path has
+  been added. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/facelessuser/pymdown-extensions/issues/15" title="GitHub Issue: facelessuser/pymdown-extensions#15">#15</a>)</li>
+<li><strong>NEW</strong>: Provide a class attribute that will cause a Filter object to avoid BOM detection if it is not appropriate for
+  the given file.</li>
 <li><strong>NEW</strong>: Wordlists should get the desired language/dictionary from the spell checker specific options.</li>
-<li><strong>NEW</strong>: Add global configuration option to specify the preferred spell checker, but it is still overridable via command line.</li>
+<li><strong>NEW</strong>: Add global configuration option to specify the preferred spell checker, but it is still overridable via
+  command line.</li>
 <li><strong>FIX</strong>: Internal cleanup in regards to error handling and debug.</li>
 <li><strong>FIX</strong>: Fix context issue when no escapes are defined.</li>
 </ul>
@@ -1253,6 +1279,7 @@
 </ul>
                 
                   
+                
                 
               
               
@@ -1309,7 +1336,8 @@
         
           <div class="md-footer-copyright__highlight">
             Copyright &copy; 2017 - 2019 <a href="https://github.com/facelessuser">Isaac Muse</a>
-<br><span class="md-footer-custom-text">emoji provided free by <a href="http://www.emojione.com">EmojiOne</a></span>
+<br><span class="md-footer-custom-text">emoji provided free by </span>
+<a href="https://github.com/twitter/twemoji">Twemoji</a>
 
           </div>
         
@@ -1333,11 +1361,11 @@
       
     </div>
     
-      <script src="../../assets/javascripts/application.ac79c3b0.js"></script>
+      <script src="../../assets/javascripts/application.808e90bb.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       
-        <script src="../../extra-0b9b22dd13.js"></script>
+        <script src="../../extra-0d9305e748.js"></script>
       
     
   </body>

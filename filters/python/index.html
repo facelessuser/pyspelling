@@ -36,7 +36,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.4.3">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.6.0">
     
     
       
@@ -44,7 +44,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.30686662.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.1b62728e.css">
       
         <link rel="stylesheet" href="../../assets/stylesheets/application-palette.a8b3c06d.css">
       
@@ -55,19 +55,19 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.268332fc.js"></script>
     
     
       
         <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono&display=fallback">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
         <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
       
     
     <link rel="stylesheet" href="../../assets/fonts/material-icons.css">
     
     
-      <link rel="stylesheet" href="../../extra-30d8e6755c.css">
+      <link rel="stylesheet" href="../../extra-174a536342.css">
     
     
       
@@ -764,15 +764,28 @@
                 
                 <h1 id="python">Python<a class="headerlink" href="#python" title="Permanent link"></a></h1>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link"></a></h2>
-<p>When first in the chain, the Python filter will look for the encoding of the file in the header, and convert to Unicode accordingly. It will assume <code>utf-8</code> if no encoding header is found, and the user has not overridden the fallback encoding.</p>
-<p>Text is returned in chunks based on the context of the captured text. Each docstring, inline comment, or normal string is returned as their own chunk.</p>
-<p>In general, regardless of Python version, strings <em>should</em> be parsed <em>almost</em> identically. PySpelling, unless configured otherwise, will decode string escapes and strip out format variables from f-strings. Decoding of escapes and stripping format variables is not dependent on what version of Python PySpelling is run on, but is based on the string prefixes that PySpelling encounters. There are two cases that may cause quirks related to Python version:</p>
+<p>When first in the chain, the Python filter will look for the encoding of the file in the header, and convert to Unicode
+accordingly. It will assume <code>utf-8</code> if no encoding header is found, and the user has not overridden the fallback
+encoding.</p>
+<p>Text is returned in chunks based on the context of the captured text. Each docstring, inline comment, or normal string
+is returned as their own chunk.</p>
+<p>In general, regardless of Python version, strings <em>should</em> be parsed <em>almost</em> identically. PySpelling, unless configured
+otherwise, will decode string escapes and strip out format variables from f-strings. Decoding of escapes and stripping
+format variables is not dependent on what version of Python PySpelling is run on, but is based on the string prefixes
+that PySpelling encounters. There are two cases that may cause quirks related to Python version:</p>
 <ol>
 <li>
-<p>PySpelling doesn't support being run from Python 2, but it will still find strings and comments in Python 2 code as many Python 3 projects support Python 2 as well. If you run this on Python 2 code that is not using <code class="codehilite"><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">unicode_literals</span></code>, it will still treat the default strings in Python 2 code as Unicode as it has no way of knowing that a file is specifically meant for Python 2 parsing only. In general, you should use <code>unicode_literals</code> if you are supporting both Python 2 and 3.</p>
+<p>PySpelling doesn't support being run from Python 2, but it will still find strings and comments in Python 2 code as
+many Python 3 projects support Python 2 as well. If you run this on Python 2 code that is not using
+<code class="codehilite"><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span></code>, it will still treat the default strings in Python 2 code as Unicode as
+it has no way of knowing that a file is specifically meant for Python 2 parsing only. In general, you should use
+<code>unicode_literals</code> if you are supporting both Python 2 and 3.</p>
 </li>
 <li>
-<p>Use of <code>\N{NAMED UNICODE}</code> <em>might</em> produce different results if one Python version defines a specific Unicode name while another does not. I'm not sure how greatly the named Unicode database varies from Python version to Python version, but if this is experienced, and is problematic, you can always disable <code>decode_escapes</code> in the options for a more consistent behavior.</p>
+<p>Use of <code>\N{NAMED UNICODE}</code> <em>might</em> produce different results if one Python version defines a specific Unicode name
+while another does not. I'm not sure how greatly the named Unicode database varies from Python version to Python
+version, but if this is experienced, and is problematic, you can always disable <code>decode_escapes</code> in the options for a
+more consistent behavior.</p>
 </li>
 </ol>
 <div class="codehilite"><pre><span></span><span class="nt">matrix</span><span class="p">:</span>
@@ -786,8 +799,14 @@
 </pre></div>
 
 <h2 id="filtering-string-types">Filtering String types<a class="headerlink" href="#filtering-string-types" title="Permanent link"></a></h2>
-<p>When <code>strings</code> is enabled, you can specify which strings you want to allow via the <code>string_types</code> option. Valid string types are <code>b</code> for bytes, <code>f</code> for format, <code>u</code> for Unicode, and <code>r</code> for raw.  <code>f</code> refers to f-strings, not strings in the form <code class="codehilite"><span class="s2">&quot;my string </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="s2">&quot;</span></code>, and though f-strings are Unicode, they are treated as a separate string type from Unicode. Case is not important, and the default value is <code>fu</code>.</p>
-<p>If specifying <code>r</code>, you must also specify either <code>u</code>, <code>b</code>, or <code>f</code> as raw strings are also either <code>u</code>, <code>b</code>, or <code>f</code> strings. Selecting <code>ur</code> will select both Unicode strings and Unicode raw strings. If you need to target just raw strings, you can use <code>r*</code> which will target all raw strings types: raw Unicode, raw format, and raw bytes. You can use <code>*</code> for other types as well. You can also just specify <code>*</code> by itself to target all string types.</p>
+<p>When <code>strings</code> is enabled, you can specify which strings you want to allow via the <code>string_types</code> option. Valid string
+types are <code>b</code> for bytes, <code>f</code> for format, <code>u</code> for Unicode, and <code>r</code> for raw.  <code>f</code> refers to f-strings, not strings in the
+form <code class="codehilite"><span class="s2">&quot;my string </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="s2">&quot;</span></code>, and though f-strings are Unicode, they are treated as a separate string type
+from Unicode. Case is not important, and the default value is <code>fu</code>.</p>
+<p>If specifying <code>r</code>, you must also specify either <code>u</code>, <code>b</code>, or <code>f</code> as raw strings are also either <code>u</code>, <code>b</code>, or <code>f</code>
+strings. Selecting <code>ur</code> will select both Unicode strings and Unicode raw strings. If you need to target just raw
+strings, you can use <code>r*</code> which will target all raw strings types: raw Unicode, raw format, and raw bytes. You can use
+<code>*</code> for other types as well. You can also just specify <code>*</code> by itself to target all string types.</p>
 <h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link"></a></h2>
 <table>
 <thead>
@@ -864,6 +883,7 @@
                 
                   
                 
+                
               
               
                 
@@ -919,7 +939,8 @@
         
           <div class="md-footer-copyright__highlight">
             Copyright &copy; 2017 - 2019 <a href="https://github.com/facelessuser">Isaac Muse</a>
-<br><span class="md-footer-custom-text">emoji provided free by <a href="http://www.emojione.com">EmojiOne</a></span>
+<br><span class="md-footer-custom-text">emoji provided free by </span>
+<a href="https://github.com/twitter/twemoji">Twemoji</a>
 
           </div>
         
@@ -943,11 +964,11 @@
       
     </div>
     
-      <script src="../../assets/javascripts/application.ac79c3b0.js"></script>
+      <script src="../../assets/javascripts/application.808e90bb.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       
-        <script src="../../extra-0b9b22dd13.js"></script>
+        <script src="../../extra-0d9305e748.js"></script>
       
     
   </body>
