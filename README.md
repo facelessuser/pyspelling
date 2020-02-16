@@ -49,17 +49,17 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 [aspell]: http://aspell.net/
 [hunspell]: https://hunspell.github.io/
 
-[github-ci-image]: https://github.com/facelessuser/Rummage/workflows/build/badge.svg
-[github-ci-link]: https://github.com/facelessuser/Rummage/actions?workflow=build
+[github-ci-image]: https://github.com/facelessuser/pyspelling/workflows/build/badge.svg
+[github-ci-link]: https://github.com/facelessuser/pyspelling/actions?workflow=build
 [discord-image]: https://img.shields.io/discord/678289859768745989?logo=discord&logoColor=aaaaaa&color=mediumpurple&labelColor=333333
 [discord-link]:https://discord.gg/Xprw7Qn
-[codecov-image]: https://img.shields.io/codecov/c/github/facelessuser/Rummage/master.svg?logo=codecov&logoColor=aaaaaa&labelColor=333333
-[codecov-link]: https://codecov.io/github/facelessuser/Rummage
-[appveyor-image]: https://img.shields.io/appveyor/ci/facelessuser/Rummage/master.svg?label=appveyor&logo=appveyor&logoColor=aaaaaa&labelColor=333333
-[appveyor-link]: https://ci.appveyor.com/project/facelessuser/Rummage
-[travis-image]: https://img.shields.io/travis/facelessuser/Rummage/master.svg?label=travis&logo=travis%20ci&logoColor=aaaaaa&labelColor=333333
-[travis-link]: https://travis-ci.org/facelessuser/Rummage
-[pypi-image]: https://img.shields.io/pypi/v/Rummage.svg?logo=pypi&logoColor=aaaaaa&labelColor=333333
-[pypi-link]: https://pypi.python.org/pypi/Rummage
-[python-image]: https://img.shields.io/pypi/pyversions/Rummage?logo=python&logoColor=aaaaaa&labelColor=333333
+[codecov-image]: https://img.shields.io/codecov/c/github/facelessuser/pyspelling/master.svg?logo=codecov&logoColor=aaaaaa&labelColor=333333
+[codecov-link]: https://codecov.io/github/facelessuser/pyspelling
+[appveyor-image]: https://img.shields.io/appveyor/ci/facelessuser/pyspelling/master.svg?label=appveyor&logo=appveyor&logoColor=aaaaaa&labelColor=333333
+[appveyor-link]: https://ci.appveyor.com/project/facelessuser/pyspelling
+[travis-image]: https://img.shields.io/travis/facelessuser/pyspelling/master.svg?label=travis&logo=travis%20ci&logoColor=aaaaaa&labelColor=333333
+[travis-link]: https://travis-ci.org/facelessuser/pyspelling
+[pypi-image]: https://img.shields.io/pypi/v/pyspelling.svg?logo=pypi&logoColor=aaaaaa&labelColor=333333
+[pypi-link]: https://pypi.python.org/pypi/pyspelling
+[python-image]: https://img.shields.io/pypi/pyversions/pyspelling?logo=python&logoColor=aaaaaa&labelColor=333333
 [license-image-mit]: https://img.shields.io/badge/license-MIT-blue.svg?labelColor=333333
