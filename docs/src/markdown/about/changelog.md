@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.6.0
+
+- **NEW**: Add support for `wcmatch` version `6.0`.
+- **NEW**: `wcmatch` version `6.0` adds a default pattern limit of `1000` to help protect against really large pattern
+  expansions such as `{1..1000000}`. If you wish to control this default, or disable it entirely, you can via the new
+  `glob_pattern_limit` configuration option.
+
 ## 2.5.1
 
 - **FIX**: Add workaround for `wcmatch` version `5.0`.

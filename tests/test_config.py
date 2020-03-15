@@ -1,5 +1,57 @@
 """Test text plugin."""
 from . import util
+from wcmatch._wcparse import PatternLimitException
+
+
+class TestGlob(util.PluginTestCase):
+    """Test `glob` behavior."""
+
+    def test_glob_limit(self):
+        """Test `glob` with a custom limit."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: glob
+              default_encoding: utf-8
+              glob_pattern_limit: 10
+              sources:
+              - '{}/**/test-{{1..11}}.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline: null
+            """
+        ).format(self.tempdir)
+        self.mktemp('.glob.yml', config, 'utf-8')
+        with self.assertRaises(PatternLimitException):
+            self.assert_spellcheck('.glob.yml', [])
+
+    def test_glob_no_limit(self):
+        """Test when there is no limit for `glob` expansion patterns."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: glob
+              default_encoding: utf-8
+              glob_pattern_limit: 0
+              sources:
+              - '{}/**/test-{{1..11}}.txt'
+              aspell:
+                lang: en
+              hunspell:
+                d: en_US
+              pipeline: null
+            """
+        ).format(self.tempdir)
+        self.mktemp('.glob.yml', config, 'utf-8')
+
+        bad_words = ['helo', 'begn']
+        good_words = ['yes', 'word']
+        self.mktemp('test-1.txt', '\n'.join(bad_words + good_words), 'utf-8')
+        self.assert_spellcheck('.glob.yml', bad_words)
 
 
 class TestNoPipeline(util.PluginTestCase):

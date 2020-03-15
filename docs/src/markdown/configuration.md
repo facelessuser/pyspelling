@@ -172,6 +172,13 @@ matrix:
   - pyspelling/**/*.py
 ```
 
+By default, to protect against really large pattern sets, such as when using brace expansion: `{1..10000000}`, there is
+a pattern limit of `1000` by default. This can be changed by setting `glob_pattern_limit` to some other number. If you
+set it to `0`, it will disable the pattern limits entirely.
+
+!!! new "New 2.6"
+    `glob_pattern_limit` is new in version `2.6` and only works with `wcmatch` version `6.0`.
+
 ### Expect Match
 
 When processing the sources field it is expected to find at least
