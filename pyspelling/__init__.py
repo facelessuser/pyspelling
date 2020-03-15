@@ -13,6 +13,8 @@ from collections import namedtuple
 __all__ = ("spellcheck",)
 
 CASE_SUPPORT = wcmatch.__version_info__ >= (5, 0)
+NOUNIQUE_SUPPORT = wcmatch.__version_info__ >= (6, 0)
+GLOBTILDE_SUPPORT = wcmatch.__version_info__ >= (6, 0)
 
 
 class Results(namedtuple('Results', ['words', 'context', 'category', 'error'])):
@@ -54,6 +56,10 @@ class SpellChecker:
         "X": glob.X,
         "NEGATEALL": glob.A,
         "A": glob.A,
+        "NOUNIQUE": (glob.Q if NOUNIQUE_SUPPORT else 0),
+        "Q": (glob.Q if NOUNIQUE_SUPPORT else 0),
+        "GLOBTILDE": (glob.T if GLOBTILDE_SUPPORT else 0),
+        "T": (glob.T if GLOBTILDE_SUPPORT else 0),
         # We will accept these, but we already force them on
         "SPLIT": glob.S,
         "S": glob.S,
@@ -172,13 +178,16 @@ class SpellChecker:
     def compile_dictionary(self, lang, wordlists, output):
         """Compile user dictionary."""
 
-    def _walk_src(self, targets, flags, pipeline, expect_match):
+    def _walk_src(self, targets, flags, limit, pipeline, expect_match):
         """Walk source and parse files."""
 
         found_something = False
         for target in targets:
             # Glob using `S` for patterns wit `|` and `O` to exclude directories.
-            for f in glob.iglob(target, flags=flags | glob.S | glob.O):
+            kwargs = {"flags": flags | glob.S | glob.O}
+            if NOUNIQUE_SUPPORT:
+                kwargs['limit'] = limit
+            for f in glob.iglob(target, **kwargs):
                 found_something = True
                 self.log('', 2)
                 self.log('> Processing: %s' % f, 1)
@@ -297,13 +306,14 @@ class SpellChecker:
         options = self.setup_spellchecker(task)
         personal_dict = self.setup_dictionary(task)
         glob_flags = self._to_flags(task.get('glob_flags', "N|B|G"))
+        glob_limit = task.get('glob_pattern_limit', 1000)
         self._build_pipeline(task)
 
         if not source_patterns:
             source_patterns = task.get('sources', [])
 
         expect_match = task.get('expect_match', True)
-        for sources in self._walk_src(source_patterns, glob_flags, self.pipeline_steps, expect_match):
+        for sources in self._walk_src(source_patterns, glob_flags, glob_limit, self.pipeline_steps, expect_match):
             if self.pipeline_steps is not None:
                 yield from self._spelling_pipeline(sources, options, personal_dict)
             else:
