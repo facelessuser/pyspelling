@@ -46,8 +46,8 @@ text to the preferred spell checker via command line.
 
 Installation is easy with pip:
 
-```bash
-pip install pyspelling
+```shell-session
+$ pip install pyspelling
 ```
 
 If you want to manually install it, run `#!bash python setup.py build` and `#!bash python setup.py install`.
@@ -76,62 +76,62 @@ optional arguments:
 PySpelling can be run with the command below (assuming your Python bin/script folder is in your path).  By default it
 will look for the spelling configuration file `.pyspelling.yml`.
 
-```
-pyspelling
+```shell-session
+$ pyspelling
 ```
 
 If you have multiple Python versions, you can run the PySpelling associated with that Python version by appending the
 Python major and minor version:
 
-```
-pyspelling3.7
+```shell-session
+$ pyspelling3.7
 ```
 
 To specify a specific configuration other than the default, or even point to a different location:
 
-```
-pyspelling -c myconfig.yml
+```shell-session
+$ pyspelling -c myconfig.yml
 ```
 
 To run a specific spelling task in your configuration file by name, you can use the `name` option. You can even specify
 multiple names if desired. You cannot use `name` and `group` together:
 
-```
-pyspelling -n my_task -n my_task2
+```shell-session
+$ pyspelling -n my_task -n my_task2
 ```
 
 If you've specified groups for your tasks, you can run all tasks in a group with the `group` option. You can specify
 multiple groups if desired. You cannot use `name` and `group` together.
 
-```
-pyspelling -g my_group -g my_group2
+```shell-session
+$ pyspelling -g my_group -g my_group2
 ```
 
 If you've specified exactly one name via the `name` option, you can override that named task's source patterns with the
 `source` option. You can specify multiple `source` patterns if desired.
 
-```
-pyspelling -n my_task -S "this/specific/file.txt" -S "these/specific/files_{a,b}.txt"
+```shell-session
+$ pyspelling -n my_task -S "this/specific/file.txt" -S "these/specific/files_{a,b}.txt"
 ```
 
 To run a more verbose output, use the `-v` flag. You can increase verbosity level by including more `v`s: `-vv`.  You
 can currently go up to four levels.
 
-```
-pyspelling -v
+```shell-session
+$ pyspelling -v
 ```
 
 If the binary for your spell checker is not found in your path, you can provide a path to the binary.
 
-```
-pyspelling -b "path/to/aspell"
+```shell-session
+$ pyspelling -b "path/to/aspell"
 ```
 
 You can specify the spell checker type by specifying it on the command line. PySpelling supports `hunspell` and
 `aspell`, but defaults to `aspell`. This will override the preferred `spellchecker` setting in the configuration file.
 
-```
-pyspelling -s hunspell
+```shell-session
+$ pyspelling -s hunspell
 ```
 
 ## Supported Spell Check Versions
@@ -178,14 +178,14 @@ as well. See your preferred spell checker's manual for more information on build
 
 Ubuntu Aspell install example:
 
-```
-sudo apt-get install aspell aspell-en
+```shell-session
+$ sudo apt-get install aspell aspell-en
 ```
 
 Ubuntu Hunspell install example:
 
-```
-sudo apt-get install hunspell hunspell-en-us
+```shell-session
+$ sudo apt-get install hunspell hunspell-en-us
 ```
 
 ## Usage in macOS
@@ -196,14 +196,14 @@ See your preferred spell checker's manual for more information on building manua
 
 Homebrew Aspell install examples:
 
-```
-brew install aspell
+```shell-session
+$ brew install aspell
 ```
 
 Homebrew Hunspell install examples:
 
-```
-brew install hunspell
+```shell-session
+$ brew install hunspell
 ```
 
 Don't forget to download dictionaries and put them to `/Library/Spelling/`.
@@ -217,8 +217,8 @@ your preferred spell checker's manual for more information on building manually.
 
 Pacman Aspell install example:
 
-```
-pacman -S mingw-w64-x86_64-aspell mingw-w64-x86_64-aspell-en
+```shell-session
+$ pacman -S mingw-w64-x86_64-aspell mingw-w64-x86_64-aspell-en
 ```
 
 For Aspell, it has been noted that the way the default configuration is configured, builtin Aspell filters are often
@@ -230,8 +230,8 @@ working.
 
 Pacman Hunspell install example:
 
-```
-pacman -S mingw-w64-x86_64-hunspell mingw-w64-x86_64-hunspell-en
+```shell-session
+$ pacman -S mingw-w64-x86_64-hunspell mingw-w64-x86_64-hunspell-en
 ```
 
 If you are dealing with Unicode text, Windows often has difficulty showing it in the console. Using
@@ -267,7 +267,7 @@ In order to get running in GitHub's CI, you can follow the steps below:
   preprocessing that is required for your specific environment.
 8. Lastly, run PySpelling.
 
-```
+```yaml
 jobs:
   spelling:
     runs-on: ubuntu-latest
