@@ -369,8 +369,8 @@ matrix:
 
 The above options would be equivalent to doing this from the command line:
 
-```
-aspell --add-extra-dicts my-dictionary.doc --add-extra-dicts my-other-dictionary.dic
+```shell-session
+$ aspell --add-extra-dicts my-dictionary.doc --add-extra-dicts my-other-dictionary.dic
 ```
 
 --8<-- "refs.txt"

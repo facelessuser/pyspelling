@@ -52,7 +52,7 @@ Options      | Type     | Default                           | Description
 `break_tags` | [string] | `#!py3 []`                        | Additional tags (in addition to the default, defined block tags), to break on for context. Useful for new or currently unsupported block tags.
 
 !!! example "Namespace example"
-    ```
+    ```yaml
     matrix:
     - name: html
       pipeline:

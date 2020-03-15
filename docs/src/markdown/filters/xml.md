@@ -46,7 +46,7 @@ Options      | Type     | Default         | Description
 `break_tags` | [string] | `#!py3 []`      | Tags to break on for context. Causes more calls to the spell checker.
 
 !!! example "Namespace example"
-    ```
+    ```yaml
     matrix:
     - name: xml
       pipeline:
