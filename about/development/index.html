@@ -1,14 +1,12 @@
 
 
 
-
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
-      <meta http-equiv="x-ua-compatible" content="ie=edge">
       
         <meta name="description" content="Python spell checker.">
       
@@ -16,27 +14,8 @@
         <link rel="canonical" href="https://facelessuser.github.io/pyspelling/about/development/">
       
       
-      
-        <meta name="lang:clipboard.copy" content="Copy to clipboard">
-      
-        <meta name="lang:clipboard.copied" content="Copied to clipboard">
-      
-        <meta name="lang:search.language" content="en">
-      
-        <meta name="lang:search.pipeline.stopwords" content="True">
-      
-        <meta name="lang:search.pipeline.trimmer" content="True">
-      
-        <meta name="lang:search.result.none" content="No matching documents">
-      
-        <meta name="lang:search.result.one" content="1 matching document">
-      
-        <meta name="lang:search.result.other" content="# matching documents">
-      
-        <meta name="lang:search.tokenizer" content="[\s\-]+">
-      
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.6.0">
+      <meta name="generator" content="mkdocs-1.1, mkdocs-material-5.0.0rc2">
     
     
       
@@ -44,9 +23,9 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.1b62728e.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.97c3fac0.min.css">
       
-        <link rel="stylesheet" href="../../assets/stylesheets/application-palette.a8b3c06d.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.31180ff2.min.css">
       
       
         
@@ -55,8 +34,6 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.268332fc.js"></script>
-    
     
       
         <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
@@ -64,10 +41,9 @@
         <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
       
     
-    <link rel="stylesheet" href="../../assets/fonts/material-icons.css">
     
     
-      <link rel="stylesheet" href="../../extra-174a536342.css">
+      <link rel="stylesheet" href="../../assets/pymdownx-extras/extra-f1fb910a62.css">
     
     
       
@@ -75,71 +51,68 @@
     
   </head>
   
+  
     
     
     <body dir="ltr" data-md-color-primary="blue" data-md-color-accent="blue">
   
-    <svg class="md-svg">
-      <defs>
-        
-        
-          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg>
-        
-      </defs>
-    </svg>
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
-    <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
+    <label class="md-overlay" for="__drawer"></label>
     
-      <a href="#development" tabindex="1" class="md-skip">
+      
+      <a href="#development" class="md-skip" data-md-component="skip">
         Skip to content
       </a>
     
     
+    
       <header class="md-header" data-md-component="header">
   <nav class="md-header-nav md-grid">
-    <div class="md-flex">
-      <div class="md-flex__cell md-flex__cell--shrink">
-        <a href="https://facelessuser.github.io/pyspelling" title="PySpelling" class="md-header-nav__button md-logo">
-          
-            <i class="md-icon">description</i>
-          
-        </a>
-      </div>
-      <div class="md-flex__cell md-flex__cell--shrink">
-        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
-      </div>
-      <div class="md-flex__cell md-flex__cell--stretch">
-        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
-          
-            <span class="md-header-nav__topic">
-              PySpelling
-            </span>
-            <span class="md-header-nav__topic">
-              
-                Development
-              
-            </span>
-          
-        </div>
-      </div>
-      <div class="md-flex__cell md-flex__cell--shrink">
+    <a href="https://facelessuser.github.io/pyspelling" title="PySpelling" aria-label="PySpelling" class="md-header-nav__button md-logo">
+      
         
-          <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
-          
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12,8A3,3 0 0,0 15,5A3,3 0 0,0 12,2A3,3 0 0,0 9,5A3,3 0 0,0 12,8M12,11.54C9.64,9.35 6.5,8 3,8V19C6.5,19 9.64,20.35 12,22.54C14.36,20.35 17.5,19 21,19V8C17.5,8 14.36,9.35 12,11.54Z" /></svg>
+      
+    </a>
+    <label class="md-header-nav__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z" /></svg>
+    </label>
+    <div class="md-header-nav__title" data-md-component="header-title">
+      <div class="md-header-nav__ellipsis md-ellipsis">
+        
+          <span class="md-header-nav__topic">
+            PySpelling
+          </span>
+          <span class="md-header-nav__topic">
+            
+              Development
+            
+          </span>
+        
+      </div>
+    </div>
+    
+      <label class="md-header-nav__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" /></svg>
+      </label>
+      
 <div class="md-search" data-md-component="search" role="dialog">
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
-      <label class="md-icon md-search__icon" for="__search"></label>
-      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
-        &#xE5CD;
+      <input type="text" class="md-search__input" name="query" aria-label="search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" /></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" /></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="reset" data-md-component="search-reset" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" /></svg>
       </button>
     </form>
     <div class="md-search__output">
       <div class="md-search__scrollwrap" data-md-scrollfix>
-        <div class="md-search-result" data-md-component="result">
+        <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
             Type to start searching
           </div>
@@ -149,41 +122,31 @@
     </div>
   </div>
 </div>
+    
+    
+      <div class="md-header-nav__source">
         
-      </div>
-      
-        <div class="md-flex__cell md-flex__cell--shrink">
-          <div class="md-header-nav__source">
-            
-
-
-  
-
-<a href="https://github.com/facelessuser/pyspelling/" title="Go to repository" class="md-source" data-md-source="github">
-  
-    <div class="md-source__icon">
-      <svg viewBox="0 0 24 24" width="24" height="24">
-        <use xlink:href="#__github" width="24" height="24"></use>
-      </svg>
-    </div>
-  
+<a href="https://github.com/facelessuser/pyspelling/" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
   <div class="md-source__repository">
     GitHub
   </div>
 </a>
-          </div>
-        </div>
-      
-    </div>
+      </div>
+    
   </nav>
 </header>
     
-    <div class="md-container">
+    <div class="md-container" data-md-component="container">
       
         
       
       
         
+          
 
   
 
@@ -246,19 +209,21 @@
     </ul>
   </div>
 </nav>
+        
       
-      <main class="md-main" role="main">
-        <div class="md-main__inner md-grid" data-md-component="container">
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
           
             
               <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     <nav class="md-nav md-nav--primary" data-md-level="0">
-  <label class="md-nav__title md-nav__title--site" for="__drawer">
-    <a href="https://facelessuser.github.io/pyspelling" title="PySpelling" class="md-nav__button md-logo">
+  <label class="md-nav__title" for="__drawer">
+    <a href="https://facelessuser.github.io/pyspelling" title="PySpelling" aria-label="PySpelling" class="md-nav__button md-logo">
       
-        <i class="md-icon">description</i>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12,8A3,3 0 0,0 15,5A3,3 0 0,0 12,2A3,3 0 0,0 9,5A3,3 0 0,0 12,8M12,11.54C9.64,9.35 6.5,8 3,8V19C6.5,19 9.64,20.35 12,22.54C14.36,20.35 17.5,19 21,19V8C17.5,8 14.36,9.35 12,11.54Z" /></svg>
       
     </a>
     PySpelling
@@ -266,18 +231,11 @@
   
     <div class="md-nav__source">
       
-
-
-  
-
-<a href="https://github.com/facelessuser/pyspelling/" title="Go to repository" class="md-source" data-md-source="github">
-  
-    <div class="md-source__icon">
-      <svg viewBox="0 0 24 24" width="24" height="24">
-        <use xlink:href="#__github" width="24" height="24"></use>
-      </svg>
-    </div>
-  
+<a href="https://github.com/facelessuser/pyspelling/" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
   <div class="md-source__repository">
     GitHub
   </div>
@@ -293,13 +251,19 @@
 
   <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-1" type="checkbox" id="nav-1">
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-1" type="checkbox" id="nav-1">
     
     <label class="md-nav__link" for="nav-1">
       Usage
+      <span class="md-nav__icon md-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" /></svg>
+      </span>
     </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+    <nav class="md-nav" data-md-level="1">
       <label class="md-nav__title" for="nav-1">
+        <span class="md-nav__icon md-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" /></svg>
+        </span>
         Usage
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -365,13 +329,19 @@
 
   <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2">
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2">
     
     <label class="md-nav__link" for="nav-2">
       Filters
+      <span class="md-nav__icon md-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" /></svg>
+      </span>
     </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+    <nav class="md-nav" data-md-level="1">
       <label class="md-nav__title" for="nav-2">
+        <span class="md-nav__icon md-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" /></svg>
+        </span>
         Filters
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -533,13 +503,19 @@
 
   <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3">
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3">
     
     <label class="md-nav__link" for="nav-3">
       Flow Control
+      <span class="md-nav__icon md-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" /></svg>
+      </span>
     </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+    <nav class="md-nav" data-md-level="1">
       <label class="md-nav__title" for="nav-3">
+        <span class="md-nav__icon md-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" /></svg>
+        </span>
         Flow Control
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -571,13 +547,19 @@
 
   <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" checked>
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" checked>
     
     <label class="md-nav__link" for="nav-4">
       About
+      <span class="md-nav__icon md-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" /></svg>
+      </span>
     </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+    <nav class="md-nav" data-md-level="1">
       <label class="md-nav__title" for="nav-4">
+        <span class="md-nav__icon md-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" /></svg>
+        </span>
         About
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -604,13 +586,16 @@
 
   <li class="md-nav__item md-nav__item--active">
     
-    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
     
       
     
     
       <label class="md-nav__link md-nav__link--active" for="__toc">
         Development
+        <span class="md-nav__icon md-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3,9H17V7H3V9M3,13H17V11H3V13M3,17H17V15H3V17M19,17H21V15H19V17M19,7V9H21V7H19M19,13H21V11H19V13Z" /></svg>
+        </span>
       </label>
     
     <a href="./" title="Development" class="md-nav__link md-nav__link--active">
@@ -624,7 +609,12 @@
     
   
   
-    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" /></svg>
+      </span>
+      Table of contents
+    </label>
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
@@ -681,10 +671,6 @@
   </a>
   
 </li>
-      
-      
-      
-      
       
     </ul>
   
@@ -739,7 +725,12 @@
     
   
   
-    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" /></svg>
+      </span>
+      Table of contents
+    </label>
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
@@ -797,10 +788,6 @@
   
 </li>
       
-      
-      
-      
-      
     </ul>
   
 </nav>
@@ -813,20 +800,25 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/facelessuser/pyspelling/tree/master/docs/src/markdown/about/development.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                  <a href="https://github.com/facelessuser/pyspelling/tree/master/docs/src/markdown/about/development.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" /></svg>
+                  </a>
                 
                 
-                <h1 id="development">Development<a class="headerlink" href="#development" title="Permanent link"></a></h1>
-<h2 id="project-layout">Project Layout<a class="headerlink" href="#project-layout" title="Permanent link"></a></h2>
+                  
+                
+                
+                <h1 id="development">Development<a class="headerlink" href="#development" title="Permanent link"></a></h1>
+<h2 id="project-layout">Project Layout<a class="headerlink" href="#project-layout" title="Permanent link"></a></h2>
 <p>There are a number of files for build, test, and continuous integration in the root of the project, but in general, the
 project is broken up like so.</p>
-<div class="codehilite"><pre><span></span>├── docs
+<div class="highlight"><pre><span></span><code>├── docs
 │   └── src
 │       ├── dictionary
 │       └── markdown
 ├── pyspelling
 └── requirements
-</pre></div>
+</code></pre></div>
 
 <table>
 <thead>
@@ -854,7 +846,7 @@ project is broken up like so.</p>
 </tr>
 </tbody>
 </table>
-<h2 id="coding-standards">Coding Standards<a class="headerlink" href="#coding-standards" title="Permanent link"></a></h2>
+<h2 id="coding-standards">Coding Standards<a class="headerlink" href="#coding-standards" title="Permanent link"></a></h2>
 <p>When writing code, the code should roughly conform to PEP8 and PEP257 suggestions.  The project utilizes the Flake8
 linter (with some additional plugins) to ensure code conforms (give or take some of the rules).  When in doubt, follow
 the formatting hints of existing code when adding or modifying files. existing files.  Listed below are the modules
@@ -867,7 +859,7 @@ used:</p>
 <li><a class="magiclink magiclink-github magiclink-repository" href="https://github.com/gforcada/flake8-builtins" title="GitHub Repository: gforcada/flake8-builtins">gforcada/flake8-builtins</a></li>
 </ul>
 <p>Usually this can be automated with Tox (assuming it is installed): <code>tox -elint</code>.</p>
-<h2 id="building-and-editing-documents">Building and Editing Documents<a class="headerlink" href="#building-and-editing-documents" title="Permanent link"></a></h2>
+<h2 id="building-and-editing-documents">Building and Editing Documents<a class="headerlink" href="#building-and-editing-documents" title="Permanent link"></a></h2>
 <p>Documents are in Markdown (with with some additional syntax provided by extensions) and are converted to HTML via Python
 Markdown. If you would like to build and preview the documentation, you must have these packages installed:</p>
 <ul>
@@ -879,10 +871,10 @@ Markdown. If you would like to build and preview the documentation, you must hav
 <p>In order to build and preview the documents, just run the command below from the root of the project and you should be
 able to view the documents at <code>localhost:8000</code> in your browser. After that, you should be able to update the documents
 and have your browser preview update live.</p>
-<div class="codehilite"><pre><span></span>mkdocs serve
-</pre></div>
+<div class="highlight"><pre><span></span><code>mkdocs serve
+</code></pre></div>
 
-<h2 id="spell-checking-documents">Spell Checking Documents<a class="headerlink" href="#spell-checking-documents" title="Permanent link"></a></h2>
+<h2 id="spell-checking-documents">Spell Checking Documents<a class="headerlink" href="#spell-checking-documents" title="Permanent link"></a></h2>
 <p>During validation we build the docs and spell check various files in the project. This project is used to spell check
 itself, but <a href="http://aspell.net/">Aspell</a> must be installed.  Currently this project uses one of the more recent versions of Aspell.
 Since the latest Aspell is not available on Windows, and this has not been tested with older versions, it is not
@@ -892,58 +884,58 @@ installed in your system path (if needed you can use the <code>--binary</code> o
 binary). It is also expected that you have the <code>en</code> dictionary installed as well. To initiate the spell check, run the
 following command from the root of the project.</p>
 <p>You will need to make sure the documents are built first:</p>
-<div class="codehilite"><pre><span></span>mkdocs build --clean
-</pre></div>
+<div class="highlight"><pre><span></span><code>mkdocs build --clean
+</code></pre></div>
 
 <p>And then run the spell checker. Using <code>python -m</code> from the project root will load your checked out version of PySpelling
 instead of your system installed version:</p>
-<div class="codehilite"><pre><span></span>python -m pyspelling
-</pre></div>
+<div class="highlight"><pre><span></span><code>python -m pyspelling
+</code></pre></div>
 
 <p>It should print out the files with the misspelled words if any are found.  If you find it prints words that are not
 misspelled, you can add them in <code>docs/src/dictionary/en-custom.text</code>.</p>
-<h2 id="validation-tests">Validation Tests<a class="headerlink" href="#validation-tests" title="Permanent link"></a></h2>
+<h2 id="validation-tests">Validation Tests<a class="headerlink" href="#validation-tests" title="Permanent link"></a></h2>
 <p>In order to preserve good code health, a test suite has been put together with pytest (<a class="magiclink magiclink-github magiclink-repository" href="https://github.com/pytest-dev/pytest" title="GitHub Repository: pytest-dev/pytest">pytest-dev/pytest</a>). There are
 currently two kinds of tests: syntax and targeted.  To run these tests, you can use the following command:</p>
-<div class="codehilite"><pre><span></span>python run_tests.py
-</pre></div>
+<div class="highlight"><pre><span></span><code>python run_tests.py
+</code></pre></div>
 
-<h3 id="running-validation-with-tox">Running Validation With Tox<a class="headerlink" href="#running-validation-with-tox" title="Permanent link"></a></h3>
+<h3 id="running-validation-with-tox">Running Validation With Tox<a class="headerlink" href="#running-validation-with-tox" title="Permanent link"></a></h3>
 <p>Tox (<a class="magiclink magiclink-github magiclink-repository" href="https://github.com/tox-dev/tox" title="GitHub Repository: tox-dev/tox">tox-dev/tox</a>) is a great way to run the validation tests, spelling checks, and linting in virtual environments so
 as not to mess with your current working environment. Tox will use the specified Python version for the given
 environment and create a virtual environment and install all the needed requirements (minus Aspell).  You could also
 setup your own virtual environments with the Virtualenv module without Tox, and manually do the same.</p>
 <p>First, you need to have Tox installed:</p>
-<div class="codehilite"><pre><span></span>pip install tox
-</pre></div>
+<div class="highlight"><pre><span></span><code>pip install tox
+</code></pre></div>
 
 <p>By running Tox, it will walk through all the environments and create them (assuming you have all the python versions on
 your machine) and run the related tests.  See <code>tox.ini</code> to learn more.</p>
-<div class="codehilite"><pre><span></span>tox
-</pre></div>
+<div class="highlight"><pre><span></span><code>tox
+</code></pre></div>
 
 <p>If you don't have all the Python versions needed to test all the environments, those entries will fail.  You can ignore
 those.  Spelling will also fail if you don't have the correct version of Aspell.</p>
 <p>As most people will not have all the Python versions on their machine, it makes more sense to target specific
 environments. To target a specific environment to test, you use the <code>-e</code> option to select the environment of interest.
 To select lint:</p>
-<div class="codehilite"><pre><span></span>tox -elint
-</pre></div>
+<div class="highlight"><pre><span></span><code>tox -elint
+</code></pre></div>
 
 <p>To select Python 3.7 unit tests (or other versions &ndash; change accordingly):</p>
-<div class="codehilite"><pre><span></span>tox -epy37
-</pre></div>
+<div class="highlight"><pre><span></span><code>tox -epy37
+</code></pre></div>
 
 <p>To select spelling and document building:</p>
-<div class="codehilite"><pre><span></span>tox -edocuments
-</pre></div>
+<div class="highlight"><pre><span></span><code>tox -edocuments
+</code></pre></div>
 
-<h2 id="code-coverage">Code Coverage<a class="headerlink" href="#code-coverage" title="Permanent link"></a></h2>
+<h2 id="code-coverage">Code Coverage<a class="headerlink" href="#code-coverage" title="Permanent link"></a></h2>
 <p>When running the validation tests through Tox, it is setup to track code coverage via the Coverage
 (<a class="magiclink magiclink-bitbucket magiclink-repository" href="https://bitbucket.org/ned/coveragepy" title="Bitbucket Repository: ned/coveragepy">ned/coveragepy</a>) module.  Coverage is run on each <code>pyxx</code> environment.  If you've made changes to the code,
 you can clear the old coverage data:</p>
-<div class="codehilite"><pre><span></span>coverage erase
-</pre></div>
+<div class="highlight"><pre><span></span><code>coverage erase
+</code></pre></div>
 
 <p>Then run each unit test environment to and coverage will be calculated. All the data from each run is merged together.
 HTML is output for each file in <code>.tox/pyXX/tmp</code>.  You can use these to see areas that are not covered/exercised yet with
@@ -951,7 +943,17 @@ testing.</p>
 <p>You can checkout <code>tox.ini</code> to see how this is accomplished.</p>
                 
                   
-                
+                    
+
+<hr>
+<div class="md-source-date">
+  <small>
+    
+      Last update: March 16, 2020
+    
+  </small>
+</div>
+                  
                 
               
               
@@ -970,32 +972,32 @@ testing.</p>
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../contributing/" title="Contributing & Support" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
-            <div class="md-flex__cell md-flex__cell--shrink">
-              <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+          <a href="../contributing/" title="Contributing & Support" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" /></svg>
             </div>
-            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
-              <span class="md-flex__ellipsis">
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
                 Contributing &amp; Support
-              </span>
+              </div>
             </div>
           </a>
         
         
-          <a href="../changelog/" title="Changelog" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
-            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
-              <span class="md-flex__ellipsis">
+          <a href="../changelog/" title="Changelog" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
                 Changelog
-              </span>
+              </div>
             </div>
-            <div class="md-flex__cell md-flex__cell--shrink">
-              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z" /></svg>
             </div>
           </a>
         
@@ -1014,16 +1016,28 @@ testing.</p>
           </div>
         
         powered by
-        <a href="https://www.mkdocs.org">MkDocs</a>
+        <a href="https://www.mkdocs.org" target="_blank" rel="noopener">
+          MkDocs
+        </a>
         and
-        <a href="https://squidfunk.github.io/mkdocs-material/">
-          Material for MkDocs</a>
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
       </div>
       
   <div class="md-footer-social">
-    <link rel="stylesheet" href="../../assets/fonts/font-awesome.css">
     
-      <a href="https://github.com/facelessuser" class="md-footer-social__link fa fa-github"></a>
+      
+      
+      <a href="https://github.com/facelessuser" target="_blank" rel="noopener" title="github.com" class="md-footer-social__link">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+      </a>
+    
+      
+      
+      <a href="https://discord.gg/Xprw7Qn" target="_blank" rel="noopener" title="discord.gg" class="md-footer-social__link">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M297.216 243.2c0 15.616-11.52 28.416-26.112 28.416-14.336 0-26.112-12.8-26.112-28.416s11.52-28.416 26.112-28.416c14.592 0 26.112 12.8 26.112 28.416zm-119.552-28.416c-14.592 0-26.112 12.8-26.112 28.416s11.776 28.416 26.112 28.416c14.592 0 26.112-12.8 26.112-28.416.256-15.616-11.52-28.416-26.112-28.416zM448 52.736V512c-64.494-56.994-43.868-38.128-118.784-107.776l13.568 47.36H52.48C23.552 451.584 0 428.032 0 398.848V52.736C0 23.552 23.552 0 52.48 0h343.04C424.448 0 448 23.552 448 52.736zm-72.96 242.688c0-82.432-36.864-149.248-36.864-149.248-36.864-27.648-71.936-26.88-71.936-26.88l-3.584 4.096c43.52 13.312 63.744 32.512 63.744 32.512-60.811-33.329-132.244-33.335-191.232-7.424-9.472 4.352-15.104 7.424-15.104 7.424s21.248-20.224 67.328-33.536l-2.56-3.072s-35.072-.768-71.936 26.88c0 0-36.864 66.816-36.864 149.248 0 0 21.504 37.12 78.08 38.912 0 0 9.472-11.52 17.152-21.248-32.512-9.728-44.8-30.208-44.8-30.208 3.766 2.636 9.976 6.053 10.496 6.4 43.21 24.198 104.588 32.126 159.744 8.96 8.96-3.328 18.944-8.192 29.44-15.104 0 0-12.8 20.992-46.336 30.464 7.68 9.728 16.896 20.736 16.896 20.736 56.576-1.792 78.336-38.912 78.336-38.912z"/></svg>
+      </a>
     
   </div>
 
@@ -1033,11 +1047,26 @@ testing.</p>
       
     </div>
     
-      <script src="../../assets/javascripts/application.808e90bb.js"></script>
+      <script>var __config={}</script>
+    
+    
+      <script src="../../assets/javascripts/vendor.b0b43276.min.js"></script>
+      <script src="../../assets/javascripts/bundle.65293e7c.min.js"></script><script id="__lang" type="application/json">
+        {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}
+      </script>
+      <script>
+        __material = initialize(Object.assign({
+          url: {
+            base: "../..",
+            worker: {
+              search: "../../assets/javascripts/worker/search.784c5235.min.js"
+            }
+          },
+          features: ["tabs"]
+        }, typeof __config !== "undefined" ? __config : {}))
+      </script>
       
-      <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
-      
-        <script src="../../extra-0d9305e748.js"></script>
+        <script src="../../assets/pymdownx-extras/extra-52d8c68747.js"></script>
       
     
   </body>
