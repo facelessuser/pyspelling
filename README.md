@@ -1,7 +1,6 @@
+[![Donate via PayPal][donate-image]][donate-link]
 [![Discord][discord-image]][discord-link]
 [![Build][github-ci-image]][github-ci-link]
-[![Unix Build Status][travis-image]][travis-link]
-[![Windows Build Status][appveyor-image]][appveyor-link]
 [![Coverage Status][codecov-image]][codecov-link]
 [![PyPI Version][pypi-image]][pypi-link]
 [![PyPI - Python Version][python-image]][pypi-link]
@@ -63,3 +62,5 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 [pypi-link]: https://pypi.python.org/pypi/pyspelling
 [python-image]: https://img.shields.io/pypi/pyversions/pyspelling?logo=python&logoColor=aaaaaa&labelColor=333333
 [license-image-mit]: https://img.shields.io/badge/license-MIT-blue.svg?labelColor=333333
+[donate-image]: https://img.shields.io/badge/Donate-PayPal-3fabd1?logo=paypal
+[donate-link]: https://www.paypal.me/facelessuser
