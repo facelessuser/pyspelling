@@ -59,7 +59,7 @@ setup(
     author='Isaac Muse',
     author_email='Isaac.Muse@gmail.com',
     url='https://github.com/facelessuser/pyspelling',
-    packages=find_packages(exclude=['tests', 'tools']),
+    packages=find_packages(exclude=['tests*', 'tools*']),
     entry_points=entry_points,
     install_requires=get_requirements(),
     license='MIT License',
