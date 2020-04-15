@@ -263,7 +263,7 @@ In order to get running in GitHub's CI, you can follow the steps below:
 5. Install dependencies you may need. Below, we update `pip` and `setuptools` and install `pyspelling`. You may require
   additional dependencies depending on spelling extensions used, or if pre-building of documents is needed.
 6. Install Aspell and Aspell dictionaries. You are also free to use Hunspell if preferred.
-7. Below we've allowed for a `Build documents` step where you can build documentations are do any other file
+7. Below we've allowed for a `Build documents` step where you can build documentation or do any other file
   preprocessing that is required for your specific environment.
 8. Lastly, run PySpelling.
 
