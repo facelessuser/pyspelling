@@ -17,7 +17,7 @@ def main():
     group.add_argument('--group', '-g', action='append', help="Specific spelling task groun to run.")
     parser.add_argument('--binary', '-b', action='store', default='', help="Provide path to spell checker's binary.")
     parser.add_argument('--config', '-c', action='store', default='', help="Spelling config.")
-    parser.add_argument('--source', '-S', action='append', help="Specify override file pattern.")
+    parser.add_argument('--source', '-S', nargs='+', help="Specify override file pattern.")
     parser.add_argument(
         '--spellchecker', '-s', action='store', default='', help="Choose between aspell and hunspell"
     )

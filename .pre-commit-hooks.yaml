@@ -1,0 +1,6 @@
+-   id: pyspelling
+    name: pyspelling
+    entry: pyspelling
+    language: python
+    args: [-S]
+    additional_dependencies: []
