@@ -224,7 +224,7 @@ which the Unicode text was originally in (`encoding`), and a `category` that is 
 filters in the chain (`category`). `SourceText` should not contain byte strings, and if they do, they will not be passed
 to additional filters. `error` is optional and is only provided message when something goes wrong.
 
-When receiving a `SourceText` object in your plugin, you can access the the content via attributes with the same name as
+When receiving a `SourceText` object in your plugin, you can access the content via attributes with the same name as
 the parameters above:
 
 ```pycon3
