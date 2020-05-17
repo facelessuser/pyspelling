@@ -55,7 +55,7 @@ class Plugin:
             isinstance(self.config[k], int) and
             (not isinstance(v, int) and not (isinstance(v, float) and v.is_integer()))
         ):
-            raise ValueError("{}: option '{}' must be a int type.".format(*args))
+            raise ValueError("{}: option '{}' must be an int type.".format(*args))
         # Floats (integers allowed)
         elif isinstance(self.config[k], float) and not isinstance(v, (int, float)):
             raise ValueError("{}: option '{}' must be a float type.".format(*args))
