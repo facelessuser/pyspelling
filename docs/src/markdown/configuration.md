@@ -234,7 +234,7 @@ to specific categories, or exclude specific categories from the next step. This 
 If for some reason you need to send the file directly to the spell checker without using PySpelling's pipeline, simply
 set `pipeline` to `null`. This sends file directly to the spell checker without evaluating the encoding or passing
 through any filters. Specifically with Hunspell, it also sends the spell checker the filename instead of piping the
-content as Hunspell has certain features that don't work when piping the data, such as OpenOffice ODF input. 
+content as Hunspell has certain features that don't work when piping the data, such as OpenOffice ODF input.
 
 Below is an example where we send an OpenOffice ODF file directly to Hunspell in order to use Hunspell's `-O` option to
 parse the ODF file. Keep in mind that when doing this, no encoding is sent to the spell checker unless you define
@@ -370,7 +370,7 @@ matrix:
 The above options would be equivalent to doing this from the command line:
 
 ```shell-session
-$ aspell --add-extra-dicts my-dictionary.doc --add-extra-dicts my-other-dictionary.dic
+$ aspell --add-extra-dicts my-dictionary.dic --add-extra-dicts my-other-dictionary.dic
 ```
 
 --8<-- "refs.txt"
