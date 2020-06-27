@@ -48,6 +48,7 @@ backticks
 blockish
 bool
 boolean
+symlink
 builtin
 builtins
 chainable
@@ -65,6 +66,7 @@ facelessuser
 filename
 gforcada
 globbing
+globstar
 iterables
 linter
 lxml

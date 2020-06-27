@@ -6,15 +6,10 @@ from .__meta__ import __version__, __version_info__  # noqa: F401
 from . import flow_control
 from . import filters
 from wcmatch import glob
-import wcmatch
 import codecs
 from collections import namedtuple
 
 __all__ = ("spellcheck",)
-
-CASE_SUPPORT = wcmatch.__version_info__ >= (5, 0)
-NOUNIQUE_SUPPORT = wcmatch.__version_info__ >= (6, 0)
-GLOBTILDE_SUPPORT = wcmatch.__version_info__ >= (6, 0)
 
 
 class Results(namedtuple('Results', ['words', 'context', 'category', 'error'])):
@@ -32,8 +27,8 @@ class SpellChecker:
     DICTIONARY = 'dictionary.dic'
 
     GLOB_FLAG_MAP = {
-        ("CASE" if CASE_SUPPORT else "FORCECASE"): (glob.C if CASE_SUPPORT else glob.F),
-        ("C" if CASE_SUPPORT else "F"): (glob.C if CASE_SUPPORT else glob.F),
+        "CASE": glob.C,
+        "C": glob.C,
         "IGNORECASE": glob.I,
         "I": glob.I,
         "RAWCHARS": glob.R,
@@ -56,10 +51,10 @@ class SpellChecker:
         "X": glob.X,
         "NEGATEALL": glob.A,
         "A": glob.A,
-        "NOUNIQUE": (glob.Q if NOUNIQUE_SUPPORT else 0),
-        "Q": (glob.Q if NOUNIQUE_SUPPORT else 0),
-        "GLOBTILDE": (glob.T if GLOBTILDE_SUPPORT else 0),
-        "T": (glob.T if GLOBTILDE_SUPPORT else 0),
+        "NOUNIQUE": glob.Q,
+        "Q": glob.Q,
+        "GLOBTILDE": glob.T,
+        "T": glob.T,
         # We will accept these, but we already force them on
         "SPLIT": glob.S,
         "S": glob.S,
@@ -185,8 +180,7 @@ class SpellChecker:
         for target in targets:
             # Glob using `S` for patterns wit `|` and `O` to exclude directories.
             kwargs = {"flags": flags | glob.S | glob.O}
-            if NOUNIQUE_SUPPORT:
-                kwargs['limit'] = limit
+            kwargs['limit'] = limit
             for f in glob.iglob(target, **kwargs):
                 found_something = True
                 self.log('', 2)
