@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.6.1
+
+- **FIX**: Upgrade to `wcmatch` 6.0.3 which fixes issues dealing with dot files and globstar (`**`) when dot globbing is
+  not enabled. Also fixes a small logic error with symlink following and globstar. 6.0.3 is now the minimum requirement.
+
 ## 2.6.0
 
 - **NEW**: Add support for `wcmatch` version `6.0`.
