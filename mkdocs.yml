@@ -11,9 +11,11 @@ copyright: |
 docs_dir: docs/src/markdown
 theme:
   name: material
+  icon:
+    logo: material/book-open-page-variant
   palette:
-    primary: blue
-    accent: blue
+    primary: drac-purple
+    accent: drac-purple
   font:
     text: Roboto
     code: Roboto Mono
