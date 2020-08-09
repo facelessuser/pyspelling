@@ -1,9 +1,5 @@
 # Changelog
 
-## 2.7
-
-- **NEW**: Formally support python 3.9.
-
 ## 2.6.1
 
 - **FIX**: Upgrade to `wcmatch` 6.0.3 which fixes issues dealing with dot files and globstar (`**`) when dot globbing is
