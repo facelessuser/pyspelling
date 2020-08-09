@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - 'master'
+    tags:
+    - '**'
+  pull_request:
+    branches:
+    - '**'
 
 jobs:
   tests:
@@ -69,11 +74,11 @@ jobs:
     # Linux
     - name: Linux (Setup Dependencies)
       if: runner.os == 'Linux'
-      run: sudo apt-get install aspell aspell-en
+      run: sudo apt-get install aspell aspell-en hunspell hunspell-en-us
     - name: Linux (Run Tests)
       if: runner.os == 'Linux'
       env:
-        TOX_SPELL_REQUIRE: aspell
+        TOX_SPELL_REQUIRE: both
       run: |
         python -m tox
 
