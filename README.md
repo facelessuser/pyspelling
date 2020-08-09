@@ -48,10 +48,10 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 [aspell]: http://aspell.net/
 [hunspell]: https://hunspell.github.io/
 
-[github-ci-image]: https://github.com/facelessuser/pyspelling/workflows/build/badge.svg
-[github-ci-link]: https://github.com/facelessuser/pyspelling/actions?workflow=build
+[github-ci-image]: https://github.com/facelessuser/pyspelling/workflows/build/badge.svg?branch=master&event=push
+[github-ci-link]: https://github.com/facelessuser/pyspelling/actions?query=workflow%3Abuild+branch%3Amaster
 [discord-image]: https://img.shields.io/discord/678289859768745989?logo=discord&logoColor=aaaaaa&color=mediumpurple&labelColor=333333
-[discord-link]:https://discord.gg/Xprw7Qn
+[discord-link]:https://discord.gg/TWs8Tgr
 [codecov-image]: https://img.shields.io/codecov/c/github/facelessuser/pyspelling/master.svg?logo=codecov&logoColor=aaaaaa&labelColor=333333
 [codecov-link]: https://codecov.io/github/facelessuser/pyspelling
 [appveyor-image]: https://img.shields.io/appveyor/ci/facelessuser/pyspelling/master.svg?label=appveyor&logo=appveyor&logoColor=aaaaaa&labelColor=333333

@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - 'master'
+    tags:
+    - '**'
+  pull_request:
+    branches:
+    - '**'
 
 jobs:
   tests:
@@ -12,16 +17,26 @@ jobs:
       max-parallel: 4
       matrix:
         platform: [ubuntu-latest, windows-latest]
-        python-version: [3.5, 3.6, 3.7, 3.8]
+        python-version: [3.5, 3.6, 3.7, 3.8, 3.9-dev]
         include:
           - python-version: 3.5
             tox-env: py35
+            continue-on-error: False
           - python-version: 3.6
             tox-env: py36
+            continue-on-error: False
           - python-version: 3.7
             tox-env: py37
+            continue-on-error: False
           - python-version: 3.8
             tox-env: py38
+            continue-on-error: False
+          - python-version: 3.9-dev
+            tox-env: py39
+            continue-on-error: True
+        exclude:
+          - platform: windows-latest
+            python-version: 3.9-dev
 
     env:
       TOXENV: ${{ matrix.tox-env }}
@@ -31,7 +46,13 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
+      if: "!endsWith(matrix.python-version, '-dev')"
       uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Set up development Python ${{ matrix.python-version }}
+      if: endsWith(matrix.python-version, '-dev')
+      uses: deadsnakes/action@v1.0.0
       with:
         python-version: ${{ matrix.python-version }}
     - name: Python (Install Dependencies)
@@ -69,13 +90,14 @@ jobs:
     # Linux
     - name: Linux (Setup Dependencies)
       if: runner.os == 'Linux'
-      run: sudo apt-get install aspell aspell-en
+      run: sudo apt-get install aspell aspell-en hunspell hunspell-en-us
     - name: Linux (Run Tests)
       if: runner.os == 'Linux'
       env:
-        TOX_SPELL_REQUIRE: aspell
+        TOX_SPELL_REQUIRE: both
       run: |
         python -m tox
+      continue-on-error: ${{ matrix.continue-on-error }}
 
     # Results
     - name: Upload Results

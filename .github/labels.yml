@@ -4,10 +4,11 @@ template: 'facelessuser:master-labels:labels.yml:master'
 
 brace_expansion: true
 extended_glob: true
+minus_negate: false
 
 rules:
   - labels: ['C: infrastructure']
-    patterns: ['*|@(requirements|.github)/**|-*.md']
+    patterns: ['*|@(requirements|.github)/**|!*.md']
 
   - labels: ['C: source']
     patterns: ['pyspelling/**']
