@@ -7,7 +7,7 @@ from pyspelling import spellcheck, __version__
 def main():
     """Main."""
 
-    parser = argparse.ArgumentParser(prog='spellcheck', description='Spell checking tool.')
+    parser = argparse.ArgumentParser(prog='pyspelling', description='Spell checking tool.')
     # Flag arguments
     parser.add_argument('--version', action='version', version=('%(prog)s ' + __version__))
     parser.add_argument('--debug', action='store_true', default=False, help=argparse.SUPPRESS)

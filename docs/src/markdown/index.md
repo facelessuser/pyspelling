@@ -55,7 +55,7 @@ If you want to manually install it, run `#!bash python setup.py build` and `#!ba
 ## Command Line Usage
 
 ```
-usage: spellcheck [-h] [--version] [--verbose] [--name NAME] [--binary BINARY]
+usage: pyspelling [-h] [--version] [--verbose] [--name NAME] [--binary BINARY]
                   [--config CONFIG] [--spellchecker SPELLCHECKER]
 
 Spell checking tool.
