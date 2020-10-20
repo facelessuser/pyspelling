@@ -14,7 +14,7 @@ def main():
     parser.add_argument('--verbose', '-v', action='count', default=0, help="Verbosity level.")
     group = parser.add_mutually_exclusive_group()
     group.add_argument('--name', '-n', action='append', help="Specific spelling task by name to run.")
-    group.add_argument('--group', '-g', action='append', help="Specific spelling task groun to run.")
+    group.add_argument('--group', '-g', action='append', help="Specific spelling task group to run.")
     parser.add_argument('--binary', '-b', action='store', default='', help="Provide path to spell checker's binary.")
     parser.add_argument('--config', '-c', action='store', default='', help="Spelling config.")
     parser.add_argument('--source', '-S', action='append', help="Specify override file pattern.")
