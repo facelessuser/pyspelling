@@ -16,12 +16,9 @@ jobs:
       fail-fast: false
       max-parallel: 4
       matrix:
-        platform: [ubuntu-latest, windows-latest]
-        python-version: [3.5, 3.6, 3.7, 3.8, 3.9-dev]
+        platform: [ubuntu-latest] #, windows-latest]
+        python-version: [3.6, 3.7, 3.8, 3.9]
         include:
-          - python-version: 3.5
-            tox-env: py35
-            continue-on-error: False
           - python-version: 3.6
             tox-env: py36
             continue-on-error: False
@@ -31,12 +28,12 @@ jobs:
           - python-version: 3.8
             tox-env: py38
             continue-on-error: False
-          - python-version: 3.9-dev
+          - python-version: 3.9
             tox-env: py39
             continue-on-error: True
-        exclude:
-          - platform: windows-latest
-            python-version: 3.9-dev
+        # exclude:
+        #   - platform: windows-latest
+        #     python-version: 3.9
 
     env:
       TOXENV: ${{ matrix.tox-env }}
@@ -59,33 +56,33 @@ jobs:
       run: |
         python -m pip install --upgrade pip setuptools tox coverage codecov
 
-    # Windows
-    - name: Windows (Setup MSYS2)
-      if: runner.os == 'Windows'
-      uses: numworks/setup-msys2@v1
-      with:
-        msystem: MSYS
-    - name: Windows (Setup MSYS2 Dependencies)
-      if: runner.os == 'Windows'
-      run: msys2do pacman -S --noconfirm mingw-w64-x86_64-aspell mingw-w64-x86_64-aspell-en mingw-w64-x86_64-hunspell mingw-w64-x86_64-hunspell-en
-    - name: Windows (Setup Aspell Config)
-      if: runner.os == 'Windows'
-      shell: bash
-      run: |
-        spellpath=$(echo "${RUNNER_TEMP}/msys/msys64/mingw64/bin" | sed 's/\\/\//g');
-        aconf=$(${spellpath}/aspell config conf-dir | sed 's/\\/\//g');
-        ${spellpath}/aspell dump config | sed 's/\\\\/\//g' > ${aconf}/aspell.conf;
-        temp=$(${spellpath}/aspell config data-dir | sed 's/\\/\//g');
-        echo "data-dir ${temp}" >> ${aconf}/aspell.conf;
-        temp=$(${spellpath}/aspell config dict-dir | sed 's/\\/\//g');
-        echo "dict-dir ${temp}" >> ${aconf}/aspell.conf
-    - name: Windows (Run Tests)
-      if: runner.os == 'Windows'
-      env:
-        TOX_SPELL_PATH: '${{ runner.temp }}\msys\msys64\mingw64\bin'
-        TOX_SPELL_REQUIRE: both
-      run: |
-        python -m tox
+    # # Windows
+    # - name: Windows (Setup MSYS2)
+    #   if: runner.os == 'Windows'
+    #   uses: numworks/setup-msys2@v1
+    #   with:
+    #     msystem: MSYS
+    # - name: Windows (Setup MSYS2 Dependencies)
+    #   if: runner.os == 'Windows'
+    #   run: msys2do pacman -S --noconfirm mingw-w64-x86_64-aspell mingw-w64-x86_64-aspell-en mingw-w64-x86_64-hunspell mingw-w64-x86_64-hunspell-en
+    # - name: Windows (Setup Aspell Config)
+    #   if: runner.os == 'Windows'
+    #   shell: bash
+    #   run: |
+    #     spellpath=$(echo "${RUNNER_TEMP}/msys/msys64/mingw64/bin" | sed 's/\\/\//g');
+    #     aconf=$(${spellpath}/aspell config conf-dir | sed 's/\\/\//g');
+    #     ${spellpath}/aspell dump config | sed 's/\\\\/\//g' > ${aconf}/aspell.conf;
+    #     temp=$(${spellpath}/aspell config data-dir | sed 's/\\/\//g');
+    #     echo "data-dir ${temp}" >> ${aconf}/aspell.conf;
+    #     temp=$(${spellpath}/aspell config dict-dir | sed 's/\\/\//g');
+    #     echo "dict-dir ${temp}" >> ${aconf}/aspell.conf
+    # - name: Windows (Run Tests)
+    #   if: runner.os == 'Windows'
+    #   env:
+    #     TOX_SPELL_PATH: '${{ runner.temp }}\msys\msys64\mingw64\bin'
+    #     TOX_SPELL_REQUIRE: both
+    #   run: |
+    #     python -m tox
 
     # Linux
     - name: Linux (Setup Dependencies)
@@ -113,7 +110,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [3.7]
+        python-version: [3.8]
 
     env:
       TOXENV: lint
@@ -141,10 +138,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python 3.7
+    - name: Set up Python 3.8
       uses: actions/setup-python@v1
       with:
-        python-version: 3.7
+        python-version: 3.8
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip setuptools tox

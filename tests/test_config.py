@@ -247,3 +247,25 @@ class TestNameGroup(util.PluginTestCase):
         self.mktemp('.source.yml', config, 'utf-8')
         with self.assertRaises(ValueError):
             self.assert_spellcheck('.source.yml', [])
+
+    def test_too_many_filter_names(self):
+        """Test too many filter names."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: too_many_pipeline_names
+              default_encoding: utf-8
+              sources:
+              - '{temp}/**/*.txt'
+              aspell:
+                lang: en
+              pipeline:
+              - pyspelling.filters.html:
+                # should be indented more
+                name2: 1
+            """
+        )
+        self.mktemp('.source.yml', config, 'utf-8')
+        with self.assertRaises(ValueError):
+            self.assert_spellcheck('.source.yml', [])
