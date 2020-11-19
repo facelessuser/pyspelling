@@ -5,6 +5,7 @@
 - **FIX**: Fix spelling in help output.
 - **FIX**: Raise error in cases where pipeline options are not indented enough and parsed as an additional pipeline
   name.
+- **FIX**: Drop Python 3.5 support and officially support Python 3.9.
 
 ## 2.6.1
 

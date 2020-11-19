@@ -17,11 +17,8 @@ jobs:
       max-parallel: 4
       matrix:
         platform: [ubuntu-latest] #, windows-latest]
-        python-version: [3.5, 3.6, 3.7, 3.8, 3.9]
+        python-version: [3.6, 3.7, 3.8, 3.9]
         include:
-          - python-version: 3.5
-            tox-env: py35
-            continue-on-error: False
           - python-version: 3.6
             tox-env: py36
             continue-on-error: False
@@ -113,7 +110,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [3.7]
+        python-version: [3.8]
 
     env:
       TOXENV: lint
@@ -141,10 +138,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python 3.7
+    - name: Set up Python 3.8
       uses: actions/setup-python@v1
       with:
-        python-version: 3.7
+        python-version: 3.8
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip setuptools tox
