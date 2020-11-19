@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.6.2.
+
+- **FIX**: Fix spelling in help output.
+- **FIX**: Raise error in cases where pipeline options are not indented enough and parsed as an additional pipeline
+  name.
+
 ## 2.6.1
 
 - **FIX**: Upgrade to `wcmatch` 6.0.3 which fixes issues dealing with dot files and globstar (`**`) when dot globbing is

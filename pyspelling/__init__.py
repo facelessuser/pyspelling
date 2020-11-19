@@ -11,6 +11,11 @@ from collections import namedtuple
 
 __all__ = ("spellcheck",)
 
+STEP_ERROR = """Pipline step in unexpected format: {}
+
+Each pipeline step should be in the form {{key: options: {{}}}} not {{key: {{}}, key2: {{}}}}
+"""
+
 
 class Results(namedtuple('Results', ['words', 'context', 'category', 'error'])):
     """Results."""
@@ -246,6 +251,8 @@ class SpellChecker:
             for step in steps:
                 # Retrieve module and module options
                 if isinstance(step, dict):
+                    if len(step) > 1:
+                        raise ValueError(STEP_ERROR.format(str(step)))
                     name, options = list(step.items())[0]
                 else:
                     name = step
