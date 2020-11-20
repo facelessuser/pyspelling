@@ -16,6 +16,7 @@ class TestURL(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
                 mode: none
               hunspell:
                 d: en_US
@@ -55,6 +56,7 @@ class TestURLChained(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
                 mode: none
               hunspell:
                 d: en_US

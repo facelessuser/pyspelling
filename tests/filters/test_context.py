@@ -16,6 +16,7 @@ class TestContext(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -70,6 +71,7 @@ class TestContextChained(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:

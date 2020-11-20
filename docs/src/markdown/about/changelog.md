@@ -3,6 +3,9 @@
 ## 2.7.0.
 
 - **NEW**: Check for `.pyspelling.yml` or `.pyspelling.yaml` by default.
+- **FIX**: Fix documentation about how to specify languages in Aspell and how to specify languages when compiling custom
+  wordlists. In short, `d` should be used for specifying languages in general, but when using custom wordlists, `lang`
+  should be specified, and it should reference the `.dat` file name..
 - **FIX**: Fix spelling in help output.
 - **FIX**: Raise error in cases where pipeline options are not indented enough and parsed as an additional pipeline
   name.

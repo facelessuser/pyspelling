@@ -16,6 +16,7 @@ class TestHTML(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -107,6 +108,7 @@ class TestCSSEscapes(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -168,6 +170,7 @@ class TestHtml5AttrNamespace(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -194,6 +197,7 @@ class TestHtml5AttrNamespace(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -221,6 +225,7 @@ class TestHtml5AttrNamespace(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -283,6 +288,7 @@ class TestHtml5EmptySelectors(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -344,6 +350,7 @@ class TestHtml5OnlySelectors(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -371,6 +378,7 @@ class TestHtml5OnlySelectors(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -432,6 +440,7 @@ class TestHtml5NthOfSelectors(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -459,6 +468,7 @@ class TestHtml5NthOfSelectors(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -483,6 +493,7 @@ class TestHtml5NthOfSelectors(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -544,6 +555,7 @@ class TestHtml5NthSelectors(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -571,6 +583,7 @@ class TestHtml5NthSelectors(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -598,6 +611,7 @@ class TestHtml5NthSelectors(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -625,6 +639,7 @@ class TestHtml5NthSelectors(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -652,6 +667,7 @@ class TestHtml5NthSelectors(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -679,6 +695,7 @@ class TestHtml5NthSelectors(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -706,6 +723,7 @@ class TestHtml5NthSelectors(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -733,6 +751,7 @@ class TestHtml5NthSelectors(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -760,6 +779,7 @@ class TestHtml5NthSelectors(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -787,6 +807,7 @@ class TestHtml5NthSelectors(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -814,6 +835,7 @@ class TestHtml5NthSelectors(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -841,6 +863,7 @@ class TestHtml5NthSelectors(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -868,6 +891,7 @@ class TestHtml5NthSelectors(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -895,6 +919,7 @@ class TestHtml5NthSelectors(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -962,6 +987,7 @@ class TestHtml5AdvancedSelectors(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -989,6 +1015,7 @@ class TestHtml5AdvancedSelectors(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -1016,6 +1043,7 @@ class TestHtml5AdvancedSelectors(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -1044,6 +1072,7 @@ class TestHtml5AdvancedSelectors(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -1071,6 +1100,7 @@ class TestHtml5AdvancedSelectors(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -1099,6 +1129,7 @@ class TestHtml5AdvancedSelectors(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -1165,6 +1196,7 @@ class TestHtml5AdvancedSelectors2(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -1192,6 +1224,7 @@ class TestHtml5AdvancedSelectors2(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -1219,6 +1252,7 @@ class TestHtml5AdvancedSelectors2(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -1246,6 +1280,7 @@ class TestHtml5AdvancedSelectors2(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -1277,6 +1312,7 @@ class TestHTML5LIB(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -1343,6 +1379,7 @@ class TestXHTML(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -1413,6 +1450,7 @@ class TestHTMLChained(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
