@@ -16,6 +16,7 @@ class TestOOOXMLFilter(util.PluginTestCase):
               - 'tests/**/*.docx'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -36,6 +37,7 @@ class TestOOOXMLFilter(util.PluginTestCase):
               - 'tests/**/*.pptx'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -56,6 +58,7 @@ class TestOOOXMLFilter(util.PluginTestCase):
               - 'tests/**/*.xlsx'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -77,6 +80,7 @@ class TestOOOXMLFilter(util.PluginTestCase):
               - 'tests/**/*.docx'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:

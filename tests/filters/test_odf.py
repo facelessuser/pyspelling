@@ -16,6 +16,7 @@ class TestODFFilter(util.PluginTestCase):
               - 'tests/**/*.odt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -36,6 +37,7 @@ class TestODFFilter(util.PluginTestCase):
               - 'tests/**/*.fodt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -56,6 +58,7 @@ class TestODFFilter(util.PluginTestCase):
               - 'tests/**/*.odp'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -76,6 +79,7 @@ class TestODFFilter(util.PluginTestCase):
               - 'tests/**/*.ods'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -97,6 +101,7 @@ class TestODFFilter(util.PluginTestCase):
               - 'tests/**/*.odt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -118,6 +123,7 @@ class TestODFFilter(util.PluginTestCase):
               - 'tests/**/*.fodt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:

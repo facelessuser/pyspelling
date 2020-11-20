@@ -16,6 +16,7 @@ class TestStylesheetsCSS(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -61,6 +62,7 @@ class TestStylesheetsSCSS(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -117,6 +119,7 @@ class TestStylesheetsSASS(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:
@@ -173,6 +176,7 @@ class TestStylesheetsCSSChained(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline:

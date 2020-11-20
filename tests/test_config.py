@@ -19,6 +19,7 @@ class TestGlob(util.PluginTestCase):
               - '{}/**/test-{{1..11}}.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline: null
@@ -41,6 +42,7 @@ class TestGlob(util.PluginTestCase):
               - '{}/**/test-{{1..11}}.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline: null
@@ -69,6 +71,7 @@ class TestNoPipeline(util.PluginTestCase):
               - '{}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline: null
@@ -93,6 +96,7 @@ class TestNoPipeline(util.PluginTestCase):
               - '{temp}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
               pipeline: null
@@ -135,6 +139,7 @@ class TestNameGroup(util.PluginTestCase):
               - '{temp}/**/test1.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
             # Purposely reuse same name
@@ -145,6 +150,7 @@ class TestNameGroup(util.PluginTestCase):
               - '{temp}/**/test2.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
             - name: name3
@@ -155,6 +161,7 @@ class TestNameGroup(util.PluginTestCase):
               - '{temp}/**/test4.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
             """
@@ -189,6 +196,7 @@ class TestNameGroup(util.PluginTestCase):
               - '{temp}/**/test4.txt'
               aspell:
                 lang: en
+                d: en_US
               hunspell:
                 d: en_US
             """
@@ -260,6 +268,7 @@ class TestNameGroup(util.PluginTestCase):
               - '{temp}/**/*.txt'
               aspell:
                 lang: en
+                d: en_US
               pipeline:
               - pyspelling.filters.html:
                 # should be indented more

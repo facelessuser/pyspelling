@@ -506,10 +506,9 @@ class Hunspell(SpellChecker):
 
         dictionary_options = task.get('dictionary', {})
         output = os.path.abspath(dictionary_options.get('output', self.dict_bin))
-        lang = dictionary_options.get('lang', 'en_US')
         wordlists = dictionary_options.get('wordlists', [])
-        if lang and wordlists:
-            self.compile_dictionary(lang, dictionary_options.get('wordlists', []), None, output)
+        if wordlists:
+            self.compile_dictionary('', dictionary_options.get('wordlists', []), None, output)
         else:
             output = None
         return output

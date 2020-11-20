@@ -20,8 +20,8 @@ matrix:
   - docs/src/scss/*.scss
   aspell:
     lang: en
+    d: en_US
   dictionary:
-    lang: en
     wordlists:
     - docs/src/dictionary/en-custom.txt
     output: build/dictionary/scss.dic

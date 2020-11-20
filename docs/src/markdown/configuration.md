@@ -31,6 +31,7 @@ matrix:
 - name: Python Source
   aspell:
     lang: en
+    d: en_US
   sources:
   - pyspelling/**/*.py
 ```
@@ -45,6 +46,7 @@ matrix:
   - pyspelling/**/*.py
   aspell:
     lang: en
+    d: en_US
   dictionary:
     wordlists:
     - docs/src/dictionary/en-custom.txt
@@ -252,25 +254,21 @@ matrix:
   pipeline: null
 ```
 
-### Dictionaries and Personal Wordlists
+### Languages
 
-By default, PySpelling sets your main dictionary to `en` for Aspell and `en_US` for Hunspell. If you do not desire an
-American English dictionary, or these dictionaries are not installed in their expected default locations, you will need
-to configure PySpelling so it can find your preferred dictionary. Since dictionary configuring varies for each spell
-checker, the main dictionary is configuration (and virtually any spell checker specific option) is performed via
-[Spell Checker Options](#spell-checker-options).
+Languages in both Aspell and Hunspell are controlled by the `-d` option. In the YAML configuration, we remove any
+leading `-`and just use `d`.
 
-For Aspell, you would use the command line option `--lang` or `-l`, which in the YAML configuration file is `lang` or
-`l` respectively. You can see we are just removing the leading `-` characters.
+For Aspell:
 
 ```yaml
 matrix:
 - name: python
   aspell:
-    lang: en
+    d: en_US
 ```
 
-For Hunspell, you would use the command line option `-d`, which in the YAML configuration file is `d`:
+For Hunspell:
 
 ```yaml
 matrix:
@@ -279,13 +277,65 @@ matrix:
     d: en_US
 ```
 
-While the dictionaries cover a number of commonly used words, they are usually not sufficient. Luckily, both Aspell and
-Hunspell allow for adding custom wordlists. You can have as many wordlists as you like, and they can be included in a
-list under the key `wordlists` which is also found under the key `dictionary`. While Hunspell doesn't directly compile
-the wordlists, Aspell does, and it uses the main dictionary that you have specified to accomplish this.
+Since spell checker options vary between both Aspell and Hunspell, spell checker specific options are handled by under
+special keys named `aspell` and `hunspell`. To learn more, check out [Spell Checker Options](#spell-checker-options).
+
+By default, PySpelling sets your main dictionary to `en` for Aspell and `en_US` for Hunspell. If you do not desire an
+American English dictionary, or these dictionaries are not installed in their expected default locations, you will need
+to configure PySpelling so it can find your preferred dictionary. Since dictionary configuring varies for each spell
+checker, the main dictionary is configuration (and virtually any spell checker specific option) is performed via
+[Spell Checker Options](#spell-checker-options).
+
+### Dictionaries and Personal Wordlists
+
+While provided dictionaries cover a number of commonly used words, you may need to specify additional words that are not
+covered in the default dictionaries. Luckily, both Aspell and Hunspell allow for adding custom wordlists. You can have
+as many wordlists as you like, and they can be included in a list under the key `wordlists` which is also found under
+the key `dictionary`.
 
 All the wordlists are combined into one custom dictionary file whose output name and location is defined via the
 `output` key which is also found under the `dictionary` key.
+
+While Hunspell doesn't directly compile the wordlists, Aspell does, and it uses the `.dat` file for dictionary you are
+using. While you may be specifying a region specific versions of English with `en_US` or `en_GB`, both of these use the
+`en.dat` file. So in Aspell, it is recommended to specify both the `--lang` option (or the alias `-l`) as well as `-d`.
+If `lang` is not specified, the assumed data file will be `en`.
+
+```yaml
+matrix:
+- name: python
+  sources:
+  - pyspelling/**/*.py
+  aspell:
+    lang: en
+    d: en_US
+  dictionary:
+    wordlists:
+    - docs/src/dictionary/en-custom.txt
+    output: build/dictionary/python.dic
+  pipeline:
+  - pyspelling.filters.python:
+      comments: false
+```
+
+Hunspell, on the other hand, does not require an additional `lang` option as custom wordlists are handled differently
+than when under Aspell:
+
+```yaml
+matrix:
+- name: python
+  sources:
+  - pyspelling/**/*.py
+  hunspell:
+    d: en_US
+  dictionary:
+    wordlists:
+    - docs/src/dictionary/en-custom.txt
+    output: build/dictionary/python.dic
+  pipeline:
+  - pyspelling.filters.python:
+      comments: false
+```
 
 Lastly, you can set the encoding to be used during compilation via the `encoding` under `dictionary`. The encoding
 should generally match the encoding of your main dictionary. The default encoding is `utf-8`, and only Aspell uses this
@@ -298,6 +348,7 @@ matrix:
   - pyspelling/**/*.py
   aspell:
     lang: en
+    d: en_US
   dictionary:
     wordlists:
     - docs/src/dictionary/en-custom.txt
@@ -345,6 +396,7 @@ matrix:
   - pyspelling/**/*.py
   aspell:
     lang: en
+    d: en_US
   pipeline:
   - pyspelling.filters.python:
       strings: false
