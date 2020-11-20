@@ -170,7 +170,7 @@ def read_config(file_name):
     """Read configuration."""
 
     config = None
-    for name in (['.pyspelling.yml', '.spelling.yml'] if not file_name else [file_name]):
+    for name in (['.pyspelling.yml', '.pyspelling.yaml', '.spelling.yml'] if not file_name else [file_name]):
         if os.path.exists(name):
             if not file_name and name == '.spelling.yml':
                 warn_deprecated(
