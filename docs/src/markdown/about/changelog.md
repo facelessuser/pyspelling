@@ -1,7 +1,8 @@
 # Changelog
 
-## 2.6.2.
+## 2.7.0.
 
+- **NEW**: Check for `.pyspelling.yml` or `.pyspelling.yaml` by default.
 - **FIX**: Fix spelling in help output.
 - **FIX**: Raise error in cases where pipeline options are not indented enough and parsed as an additional pipeline
   name.
