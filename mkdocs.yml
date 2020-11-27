@@ -8,18 +8,19 @@ copyright: |
 
 docs_dir: docs/src/markdown
 theme:
-  name: material
   custom_dir: docs/theme
+  name: material
   icon:
     logo: material/book-open-page-variant
   palette:
-    primary: drac-purple
-    accent: drac-purple
+    scheme: dracula
+    primary: deep purple
+    accent: deep purple
   font:
     text: Roboto
     code: Roboto Mono
   features:
-    - tabs
+    - navigation.tabs
 
 nav:
   - Usage:
