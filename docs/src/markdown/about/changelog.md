@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.7.0.
+## 2.7
 
 - **NEW**: Check for `.pyspelling.yml` or `.pyspelling.yaml` by default.
 - **FIX**: Fix documentation about how to specify languages in Aspell and how to specify languages when compiling custom
@@ -16,7 +16,7 @@
 - **FIX**: Upgrade to `wcmatch` 6.0.3 which fixes issues dealing with dot files and globstar (`**`) when dot globbing is
   not enabled. Also fixes a small logic error with symlink following and globstar. 6.0.3 is now the minimum requirement.
 
-## 2.6.0
+## 2.6
 
 - **NEW**: Add support for `wcmatch` version `6.0`.
 - **NEW**: `wcmatch` version `6.0` adds a default pattern limit of `1000` to help protect against really large pattern
@@ -27,12 +27,12 @@
 
 - **FIX**: Add workaround for `wcmatch` version `5.0`.
 
-## 2.5.0
+## 2.5
 
 - **NEW**: Add `expect_match` option to prevent a rule from failing if it finds no matching files.
 - **NEW**: Formally support Python 3.8.
 
-## 2.4.0
+## 2.4
 
 - **NEW**: Disable Aspell filters by default. Users must explicitly set the `mode` parameter under the `aspell` option
   to enable default Aspell filters.
@@ -45,7 +45,7 @@
 
 - **FIX**: Properly handle docstring content and detection in files that have single line functions.
 
-## 2.3.0
+## 2.3
 
 - **NEW**: Support new `wcmatch` glob feature flags and upgrade to `wcmatch` 4.0.
 - **FIX**: Don't use recursion when parsing XML or HTML documents.
@@ -81,7 +81,7 @@
 
 - **FIX**: Comments in HTML/XML should be returned regardless of whether they are in an ignored tag or not.
 
-## 2.2.0
+## 2.2
 
 - **NEW**: Add support for CSS4 selectors: `:empty`, `:first-child`, `:last-child`, `:only-child`, `:first-of-type`,
   `:last-of-type`, `:only-of-type`, `:nth-child(an+b [of S]?)`, `:nth-last-child(an+b [of S]?)`, `:nth-of-type(an+b)`,
@@ -91,7 +91,7 @@
 
 - **FIX**: CSS4 allows `:not()`, `:has()`, and `:is()` to be nested in `:not()`. (#62)
 
-## 2.1.0
+## 2.1
 
 - **NEW**: Add support for `div p`, `div>p`, `div+p`, `div~p` in the HTML/XML filter's CSS selectors. (#51)
 - **NEW**: Add support for the `:root` CSS selector. (#57)
@@ -100,7 +100,7 @@
   allowed alias. (#53)
 - **FIX**: Allow `:not()` to be nested in `:is()`/`:matches()`. (#56)
 
-## 2.0.0
+## 2.0
 
 - **NEW**: (Breaking change) Task names should be unique and using `--name` from the command line will only target one
   `name` (the last task defined with that name). If you were not using `name` to run a group of tasks, you will not
@@ -139,7 +139,7 @@
 - **FIX**: Catch and bubble up errors better.
 - **FIX**: Fix issue where Python module docstrings would not get spell checked if they followed a shebang.
 
-## 1.1.0
+## 1.1
 
 - **NEW**: Add URL/email address filter. (#30)
 - **NEW**: If `pipeline` configuration key is set to `null`, do not use any filters, and send the filename, not the
@@ -148,7 +148,7 @@
   dictionary is when compiling wordlists (only Aspell takes advantage of this).
 - **FIX**: Fix Hunspell `-O` option which was mistakenly `-o`. (#31)
 
-## 1.0.0
+## 1.0
 
 - **NEW**: Allow multiple names on command line via: `pyspelling -n name1 -n name2`.
 - **FIX**: Fix empty HTML tags not properly having their attributes evaluated.
@@ -157,11 +157,11 @@
 - **FIX**: Catch comments outside of the `<HTML>` tag.
 - **FIX**: Filter out `Doctype`, `CData`, and other XML or non-content type information.
 
-## 1.0.0b2
+## 1.0b2
 
 - **FIX**: Fix CPP comment regular expression.
 
-## 1.0.0b1
+## 1.0b1
 
 - **NEW**: Better context for HTML elements. HTML is now returned by block level elements, and the elements selector is
   given as context. Attributes also return a selector as context and are returned individually. HTML comments are
@@ -184,24 +184,24 @@
 - **FIX**: Internal cleanup in regards to error handling and debug.
 - **FIX**: Fix context issue when no escapes are defined.
 
-## 0.2.0a4
+## 0.2a4
 
 - **NEW**: Text filter can handle Unicode normalization and converting to other encodings.
 - **NEW**: Default encoding is now `utf-8` for all filters.
 - **FIX**: Internal encoding handling.
 
-## 0.2.0a3
+## 0.2a3
 
 - **FIX**: Text filter was returning old Parser name instead of new Filter name.
 
-## 0.2.0a2
+## 0.2a2
 
 - **NEW**: Incorporate the Decoder class into the filter class.
 - **NEW**: Add Hunspell support.
 - **NEW**: Drop specifying spell checker in configuration file. It must be set from command line.
 - **FIX**: Add missing documentation about Context filter.
 
-## 0.2.0a1
+## 0.2a1
 
 - **NEW**: Better filters (combine filters and parsers into just filters).
 - **NEW**: Drop Python 2 support.
@@ -212,16 +212,16 @@
 - **NEW**: Drop regular expression support for sources.
 - **NEW**: Drop raw filter.
 
-## 0.1.0a3
+## 0.1a3
 
 - **NEW**: Add JavaScript parser.
 
-## 0.1.0a2
+## 0.1a2
 
 - **NEW**: Add option to group consecutive Python comments.
 - **FIX**: Properly return error.
 - **FIX**: Only retry with default encoding if exception thrown was a `UnicodeDecodeError`.
 
-## 0.1.0a1
+## 0.1a1
 
 - **NEW**: Initial alpha release.
