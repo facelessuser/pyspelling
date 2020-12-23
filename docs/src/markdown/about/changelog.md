@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.7.1
+
+- **FIX**: Allow camel case option in Aspell.
+
 ## 2.7
 
 - **NEW**: Check for `.pyspelling.yml` or `.pyspelling.yaml` by default.
