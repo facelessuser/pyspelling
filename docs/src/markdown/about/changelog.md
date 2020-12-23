@@ -2,7 +2,7 @@
 
 ## 2.7.1
 
-- **FIX**: Allow camel case option in Aspell.
+- **FIX**: Allow camel case options in Aspell.
 
 ## 2.7
 
