@@ -462,7 +462,8 @@ class Aspell(SpellChecker):
             'add-html-check', 'rem-html-check', 'add-html-skip', 'rem-html-skip', 'add-sgml-check',
             'rem-sgml-check', 'add-sgml-skip', 'rem-sgml-skip', 'dont-tex-check-comments',
             'tex-check-comments', 'add-tex-command', 'rem-tex-command', 'add-texinfo-ignore',
-            'rem-texinfo-ignore', 'add-texinfo-ignore-env', 'rem-texinfo-ignore-env', 'filter'
+            'rem-texinfo-ignore', 'add-texinfo-ignore-env', 'rem-texinfo-ignore-env', 'filter',
+            'camel-case', 'dont-camel-case'
         }
 
         if 'mode' not in options:
