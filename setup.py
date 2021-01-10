@@ -53,6 +53,7 @@ setup(
     name='pyspelling',
     version=VER,
     keywords='spelling',
+    python_requires=">=3.6",
     description='Spell checker.',
     long_description=get_description(),
     long_description_content_type='text/markdown',
