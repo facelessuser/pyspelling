@@ -265,6 +265,7 @@ For Aspell:
 matrix:
 - name: python
   aspell:
+    lang: en
     d: en_US
 ```
 
