@@ -1,87 +1,87 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url>
      <loc>https://facelessuser.github.io/pyspelling/</loc>
-     <lastmod>2021-01-06</lastmod>
+     <lastmod>2021-01-31</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://facelessuser.github.io/pyspelling/configuration/</loc>
-     <lastmod>2021-01-06</lastmod>
+     <lastmod>2021-01-31</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://facelessuser.github.io/pyspelling/pipeline/</loc>
-     <lastmod>2021-01-06</lastmod>
+     <lastmod>2021-01-31</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://facelessuser.github.io/pyspelling/api/</loc>
-     <lastmod>2021-01-06</lastmod>
+     <lastmod>2021-01-31</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://facelessuser.github.io/pyspelling/filters/context/</loc>
-     <lastmod>2021-01-06</lastmod>
+     <lastmod>2021-01-31</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://facelessuser.github.io/pyspelling/filters/cpp/</loc>
-     <lastmod>2021-01-06</lastmod>
+     <lastmod>2021-01-31</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://facelessuser.github.io/pyspelling/filters/html/</loc>
-     <lastmod>2021-01-06</lastmod>
+     <lastmod>2021-01-31</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://facelessuser.github.io/pyspelling/filters/javascript/</loc>
-     <lastmod>2021-01-06</lastmod>
+     <lastmod>2021-01-31</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://facelessuser.github.io/pyspelling/filters/markdown/</loc>
-     <lastmod>2021-01-06</lastmod>
+     <lastmod>2021-01-31</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://facelessuser.github.io/pyspelling/filters/odf/</loc>
-     <lastmod>2021-01-06</lastmod>
+     <lastmod>2021-01-31</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://facelessuser.github.io/pyspelling/filters/ooxml/</loc>
-     <lastmod>2021-01-06</lastmod>
+     <lastmod>2021-01-31</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://facelessuser.github.io/pyspelling/filters/python/</loc>
-     <lastmod>2021-01-06</lastmod>
+     <lastmod>2021-01-31</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://facelessuser.github.io/pyspelling/filters/stylesheets/</loc>
-     <lastmod>2021-01-06</lastmod>
+     <lastmod>2021-01-31</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://facelessuser.github.io/pyspelling/filters/text/</loc>
-     <lastmod>2021-01-06</lastmod>
+     <lastmod>2021-01-31</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://facelessuser.github.io/pyspelling/filters/url/</loc>
-     <lastmod>2021-01-06</lastmod>
+     <lastmod>2021-01-31</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://facelessuser.github.io/pyspelling/filters/xml/</loc>
-     <lastmod>2021-01-06</lastmod>
+     <lastmod>2021-01-31</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://facelessuser.github.io/pyspelling/flow_control/wildcard/</loc>
-     <lastmod>2021-01-06</lastmod>
+     <lastmod>2021-01-31</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://facelessuser.github.io/pyspelling/about/contributing/</loc>
-     <lastmod>2021-01-06</lastmod>
+     <lastmod>2021-01-31</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://facelessuser.github.io/pyspelling/about/development/</loc>
-     <lastmod>2021-01-06</lastmod>
+     <lastmod>2021-01-31</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://facelessuser.github.io/pyspelling/about/changelog/</loc>
-     <lastmod>2021-01-06</lastmod>
+     <lastmod>2021-01-31</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
      <loc>https://facelessuser.github.io/pyspelling/about/license/</loc>
-     <lastmod>2021-01-06</lastmod>
+     <lastmod>2021-01-31</lastmod>
      <changefreq>daily</changefreq>
     </url>
 </urlset>
