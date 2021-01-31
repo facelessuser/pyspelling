@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.7.2
+
+- **FIX**: Add note in `--help` option about `--source` behavior.
+- **FIX**: Better documentation on language options and Unicode normalization in international languages.
+
 ## 2.7.1
 
 - **FIX**: Allow camel case options in Aspell.
