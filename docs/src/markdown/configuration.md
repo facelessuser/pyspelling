@@ -278,14 +278,44 @@ matrix:
     d: en_US
 ```
 
+!!! tip
+    It can be noted above that Aspell is setting `lang` to `en`  and `d` to `en_US`, this isn't strictly necessary to
+    just spell check, but is often needed to compile wordlists of words to ignore when spellchecking. `lang` points to
+    the actual `.dat` file used to [compile wordlists](dictionaries-and-personal-wordlists) in Aspell and needs that
+    information to work. There is usually one `.dat` file that covers a language and its variants. So `en_US` and
+    `en_GB` will both build their wordlists against the `en.dat` file.
+
 Since spell checker options vary between both Aspell and Hunspell, spell checker specific options are handled by under
 special keys named `aspell` and `hunspell`. To learn more, check out [Spell Checker Options](#spell-checker-options).
 
 By default, PySpelling sets your main dictionary to `en` for Aspell and `en_US` for Hunspell. If you do not desire an
 American English dictionary, or these dictionaries are not installed in their expected default locations, you will need
 to configure PySpelling so it can find your preferred dictionary. Since dictionary configuring varies for each spell
-checker, the main dictionary is configuration (and virtually any spell checker specific option) is performed via
+checker, the main dictionary (and virtually any spell checker specific option) is performed via
 [Spell Checker Options](#spell-checker-options).
+
+!!! tip "International Languages"
+    Some languages use special Unicode characters in them. The spell checker in use may be particular about how the
+    Unicode characters are normalized. When PySpelling passes the content to be spellchecked you may want to normalize
+    the Unicode content if it is having trouble. This can be done with the [`Text` filter](./filters/text.md).
+
+    For instance, here is how to do so via Aspell with a Czech dictionary.
+
+    ```yaml
+    matrix:
+    - name: czechstuff
+      sources: *.txt
+      aspell:
+        lang: cs
+        d: cs
+      dictionary:
+        wordlist:
+        - .dictionary
+        output: build/czech.dict
+      pipeline:
+      - pyspelling.filters.text:
+          normalize: nfd
+    ```
 
 ### Dictionaries and Personal Wordlists
 
