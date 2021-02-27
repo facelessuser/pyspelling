@@ -79,7 +79,7 @@ def run(config, **kwargs):
                 if results.context in json_data:
                     json_data[results.context].extend(results.words)
                 else:
-                    json_data[results.context] = (results.words)
+                    json_data[results.context] = results.words
 
             else:
                 print('Misspelled words:\n<%s> %s' % (results.category, results.context))
