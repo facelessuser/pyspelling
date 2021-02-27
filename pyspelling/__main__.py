@@ -72,7 +72,8 @@ def run(config, **kwargs):
         count += 1
         if results.error:
             fail = True
-            print('ERROR: %s -- %s' % (results.context, results.error))
+            if not tojson:
+                print('ERROR: %s -- %s' % (results.context, results.error))
         elif results.words:
             fail = True
             if tojson:
