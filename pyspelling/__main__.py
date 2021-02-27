@@ -58,7 +58,6 @@ def run(config, **kwargs):
     count = 0
 
     json_data = {}
-    json_element={}
 
     for results in spellcheck(
         config,
