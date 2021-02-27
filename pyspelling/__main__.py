@@ -80,6 +80,7 @@ def run(config, **kwargs):
                     json_data[results.context].extend(results.words)
                 else:
                     json_data[results.context]=(results.words)
+
             else:
                 print('Misspelled words:\n<%s> %s' % (results.category, results.context))
                 print('-' * 80)
