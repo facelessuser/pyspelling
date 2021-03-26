@@ -10,7 +10,7 @@ the text.  The filter can return JSDoc comments, block comment, inline comment, 
 matrix:
 - name: javascript
   pipeline:
-  - pyspelling.filters.javascript
+  - pyspelling.filters.javascript:
       jsdocs: true
       line_comments: false
       block_comments: false
