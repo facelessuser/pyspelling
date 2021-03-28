@@ -1,4 +1,5 @@
 """Main."""
+import json
 import sys
 import argparse
 from pyspelling import spellcheck, __version__
@@ -25,6 +26,7 @@ def main():
     parser.add_argument(
         '--spellchecker', '-s', action='store', default='', help="Choose between aspell and hunspell"
     )
+    parser.add_argument('--json', action='store_true', default=False, help="Output result in JSON.")
     args = parser.parse_args()
 
     return run(
@@ -35,7 +37,8 @@ def main():
         spellchecker=args.spellchecker,
         sources=args.source,
         verbose=args.verbose,
-        debug=args.debug
+        debug=args.debug,
+        tojson=args.json
     )
 
 
@@ -49,9 +52,13 @@ def run(config, **kwargs):
     verbose = kwargs.get('verbose', 0)
     sources = kwargs.get('sources', [])
     debug = kwargs.get('debug', False)
+    tojson = kwargs.get('tojson', False)
 
     fail = False
     count = 0
+
+    json_data = {}
+
     for results in spellcheck(
         config,
         names=names,
@@ -65,20 +72,31 @@ def run(config, **kwargs):
         count += 1
         if results.error:
             fail = True
-            print('ERROR: %s -- %s' % (results.context, results.error))
+            if not tojson:
+                print('ERROR: %s -- %s' % (results.context, results.error))
         elif results.words:
             fail = True
-            print('Misspelled words:\n<%s> %s' % (results.category, results.context))
-            print('-' * 80)
-            for word in results.words:
-                print(word)
-            print('-' * 80)
-            print('')
+            if tojson:
+                if results.context in json_data:
+                    json_data[results.context].extend(results.words)
+                else:
+                    json_data[results.context] = results.words
 
-    if fail:
-        print('!!!Spelling check failed!!!')
+            else:
+                print('Misspelled words:\n<%s> %s' % (results.category, results.context))
+                print('-' * 80)
+                for word in results.words:
+                    print(word)
+                print('-' * 80)
+                print('')
+
+    if tojson:
+        print(json.dumps(json_data, ensure_ascii=False, indent=4))
     else:
-        print('Spelling check passed :)')
+        if fail:
+            print('!!!Spelling check failed!!!')
+        else:
+            print('Spelling check passed :)')
 
     return fail
 
