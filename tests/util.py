@@ -135,6 +135,54 @@ class PluginTestCase(unittest.TestCase):
                 "'{}', is not compatible with '{}'".format(running, required)
             )
 
+    def assert_context(self, config_file, expected, names=None, groups=None, sources=None, verbose=4):
+        """Check context."""
+
+        hunspell_location = which(HUNSPELL)
+        aspell_location = which(ASPELL)
+        if hunspell_location and aspell_location:
+            running = "both"
+        elif hunspell_location:
+            running = "hunspell"
+        elif aspell_location:
+            running = "aspell"
+        else:
+            running = "none"
+        self.assert_spell_required(running)
+
+        if hunspell_location:
+            context = []
+            for results in spellcheck(
+                os.path.join(self.tempdir, config_file),
+                names=names,
+                groups=groups,
+                sources=sources,
+                checker='hunspell',
+                binary=hunspell_location,
+                debug=True,
+                verbose=verbose
+            ):
+                if results.error:
+                    print(results.error)
+                context.append(results.context)
+            self.assertEqual([('{}/{}'.format(self.tempdir, i) if i else i) for i in expected[:]], context)
+        if aspell_location:
+            context = []
+            for results in spellcheck(
+                os.path.join(self.tempdir, config_file),
+                names=names,
+                groups=groups,
+                sources=sources,
+                checker='aspell',
+                binary=aspell_location,
+                debug=True,
+                verbose=verbose
+            ):
+                if results.error:
+                    print(results.error)
+                context.append(results.context)
+            self.assertEqual([('{}/{}'.format(self.tempdir, i) if i else i) for i in expected[:]], context)
+
     def assert_spellcheck(self, config_file, expected, names=None, groups=None, sources=None, verbose=4):
         """Spell check."""
 

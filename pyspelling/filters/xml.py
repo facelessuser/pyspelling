@@ -198,12 +198,17 @@ class XmlFilter(filters.Filter):
                 self._block_text[self._current_block].append(string)
                 self._block_text[self._current_block].append(' ')
 
+    def pop_block(self, node, force=False):
+        """Pop block if the current blocks sibling is found."""
+
+        while self._block_stack and node is self._block_stack[-1][1]:
+            self._block_stack.pop(-1)
+            self._current_block = self._block_stack[-1][0]
+
     def set_block(self, node, force=False):
         """Set the current block."""
 
-        if not force and node is self._block_stack[-1][1]:
-            self._block_stack.pop(-1)
-            self._current_block = self._block_stack[-1][0]
+        self.pop_block(node, force)
 
         if force or self.is_break_tag(node):
             self._block_stack.append((node, self.get_last_descendant(node)))
@@ -265,6 +270,8 @@ class XmlFilter(filters.Filter):
                         if next_good is None:
                             break
                 else:
+                    self.pop_block(node)
+
                     # Handle test nodes: normal text and comments
                     is_comments = isinstance(node, bs4.Comment)
                     if (self.comments and is_comments) or (not is_comments and not isinstance(node, NON_CONTENT)):

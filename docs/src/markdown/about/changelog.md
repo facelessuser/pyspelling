@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.7.3
+
+- **FIX**: Fix context reporting in the XML, HTML, and other filters derived from XML the filter.
+
 ## 2.7.2
 
 - **FIX**: Add note in `--help` option about `--source` behavior.

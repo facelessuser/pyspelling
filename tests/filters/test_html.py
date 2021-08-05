@@ -1498,3 +1498,62 @@ class TestHTMLChained(util.PluginTestCase):
 
         self.mktemp('test.txt', template, 'utf-8')
         self.assert_spellcheck('.html.yml', bad_words)
+
+
+class TestHTMLContext(util.PluginTestCase):
+    """Test HTML plugin with default `lxml` (HTML) mode."""
+
+    def setup_fs(self):
+        """Setup file system."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: html
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+                d: en_US
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.html:
+                  attributes:
+                  - alt
+                  ignores:
+                  - ':is(code, pre)'
+                  - 'span:matches(.some-class, #some-id)'
+            """
+        ).format(self.tempdir)
+        self.mktemp('.html.yml', config, 'utf-8')
+
+    def test_html_context(self):
+        """Test HTML context."""
+
+        template = self.dedent(
+            """
+            <html>
+            <head>
+            </head>
+            <body>
+            <ol>
+            <li>
+            <p>Some <code>dkdd</code> text
+                flga</p>
+                <div><pre><code>kdjk</code></pre></div>
+                helo
+            </li>
+            </ol>
+            </html>
+            """
+        )
+
+        self.mktemp('test.txt', template, 'utf-8')
+        self.assert_context(
+            '.html.yml',
+            [
+                'test.txt: html>body>ol>li',
+                'test.txt: html>body>ol>li>p'
+            ]
+        )
