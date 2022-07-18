@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.8.0
+
+- **NEW**: Officially drop support for Python 3.6 and add support for Python 3.10.
+- **NEW**: Switch build system to Hatchling.
+- **FIX**: Fix typo in Aspell accepted parameters.
+
 ## 2.7.3
 
 - **FIX**: Fix context reporting in the XML, HTML, and other filters derived from XML the filter.

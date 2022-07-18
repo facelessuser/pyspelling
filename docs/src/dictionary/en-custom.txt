@@ -13,6 +13,7 @@ GitHub
 GitLab
 Gitter
 Hashable
+Hatchling
 Homebrew
 JSDoc
 MERCHANTABILITY
@@ -48,7 +49,6 @@ backticks
 blockish
 bool
 boolean
-symlink
 builtin
 builtins
 chainable
@@ -98,6 +98,7 @@ subclassing
 sublicense
 substring
 subtypes
+symlink
 syntaxes
 trigraphs
 tuple
