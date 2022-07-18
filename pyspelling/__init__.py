@@ -452,7 +452,7 @@ class Aspell(SpellChecker):
             'conf-dir', 'data-dir', 'add-dict-alias', 'rem-dict-alias', 'dict-dir',
             'encoding', 'add-filter', 'rem-filter', 'add-filter-path', 'rem-filter-path',
             'mode', 'e', 'H', 't', 'n', 'add-extra-dicts', 'rem-extra-dicts', 'home-dir',
-            'ingore', 'W', 'dont-ignore-case', 'ignore-case', 'lang', 'l', 'local-data-dir',
+            'ignore', 'W', 'dont-ignore-case', 'ignore-case', 'lang', 'l', 'local-data-dir',
             'd', 'master', 'dont-normalize', 'normalize', 'dont-norm-required',
             'norm-required', 'norm-form', 'dont-norm-strict', 'norm-strict', 'per-conf',
             'p', 'personal', 'C', 'B', 'dont-run-together', 'run-together', 'run-together-limit',
