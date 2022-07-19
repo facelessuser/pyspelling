@@ -1,6 +1,6 @@
 """Dynamically define some metadata."""
 import os
-
+import sys
 from hatchling.metadata.plugin.interface import MetadataHookInterface
 
 
@@ -48,3 +48,7 @@ class CustomMetadataHook(MetadataHookInterface):
             'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
             'Topic :: Software Development :: Libraries :: Python Modules'
         ]
+        metadata['scripts'] = {
+            'pyspelling': 'pyspelling.__main__:main',
+            f'pyspelling{".".join([str(x)for x in sys.version_info[:2]])}': 'pyspelling.__main__:main'
+        }

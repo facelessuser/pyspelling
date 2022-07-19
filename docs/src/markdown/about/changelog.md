@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.8.1
+
+- **FIX**: Fix missing command line application after migration to new build system.
+
 ## 2.8.0
 
 - **NEW**: Officially drop support for Python 3.6 and add support for Python 3.10.
