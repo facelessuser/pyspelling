@@ -295,5 +295,3 @@ jobs:
 
 In *this* project, we actually use `tox` to make running our tests locally and in CI easier. If you would like to use
 `tox` as well, you can check out how this project does it by taking a look at the source.
-
---8<-- "refs.txt"

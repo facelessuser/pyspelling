@@ -73,5 +73,3 @@ Options | Type     | Default       | Description
 `allow` | [string] | `#!py3 ["*"]` | The chunk of text is allowed to be evaluated by the next filter.
 `skip`  | [string] | `#!py3 []`    | The chunk of text should skip the next filter.
 `halt`  | [string] | `#!py3 []`    | Halts the progress of the text chunk down the pipeline and sends it directly to the spell checker.
-
---8<-- "refs.txt"
