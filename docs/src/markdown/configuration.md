@@ -455,5 +455,3 @@ The above options would be equivalent to doing this from the command line:
 ```shell-session
 $ aspell --add-extra-dicts my-dictionary.dic --add-extra-dicts my-other-dictionary.dic
 ```
-
---8<-- "refs.txt"

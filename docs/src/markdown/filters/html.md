@@ -73,7 +73,3 @@ Category         | Description
 `html-content`   | Text captured from HTML blocks.
 `html-attribute` | Text captured from HTML attributes.
 `html-comment`   | Text captured from HTML comments.
-
---8<--
-refs.txt
---8<--

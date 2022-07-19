@@ -1,7 +1,71 @@
 [build-system]
 requires = [
-    "setuptools>=42",
-    "wheel"
+    "hatchling>=0.21.1",
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "pyspelling"
+description = "Spell checker."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.6"
+authors = [
+    { name = "Isaac Muse", email = "Isaac.Muse@gmail.com" },
+]
+keywords = [
+    "spelling"
+]
+dynamic = [
+    "classifiers",
+    "dependencies",
+    "version",
 ]
 
-build-backend = "setuptools.build_meta"
+[project.urls]
+Homepage = "https://github.com/facelessuser/pyspelling"
+
+[tool.hatch.version]
+source = "code"
+path = "pyspelling/__meta__.py"
+
+[tool.hatch.build.targets.wheel]
+include = [
+    "/pyspelling",
+]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/docs/src/markdown/**/*.md",
+    "/docs/src/markdown/**/*.gif",
+    "/docs/src/markdown/**/*.png",
+    "/docs/src/markdown/dictionary/*.txt",
+    "/docs/theme/**/*.css",
+    "/docs/theme/**/*.js",
+    "/docs/theme/**/*.html",
+    "/requirements/*.txt",
+    "/pyspelling/**/*.py",
+    # "/pyspelling/py.typed",
+    "/tests/**/*.py",
+    "/tests/test_files/odf/*.fodt",
+    "/tests/test_files/odf/*.odp",
+    "/tests/test_files/odf/*.ods",
+    "/tests/test_files/odf/*.odt",
+    "/tests/test_files/ooxml/*.docx",
+    "/tests/test_files/ooxml/*.pptx",
+    "/tests/test_files/ooxml/*.xlsx",
+    "/.pyspelling.yml",
+    "/.coveragerc",
+    "/mkdocs.yml",
+    "/tox.ini",
+]
+
+# TODO
+# [tool.mypy]
+# files = [
+#     "pyspelling"
+# ]
+# strict = true
+# show_error_codes = true
+
+[tool.hatch.metadata.hooks.custom]

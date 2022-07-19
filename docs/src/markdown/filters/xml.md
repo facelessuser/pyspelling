@@ -66,7 +66,3 @@ Category         | Description
 `xml-content`   | Text captured from XML tags.
 `xml-attribute` | Text captured from XML attributes.
 `xml-comment`   | Text captured from XML comments.
-
---8<--
-refs.txt
---8<--

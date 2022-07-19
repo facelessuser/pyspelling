@@ -150,5 +150,3 @@ HTML is output for each file in `.tox/pyXX/tmp`.  You can use these to see areas
 testing.
 
 You can checkout `tox.ini` to see how this is accomplished.
-
---8<-- "links.txt"
