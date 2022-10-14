@@ -29,7 +29,7 @@ matrix:
   pipeline:
   - pyspelling.filters.python:
       comments: false
-  - pyspelling.filters.context_filter:
+  - pyspelling.filters.context:
       context_visible_first: true
       escapes: '\\[\\`~]'
       delimiters:
