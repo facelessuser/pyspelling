@@ -4,7 +4,7 @@ repo_url: https://github.com/facelessuser/pyspelling
 edit_uri: tree/master/docs/src/markdown
 site_description: Python spell checker.
 copyright: |
-  Copyright &copy; 2017 - 2022 <a href="https://github.com/facelessuser" target="_blank" rel="noopener">Isaac Muse</a>
+  Copyright &copy; 2017 - 2023 <a href="https://github.com/facelessuser" target="_blank" rel="noopener">Isaac Muse</a>
 
 docs_dir: docs/src/markdown
 theme:
@@ -23,6 +23,12 @@ theme:
     - navigation.tabs
     - navigation.top
     - navigation.instant
+    - toc.follow
+    - content.code.copy
+    - navigation.footer
+    - search.share
+    - search.highlight
+    - search.suggest
   pymdownx:
     sponsor: "https://github.com/sponsors/facelessuser"
 
@@ -121,7 +127,8 @@ extra:
 
 plugins:
   - search
-  - git-revision-date-localized
+  - git-revision-date-localized:
+      fallback_to_build_date: true
   - mkdocs_pymdownx_material_extras
   - minify:
       minify_html: true
