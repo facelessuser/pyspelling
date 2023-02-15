@@ -384,13 +384,7 @@ class Aspell(SpellChecker):
 
             # Compile wordlist against language
             util.call(
-                [
-                    self.binary,
-                    '--lang', lang,
-                    '--encoding=utf-8',
-                    'create',
-                    'master', output
-                ],
+                cmd,
                 input_text=b'\n'.join(sorted(words)) + b'\n'
             )
         except Exception:
@@ -448,29 +442,24 @@ class Aspell(SpellChecker):
         if personal_dict:
             cmd.extend(['--add-extra-dicts', personal_dict])
 
-        allowed = {
-            'conf-dir', 'data-dir', 'add-dict-alias', 'rem-dict-alias', 'dict-dir',
-            'encoding', 'add-filter', 'rem-filter', 'add-filter-path', 'rem-filter-path',
-            'mode', 'e', 'H', 't', 'n', 'add-extra-dicts', 'rem-extra-dicts', 'home-dir',
-            'ignore', 'W', 'dont-ignore-case', 'ignore-case', 'lang', 'l', 'local-data-dir',
-            'd', 'master', 'dont-normalize', 'normalize', 'dont-norm-required',
-            'norm-required', 'norm-form', 'dont-norm-strict', 'norm-strict', 'per-conf',
-            'p', 'personal', 'C', 'B', 'dont-run-together', 'run-together', 'run-together-limit',
-            'run-together-min', 'use-other-dicts', 'dont-use-other-dicts', 'add-variety', 'rem-variety',
-            'add-context-delimiters', 'rem-context-delimiters', 'dont-context-visible-first',
-            'context-visible-first', 'add-email-quote', 'rem-email-quote', 'email-margin',
-            'add-html-check', 'rem-html-check', 'add-html-skip', 'rem-html-skip', 'add-sgml-check',
-            'rem-sgml-check', 'add-sgml-skip', 'rem-sgml-skip', 'dont-tex-check-comments',
-            'tex-check-comments', 'add-tex-command', 'rem-tex-command', 'add-texinfo-ignore',
-            'rem-texinfo-ignore', 'add-texinfo-ignore-env', 'rem-texinfo-ignore-env', 'filter',
-            'camel-case', 'dont-camel-case'
+        disallowed = {
+            '?', 'a', 'c', 'v', 'ignore-repl', 'dont-ignore-repl', 'keyboard', 'prefix', 'repl', 'save-repl',
+            'dont-save-repl', 'set-prefix', 'dont-set-prefix', 'size', 'sug-mode', 'sug-typo-analysis',
+            'dont-sug-typo-analysis', 'sug-repl-table', 'dont-sug-repl-table', 'rem-sug-split-char',
+            'add-sug-split-char', 'warn', 'affix-compress', 'dont-affix-compress', 'clean-affixes',
+            'dont-clean-affixes', 'invisible-soundslike', 'dont-invisible-soundslike', 'partially-expand',
+            'dont-partially-expand', 'skip-invalid-words', 'dont-skip-invalid-words', 'validate-affixes',
+            'dont-validate-affixes', 'validate-words', 'dont-validate-words', 'b', 'x', 'backup', 'dont-backup',
+            'byte-offsets', 'dont-byte-offsets', 'm', 'P', 'guess', 'dont-guess', 'keymapping', 'reverse',
+            'dont-reverse', 'suggest', 'dont-suggest', 'time', 'dont-time'
+
         }
 
         if 'mode' not in options:
             options['mode'] = 'none'
 
         for k, v in options.items():
-            if k in allowed:
+            if k not in disallowed:
                 key = ('-%s' if len(k) == 1 else '--%s') % k
                 if isinstance(v, bool) and v is True:
                     cmd.append(key)
@@ -516,6 +505,7 @@ class Hunspell(SpellChecker):
 
     def compile_dictionary(self, lang, wordlists, encoding, output):
         """Compile user dictionary."""
+
         wordlist = ''
 
         try:
@@ -576,13 +566,12 @@ class Hunspell(SpellChecker):
         if personal_dict:
             cmd.extend(['-p', personal_dict])
 
-        allowed = {
-            'check-apostrophe', 'check-url',
-            'd', 'H', 'i', 'n', 'O', 'r', 't', 'X'
+        disallowed = {
+            '1', 'a', 'D', 'G', 'h', 'help', 'l', 'L', 'm', 'P', 's', 'S', 'v', 'vv', 'w'
         }
 
         for k, v in options.items():
-            if k in allowed:
+            if k not in disallowed:
                 key = ('-%s' if len(k) == 1 else '--%s') % k
                 if isinstance(v, bool) and v is True:
                     cmd.append(key)
