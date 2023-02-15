@@ -103,7 +103,7 @@ class JavaScriptFilter(filters.Filter):
                 value = esc[1:-1]
                 overflow + esc[-1]
             value = chr(value) + overflow
-        elif('other'):
+        elif groups.get('other'):
             value = esc[1:]
         return value.replace('\x00', '\n')
 
