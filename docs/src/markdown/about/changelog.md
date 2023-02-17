@@ -3,7 +3,7 @@
 ## 2.8.2
 
 - **FIX**: Ensure that Aspell actually uses the encoding passed to it for dictionaries.
-- **FIX**: Use a disallow list for problematic or unsupported arguments to underlying spell checker instead of using an
+- **FIX**: Use a disallow list for problematic or unsupported arguments to the underlying spell checker instead of using
   a more restrictive allow list.
 - **FIX**: Fix logic bug in JavaScript filter.
 
