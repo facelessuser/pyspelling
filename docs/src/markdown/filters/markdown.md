@@ -10,7 +10,7 @@ default, assumed encoding is `utf-8` unless otherwise overridden by the user.
 matrix:
 - name: markdown
   pipeline:
-  - pyspelling.parsers.markdown_parser:
+  - pyspelling.filters.markdown:
       markdown_extensions:
       - markdown.extensions.toc:
           slugify: !!python/name:pymdownx.slugs.uslugify
