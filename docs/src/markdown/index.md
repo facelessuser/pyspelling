@@ -289,8 +289,8 @@ jobs:
       run: |
         # Perform any documentation building that might be required
     - name: Spell check
-       run: |
-         python -m pyspelling
+      run: |
+        python -m pyspelling
 ```
 
 In *this* project, we actually use `tox` to make running our tests locally and in CI easier. If you would like to use
