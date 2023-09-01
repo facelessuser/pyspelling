@@ -38,7 +38,7 @@ Name                                     | Include\ Path
 [Stylesheets](./filters/stylesheets.md)  | `pyspelling.filters.stylesheets`
 [Text](./filters/text.md)                | `pyspelling.filters.text`
 [URL](./filters/url.md)                  | `pyspelling.filters.url`
-[XML](./filters/xml.md)                  | `pyspelling filters.xml`
+[XML](./filters/xml.md)                  | `pyspelling.filters.xml`
 
 ## Flow Control
 
