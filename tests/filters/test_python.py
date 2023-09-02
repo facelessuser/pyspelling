@@ -26,6 +26,27 @@ class TestPython(util.PluginTestCase):
         ).format(self.tempdir)
         self.mktemp('.python.yml', config, 'utf-8')
 
+    def test_python_fstr_docstring(self):
+        """Test format docstring."""
+
+        bad_words = ['helo', 'begn']
+        good_words = ['yes', 'word']
+        template = self.dedent(
+            """
+            var = "{}"
+            def function():
+                f\"""
+                {{var}} {}
+                \"""
+            """
+        ).format(
+            ' '.join(good_words),
+            ' '.join(bad_words)
+        )
+        print(template)
+        self.mktemp('test.txt', template, 'utf-8')
+        self.assert_spellcheck('.python.yml', bad_words)
+
     def test_python(self):
         """Test Python."""
 

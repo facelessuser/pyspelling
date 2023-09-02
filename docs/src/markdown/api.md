@@ -46,8 +46,9 @@ in that is not found in the defaults, an error will be raised.
         }
 ```
 
-!!! new "New 2.0"
-    `get_default_confg` was added in version `2.0`.
+/// new |"New 2.0
+`get_default_confg` was added in version `2.0`.
+///
 
 ### `Filter.validate_options`
 
@@ -69,8 +70,9 @@ own, you should override `validate_options`.
             raise ValueError("Value should be 'bar' for 'foo'")
 ```
 
-!!! new "New 2.0"
-    `validate_options` was added in version `2.0`.
+/// new | New 2.0
+`validate_options` was added in version `2.0`.
+///
 
 ### `Filter.setup`
 
@@ -84,8 +86,9 @@ configuration via `self.config`.
         self.enable_foo = self.config['foo']
 ```
 
-!!! new "New 2.0"
-    `setup` was added in version `2.0`.
+/// new | New 2.0
+`setup` was added in version `2.0`.
+///
 
 ### `Filter.reset`
 
@@ -99,8 +102,9 @@ configuration via `self.config`.
         self.tracked_stuff = []
 ```
 
-!!! new "New 2.0"
-    `reset` was added in version `2.0`.
+/// new | New 2.0
+`reset` was added in version `2.0`.
+///
 
 ### `Filter.has_bom`
 
@@ -127,11 +131,13 @@ sensible encoding in your `SourceText` object when your plugin returns file cont
         return super().has_bom(filestream)
 ```
 
-!!! new "New 2.0"
-    `has_bom` was added in version `2.0`.
+/// new | New 2.0
+`has_bom` was added in version `2.0`.
+///
 
-!!! warning "Deprecation 2.0"
-    `CHECK_BOM` has been deprecated since `2.0`.
+/// warning | Deprecation 2.0
+`CHECK_BOM` has been deprecated since `2.0`.
+///
 
 ### `Filter.header_check`
 
@@ -290,8 +296,9 @@ in that is not found in the defaults, an error will be raised.
         }
 ```
 
-!!! new "New 2.0"
-    `get_default_confg` was added in version `2.0`.
+/// new | New 2.0
+`get_default_confg` was added in version `2.0`.
+///
 
 ### `FlowControl.validate_options`
 
@@ -313,8 +320,9 @@ own, you should override `validate_options`.
             raise ValueError("Value should be 'bar' for 'foo'")
 ```
 
-!!! new "New 2.0"
-    `validate_options` was added in version `2.0`.
+/// new | New 2.0
+`validate_options` was added in version `2.0`.
+///
 
 ### `FlowControl.setup`
 
@@ -328,8 +336,9 @@ configuration via `self.config`.
         self.enable_foo = self.config['foo']
 ```
 
-!!! new "New 2.0"
-    `setup` was added in version `2.0`.
+/// new | New 2.0
+`setup` was added in version `2.0`.
+///
 
 ### `FlowControl.reset`
 
@@ -343,8 +352,9 @@ configuration via `self.config`.
         self.tracked_stuff = []
 ```
 
-!!! new "New 2.0"
-    `reset` was added in version `2.0`.
+/// new | New 2.0
+`reset` was added in version `2.0`.
+///
 
 ### `FlowControl.adjust_flow`
 

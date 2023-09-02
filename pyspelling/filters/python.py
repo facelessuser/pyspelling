@@ -13,6 +13,7 @@ import unicodedata
 import sys
 
 F_SUPPORT = (3, 6) <= sys.version_info
+FSTR_TOKENIZE = (3, 12) <= sys.version_info
 
 tokenizer = tokenize.generate_tokens
 PREV_DOC_TOKENS = (tokenize.INDENT, tokenize.DEDENT, tokenize.NEWLINE, tokenize.ENCODING)
@@ -262,6 +263,7 @@ class PythonFilter(filters.Filter):
         docstrings = []
         strings = []
         comments = []
+        fstring_stack = []
         prev_token_type = tokenize.NEWLINE
         indent = ''
         name = None
@@ -276,9 +278,6 @@ class PythonFilter(filters.Filter):
             value = token[1]
             line = str(token[2][0])
             line_num = token[2][0]
-
-            value = token[1]
-            line = str(token[2][0])
 
             # Track function and class ancestry
             if token_type == tokenize.NAME:
@@ -298,6 +297,12 @@ class PythonFilter(filters.Filter):
                     name = None
                 elif not F_SUPPORT and value in FMT_STR:
                     possible_fmt_str = (prev_token_type, value)
+            elif FSTR_TOKENIZE and token_type == tokenize.FSTRING_START:
+                dstr = not self.catch_same_level(stack, len(indent)) and (prev_token_type in PREV_DOC_TOKENS)
+                stype = self.get_string_type(value)
+                fstring_stack.append((value, dstr) if self.match_string(stype) else ('', dstr))
+            elif FSTR_TOKENIZE and token_type == tokenize.FSTRING_END:
+                fstring_stack.pop()
             elif token_type != tokenize.STRING:
                 possible_fmt_str = None
 
@@ -317,6 +322,19 @@ class PythonFilter(filters.Filter):
                     else:
                         loc = "%s(%s)" % (stack[0][0], line)
                     comments.append([value[1:], loc, line_num])
+
+            if FSTR_TOKENIZE and token_type == tokenize.FSTRING_MIDDLE and fstring_stack[-1][0]:
+                fstr, dstr = fstring_stack[-1]
+                if (self.docstrings and dstr) or (self.strings and not dstr):
+                    end = fstr[-1] * (len(fstr) - 1)
+                    string, _is_bytes = self.process_strings(
+                        fstr + value + end,
+                        docstrings=dstr
+                    )
+                    if string:
+                        loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
+                        strings.append(filters.SourceText(string, loc, 'utf-8', 'py-string'))
+
             if token_type == tokenize.STRING:
                 # Capture docstrings.
                 # If we captured an `INDENT` or `NEWLINE` previously we probably have a docstring.
@@ -334,7 +352,7 @@ class PythonFilter(filters.Filter):
                         value = value.strip()
                         if possible_fmt_str and value.startswith(("'", "\"")):
                             value = possible_fmt_str[1] + value
-                        string, is_bytes = self.process_strings(value, docstrings=True)
+                        string, _is_bytes = self.process_strings(value, docstrings=True)
                         if string:
                             loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
                             docstrings.append(
@@ -344,7 +362,7 @@ class PythonFilter(filters.Filter):
                     value = value.strip()
                     if possible_fmt_str and value.startswith(("'", "\"")):
                         value = possible_fmt_str[1] + value
-                    string, is_bytes = self.process_strings(value)
+                    string, _is_bytes = self.process_strings(value)
                     if string:
                         loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
                         strings.append(filters.SourceText(string, loc, 'utf-8', 'py-string'))
@@ -366,9 +384,9 @@ class PythonFilter(filters.Filter):
             else:
                 last_comment = True
 
-        final_comments = []
-        for comment in comments:
-            final_comments.append(filters.SourceText(textwrap.dedent(comment[0]), comment[1], encoding, 'py-comment'))
+        final_comments = [
+            filters.SourceText(textwrap.dedent(comment[0]), comment[1], encoding, 'py-comment') for comment in comments
+        ]
 
         return docstrings + final_comments + strings
 

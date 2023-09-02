@@ -45,17 +45,18 @@ Options      | Type     | Default         | Description
 `namespaces` | dict     | `#!py3 {}`      | Dictionary containing key value pairs of namespaces to use for CSS selectors (equivalent to `@namespace` in CSS). Use the an empty string for the key to define default the namespace. See below for example.
 `break_tags` | [string] | `#!py3 []`      | Tags to break on for context. Causes more calls to the spell checker.
 
-!!! example "Namespace example"
-    ```yaml
-    matrix:
-    - name: xml
-      pipeline:
-      - pyspelling.filters.xml:
-          namespaces:
-            "": http://www.w3.org/1999/xhtml
-            svg: http://www.w3.org/2000/svg
-            xlink: http://www.w3.org/1999/xlink
-    ```
+/// example | Namespace example
+```yaml
+matrix:
+- name: xml
+  pipeline:
+  - pyspelling.filters.xml:
+      namespaces:
+        "": http://www.w3.org/1999/xhtml
+        svg: http://www.w3.org/2000/svg
+        xlink: http://www.w3.org/1999/xlink
+```
+///
 
 ## Categories
 

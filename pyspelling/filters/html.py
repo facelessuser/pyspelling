@@ -27,7 +27,7 @@ class HtmlFilter(xml.XmlFilter):
         'div', 'dl', 'dt'
         'fieldset', 'figcaption', 'figure', 'footer', 'form', 'h1', 'h2', 'h3',
         'h4', 'h5', 'h6', 'header', 'hgroup', 'hr', 'li', 'main', 'menu', 'nav', 'ol', 'p', 'pre',
-        'section', 'table', 'ul',
+        'section', 'ul',
         'canvas', 'group', 'iframe', 'math', 'noscript', 'output',
         'script', 'style', 'table', 'video', 'body', 'head'
     }
