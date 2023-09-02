@@ -28,7 +28,7 @@ class MarkdownFilter(filters.Filter):
             if isinstance(item, str):
                 extensions.append(item)
             else:
-                k, v = list(item.items())[0]
+                k, v = next(iter(item.items()))
                 extensions.append(k)
                 if v is not None:
                     extension_configs[k] = v

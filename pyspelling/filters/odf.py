@@ -169,7 +169,7 @@ class OdfFilter(xml.XmlFilter):
                 src = f.read()
             sources.extend(self._filter(src, source_file, encoding))
         else:
-            for content, filename, enc in self.get_content(source_file):
+            for content, _filename, enc in self.get_content(source_file):
                 sources.extend(self._filter(content, source_file, enc))
         return sources
 
@@ -180,7 +180,7 @@ class OdfFilter(xml.XmlFilter):
         if source.text[:4].encode(source.encoding) != b'PK\x03\x04':
             sources.extend(self._filter(source.text, source.context, source.encoding))
         else:
-            for content, filename, enc in self.get_content(io.BytesIO(source.text.encode(source.encoding))):
+            for content, _filename, enc in self.get_content(io.BytesIO(source.text.encode(source.encoding))):
                 sources.extend(self._filter(content, source.context, enc))
         return sources
 

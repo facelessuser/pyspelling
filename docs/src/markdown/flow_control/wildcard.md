@@ -8,9 +8,9 @@ filter.
 
 You can define patterns for the following cases:
 
-- `allow`: the chunk of text is allowed to be evaluated by the next filter.
-- `skip`: the chunk of text should skip the next filter.
-- `halt`: halts the progress of the text chunk(s) down the pipeline and sends it directly to the spell checker.
+-   `allow`: the chunk of text is allowed to be evaluated by the next filter.
+-   `skip`: the chunk of text should skip the next filter.
+-   `halt`: halts the progress of the text chunk(s) down the pipeline and sends it directly to the spell checker.
 
 Under each option, you can define a list of different patterns. The plugin will loop through the patterns until it has
 determined what should be done with the text.

@@ -253,7 +253,7 @@ class SpellChecker:
                 if isinstance(step, dict):
                     if len(step) > 1:
                         raise ValueError(STEP_ERROR.format(str(step)))
-                    name, options = list(step.items())[0]
+                    name, options = next(iter(step.items()))
                 else:
                     name = step
                     options = {}
@@ -593,7 +593,7 @@ def iter_tasks(matrix, names, groups):
     """Iterate tasks."""
 
     # Build name index
-    name_index = dict([(task.get('name', ''), index) for index, task in enumerate(matrix)])
+    name_index = {task.get('name', ''): index for index, task in enumerate(matrix)}
 
     for index, task in enumerate(matrix):
         name = task.get('name', '')

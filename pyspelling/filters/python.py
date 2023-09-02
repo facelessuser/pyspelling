@@ -366,9 +366,9 @@ class PythonFilter(filters.Filter):
             else:
                 last_comment = True
 
-        final_comments = []
-        for comment in comments:
-            final_comments.append(filters.SourceText(textwrap.dedent(comment[0]), comment[1], encoding, 'py-comment'))
+        final_comments = [
+            filters.SourceText(textwrap.dedent(comment[0]), comment[1], encoding, 'py-comment') for comment in comments
+        ]
 
         return docstrings + final_comments + strings
 

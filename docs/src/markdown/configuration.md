@@ -79,11 +79,12 @@ matrix:
 - name: python
 ```
 
-!!! new "New Behavior 2.0"
-    In `1.0`, names doubled as identifiers and groups. It became apparent for certain features that a unique name is
-    desirable for targeting different tasks, while a group specifier should be implemented separately. In `2.0`, if
-    multiple tasks have the same name, the last defined one will be the targeted task when requesting a named task. Use
-    groups to target multiple grouped tasks.
+/// new | New Behavior 2.0
+In `1.0`, names doubled as identifiers and groups. It became apparent for certain features that a unique name is
+desirable for targeting different tasks, while a group specifier should be implemented separately. In `2.0`, if
+multiple tasks have the same name, the last defined one will be the targeted task when requesting a named task. Use
+groups to target multiple grouped tasks.
+///
 
 ### Groups
 
@@ -97,8 +98,9 @@ matrix:
   group: some_name
 ```
 
-!!! new "New 2.0"
-    `group` was added in version `2.0`.
+/// new | New 2.0
+`group` was added in version `2.0`.
+///
 
 ### Hidden
 
@@ -112,8 +114,9 @@ matrix:
   hidden: true
 ```
 
-!!! new "New 2.0"
-    `group` was added in version `2.0`.
+/// new | New 2.0
+`group` was added in version `2.0`.
+///
 
 ### Default Encoding
 
@@ -143,9 +146,10 @@ strings that have the associated encoding of UTF-16 or UTF-32 will be encoded wi
 apply to files being processed with a the pipeline disabled. When the pipeline is disabled, files are sent directly to
 the spell checker with no modifications.
 
-!!! tip "Unsupported Encodings"
-    If you are trying to spell check a file in an unsupported encoding, you can use the builtin text filter to convert
-    the content to a more appropriate encoding. In general, it is recommended to work in, or convert to UTF-8.
+/// tip | Unsupported Encodings
+If you are trying to spell check a file in an unsupported encoding, you can use the builtin text filter to convert
+the content to a more appropriate encoding. In general, it is recommended to work in, or convert to UTF-8.
+///
 
 ### Sources
 
@@ -178,8 +182,9 @@ By default, to protect against really large pattern sets, such as when using bra
 a pattern limit of `1000` by default. This can be changed by setting `glob_pattern_limit` to some other number. If you
 set it to `0`, it will disable the pattern limits entirely.
 
-!!! new "New 2.6"
-    `glob_pattern_limit` is new in version `2.6` and only works with `wcmatch` version `6.0`.
+/// new | New 2.6
+`glob_pattern_limit` is new in version `2.6` and only works with `wcmatch` version `6.0`.
+///
 
 ### Expect Match
 
@@ -278,12 +283,13 @@ matrix:
     d: en_US
 ```
 
-!!! tip
-    It can be noted above that Aspell is setting `lang` to `en`  and `d` to `en_US`, this isn't strictly necessary to
-    just spell check, but is often needed to compile wordlists of words to ignore when spellchecking. `lang` points to
-    the actual `.dat` file used to [compile wordlists](dictionaries-and-personal-wordlists) in Aspell and needs that
-    information to work. There is usually one `.dat` file that covers a language and its variants. So `en_US` and
-    `en_GB` will both build their wordlists against the `en.dat` file.
+/// tip
+It can be noted above that Aspell is setting `lang` to `en`  and `d` to `en_US`, this isn't strictly necessary to
+just spell check, but is often needed to compile wordlists of words to ignore when spellchecking. `lang` points to
+the actual `.dat` file used to [compile wordlists](dictionaries-and-personal-wordlists) in Aspell and needs that
+information to work. There is usually one `.dat` file that covers a language and its variants. So `en_US` and
+`en_GB` will both build their wordlists against the `en.dat` file.
+///
 
 Since spell checker options vary between both Aspell and Hunspell, spell checker specific options are handled by under
 special keys named `aspell` and `hunspell`. To learn more, check out [Spell Checker Options](#spell-checker-options).
@@ -294,28 +300,29 @@ to configure PySpelling so it can find your preferred dictionary. Since dictiona
 checker, the main dictionary (and virtually any spell checker specific option) is performed via
 [Spell Checker Options](#spell-checker-options).
 
-!!! tip "International Languages"
-    Some languages use special Unicode characters in them. The spell checker in use may be particular about how the
-    Unicode characters are normalized. When PySpelling passes the content to be spellchecked you may want to normalize
-    the Unicode content if it is having trouble. This can be done with the [`Text` filter](./filters/text.md).
+/// tip | International Languages
+Some languages use special Unicode characters in them. The spell checker in use may be particular about how the
+Unicode characters are normalized. When PySpelling passes the content to be spellchecked you may want to normalize
+the Unicode content if it is having trouble. This can be done with the [`Text` filter](./filters/text.md).
 
-    For instance, here is how to do so via Aspell with a Czech dictionary.
+For instance, here is how to do so via Aspell with a Czech dictionary.
 
-    ```yaml
-    matrix:
-    - name: czechstuff
-      sources: *.txt
-      aspell:
-        lang: cs
-        d: cs
-      dictionary:
-        wordlist:
-        - .dictionary
-        output: build/czech.dict
-      pipeline:
-      - pyspelling.filters.text:
-          normalize: nfd
-    ```
+```yaml
+matrix:
+- name: czechstuff
+  sources: *.txt
+  aspell:
+    lang: cs
+    d: cs
+  dictionary:
+    wordlist:
+    - .dictionary
+    output: build/czech.dict
+  pipeline:
+  - pyspelling.filters.text:
+      normalize: nfd
+```
+///
 
 ### Dictionaries and Personal Wordlists
 

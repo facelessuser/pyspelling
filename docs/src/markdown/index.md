@@ -167,8 +167,9 @@ PySpelling disables all native Aspell filters by default. If you need to enable 
 via Aspell's builtin options. For more information, see
 [Aspell configuration options](./configuration.md#spell-checker-options).
 
-!!! new "New in 2.4.0"
-    Starting in 2.4.0, PySpelling ensures filters that are native to the spell checker are disabled by default.
+/// new | New in 2.4.0
+Starting in 2.4.0, PySpelling ensures filters that are native to the spell checker are disabled by default.
+///
 
 ## Usage in Linux
 
@@ -256,16 +257,16 @@ others.
 
 In order to get running in GitHub's CI, you can follow the steps below:
 
-1. Create a `spelling` task under `jobs`.
-2. Specify a Linux environment as it is one of the easiest to configure and get running.
-3. Use the `actions/checkout` action to checkout your project.
-4. Setup your Python environment using the `actions/setup-python` action.
-5. Install dependencies you may need. Below, we update `pip` and `setuptools` and install `pyspelling`. You may require
-  additional dependencies depending on spelling extensions used, or if pre-building of documents is needed.
-6. Install Aspell and Aspell dictionaries. You are also free to use Hunspell if preferred.
-7. Below we've allowed for a `Build documents` step where you can build documentation or do any other file
-  preprocessing that is required for your specific environment.
-8. Lastly, run PySpelling.
+1.  Create a `spelling` task under `jobs`.
+2.  Specify a Linux environment as it is one of the easiest to configure and get running.
+3.  Use the `actions/checkout` action to checkout your project.
+4.  Setup your Python environment using the `actions/setup-python` action.
+5.  Install dependencies you may need. Below, we update `pip` and `setuptools` and install `pyspelling`. You may require
+    additional dependencies depending on spelling extensions used, or if pre-building of documents is needed.
+6.  Install Aspell and Aspell dictionaries. You are also free to use Hunspell if preferred.
+7.  Below we've allowed for a `Build documents` step where you can build documentation or do any other file
+    preprocessing that is required for your specific environment.
+8.  Lastly, run PySpelling.
 
 ```yaml
 jobs:

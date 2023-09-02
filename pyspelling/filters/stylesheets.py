@@ -67,7 +67,7 @@ class StylesheetsFilter(filters.Filter):
         self.group_comments = self.config['group_comments']
         # If the style isn't found, just go with CSS, then use the appropriate prefix.
         self.stylesheets = STYLESHEET_TYPE.get(self.config['stylesheets'].lower(), CSS)
-        self.prefix = [k for k, v in STYLESHEET_TYPE.items() if v == SASS][0]
+        self.prefix = next(k for k, v in STYLESHEET_TYPE.items() if v == SASS)
         self.pattern = RE_CSS if self.stylesheets == CSS else RE_SCSS
 
     def evaluate_block(self, groups):

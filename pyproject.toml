@@ -9,16 +9,25 @@ name = "pyspelling"
 description = "Spell checker."
 readme = "README.md"
 license = "MIT"
-requires-python = ">=3.6"
+requires-python = ">=3.8"
 authors = [
     { name = "Isaac Muse", email = "Isaac.Muse@gmail.com" },
 ]
 keywords = [
     "spelling"
 ]
+
+dependencies = [
+    "beautifulsoup4",
+    "soupsieve>=1.8",
+    "markdown",
+    "pyyaml",
+    "wcmatch>=6.0.3",
+    "lxml",
+    "html5lib"
+]
 dynamic = [
     "classifiers",
-    "dependencies",
     "version",
     "scripts"
 ]
@@ -57,8 +66,7 @@ include = [
     "/tests/test_files/ooxml/*.xlsx",
     "/.pyspelling.yml",
     "/.coveragerc",
-    "/mkdocs.yml",
-    "/tox.ini",
+    "/mkdocs.yml"
 ]
 
 # TODO
@@ -70,3 +78,73 @@ include = [
 # show_error_codes = true
 
 [tool.hatch.metadata.hooks.custom]
+
+[tool.ruff]
+line-length = 120
+
+select = [
+    "A",    # flake8-builtins
+    "B",    # flake8-bugbear
+    "D",    # pydocstyle
+    "C4",   # flake8-comprehensions
+    "N",    # pep8-naming
+    "E",    # pycodestyle
+    "F",    # pyflakes
+    "PGH",  # pygrep-hooks
+    "RUF",  # ruff
+    # "UP",   # pyupgrade
+    "W",    # pycodestyle
+    "YTT",  # flake8-2020,
+    "PERF"  # Perflint
+]
+
+ignore = [
+    "E741",
+    "D202",
+    "D401",
+    "D212",
+    "D203",
+    "D417",
+    "N802",
+    "N801",
+    "N803",
+    "N806",
+    "N818",
+    "RUF012",
+    "RUF005",
+    "PGH004",
+    "RUF100"
+]
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+isolated_build = true
+envlist =
+    py38,py39,py310,py311,py312,lint
+
+[testenv]
+passenv = LANG,TOX_SPELL_PATH,TOX_SPELL_REQUIRE,HOME
+deps=
+    -r requirements/tests.txt
+commands=
+    {envpython} -m pytest --cov pyspelling --cov-append {toxinidir}
+    {envpython} -m coverage html -d {envtmpdir}/coverage
+    {envpython} -m coverage xml
+    {envpython} -m coverage report --show-missing
+
+[testenv:documents]
+deps=
+    .
+    -r requirements/docs.txt
+commands=
+    {envpython} -m mkdocs build --clean --verbose --strict
+    {envpython} -m pyspelling
+
+[testenv:lint]
+deps=
+    .
+    -r requirements/lint.txt
+commands=
+    "{envbindir}"/ruff check .
+"""

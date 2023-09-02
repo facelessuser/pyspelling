@@ -31,8 +31,7 @@ Parsers
 PyMdown
 PyPI
 PySpelling
-PySpelling's
-PyYaml's
+PyYaml
 SCSS
 SVG
 Stylesheets
@@ -57,7 +56,7 @@ checkable
 chunking
 could've
 dicts
-distro's
+distro
 docstring
 docstrings
 ebeweber

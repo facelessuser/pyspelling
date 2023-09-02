@@ -45,6 +45,7 @@ def change_cwd(path, quiet=False):
     Return a context manager that changes the current working directory.
 
     Arguments:
+    ---------
       path: the directory to use as the temporary current working directory.
       quiet: if False (the default), the context manager raises an exception
         on error.  Otherwise, it issues only a warning and keeps the current
@@ -89,7 +90,7 @@ class PluginTestCase(unittest.TestCase):
                 try:
                     os.makedirs(base)
                     retry = 0
-                except Exception:
+                except Exception:  # noqa PERF203
                     retry -= 1
         with open(filename, "wb") as f:
             f.write(content.encode(encoding))
@@ -111,7 +112,7 @@ class PluginTestCase(unittest.TestCase):
             try:
                 shutil.rmtree(self.tempdir)
                 retry = 0
-            except Exception:
+            except Exception:  # noqa: PERF203
                 retry -= 1
 
     def assert_spell_required(self, running):
@@ -213,7 +214,7 @@ class PluginTestCase(unittest.TestCase):
                 if results.error:
                     print(results.error)
                 words |= set(results.words)
-            self.assertEqual(sorted(expected), sorted(list(words)))
+            self.assertEqual(sorted(expected), sorted(words))
         if aspell_location:
             words = set()
             for results in spellcheck(
@@ -229,4 +230,4 @@ class PluginTestCase(unittest.TestCase):
                 if results.error:
                     print(results.error)
                 words |= set(results.words)
-            self.assertEqual(sorted(expected), sorted(list(words)))
+            self.assertEqual(sorted(expected), sorted(words))

@@ -51,18 +51,19 @@ Options      | Type     | Default                           | Description
 `namespaces` | dict     | `#!py3 {}`                        | Dictionary containing key value pairs of namespaces to use for CSS selectors (equivalent to `@namespace` in CSS). Use the an empty string for the key to define default the namespace. See below for example.
 `break_tags` | [string] | `#!py3 []`                        | Additional tags (in addition to the default, defined block tags), to break on for context. Useful for new or currently unsupported block tags.
 
-!!! example "Namespace example"
-    ```yaml
-    matrix:
-    - name: html
-      pipeline:
-      - pyspelling.filters.html:
-          mode: xhtml
-          namespaces:
-            "": http://www.w3.org/1999/xhtml
-            svg: http://www.w3.org/2000/svg
-            xlink: http://www.w3.org/1999/xlink
-    ```
+/// example | Namespace example
+```yaml
+matrix:
+- name: html
+  pipeline:
+  - pyspelling.filters.html:
+      mode: xhtml
+      namespaces:
+        "": http://www.w3.org/1999/xhtml
+        svg: http://www.w3.org/2000/svg
+        xlink: http://www.w3.org/1999/xlink
+```
+///
 
 ## Categories
 
