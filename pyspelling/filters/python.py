@@ -12,7 +12,6 @@ import io
 import unicodedata
 import sys
 
-F_SUPPORT = (3, 6) <= sys.version_info
 FSTR_TOKENIZE = (3, 12) <= sys.version_info
 
 tokenizer = tokenize.generate_tokens
@@ -183,6 +182,7 @@ class PythonFilter(filters.Filter):
 
         groups = m.groupdict()
         esc = m.group(0)
+        value = ''
         if groups.get('fesc'):
             value = m.group(0)
         elif groups.get('format'):
@@ -269,7 +269,6 @@ class PythonFilter(filters.Filter):
         name = None
         stack = [(context, 0, self.MODULE)]
         last_comment = False
-        possible_fmt_str = None
 
         src = io.StringIO(text)
 
@@ -281,7 +280,6 @@ class PythonFilter(filters.Filter):
 
             # Track function and class ancestry
             if token_type == tokenize.NAME:
-                possible_fmt_str = None
                 if value in ('def', 'class'):
                     name = value
                     self.catch_same_level(stack, len(indent))
@@ -295,16 +293,12 @@ class PythonFilter(filters.Filter):
                     elif name == 'def':
                         stack.append(('%s%s()' % (prefix, value), len(indent), self.FUNCTION))
                     name = None
-                elif not F_SUPPORT and value in FMT_STR:
-                    possible_fmt_str = (prev_token_type, value)
             elif FSTR_TOKENIZE and token_type == tokenize.FSTRING_START:
                 dstr = not self.catch_same_level(stack, len(indent)) and (prev_token_type in PREV_DOC_TOKENS)
                 stype = self.get_string_type(value)
                 fstring_stack.append((value, dstr) if self.match_string(stype) else ('', dstr))
             elif FSTR_TOKENIZE and token_type == tokenize.FSTRING_END:
                 fstring_stack.pop()
-            elif token_type != tokenize.STRING:
-                possible_fmt_str = None
 
             if token_type == tokenize.COMMENT and self.comments:
                 # Capture comments
@@ -341,17 +335,9 @@ class PythonFilter(filters.Filter):
                 # `NL` means end of line, but not the end of the Python code line (line continuation).
 
                 same_level = self.catch_same_level(stack, len(indent))
-                if (
-                    not same_level and
-                    (
-                        (prev_token_type in PREV_DOC_TOKENS) or
-                        (possible_fmt_str and possible_fmt_str[0] in PREV_DOC_TOKENS)
-                    )
-                ):
+                if (not same_level and (prev_token_type in PREV_DOC_TOKENS)):
                     if self.docstrings:
                         value = value.strip()
-                        if possible_fmt_str and value.startswith(("'", "\"")):
-                            value = possible_fmt_str[1] + value
                         string, _is_bytes = self.process_strings(value, docstrings=True)
                         if string:
                             loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
@@ -360,8 +346,6 @@ class PythonFilter(filters.Filter):
                             )
                 elif self.strings:
                     value = value.strip()
-                    if possible_fmt_str and value.startswith(("'", "\"")):
-                        value = possible_fmt_str[1] + value
                     string, _is_bytes = self.process_strings(value)
                     if string:
                         loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
