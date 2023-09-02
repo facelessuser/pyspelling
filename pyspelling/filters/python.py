@@ -13,6 +13,7 @@ import unicodedata
 import sys
 
 F_SUPPORT = (3, 6) <= sys.version_info
+FSTR_TOKENIZE = (3, 12) <= sys.version_info
 
 tokenizer = tokenize.generate_tokens
 PREV_DOC_TOKENS = (tokenize.INDENT, tokenize.DEDENT, tokenize.NEWLINE, tokenize.ENCODING)
@@ -262,6 +263,7 @@ class PythonFilter(filters.Filter):
         docstrings = []
         strings = []
         comments = []
+        fstring_stack = []
         prev_token_type = tokenize.NEWLINE
         indent = ''
         name = None
@@ -276,9 +278,6 @@ class PythonFilter(filters.Filter):
             value = token[1]
             line = str(token[2][0])
             line_num = token[2][0]
-
-            value = token[1]
-            line = str(token[2][0])
 
             # Track function and class ancestry
             if token_type == tokenize.NAME:
@@ -298,6 +297,11 @@ class PythonFilter(filters.Filter):
                     name = None
                 elif not F_SUPPORT and value in FMT_STR:
                     possible_fmt_str = (prev_token_type, value)
+            elif FSTR_TOKENIZE and token_type == tokenize.FSTRING_START:
+                stype = self.get_string_type(value)
+                fstring_stack.append(value if self.match_string(stype) else '')
+            elif FSTR_TOKENIZE and token_type == tokenize.FSTRING_END:
+                fstring_stack.pop()
             elif token_type != tokenize.STRING:
                 possible_fmt_str = None
 
@@ -317,7 +321,10 @@ class PythonFilter(filters.Filter):
                     else:
                         loc = "%s(%s)" % (stack[0][0], line)
                     comments.append([value[1:], loc, line_num])
-            if token_type == tokenize.STRING:
+            if (
+                token_type == tokenize.STRING or
+                (FSTR_TOKENIZE and token_type == tokenize.FSTRING_MIDDLE and fstring_stack[-1])
+            ):
                 # Capture docstrings.
                 # If we captured an `INDENT` or `NEWLINE` previously we probably have a docstring.
                 # `NL` means end of line, but not the end of the Python code line (line continuation).
@@ -331,23 +338,41 @@ class PythonFilter(filters.Filter):
                     )
                 ):
                     if self.docstrings:
+                        if FSTR_TOKENIZE and token_type == tokenize.FSTRING_MIDDLE:
+                            string, _is_bytes = self.process_strings(
+                                fstring_stack[-1] + value + fstring_stack[-1][-1],
+                                docstrings=True
+                            )
+                            if string:
+                                loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
+                                strings.append(filters.SourceText(string, loc, 'utf-8', 'py-string'))
+                        else:
+                            value = value.strip()
+                            if possible_fmt_str and value.startswith(("'", "\"")):
+                                value = possible_fmt_str[1] + value
+                            string, _is_bytes = self.process_strings(value, docstrings=True)
+                            if string:
+                                loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
+                                docstrings.append(
+                                    filters.SourceText(string, loc, 'utf-8', 'py-docstring')
+                                )
+                elif self.strings:
+                    if FSTR_TOKENIZE and token_type == tokenize.FSTRING_MIDDLE:
+                        string, _is_bytes = self.process_strings(
+                            fstring_stack[-1] + value + fstring_stack[-1][-1],
+                            docstrings=True
+                        )
+                        if string:
+                            loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
+                            strings.append(filters.SourceText(string, loc, 'utf-8', 'py-string'))
+                    else:
                         value = value.strip()
                         if possible_fmt_str and value.startswith(("'", "\"")):
                             value = possible_fmt_str[1] + value
-                        string, is_bytes = self.process_strings(value, docstrings=True)
+                        string, _is_bytes = self.process_strings(value)
                         if string:
                             loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
-                            docstrings.append(
-                                filters.SourceText(string, loc, 'utf-8', 'py-docstring')
-                            )
-                elif self.strings:
-                    value = value.strip()
-                    if possible_fmt_str and value.startswith(("'", "\"")):
-                        value = possible_fmt_str[1] + value
-                    string, is_bytes = self.process_strings(value)
-                    if string:
-                        loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
-                        strings.append(filters.SourceText(string, loc, 'utf-8', 'py-string'))
+                            strings.append(filters.SourceText(string, loc, 'utf-8', 'py-string'))
 
             if token_type == tokenize.INDENT:
                 indent = value

@@ -2,7 +2,7 @@
 
 ## 2.9
 
--   **NEW**: Officially support Python 3.10 and 3.11.
+-   **NEW**: Officially support Python 3.11 and 3.12.
 -   **NEW**: Drop support for Python 3.7.
 
 ## 2.8.2
