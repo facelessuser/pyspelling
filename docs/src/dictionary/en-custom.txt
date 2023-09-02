@@ -8,6 +8,7 @@ Booleans
 CPP
 CSS
 Changelog
+CommonMark
 Cygwin
 GitHub
 GitLab

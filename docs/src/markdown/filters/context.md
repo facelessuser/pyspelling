@@ -3,9 +3,12 @@
 ## Usage
 
 The Context filter is used to create regular expression context delimiters for filtering out content you want from
-content you don't want. Depending on how the filter is configured, the opening delimiter will swap from ignoring text to
-gathering text. When the closing delimiter is met, the filter will swap back from gathering text to ignoring text.  If
-`context_visible_first` is set to `true`, the logic will be reversed.
+content you don't want. It takes a text buffer in and will return one or more text buffer with undesirable content
+filtered out.
+
+Depending on how the filter is configured, the opening delimiter will swap from ignoring text to gathering text. When
+the closing delimiter is met, the filter will swap back from gathering text to ignoring text. If `context_visible_first`
+is set to `true`, the logic will be reversed.
 
 Regular expressions are compiled with the MULTILINE flag so that `^` represents the start of a line and `$` represents
 the end of a line. `\A` and `\Z` would represent the start and end of the buffer.

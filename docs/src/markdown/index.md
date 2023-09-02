@@ -1,6 +1,4 @@
-# Basic Usage
-
-## Overview
+# Setup &amp; Overview
 
 PySpelling is a module to help with automating spell checking in a project with [Aspell][aspell] or
 [Hunspell][hunspell]. It is essentially a wrapper around the command line utility of these two spell checking tools,

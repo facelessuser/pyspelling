@@ -2,8 +2,11 @@
 
 ## Usage
 
-The HTML filter is designed to capture HTML content, comments, and even attributes. It allows for filtering out specific
+The HTML filter is designed to capture HTML content, comments, and even attributes. It allows for filtering out specific 
 tags, and you can even filter them out with basic selectors.
+
+The filter accepts an HTML content buffer and will return one or more buffers containing just the text from HTML
+attributes and/or tags. The content will no longer be considered HTML.
 
 When first in the chain, the HTML filter will look for the encoding of the HTML in its header and convert the buffer to
 Unicode. It will assume `utf-8` if no encoding header is found, and the user has not overridden the fallback encoding.

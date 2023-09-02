@@ -2,6 +2,9 @@
 
 ## Usage
 
+The JavaScript filter is designed to find and return only content from comments and/or strings. It takes a JavaScript
+buffer and returns one or more buffers containing the content of the comments and/or strings.
+
 When first in the chain, the JavaScript filter uses no special encoding detection. It will assume `utf-8` if no encoding
 BOM is found, and the user has not overridden the fallback encoding. Text is returned in chunks based on the context of
 the text.  The filter can return JSDoc comments, block comment, inline comment, string, and template literal content.

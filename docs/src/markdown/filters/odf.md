@@ -7,6 +7,8 @@ presentations (`odp`). It also supports their flat format as well: `fodt`, `fods
 return one chunk containing all the checkable strings in the file. In the case of presentations, it will actually send
 multiple chunks, one for each slide.
 
+Under the hood, content is parsed via the XML filter.
+
 ```yaml
 - name: odf
   sources:

@@ -206,6 +206,34 @@ matrix:
 
 ### Pipeline
 
+/// note
+PySpelling's `pipeline` is designed to provide advanced, custom filtering above and beyond what spell checker's normally
+provide, but it may often be the case that what the spell checker provides is more than sufficient. It should be noted
+that `pipeline` filters are processed before sending the buffer to Aspell or Hunspell. By default, we disable any
+special modes of the spell checkers.
+
+Spellcheckers like Aspell have builtin filtering. If all you need is the builtin filters from Aspell, the `pipeline`
+configuration can be omitted. For instance, to use Aspell's builtin Markdown mode, simply set the Aspell option directly
+and omit the pipeline.
+
+```yaml
+- name: markdown
+  group: docs
+  sources:
+  - README.md
+  aspell:
+    lang: en
+    d: en_US
+    mode: markdown
+  dictionary:
+    wordlists:
+    - .spell-dict
+    output: build/dictionary/markdown.dic
+```
+
+You can also use PySpelling `pipeline` filters and enable special modes of the underlying spell checker if desired.
+///
+
 PySpelling allows you to define tasks that outline what kind of files you want to spell check, and then sends them down
 a pipeline that filters the content returning chunks of text with some associated context. Each chunk is sent down each
 step of the pipeline until it reaches the final step, the spell check step. Between filter steps, you can also insert
@@ -399,12 +427,13 @@ matrix:
 
 ### Spell Checker Options
 
-Since PySpelling is a wrapper around both Aspell and Hunspell, there are a number of spell checker specific options. As
-only a few options are present in both, it was decided to expose them via spell checker specific keywords: `aspell` and
-`hunspell` for Aspell and Hunspell respectively. Here you can set options like the default dictionary and search
-options. Not all options are exposed though, only relevant search options are passed directly to the spell checker.
-Things like replace options (which aren't relevant in PySpelling) and encoding (which are handled internally by
-PySpelling) are not accessible.
+Since PySpelling is a wrapper around both Aspell and Hunspell, there are a number of spell checker specific options.
+Spell checker specific options can be set under keywords: `aspell` and `hunspell` for Aspell and Hunspell respectively.
+Here you can set options like the default dictionary and search options.
+
+We will not list all available options here. In general we expose any and all options and only exclude those that we are
+aware of that could be problematic. For instance, we do not have an interface for interactive suggestions, so such
+options are not allowed with PySpelling.
 
 Spell checker specific options basically translate directly to the spell checker's command line options and only
 requires you to remove the leading `-`s you would normally specify on the command line. For instance, a short form

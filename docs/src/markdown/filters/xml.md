@@ -3,7 +3,9 @@
 ## Usage
 
 The XML filter is designed to capture XML content, comments, and even attributes. It allows for filtering out specific
-tags, and you can even filter them out with CSS selectors (even though this is XML content :slightly_smiling:).
+tags, and you can even filter them out with CSS selectors (even though this is XML content :slightly_smiling:). The
+filters takes an XML buffer and returns one or more text buffers containing the content of XML comments, attributes,
+etc. The returned content should no longer be considered XML.
 
 When first in the chain, the XML filter will look for the encoding of the file in its header and convert the buffer to
 Unicode. It will assume `utf-8` if no encoding header is found, and the user has not overridden the fallback encoding.

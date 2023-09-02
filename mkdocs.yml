@@ -34,7 +34,7 @@ theme:
 
 nav:
   - Usage:
-    - Basic Usage: index.md
+    - Setup &amp; Overview: index.md
     - Configuration: configuration.md
     - Spelling Pipeline: pipeline.md
     - Plugin API: api.md
@@ -63,12 +63,10 @@ markdown_extensions:
   - markdown.extensions.toc:
       slugify: !!python/object/apply:pymdownx.slugs.slugify {kwds: {case: lower}}
       permalink: ""
-  - markdown.extensions.admonition:
   - markdown.extensions.smarty:
       smart_quotes: false
   - pymdownx.betterem:
   - markdown.extensions.attr_list:
-  - markdown.extensions.def_list:
   - markdown.extensions.tables:
   - markdown.extensions.abbr:
   - markdown.extensions.footnotes:
@@ -114,9 +112,28 @@ markdown_extensions:
       - refs.md
   - pymdownx.keys:
       separator: "\uff0b"
-  - pymdownx.details:
-  - pymdownx.tabbed:
   - pymdownx.saneheaders:
+  - pymdownx.blocks.admonition:
+      types:
+      - new
+      - settings
+      - note
+      - abstract
+      - info
+      - tip
+      - success
+      - question
+      - warning
+      - failure
+      - danger
+      - bug
+      - example
+      - quote
+  - pymdownx.blocks.details:
+  - pymdownx.blocks.html:
+  - pymdownx.blocks.definition:
+  - pymdownx.blocks.tab:
+      alternate_style: True
 
 extra:
   social:

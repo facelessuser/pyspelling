@@ -7,6 +7,8 @@ documents (`docx`), spreadsheets (`xlsx`), and presentations (`pptx`). In genera
 all the checkable strings in the file. In the case of presentations, it will actually send multiple chunks, one for each
 slide. Documents may return additional chunks for headers, footers, etc.
 
+Under the hood, content is parsed via the XML filter.
+
 ```yaml
 - name: ooxml
   sources:

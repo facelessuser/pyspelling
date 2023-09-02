@@ -2,6 +2,9 @@
 
 ## Usage
 
+The Python filter is designed to find and return only content from comments and/or strings. It takes a Python buffer and
+returns one or more buffers containing the content of the comments and/or strings.
+
 When first in the chain, the Python filter will look for the encoding of the file in the header, and convert to Unicode
 accordingly. It will assume `utf-8` if no encoding header is found, and the user has not overridden the fallback
 encoding.
