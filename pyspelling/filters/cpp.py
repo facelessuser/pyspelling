@@ -133,16 +133,16 @@ class CppFilter(filters.Filter):
         super().validate_options(k, v)
         if k == 'charset_size':
             if v not in (1, 2, 4):
-                raise ValueError("{}: '{}' is an unsupported charset size".format(self.__class__.__name__, v))
+                raise ValueError(f"{self.__class__.__name__}: '{v}' is an unsupported charset size")
         elif k == 'wide_charset_size':
             if v not in (2, 4):
-                raise ValueError("{}: '{}' is an unsupported wide charset size".format(self.__class__.__name__, v))
+                raise ValueError(f"{self.__class__.__name__}: '{v}' is an unsupported wide charset size")
         elif k in ('exec_charset', 'wide_exec_charset'):
             # See if parsing fails.
             self.get_encoding_name(v)
         elif k == 'string_types':
             if RE_VALID_STRING_TYPES.match(v) is None:
-                raise ValueError("{}: '{}' does not define valid string types".format(self.__class__.__name__, v))
+                raise ValueError(f"{self.__class__.__name__}: '{v}' does not define valid string types")
 
     def eval_string_type(self, text, is_string=False):
         """Evaluate string type."""

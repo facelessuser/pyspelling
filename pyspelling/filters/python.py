@@ -127,7 +127,7 @@ class PythonFilter(filters.Filter):
         super().validate_options(k, v)
         if k == 'string_types':
             if RE_VALID_STRING_TYPES.match(v) is None:
-                raise ValueError("{}: '{}' does not define valid string types".format(self.__class__.__name__, v))
+                raise ValueError(f"{self.__class__.__name__}: '{v}' does not define valid string types")
 
     def header_check(self, content):
         """Special Python encoding check."""
@@ -289,9 +289,9 @@ class PythonFilter(filters.Filter):
                     if parent != self.MODULE:
                         prefix = '.' if parent == self.CLASS else ', '
                     if name == 'class':
-                        stack.append(('%s%s' % (prefix, value), len(indent), self.CLASS))
+                        stack.append((f'{prefix}{value}', len(indent), self.CLASS))
                     elif name == 'def':
-                        stack.append(('%s%s()' % (prefix, value), len(indent), self.FUNCTION))
+                        stack.append((f'{prefix}{value}()', len(indent), self.FUNCTION))
                     name = None
             elif FSTR_TOKENIZE and token_type == tokenize.FSTRING_START:
                 dstr = not self.catch_same_level(stack, len(indent)) and (prev_token_type in PREV_DOC_TOKENS)
@@ -312,9 +312,9 @@ class PythonFilter(filters.Filter):
                     comments[-1][2] = line_num
                 else:
                     if len(stack) > 1:
-                        loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
+                        loc = "{}({}): {}".format(stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
                     else:
-                        loc = "%s(%s)" % (stack[0][0], line)
+                        loc = f"{stack[0][0]}({line})"
                     comments.append([value[1:], loc, line_num])
 
             if FSTR_TOKENIZE and token_type == tokenize.FSTRING_MIDDLE and fstring_stack[-1][0]:
@@ -326,7 +326,7 @@ class PythonFilter(filters.Filter):
                         docstrings=dstr
                     )
                     if string:
-                        loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
+                        loc = "{}({}): {}".format(stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
                         strings.append(filters.SourceText(string, loc, 'utf-8', 'py-string'))
 
             if token_type == tokenize.STRING:
@@ -340,7 +340,7 @@ class PythonFilter(filters.Filter):
                         value = value.strip()
                         string, _is_bytes = self.process_strings(value, docstrings=True)
                         if string:
-                            loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
+                            loc = "{}({}): {}".format(stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
                             docstrings.append(
                                 filters.SourceText(string, loc, 'utf-8', 'py-docstring')
                             )
@@ -348,7 +348,7 @@ class PythonFilter(filters.Filter):
                     value = value.strip()
                     string, _is_bytes = self.process_strings(value)
                     if string:
-                        loc = "%s(%s): %s" % (stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
+                        loc = "{}({}): {}".format(stack[0][0], line, ''.join([crumb[0] for crumb in stack[1:]]))
                         strings.append(filters.SourceText(string, loc, 'utf-8', 'py-string'))
 
             if token_type == tokenize.INDENT:

@@ -103,7 +103,7 @@ class OoxmlFilter(odf.OdfFilter):
             for o in soup.find_all('Override'):
                 name = o.attrs.get('PartName')
                 for k, v in MIMEMAP.items():
-                    if name.startswith('/{}/'.format(k)):
+                    if name.startswith(f'/{k}/'):
                         self.type = v
                         break
                 if self.type:
@@ -132,9 +132,9 @@ class OoxmlFilter(odf.OdfFilter):
         """Get context."""
 
         if self.type == 'pptx':
-            context = '{}: '.format(RE_SLIDE.search(filename).group(1))
+            context = f'{RE_SLIDE.search(filename).group(1)}: '
         elif self.type == 'docx':
-            context = '{}: '.format(RE_DOCS.match(filename).group(1))
+            context = f'{RE_DOCS.match(filename).group(1)}: '
         else:
             context = ''
         return context

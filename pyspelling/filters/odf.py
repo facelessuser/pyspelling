@@ -123,7 +123,7 @@ class OdfFilter(xml.XmlFilter):
         if self.type == 'odp':
             if el.namespace and el.namespace == self.namespaces['draw'] and el.name == 'page-thumbnail':
                 name = el.attrs.get('draw:page-number', '')
-                self.additional_context = 'slide{}:'.format(name)
+                self.additional_context = f'slide{name}:'
         super().extract_tag_metadata(el)
 
     def reset(self):

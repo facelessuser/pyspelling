@@ -18,7 +18,7 @@ ASPELL = 'aspell.exe' if WIN else 'aspell'
 
 # Disambiguate `TESTFN` for parallel testing, while letting it remain a valid
 # module name.
-TESTFN = "{}_{}_tmp".format(TESTFN, os.getpid())
+TESTFN = f"{TESTFN}_{os.getpid()}_tmp"
 
 
 def which(executable):
@@ -121,13 +121,13 @@ class PluginTestCase(unittest.TestCase):
         required = os.environ.get("TOX_SPELL_REQUIRE", "any")
 
         if required not in ("both", "any", "aspell", "hunspell"):
-            raise RuntimeError("Invalid value of '{}' in 'TOX_SPELL_REQUIRE'".format(required))
+            raise RuntimeError(f"Invalid value of '{required}' in 'TOX_SPELL_REQUIRE'")
 
         if running not in ("both", "aspell", "hunspell"):
             raise RuntimeError(
-                "Required tests are not being run (currently running '{}'). ".format(running) +
+                f"Required tests are not being run (currently running '{running}'). " +
                 "Make sure spell checker can be found and " +
-                "'TOX_SPELL_REQUIRE' is set appropriately (currently '{}')".format(required)
+                f"'TOX_SPELL_REQUIRE' is set appropriately (currently '{required}')"
             )
 
         if required != running and (required != "any" and running != "both"):
@@ -166,7 +166,7 @@ class PluginTestCase(unittest.TestCase):
                 if results.error:
                     print(results.error)
                 context.append(results.context)
-            self.assertEqual([('{}/{}'.format(self.tempdir, i) if i else i) for i in expected[:]], context)
+            self.assertEqual([(f'{self.tempdir}/{i}' if i else i) for i in expected[:]], context)
         if aspell_location:
             context = []
             for results in spellcheck(
@@ -182,7 +182,7 @@ class PluginTestCase(unittest.TestCase):
                 if results.error:
                     print(results.error)
                 context.append(results.context)
-            self.assertEqual([('{}/{}'.format(self.tempdir, i) if i else i) for i in expected[:]], context)
+            self.assertEqual([(f'{self.tempdir}/{i}' if i else i) for i in expected[:]], context)
 
     def assert_spellcheck(self, config_file, expected, names=None, groups=None, sources=None, verbose=4):
         """Spell check."""

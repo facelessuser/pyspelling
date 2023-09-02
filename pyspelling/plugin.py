@@ -12,7 +12,7 @@ class Plugin:
         self.config = self.get_default_config()
         if self.config is None:
             warnings.warn(
-                "'{}' did not provide a default config. ".format(self.__class__.__name__) +
+                f"'{self.__class__.__name__}' did not provide a default config. " +
                 "All plugins in the future should provide a default config.",
                 category=FutureWarning,
                 stacklevel=1
@@ -36,7 +36,7 @@ class Plugin:
         for k, v in options.items():
             # Reject names not in the default configuration
             if k not in self.config:
-                raise KeyError("'{}' is not a valid option for '{}'".format(k, self.__class__.__name__))
+                raise KeyError(f"'{k}' is not a valid option for '{self.__class__.__name__}'")
             self.validate_options(k, v)
             self.config[k] = v
 

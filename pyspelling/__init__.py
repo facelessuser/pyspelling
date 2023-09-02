@@ -212,7 +212,7 @@ class SpellChecker:
         if not found_something and expect_match:
             raise RuntimeError(
                 'None of the source targets from the configuration match any files:\n{}'.format(
-                    '\n'.join('- {}'.format(target) for target in targets)
+                    '\n'.join(f'- {target}' for target in targets)
                 )
             )
 
@@ -658,7 +658,7 @@ def spellcheck(config_file, names=None, groups=None, binary='', checker='', sour
         else:
             raise ValueError('%s is not a valid spellchecker!' % checker)
 
-        spellchecker.log('Using %s to spellcheck %s' % (checker, task.get('name', '')), 1)
+        spellchecker.log('Using {} to spellcheck {}'.format(checker, task.get('name', '')), 1)
         for result in spellchecker.run_task(task, source_patterns=sources):
             spellchecker.log('Context: %s' % result.context, 2)
             yield result

@@ -33,15 +33,15 @@ class ContextFilter(filters.Filter):
         if k == 'delimiters':
             for d in v:
                 if not isinstance(d, (dict, OrderedDict)):
-                    raise ValueError("{}: 'delimters' entries must be of dict type.".format(self.__class__.__name__))
+                    raise ValueError(f"{self.__class__.__name__}: 'delimters' entries must be of dict type.")
                 for key, value in d.items():
                     if key not in ('open', 'close', 'content'):
                         raise KeyError(
-                            "{}: '{}' is not a valid key for a 'delimeters' entry.".format(self.__class__.__name__, key)
+                            f"{self.__class__.__name__}: '{key}' is not a valid key for a 'delimeters' entry."
                         )
                     if not isinstance(value, str):
                         raise ValueError(
-                            "{}: 'delimeters' '{}' key should have str values.".format(self.__class__.__name__, value)
+                            f"{self.__class__.__name__}: 'delimeters' '{value}' key should have str values."
                         )
 
     def setup(self):
@@ -63,7 +63,7 @@ class ContextFilter(filters.Filter):
             ):
                 group = util.random_name_gen()
 
-            pattern = r'%s(?P<%s>%s)(?:%s|\Z)' % (
+            pattern = r'{}(?P<{}>{})(?:{}|\Z)'.format(
                 delimiter['open'],
                 group,
                 delimiter.get('content', DEFAULT_CONTENT),

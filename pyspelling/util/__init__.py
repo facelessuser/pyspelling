@@ -29,7 +29,7 @@ def deprecated(message):  # pragma: no cover
             """Display deprecation warning."""
 
             warnings.warn(
-                "'{}' is deprecated. {}".format(func.__name__, message),
+                f"'{func.__name__}' is deprecated. {message}",
                 category=DeprecationWarning,
                 stacklevel=2
             )

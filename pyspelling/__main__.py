@@ -65,10 +65,10 @@ def run(config, **kwargs):
         count += 1
         if results.error:
             fail = True
-            print('ERROR: %s -- %s' % (results.context, results.error))
+            print(f'ERROR: {results.context} -- {results.error}')
         elif results.words:
             fail = True
-            print('Misspelled words:\n<%s> %s' % (results.category, results.context))
+            print(f'Misspelled words:\n<{results.category}> {results.context}')
             print('-' * 80)
             for word in results.words:
                 print(word)

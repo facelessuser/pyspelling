@@ -26,9 +26,9 @@ class TextFilter(filters.Filter):
 
         super().validate_options(k, v)
         if k == 'errors' and v.lower() not in ('strict', 'replace', 'ignore', 'backslashreplace'):
-            raise ValueError("{}: '{}' is not a valid value for '{}'".format(self.__class__.__name, v, k))
+            raise ValueError(f"{self.__class__.__name}: '{v}' is not a valid value for '{k}'")
         if k == 'normalize' and v.upper() not in ('NFC', 'NFKC', 'NFD', 'NFKD'):
-            raise ValueError("{}: '{}' is not a valid value for '{}'".format(self.__class__.__name, v, k))
+            raise ValueError(f"{self.__class__.__name}: '{v}' is not a valid value for '{k}'")
 
     def setup(self):
         """Setup."""
