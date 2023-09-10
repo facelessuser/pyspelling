@@ -45,7 +45,7 @@ class TestCPP(util.PluginTestCase):
                 uint8_t tsdd = 3;
                 // {}
                 // {} \
-                return tsdd;
+                reurn tsdd;
 
                 uint32_t trigraph_test = (CONSTANT_1 ??' ADKASLD) ??' CONSTANT_2; // {}
 
@@ -497,7 +497,7 @@ class TestCPPGeneric(util.PluginTestCase):
                 uint8_t tsdd = 3;
                 // {}
                 // {} \
-                return tsdd;
+                reurn tsdd;
 
                 rtuern ddst;
             }}
@@ -555,7 +555,7 @@ class TestCPPChained(util.PluginTestCase):
                 uint8_t tsdd = 3;
                 // {}
                 // {}
-                return tsdd;
+                reurn tsdd;
             }}
             """
         ).format(
