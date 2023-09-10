@@ -20,7 +20,7 @@ def main():
     parser.add_argument(
         '--source', '-S',
         action='append',
-        help="Specify override file pattern. Only applicaple when specifying exactly one --name."
+        help="Specify override file pattern. Only applicable when specifying exactly one --name."
     )
     parser.add_argument(
         '--spellchecker', '-s', action='store', default='', help="Choose between aspell and hunspell"

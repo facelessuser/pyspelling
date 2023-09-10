@@ -11,7 +11,7 @@ from collections import namedtuple
 
 __all__ = ("spellcheck",)
 
-STEP_ERROR = """Pipline step in unexpected format: {}
+STEP_ERROR = """Pipeline step in unexpected format: {}
 
 Each pipeline step should be in the form {{key: options: {{}}}} not {{key: {{}}, key2: {{}}}}
 """
@@ -183,7 +183,7 @@ class SpellChecker:
 
         found_something = False
         for target in targets:
-            # Glob using `S` for patterns wit `|` and `O` to exclude directories.
+            # Glob using `S` for patterns with `|` and `O` to exclude directories.
             kwargs = {"flags": flags | glob.S | glob.O}
             kwargs['limit'] = limit
             for f in glob.iglob(target, **kwargs):
