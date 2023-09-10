@@ -14,51 +14,27 @@ jobs:
   tests:
     strategy:
       fail-fast: false
-      max-parallel: 4
+      max-parallel: 5
       matrix:
         platform: [ubuntu-latest] #, windows-latest]
         python-version: [3.8, 3.9, '3.10', '3.11', '3.12']
-        include:
-          - python-version: 3.8
-            tox-env: py38
-            continue-on-error: False
-          - python-version: 3.9
-            tox-env: py39
-            continue-on-error: False
-          - python-version: '3.10'
-            tox-env: py310
-            continue-on-error: False
-          - python-version: '3.11'
-            tox-env: py311
-            continue-on-error: False
-          - python-version: '3.12'
-            tox-env: py312
-            continue-on-error: False
         # exclude:
         #   - platform: windows-latest
         #     python-version: 3.9
 
-    env:
-      TOXENV: ${{ matrix.tox-env }}
-
     runs-on: ${{ matrix.platform }}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
-      if: "!endsWith(matrix.python-version, '-dev')"
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
         allow-prereleases: true
-    - name: Set up development Python ${{ matrix.python-version }}
-      if: endsWith(matrix.python-version, '-dev')
-      uses: deadsnakes/action@v2.1.1
-      with:
-        python-version: ${{ matrix.python-version }}
     - name: Python (Install Dependencies)
       run: |
-        python -m pip install --upgrade pip setuptools tox coverage build
+        python -m pip install --upgrade pip
+        python -m pip install build coverage setuptools tox 
 
     # # Windows
     # - name: Windows (Setup MSYS2)
@@ -97,7 +73,7 @@ jobs:
       env:
         TOX_SPELL_REQUIRE: both
       run: |
-        python -m tox
+        python -m tox - py
       continue-on-error: ${{ matrix.continue-on-error }}
 
     # Results
@@ -110,53 +86,25 @@ jobs:
         name: ${{ matrix.platform }}-${{ matrix.tox-env }}
         fail_ci_if_error: false
 
-  lint:
+  docs_and_lint:
     strategy:
-      max-parallel: 4
+      max-parallel: 2
       matrix:
-        python-version: [3.11]
-
-    env:
-      TOXENV: lint
+        python-version: [3.x]
+        tox-env: [documents, lint]
 
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip setuptools tox build
+        python -m pip install --upgrade pip
+        python -m pip install build setuptools tox 
     - name: Lint
       run: |
-        python -m tox
-
-  documents:
-    strategy:
-      max-parallel: 4
-      matrix:
-        python-version: [3.11]
-
-    env:
-      TOXENV: documents
-
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip setuptools tox build
-    - name: Install Aspell
-      run: |
-        sudo apt-get install aspell aspell-en
-    - name: Build documents
-      run: |
-        python -m tox
+        python -m tox -e ${{ matrix.tox-env }}
