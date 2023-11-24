@@ -35,14 +35,8 @@ MIT
 
 [github-ci-image]: https://github.com/facelessuser/pyspelling/workflows/build/badge.svg?branch=master&event=push
 [github-ci-link]: https://github.com/facelessuser/pyspelling/actions?query=workflow%3Abuild+branch%3Amaster
-[discord-image]: https://img.shields.io/discord/678289859768745989?logo=discord&logoColor=aaaaaa&color=mediumpurple&labelColor=333333
-[discord-link]:https://discord.gg/TWs8Tgr
 [codecov-image]: https://img.shields.io/codecov/c/github/facelessuser/pyspelling/master.svg?logo=codecov&logoColor=aaaaaa&labelColor=333333
 [codecov-link]: https://codecov.io/github/facelessuser/pyspelling
-[appveyor-image]: https://img.shields.io/appveyor/ci/facelessuser/pyspelling/master.svg?label=appveyor&logo=appveyor&logoColor=aaaaaa&labelColor=333333
-[appveyor-link]: https://ci.appveyor.com/project/facelessuser/pyspelling
-[travis-image]: https://img.shields.io/travis/facelessuser/pyspelling/master.svg?label=travis&logo=travis%20ci&logoColor=aaaaaa&labelColor=333333
-[travis-link]: https://travis-ci.org/facelessuser/pyspelling
 [pypi-image]: https://img.shields.io/pypi/v/pyspelling.svg?logo=pypi&logoColor=aaaaaa&labelColor=333333
 [pypi-link]: https://pypi.python.org/pypi/pyspelling
 [python-image]: https://img.shields.io/pypi/pyversions/pyspelling?logo=python&logoColor=aaaaaa&labelColor=333333
