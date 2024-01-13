@@ -4,7 +4,7 @@ repo_url: https://github.com/facelessuser/pyspelling
 edit_uri: tree/master/docs/src/markdown
 site_description: Python spell checker.
 copyright: |
-  Copyright &copy; 2017 - 2023 <a href="https://github.com/facelessuser" target="_blank" rel="noopener">Isaac Muse</a>
+  Copyright &copy; 2017 - 2024 <a href="https://github.com/facelessuser" target="_blank" rel="noopener">Isaac Muse</a>
 
 docs_dir: docs/src/markdown
 theme:
