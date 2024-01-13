@@ -16,6 +16,13 @@ def main():
     group.add_argument('--name', '-n', action='append', help="Specific spelling task by name to run.")
     group.add_argument('--group', '-g', action='append', help="Specific spelling task group to run.")
     parser.add_argument('--binary', '-b', action='store', default='', help="Provide path to spell checker's binary.")
+    parser.add_argument(
+        '--jobs', '-j',
+        action='store',
+        type=int,
+        default=0,
+        help="Specify the number of spell checker processes to run in parallel."
+    )
     parser.add_argument('--config', '-c', action='store', default='', help="Spelling config.")
     parser.add_argument(
         '--source', '-S',
@@ -35,7 +42,8 @@ def main():
         spellchecker=args.spellchecker,
         sources=args.source,
         verbose=args.verbose,
-        debug=args.debug
+        debug=args.debug,
+        jobs=args.jobs,
     )
 
 
@@ -49,6 +57,7 @@ def run(config, **kwargs):
     verbose = kwargs.get('verbose', 0)
     sources = kwargs.get('sources', [])
     debug = kwargs.get('debug', False)
+    jobs = kwargs.get('jobs', 0)
 
     fail = False
     count = 0
@@ -60,7 +69,8 @@ def run(config, **kwargs):
         checker=spellchecker,
         sources=sources,
         verbose=verbose,
-        debug=debug
+        debug=debug,
+        jobs=jobs,
     ):
         count += 1
         if results.error:

@@ -53,20 +53,24 @@ If you want to manually install it, run `#!bash python setup.py build` and `#!ba
 ## Command Line Usage
 
 ```
-usage: pyspelling [-h] [--version] [--verbose] [--name NAME] [--binary BINARY]
-                  [--config CONFIG] [--spellchecker SPELLCHECKER]
+usage: pyspelling [-h] [--version] [--verbose] [--name NAME | --group GROUP] [--binary BINARY] [--jobs JOBS] [--config CONFIG] [--source SOURCE] [--spellchecker SPELLCHECKER]
 
 Spell checking tool.
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   --version             show program's version number and exit
   --verbose, -v         Verbosity level.
   --name NAME, -n NAME  Specific spelling task by name to run.
+  --group GROUP, -g GROUP
+                        Specific spelling task group to run.
   --binary BINARY, -b BINARY
                         Provide path to spell checker's binary.
+  --jobs JOBS, -j JOBS  Specify the number of spell checker processes to run in parallel.
   --config CONFIG, -c CONFIG
                         Spelling config.
+  --source SOURCE, -S SOURCE
+                        Specify override file pattern. Only applicable when specifying exactly one --name.
   --spellchecker SPELLCHECKER, -s SPELLCHECKER
                         Choose between aspell and hunspell
 ```
@@ -82,7 +86,7 @@ If you have multiple Python versions, you can run the PySpelling associated with
 Python major and minor version:
 
 ```shell-session
-$ pyspelling3.7
+$ pyspelling3.11
 ```
 
 To specify a specific configuration other than the default, or even point to a different location:
@@ -131,6 +135,17 @@ You can specify the spell checker type by specifying it on the command line. PyS
 ```shell-session
 $ pyspelling -s hunspell
 ```
+
+To run multiple jobs in parallel, you can use the `--job` or `-j` option. Processing files in parallel can speed up
+processing time. Specifying jobs on the command line will override the `jobs` setting in the configuration file.
+
+```console
+$ pyspelling -n my_task -j 4
+```
+
+/// new | New 2.10
+Parallel processing is new in 2.10.
+///
 
 ## Supported Spell Check Versions
 

@@ -12,6 +12,17 @@ This can be overridden on the command line.
 spellchecker: hunspell
 ```
 
+You can specify the number of parallel jobs to use by setting the global option `jobs`. This create parallel jobs to
+process files in a given task.
+
+```yaml
+jobs: 4
+```
+
+/// new | New 2.10
+Parallel processing is new in 2.10.
+///
+
 All of the spelling tasks are contained under the keyword `matrix` and are organized in a list:
 
 ```yaml

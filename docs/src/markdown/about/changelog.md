@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.10
+
+-   **NEW**: Allow specifying parallel processes to speed up spell checking. Number of jobs can be specified either
+    by command line or via the config. Command line overrides the config.
+
 ## 2.9
 
 -   **NEW**: Officially support Python 3.11 and 3.12.
