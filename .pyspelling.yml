@@ -1,4 +1,5 @@
 spellchecker: aspell
+jobs: 8
 
 matrix:
 - name: mkdocs

@@ -8,6 +8,7 @@ from . import filters
 from wcmatch import glob
 import codecs
 from collections import namedtuple
+from concurrent.futures import ProcessPoolExecutor
 
 __all__ = ("spellcheck",)
 
@@ -15,6 +16,13 @@ STEP_ERROR = """Pipeline step in unexpected format: {}
 
 Each pipeline step should be in the form {{key: options: {{}}}} not {{key: {{}}, key2: {{}}}}
 """
+
+
+def log(text, level, verbose=0):
+    """Log level."""
+
+    if verbose >= level:
+        print(text)
 
 
 class Results(namedtuple('Results', ['words', 'context', 'category', 'error'])):
@@ -31,56 +39,19 @@ class SpellChecker:
 
     DICTIONARY = 'dictionary.dic'
 
-    GLOB_FLAG_MAP = {
-        "CASE": glob.C,
-        "C": glob.C,
-        "IGNORECASE": glob.I,
-        "I": glob.I,
-        "RAWCHARS": glob.R,
-        "R": glob.R,
-        "NEGATE": glob.N,
-        "N": glob.N,
-        "MINUSNEGATE": glob.M,
-        "M": glob.M,
-        "GLOBSTAR": glob.G,
-        "G": glob.G,
-        "DOTGLOB": glob.D,
-        "D": glob.D,
-        "EXTGLOB": glob.E,
-        "E": glob.E,
-        "BRACE": glob.B,
-        "B": glob.B,
-        "FOLLOW": glob.L,
-        "L": glob.L,
-        "MATCHBASE": glob.X,
-        "X": glob.X,
-        "NEGATEALL": glob.A,
-        "A": glob.A,
-        "NOUNIQUE": glob.Q,
-        "Q": glob.Q,
-        "GLOBTILDE": glob.T,
-        "T": glob.T,
-        # We will accept these, but we already force them on
-        "SPLIT": glob.S,
-        "S": glob.S,
-        "NODIR": glob.O,
-        "O": glob.O
-    }
-
-    def __init__(self, config, binary='', verbose=0, debug=False):
+    def __init__(self, config, binary='', verbose=0, default_encoding='', debug=False):
         """Initialize."""
 
         # General options
         self.binary = binary if binary else 'aspell'
         self.verbose = verbose
-        self.dict_bin = os.path.abspath(self.DICTIONARY)
         self.debug = debug
-        self.default_encoding = ''
+        self.default_encoding = default_encoding
 
     def log(self, text, level):
         """Log level."""
-        if self.verbose >= level:
-            print(text)
+
+        log(text, level, verbose=self.verbose)
 
     def get_error(self, e):
         """Get the error."""
@@ -175,53 +146,16 @@ class SpellChecker:
     def spell_check_no_pipeline(self, sources, options, personal_dict):
         """Spell check without the pipeline."""
 
-    def compile_dictionary(self, lang, wordlists, output):
+    def compile_dictionary(self, lang, wordlists, output, verbose):
         """Compile user dictionary."""
 
-    def _walk_src(self, targets, flags, limit, pipeline, expect_match):
-        """Walk source and parse files."""
-
-        found_something = False
-        for target in targets:
-            # Glob using `S` for patterns with `|` and `O` to exclude directories.
-            kwargs = {"flags": flags | glob.S | glob.O}
-            kwargs['limit'] = limit
-            for f in glob.iglob(target, **kwargs):
-                found_something = True
-                self.log('', 2)
-                self.log('> Processing: %s' % f, 1)
-                if pipeline:
-                    try:
-                        yield pipeline[0]._run_first(f)
-                    except Exception as e:
-                        err = self.get_error(e)
-                        yield [filters.SourceText('', f, '', '', err)]
-                else:
-                    try:
-                        if self.default_encoding:
-                            encoding = filters.PYTHON_ENCODING_NAMES.get(
-                                self.default_encoding, self.default_encoding
-                            ).lower()
-                            encoding = codecs.lookup(encoding).name
-                        else:
-                            encoding = self.default_encoding
-                        yield [filters.SourceText('', f, encoding, 'file')]
-                    except Exception as e:
-                        err = self.get_error(e)
-                        yield [filters.SourceText('', f, '', '', err)]
-        if not found_something and expect_match:
-            raise RuntimeError(
-                'None of the source targets from the configuration match any files:\n{}'.format(
-                    '\n'.join(f'- {target}' for target in targets)
-                )
-            )
-
-    def setup_spellchecker(self, task):
+    @staticmethod
+    def get_options(task):
         """Setup spell checker."""
 
         return {}
 
-    def setup_dictionary(self, task):
+    def setup_dictionary(self, task, binary, verbose):
         """Setup dictionary."""
 
         return None
@@ -286,79 +220,74 @@ class SpellChecker:
             raise ValueError("Could not find the 'get_plugin' function in module '%s'!" % module)
         return attr()
 
-    def _to_flags(self, text):
-        """Convert text representation of flags to actual flags."""
+    def get_source(self, f):
+        """Get the source."""
 
-        flags = 0
-        for x in text.split('|'):
-            value = x.strip().upper()
-            if value:
-                flags |= self.GLOB_FLAG_MAP.get(value, 0)
-        return flags
-
-    def run_task(self, task, source_patterns=None):
-        """Walk source and initiate spell check."""
-
-        # Perform spell check
-        self.log('Running Task: %s...' % task.get('name', ''), 1)
-
-        # Setup filters and variables for the spell check
-        self.default_encoding = task.get('default_encoding', '')
-        options = self.setup_spellchecker(task)
-        personal_dict = self.setup_dictionary(task)
-        glob_flags = self._to_flags(task.get('glob_flags', "N|B|G"))
-        glob_limit = task.get('glob_pattern_limit', 1000)
-        self._build_pipeline(task)
-
-        if not source_patterns:
-            source_patterns = task.get('sources', [])
-
-        expect_match = task.get('expect_match', True)
-        for sources in self._walk_src(source_patterns, glob_flags, glob_limit, self.pipeline_steps, expect_match):
-            if self.pipeline_steps is not None:
-                yield from self._spelling_pipeline(sources, options, personal_dict)
-            else:
-                yield from self.spell_check_no_pipeline(sources, options, personal_dict)
+        if self.pipeline_steps:
+            try:
+                source = self.pipeline_steps[0]._run_first(f)
+            except Exception as e:
+                err = self.get_error(e)
+                source = [filters.SourceText('', f, '', '', err)]
+        else:
+            try:
+                if self.default_encoding:
+                    encoding = filters.PYTHON_ENCODING_NAMES.get(
+                        self.default_encoding, self.default_encoding
+                    ).lower()
+                    encoding = codecs.lookup(encoding).name
+                else:
+                    encoding = self.default_encoding
+                source = [filters.SourceText('', f, encoding, 'file')]
+            except Exception as e:
+                err = self.get_error(e)
+                source = [filters.SourceText('', f, '', '', err)]
+        return source
 
 
 class Aspell(SpellChecker):
     """Aspell spell check class."""
 
-    def __init__(self, config, binary='', verbose=0, debug=False):
+    def __init__(self, config, binary='', verbose=0, default_encoding='', debug=False):
         """Initialize."""
 
-        super().__init__(config, binary, verbose, debug)
+        super().__init__(config, binary, verbose, default_encoding, debug)
         self.binary = binary if binary else 'aspell'
 
-    def setup_spellchecker(self, task):
+    @staticmethod
+    def get_options(task):
         """Setup spell checker."""
 
         return task.get('aspell', {})
 
-    def setup_dictionary(self, task):
+    @classmethod
+    def setup_dictionary(cls, task, binary, verbose):
         """Setup dictionary."""
 
         dictionary_options = task.get('dictionary', {})
-        output = os.path.abspath(dictionary_options.get('output', self.dict_bin))
+        output = os.path.abspath(dictionary_options.get('output', os.path.abspath(cls.DICTIONARY)))
         aspell_options = task.get('aspell', {})
         lang = aspell_options.get('lang', aspell_options.get('l', 'en'))
         wordlists = dictionary_options.get('wordlists', [])
         if lang and wordlists:
-            self.compile_dictionary(
+            cls.compile_dictionary(
+                binary,
                 lang,
                 dictionary_options.get('wordlists', []),
                 dictionary_options.get('encoding', 'utf-8'),
-                output
+                output,
+                verbose
             )
         else:
             output = None
         return output
 
-    def compile_dictionary(self, lang, wordlists, encoding, output):
+    @classmethod
+    def compile_dictionary(cls, binary, lang, wordlists, encoding, output, verbose):
         """Compile user dictionary."""
 
         cmd = [
-            self.binary,
+            binary,
             '--lang', lang,
             '--encoding', codecs.lookup(filters.PYTHON_ENCODING_NAMES.get(encoding, encoding).lower()).name,
             'create',
@@ -374,7 +303,7 @@ class Aspell(SpellChecker):
             if os.path.exists(output):
                 os.remove(output)
 
-            self.log("Compiling Dictionary...", 1)
+            log("Compiling Dictionary...", 1, verbose)
             # Read word lists and create a unique set of words
             words = set()
             for wordlist in wordlists:
@@ -388,9 +317,9 @@ class Aspell(SpellChecker):
                 input_text=b'\n'.join(sorted(words)) + b'\n'
             )
         except Exception:
-            self.log(cmd, 0)
-            self.log("Current wordlist: '%s'" % wordlist, 0)
-            self.log("Problem compiling dictionary. Check the binary path and options.", 0)
+            log(cmd, 0, verbose)
+            log("Current wordlist: '%s'" % wordlist, 0, verbose)
+            log("Problem compiling dictionary. Check the binary path and options.", 0, verbose)
             raise
 
     def spell_check_no_pipeline(self, sources, options, personal_dict):
@@ -480,30 +409,33 @@ class Aspell(SpellChecker):
 class Hunspell(SpellChecker):
     """Hunspell spell check class."""
 
-    def __init__(self, config, binary='', verbose=0, debug=False):
+    def __init__(self, config, binary='', verbose=0, default_encoding='', debug=False):
         """Initialize."""
 
-        super().__init__(config, binary, verbose, debug)
+        super().__init__(config, binary, verbose, default_encoding, debug)
         self.binary = binary if binary else 'hunspell'
 
-    def setup_spellchecker(self, task):
+    @staticmethod
+    def get_options(task):
         """Setup spell checker."""
 
         return task.get('hunspell', {})
 
-    def setup_dictionary(self, task):
+    @classmethod
+    def setup_dictionary(cls, task, binary, verbose):
         """Setup dictionary."""
 
         dictionary_options = task.get('dictionary', {})
-        output = os.path.abspath(dictionary_options.get('output', self.dict_bin))
+        output = os.path.abspath(dictionary_options.get('output', os.path.abspath(cls.DICTIONARY)))
         wordlists = dictionary_options.get('wordlists', [])
         if wordlists:
-            self.compile_dictionary('', dictionary_options.get('wordlists', []), None, output)
+            cls.compile_dictionary(binary, '', dictionary_options.get('wordlists', []), None, output, verbose)
         else:
             output = None
         return output
 
-    def compile_dictionary(self, lang, wordlists, encoding, output):
+    @classmethod
+    def compile_dictionary(cls, binary, lang, wordlists, encoding, output, verbose):
         """Compile user dictionary."""
 
         wordlist = ''
@@ -515,7 +447,7 @@ class Hunspell(SpellChecker):
             if os.path.exists(output):
                 os.remove(output)
 
-            self.log("Compiling Dictionary...", 1)
+            log("Compiling Dictionary...", 1, verbose)
             # Read word lists and create a unique set of words
             words = set()
             for wordlist in wordlists:
@@ -527,8 +459,8 @@ class Hunspell(SpellChecker):
             with open(output, 'wb') as dest:
                 dest.write(b'\n'.join(sorted(words)) + b'\n')
         except Exception:
-            self.log('Problem compiling dictionary.', 0)
-            self.log("Current wordlist '%s'" % wordlist)
+            log('Problem compiling dictionary.', 0, verbose)
+            log("Current wordlist '%s'" % wordlist, verbose)
             raise
 
     def spell_check_no_pipeline(self, sources, options, personal_dict):
@@ -607,18 +539,174 @@ def iter_tasks(matrix, names, groups):
             yield task
 
 
-def spellcheck(config_file, names=None, groups=None, binary='', checker='', sources=None, verbose=0, debug=False):
+class SpellingTask:
+    """Process spelling task."""
+
+    GLOB_FLAG_MAP = {
+        "CASE": glob.C,
+        "C": glob.C,
+        "IGNORECASE": glob.I,
+        "I": glob.I,
+        "RAWCHARS": glob.R,
+        "R": glob.R,
+        "NEGATE": glob.N,
+        "N": glob.N,
+        "MINUSNEGATE": glob.M,
+        "M": glob.M,
+        "GLOBSTAR": glob.G,
+        "G": glob.G,
+        "DOTGLOB": glob.D,
+        "D": glob.D,
+        "EXTGLOB": glob.E,
+        "E": glob.E,
+        "BRACE": glob.B,
+        "B": glob.B,
+        "FOLLOW": glob.L,
+        "L": glob.L,
+        "MATCHBASE": glob.X,
+        "X": glob.X,
+        "NEGATEALL": glob.A,
+        "A": glob.A,
+        "NOUNIQUE": glob.Q,
+        "Q": glob.Q,
+        "GLOBTILDE": glob.T,
+        "T": glob.T,
+        # We will accept these, but we already force them on
+        "SPLIT": glob.S,
+        "S": glob.S,
+        "NODIR": glob.O,
+        "O": glob.O
+    }
+
+    def __init__(self, checker, config, binary='', verbose=0, jobs=0, debug=False):
+        """Initialize."""
+
+        if checker == "hunspell":  # pragma: no cover
+            spellchecker = Hunspell
+        elif checker == "aspell":
+            spellchecker = Aspell
+        else:
+            raise ValueError('%s is not a valid spellchecker!' % checker)
+
+        self.spellchecker = spellchecker
+        self.verbose = verbose
+        self.config = config
+        self.binary = checker if not binary else binary
+        self.debug = debug
+        self.jobs = jobs
+
+    def log(self, text, level):
+        """Log level."""
+
+        log(text, level, verbose=self.verbose)
+
+    def _to_flags(self, text):
+        """Convert text representation of flags to actual flags."""
+
+        flags = 0
+        for x in text.split('|'):
+            value = x.strip().upper()
+            if value:
+                flags |= self.GLOB_FLAG_MAP.get(value, 0)
+        return flags
+
+    def walk_src(self, targets, flags, limit):
+        """Walk source and parse files."""
+
+        for target in targets:
+            # Glob using `S` for patterns with `|` and `O` to exclude directories.
+            kwargs = {"flags": flags | glob.S | glob.O}
+            kwargs['limit'] = limit
+            yield from glob.iglob(target, **kwargs)
+
+    def get_checker(self):
+        """Get a spell checker object."""
+
+        checker = self.spellchecker(self.config, self.binary, self.verbose, self.default_encoding, self.debug)
+        checker._build_pipeline(self.task)
+        return checker
+
+    def process_file(self, f, checker):
+        """Process a given file."""
+
+        self.log('', 2)
+        self.log('> Processing: %s' % f, 1)
+
+        source = checker.get_source(f)
+
+        if checker.pipeline_steps is not None:
+            yield from checker._spelling_pipeline(source, self.options, self.personal_dict)
+        else:
+            yield from checker.spell_check_no_pipeline(source, self.options, self.personal_dict)
+
+    def multi_check(self, f):
+        """Check the file for spelling errors (for multi-processing)."""
+
+        return list(self.process_file(f, self.get_checker()))
+
+    def run_task(self, task, source_patterns=None):
+        """Walk source and initiate spell check."""
+
+        # Perform spell check
+        self.log('Running Task: %s...' % task.get('name', ''), 1)
+
+        # Setup filters and variables for the spell check
+        self.task = task
+        self.default_encoding = self.task.get('default_encoding', '')
+        self.options = self.spellchecker.get_options(self.task)
+        self.personal_dict = self.spellchecker.setup_dictionary(self.task, self.binary, self.verbose)
+        self.found_match = False
+        glob_flags = self._to_flags(self.task.get('glob_flags', "N|B|G"))
+        glob_limit = self.task.get('glob_pattern_limit', 1000)
+
+        if not source_patterns:
+            source_patterns = self.task.get('sources', [])
+
+        # If jobs was not specified via command line, check the config for jobs settings
+        jobs = max(1, self.config.get('jobs', 1) if self.jobs == 0 else self.jobs)
+
+        expect_match = self.task.get('expect_match', True)
+        if jobs > 1:
+            # Use multi-processing to process files concurrently
+            with ProcessPoolExecutor(max_workers=jobs) as pool:
+                for results in pool.map(self.multi_check, self.walk_src(source_patterns, glob_flags, glob_limit)):
+                    self.found_match = True
+                    yield from results
+        else:
+            # Avoid overhead of multiprocessing if we are single threaded
+            checker = self.get_checker()
+            for f in self.walk_src(source_patterns, glob_flags, glob_limit):
+                self.found_match = True
+                yield from self.process_file(f, checker)
+
+        if not self.found_match and expect_match:
+            raise RuntimeError(
+                'None of the source targets from the configuration match any files:\n{}'.format(
+                    '\n'.join(f'- {target}' for target in source_patterns)
+                )
+            )
+
+
+def spellcheck(
+    config_file,
+    names=None,
+    groups=None,
+    binary='',
+    checker='',
+    sources=None,
+    verbose=0,
+    debug=False,
+    jobs=0
+):
     """Spell check."""
 
-    hunspell = None
-    aspell = None
-    spellchecker = None
     config = util.read_config(config_file)
     if sources is None:
         sources = []
 
     matrix = config.get('matrix')
     preferred_checker = config.get('spellchecker', 'aspell')
+
     if matrix is None:
         matrix = config.get('documents')
         if matrix is not None:
@@ -639,6 +727,7 @@ def spellcheck(config_file, names=None, groups=None, binary='', checker='', sour
         sources = []
 
     processed_tasks = 0
+
     for task in iter_tasks(matrix, names, groups):
 
         processed_tasks += 1
@@ -646,23 +735,15 @@ def spellcheck(config_file, names=None, groups=None, binary='', checker='', sour
         if not checker:
             checker = preferred_checker
 
-        if checker == "hunspell":  # pragma: no cover
-            if hunspell is None:
-                hunspell = Hunspell(config, binary, verbose, debug)
-            spellchecker = hunspell
+        log('Using {} to spellcheck {}'.format(checker, task.get('name', '')), 1, verbose)
 
-        elif checker == "aspell":
-            if aspell is None:
-                aspell = Aspell(config, binary, verbose, debug)
-            spellchecker = aspell
-        else:
-            raise ValueError('%s is not a valid spellchecker!' % checker)
+        spelltask = SpellingTask(checker, config, binary, verbose, jobs, debug)
 
-        spellchecker.log('Using {} to spellcheck {}'.format(checker, task.get('name', '')), 1)
-        for result in spellchecker.run_task(task, source_patterns=sources):
-            spellchecker.log('Context: %s' % result.context, 2)
+        for result in spelltask.run_task(task, source_patterns=sources):
+            log('Context: %s' % result.context, 2, verbose)
             yield result
-        spellchecker.log("", 1)
+
+        log("", 1, verbose)
 
     if processed_tasks == 0:
         raise ValueError(

@@ -56,6 +56,42 @@ class TestGlob(util.PluginTestCase):
         self.assert_spellcheck('.glob.yml', bad_words)
 
 
+class TestParallel(util.PluginTestCase):
+    """Test parallel processing."""
+
+    def test_parallel(self):
+        """Test parallel processing."""
+
+        config = self.dedent(
+            """
+            jobs: 2
+
+            matrix:
+            - name: no_pipeline
+              default_encoding: utf-8
+              sources:
+              - '{}/**/*.txt'
+              aspell:
+                lang: en
+                d: en_US
+              hunspell:
+                d: en_US
+              pipeline:
+              - pyspelling.filters.text:
+                  convert_encoding: utf-8
+            """
+        ).format(self.tempdir)
+        self.mktemp('.parallel.yml', config, 'utf-8')
+
+        bad_words1 = ['helo', 'begn']
+        good_words1 = ['yes', 'word']
+        bad_words2 = ['gdbye', 'stopp']
+        good_words2 = ['okay', 'good']
+        self.mktemp('test1.txt', '\n'.join(bad_words1 + good_words1), 'utf-8')
+        self.mktemp('test2.txt', '\n'.join(bad_words2 + good_words2), 'utf-8')
+        self.assert_spellcheck('.parallel.yml', bad_words1 + bad_words2)
+
+
 class TestNoPipeline(util.PluginTestCase):
     """Test no pipeline."""
 
@@ -273,8 +309,9 @@ class TestNameGroup(util.PluginTestCase):
               - pyspelling.filters.html:
                 # should be indented more
                 name2: 1
-            """
+            """.format(temp=self.tempdir)
         )
         self.mktemp('.source.yml', config, 'utf-8')
+        self.mktemp('test.txt', '', 'utf-8')
         with self.assertRaises(ValueError):
             self.assert_spellcheck('.source.yml', [])

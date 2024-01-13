@@ -55,6 +55,7 @@ chainable
 charset
 checkable
 chunking
+config
 could've
 dicts
 distro
