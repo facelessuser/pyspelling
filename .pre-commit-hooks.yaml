@@ -1,0 +1,10 @@
+---
+- id: 'pyspelling'
+  name: 'pyspelling'
+  description: 'This hook runs pyspelling'
+  language: 'python'
+  entry: 'pyspelling'
+  pass_filenames: false
+  additional_dependencies:
+    - 'pymdown-extensions'
+...
