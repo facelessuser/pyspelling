@@ -322,7 +322,7 @@ repos:
     hooks:
       - id: 'pyspelling'
         verbose: true
-        pass_filenames: true
+        pass_filenames: false
 ...
 
 Please note that version tags should be preferred over using the `master` branch as revision (`rev`) attribute, as the
