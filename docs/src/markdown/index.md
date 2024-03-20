@@ -309,3 +309,23 @@ jobs:
 
 In *this* project, we actually use `tox` to make running our tests locally and in CI easier. If you would like to use
 `tox` as well, you can check out how this project does it by taking a look at the source.
+
+## Usage as `pre-commit` Hook
+
+PySpelling can be used as a [`pre-commit`](https://pre-commit.com/) hook. To use it as a `pre-commit` hook, please have a
+look at the following example `.pre-commit-config.yaml`:
+
+```yaml
+---
+repos:
+  - repo: 'https://github.com/facelessuser/pyspelling.git'
+    rev: 'v2.11'
+    hooks:
+      - id: 'pyspelling'
+        verbose: true
+        pass_filenames: false
+...
+```
+
+Please note that version tags should be preferred over using the `master` branch as revision (`rev`) attribute, as the
+`master` branch is considered unstable.
