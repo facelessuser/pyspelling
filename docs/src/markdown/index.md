@@ -310,9 +310,9 @@ jobs:
 In *this* project, we actually use `tox` to make running our tests locally and in CI easier. If you would like to use
 `tox` as well, you can check out how this project does it by taking a look at the source.
 
-## Usage as pre-commit Hook
+## Usage as `pre-commit` Hook
 
-`pyspelling` can be used as [`pre-commit`](https://pre-commit.com/) hook. To use it as `pre-commit` hook, please have a
+PySpelling can be used as [`pre-commit`](https://pre-commit.com/) hook. To use it as `pre-commit` hook, please have a
 look at the following example `.pre-commit-config.yaml`:
 
 ```yaml
