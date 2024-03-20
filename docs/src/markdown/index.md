@@ -316,6 +316,7 @@ PySpelling can be used as a [`pre-commit`](https://pre-commit.com/) hook. To use
 look at the following example `.pre-commit-config.yaml`:
 
 ```yaml
+---
 repos:
   - repo: 'https://github.com/facelessuser/pyspelling.git'
     rev: 'v2.11'
@@ -324,6 +325,7 @@ repos:
         verbose: true
         pass_filenames: false
 ...
+```
 
 Please note that version tags should be preferred over using the `master` branch as revision (`rev`) attribute, as the
 `master` branch is considered unstable.
