@@ -312,7 +312,7 @@ In *this* project, we actually use `tox` to make running our tests locally and i
 
 ## Usage as `pre-commit` Hook
 
-PySpelling can be used as a [`pre-commit`](https://pre-commit.com/) hook. To use it as `pre-commit` hook, please have a
+PySpelling can be used as a [`pre-commit`](https://pre-commit.com/) hook. To use it as a `pre-commit` hook, please have a
 look at the following example `.pre-commit-config.yaml`:
 
 ```yaml
