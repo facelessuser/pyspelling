@@ -5,6 +5,7 @@ from . import util
 from .__meta__ import __version__, __version_info__  # noqa: F401
 from . import flow_control
 from . import filters
+from .util import git
 from wcmatch import glob
 import codecs
 from collections import namedtuple
@@ -578,7 +579,7 @@ class SpellingTask:
         "O": glob.O
     }
 
-    def __init__(self, checker, config, binary='', verbose=0, jobs=0, debug=False):
+    def __init__(self, checker, config, binary='', verbose=0, jobs=0, git_merge_base='', git_binary=None, debug=False):
         """Initialize."""
 
         if checker == "hunspell":  # pragma: no cover
@@ -594,6 +595,8 @@ class SpellingTask:
         self.binary = checker if not binary else binary
         self.debug = debug
         self.jobs = jobs
+        self.git_merge_base = git_merge_base
+        self.git_binary = git_binary
 
     def log(self, text, level):
         """Log level."""
@@ -613,11 +616,20 @@ class SpellingTask:
     def walk_src(self, targets, flags, limit):
         """Walk source and parse files."""
 
-        for target in targets:
-            # Glob using `S` for patterns with `|` and `O` to exclude directories.
-            kwargs = {"flags": flags | glob.S | glob.O}
-            kwargs['limit'] = limit
-            yield from glob.iglob(target, **kwargs)
+        # Glob using `S` for patterns with `|` and `O` to exclude directories.
+        kwargs = {"flags": flags | glob.S | glob.O}
+        kwargs['limit'] = limit
+
+        if self.git_merge_base:
+            for target in targets:
+                yield from glob.globfilter(
+                    git.get_file_diff(self.git_merge_base, git_binary=self.git_binary),
+                    target,
+                    **kwargs
+                )
+        else:
+            for target in targets:
+                yield from glob.iglob(target, **kwargs)
 
     def get_checker(self):
         """Get a spell checker object."""
@@ -659,13 +671,18 @@ class SpellingTask:
         glob_flags = self._to_flags(self.task.get('glob_flags', "N|B|G"))
         glob_limit = self.task.get('glob_pattern_limit', 1000)
 
+        if self.git_merge_base:
+            self.log("Searching: Only checking files that changed in git...", 1)
+        else:
+            self.log("Searching: Finding files to check...", 1)
+
         if not source_patterns:
             source_patterns = self.task.get('sources', [])
 
         # If jobs was not specified via command line, check the config for jobs settings
         jobs = max(1, self.config.get('jobs', 1) if self.jobs == 0 else self.jobs)
 
-        expect_match = self.task.get('expect_match', True)
+        expect_match = self.task.get('expect_match', True) and not self.git_merge_base
         if jobs > 1:
             # Use multi-processing to process files concurrently
             with ProcessPoolExecutor(max_workers=jobs) as pool:
@@ -696,7 +713,9 @@ def spellcheck(
     sources=None,
     verbose=0,
     debug=False,
-    jobs=0
+    jobs=0,
+    git_merge_base='',
+    git_binary=None
 ):
     """Spell check."""
 
@@ -737,7 +756,7 @@ def spellcheck(
 
         log('Using {} to spellcheck {}'.format(checker, task.get('name', '')), 1, verbose)
 
-        spelltask = SpellingTask(checker, config, binary, verbose, jobs, debug)
+        spelltask = SpellingTask(checker, config, binary, verbose, jobs, git_merge_base, git_binary, debug)
 
         for result in spelltask.run_task(task, source_patterns=sources):
             log('Context: %s' % result.context, 2, verbose)

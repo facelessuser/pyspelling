@@ -17,6 +17,16 @@ def main():
     group.add_argument('--group', '-g', action='append', help="Specific spelling task group to run.")
     parser.add_argument('--binary', '-b', action='store', default='', help="Provide path to spell checker's binary.")
     parser.add_argument(
+        '--git-merge-base',
+        '-m',
+        help="Specify the git merge base for generating a modified file list."
+    )
+    parser.add_argument(
+        '--git-binary',
+        '-G',
+        help="Specify the path to the the git binary if not on the system path."
+    )
+    parser.add_argument(
         '--jobs', '-j',
         action='store',
         type=int,
@@ -44,6 +54,8 @@ def main():
         verbose=args.verbose,
         debug=args.debug,
         jobs=args.jobs,
+        git_merge_base=args.git_merge_base,
+        git_binary=args.git_binary
     )
 
 
@@ -58,6 +70,8 @@ def run(config, **kwargs):
     sources = kwargs.get('sources', [])
     debug = kwargs.get('debug', False)
     jobs = kwargs.get('jobs', 0)
+    git_merge_base = kwargs.get('git_merge_base', '')
+    git_binary = kwargs.get('git_binary', None)
 
     fail = False
     count = 0
@@ -71,6 +85,8 @@ def run(config, **kwargs):
         verbose=verbose,
         debug=debug,
         jobs=jobs,
+        git_merge_base=git_merge_base,
+        git_binary=git_binary
     ):
         count += 1
         if results.error:
