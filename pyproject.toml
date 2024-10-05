@@ -134,12 +134,15 @@ commands=
     {envpython} -m coverage report --show-missing
 
 [testenv:documents]
+passenv = TOX_MERGE_BASE
 deps=
     .
     -r requirements/docs.txt
 commands=
     {envpython} -m mkdocs build --clean --verbose --strict
-    {envpython} -m pyspelling
+    {envpython} -m pyspelling -n python -m {env:TOX_MERGE_BASE:master} -v
+    {envpython} -m pyspelling -n markdown -m {env:TOX_MERGE_BASE:master} -v
+    {envpython} -m pyspelling -n mkdocs -v
 
 [testenv:lint]
 deps=
