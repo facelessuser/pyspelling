@@ -319,7 +319,7 @@ look at the following example `.pre-commit-config.yaml`:
 ---
 repos:
   - repo: 'https://github.com/facelessuser/pyspelling.git'
-    rev: 'v2.11'
+    rev: '2.11'
     hooks:
       - id: 'pyspelling'
         verbose: true
