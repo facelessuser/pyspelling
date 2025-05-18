@@ -184,7 +184,17 @@ class PluginTestCase(unittest.TestCase):
                 context.append(results.context)
             self.assertEqual([(f'{self.tempdir}/{i}' if i else i) for i in expected[:]], context)
 
-    def assert_spellcheck(self, config_file, expected, names=None, groups=None, sources=None, verbose=4):
+    def assert_spellcheck(
+        self,
+        config_file,
+        expected,
+        names=None,
+        groups=None,
+        sources=None,
+        verbose=4,
+        skip_dict_compile=False,
+        only_one=False
+    ):
         """Spell check."""
 
         hunspell_location = which(HUNSPELL)
@@ -209,12 +219,15 @@ class PluginTestCase(unittest.TestCase):
                 checker='hunspell',
                 binary=hunspell_location,
                 debug=True,
-                verbose=verbose
+                verbose=verbose,
+                skip_dict_compile=skip_dict_compile
             ):
                 if results.error:
                     print(results.error)
                 words |= set(results.words)
             self.assertEqual(sorted(expected), sorted(words))
+            if only_one:
+                return
         if aspell_location:
             words = set()
             for results in spellcheck(
@@ -225,9 +238,12 @@ class PluginTestCase(unittest.TestCase):
                 checker='aspell',
                 binary=aspell_location,
                 debug=True,
-                verbose=verbose
+                verbose=verbose,
+                skip_dict_compile=skip_dict_compile
             ):
                 if results.error:
                     print(results.error)
                 words |= set(results.words)
             self.assertEqual(sorted(expected), sorted(words))
+            if only_one:
+                return

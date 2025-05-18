@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.11
+
+-   **NEW**: Add new command line option `--skip-dict-compile` which will skip the dictionary compiling step. This
+    should only be run if the dictionary is already built and no changes have been made to it.
+
 ## 2.10
 
 -   **NEW**: Allow specifying parallel processes to speed up spell checking. Number of jobs can be specified either

@@ -30,7 +30,10 @@ def main():
         help="Specify override file pattern. Only applicable when specifying exactly one --name."
     )
     parser.add_argument(
-        '--spellchecker', '-s', action='store', default='', help="Choose between aspell and hunspell"
+        '--spellchecker', '-s', action='store', default='', help="Choose between aspell and hunspell."
+    )
+    parser.add_argument(
+        '--skip-dict-compile', '-x', action='store_true', help="Skip dictionary compilation."
     )
     args = parser.parse_args()
 
@@ -44,6 +47,7 @@ def main():
         verbose=args.verbose,
         debug=args.debug,
         jobs=args.jobs,
+        skip_dict_compile=args.skip_dict_compile
     )
 
 
@@ -58,6 +62,7 @@ def run(config, **kwargs):
     sources = kwargs.get('sources', [])
     debug = kwargs.get('debug', False)
     jobs = kwargs.get('jobs', 0)
+    skip_dict_compile = kwargs.get('skip_dict_compile', False)
 
     fail = False
     count = 0
@@ -71,6 +76,7 @@ def run(config, **kwargs):
         verbose=verbose,
         debug=debug,
         jobs=jobs,
+        skip_dict_compile=skip_dict_compile
     ):
         count += 1
         if results.error:
