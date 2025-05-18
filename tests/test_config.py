@@ -348,7 +348,7 @@ class TestSkipDictionary(util.PluginTestCase):
         good_words = ['yes', 'word']
         self.mktemp('mydict.wl', '\n'.join(bad_words), 'utf-8')
         self.mktemp('test.txt', '\n'.join(bad_words + good_words), 'utf-8')
-        self.assert_spellcheck('.skip_compile.yml', ['helo', 'begn'], skip_dict_compile=True)
+        self.assert_spellcheck('.skip_compile.yml', [], skip_dict_compile=True)
 
     def test_compile_once(self):
         """Test text."""

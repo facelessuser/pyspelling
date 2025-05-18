@@ -70,7 +70,7 @@ options:
   --spellchecker, -s SPELLCHECKER
                         Choose between aspell and hunspell.
   --skip-dict-compile, -x
-                        Skip dictionary compilation.
+                        Skip dictionary compilation if the compiled file already exists.
 ```
 
 PySpelling can be run with the command below (assuming your Python bin/script folder is in your path).  By default it

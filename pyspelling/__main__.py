@@ -33,7 +33,10 @@ def main():
         '--spellchecker', '-s', action='store', default='', help="Choose between aspell and hunspell."
     )
     parser.add_argument(
-        '--skip-dict-compile', '-x', action='store_true', help="Skip dictionary compilation."
+        '--skip-dict-compile',
+        '-x',
+        action='store_true',
+        help="Skip dictionary compilation if the compiled file already exists."
     )
     args = parser.parse_args()
 

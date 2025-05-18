@@ -666,7 +666,10 @@ class SpellingTask:
         else:
             dictionary_options = self.task.get('dictionary', {})
             output = os.path.abspath(dictionary_options.get('output', os.path.abspath(self.spellchecker.DICTIONARY)))
-            self.personal_dict = output if os.path.exists(output) else None
+            if os.path.exists(output):
+                self.personal_dict = output
+            else:
+                self.personal_dict = self.spellchecker.setup_dictionary(self.task, self.binary, self.verbose)
         self.found_match = False
         glob_flags = self._to_flags(self.task.get('glob_flags', "N|B|G"))
         glob_limit = self.task.get('glob_pattern_limit', 1000)

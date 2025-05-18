@@ -2,8 +2,8 @@
 
 ## 2.11
 
--   **NEW**: Add new command line option `--skip-dict-compile` which will skip the dictionary compiling step. This
-    should only be run if the dictionary is already built and no changes have been made to it.
+-   **NEW**: Add new command line option `--skip-dict-compile` which will skip the dictionary compiling step if the
+    dictionary already exists. Changes to a custom dictionary will be ignored.
 
 ## 2.10
 
