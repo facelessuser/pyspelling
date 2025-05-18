@@ -4,6 +4,8 @@
 
 -   **NEW**: Add new command line option `--skip-dict-compile` which will skip the dictionary compiling step if the
     dictionary already exists. Changes to a custom dictionary will be ignored.
+-   **NEW**: Drop support for Python 3.8.
+-   **NEW**: Add official support for Python 3.13.
 
 ## 2.10
 
