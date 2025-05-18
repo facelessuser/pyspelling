@@ -90,11 +90,12 @@ jobs:
     # Results
     - name: Upload Results
       if: success()
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         file: ./coverage.xml
         flags: unittests
         name: ${{ matrix.platform }}-${{ matrix.tox-env }}
+        token: ${{ secrets.CODECOV_TOKEN }} # required
         fail_ci_if_error: false
 
   docs_and_lint:
@@ -110,7 +111,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: 3.x
+        python-version: '3.13'
     - name: Install Aspell
       if: matrix.tox-env == 'documents'
       run: |
@@ -118,7 +119,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install --upgrade build setuptools tox 
+        python -m pip install --upgrade build setuptools tox
     - name: ${{ matrix.tox-env }}
       run: |
         python -m tox -e ${{ matrix.tox-env }}

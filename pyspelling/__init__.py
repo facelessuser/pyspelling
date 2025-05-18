@@ -578,7 +578,7 @@ class SpellingTask:
         "O": glob.O
     }
 
-    def __init__(self, checker, config, binary='', verbose=0, jobs=0, debug=False):
+    def __init__(self, checker, config, binary='', verbose=0, jobs=0, debug=False, skip_dict_compile=False):
         """Initialize."""
 
         if checker == "hunspell":  # pragma: no cover
@@ -594,6 +594,7 @@ class SpellingTask:
         self.binary = checker if not binary else binary
         self.debug = debug
         self.jobs = jobs
+        self.skip_dict_compile = skip_dict_compile
 
     def log(self, text, level):
         """Log level."""
@@ -622,7 +623,13 @@ class SpellingTask:
     def get_checker(self):
         """Get a spell checker object."""
 
-        checker = self.spellchecker(self.config, self.binary, self.verbose, self.default_encoding, self.debug)
+        checker = self.spellchecker(
+            self.config,
+            self.binary,
+            self.verbose,
+            self.default_encoding,
+            self.debug
+        )
         checker._build_pipeline(self.task)
         return checker
 
@@ -654,7 +661,15 @@ class SpellingTask:
         self.task = task
         self.default_encoding = self.task.get('default_encoding', '')
         self.options = self.spellchecker.get_options(self.task)
-        self.personal_dict = self.spellchecker.setup_dictionary(self.task, self.binary, self.verbose)
+        if not self.skip_dict_compile:
+            self.personal_dict = self.spellchecker.setup_dictionary(self.task, self.binary, self.verbose)
+        else:
+            dictionary_options = self.task.get('dictionary', {})
+            output = os.path.abspath(dictionary_options.get('output', os.path.abspath(self.spellchecker.DICTIONARY)))
+            if os.path.exists(output):
+                self.personal_dict = output
+            else:
+                self.personal_dict = self.spellchecker.setup_dictionary(self.task, self.binary, self.verbose)
         self.found_match = False
         glob_flags = self._to_flags(self.task.get('glob_flags', "N|B|G"))
         glob_limit = self.task.get('glob_pattern_limit', 1000)
@@ -696,7 +711,8 @@ def spellcheck(
     sources=None,
     verbose=0,
     debug=False,
-    jobs=0
+    jobs=0,
+    skip_dict_compile=False
 ):
     """Spell check."""
 
@@ -737,7 +753,7 @@ def spellcheck(
 
         log('Using {} to spellcheck {}'.format(checker, task.get('name', '')), 1, verbose)
 
-        spelltask = SpellingTask(checker, config, binary, verbose, jobs, debug)
+        spelltask = SpellingTask(checker, config, binary, verbose, jobs, debug, skip_dict_compile)
 
         for result in spelltask.run_task(task, source_patterns=sources):
             log('Context: %s' % result.context, 2, verbose)

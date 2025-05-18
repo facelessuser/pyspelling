@@ -315,3 +315,70 @@ class TestNameGroup(util.PluginTestCase):
         self.mktemp('test.txt', '', 'utf-8')
         with self.assertRaises(ValueError):
             self.assert_spellcheck('.source.yml', [])
+
+
+class TestSkipDictionary(util.PluginTestCase):
+    """Test no pipeline."""
+
+    def test_skip(self):
+        """Test text."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: no_pipeline
+              default_encoding: utf-8
+              sources:
+              - '{temp}/**/*.txt'
+              aspell:
+                lang: en
+                d: en_US
+              hunspell:
+                d: en_US
+              pipeline: null
+              dictionary:
+                wordlists:
+                - '{temp}/mydict.wl'
+                output: '{temp}/mydict.dic'
+            """
+        ).format(temp=self.tempdir)
+        self.mktemp('.skip_compile.yml', config, 'utf-8')
+
+        bad_words = ['helo', 'begn']
+        good_words = ['yes', 'word']
+        self.mktemp('mydict.wl', '\n'.join(bad_words), 'utf-8')
+        self.mktemp('test.txt', '\n'.join(bad_words + good_words), 'utf-8')
+        self.assert_spellcheck('.skip_compile.yml', [], skip_dict_compile=True)
+
+    def test_compile_once(self):
+        """Test text."""
+
+        config = self.dedent(
+            """
+            matrix:
+            - name: no_pipeline
+              default_encoding: utf-8
+              sources:
+              - '{temp}/**/*.txt'
+              aspell:
+                lang: en
+                d: en_US
+              hunspell:
+                d: en_US
+              pipeline: null
+              dictionary:
+                wordlists:
+                - '{temp}/mydict.wl'
+                output: '{temp}/mydict.dic'
+            """
+        ).format(temp=self.tempdir)
+        self.mktemp('.skip_compile.yml', config, 'utf-8')
+
+        bad_words = ['helo', 'begn']
+        good_words = ['yes', 'word']
+        self.mktemp('mydict.wl', '\n'.join(bad_words), 'utf-8')
+        self.mktemp('test.txt', '\n'.join(bad_words + good_words), 'utf-8')
+        # For this to work, we need to run on either Hunspell or Aspell, not both as the dictionary
+        # will be overwritten with the format for the wrong spell checker.
+        self.assert_spellcheck('.skip_compile.yml', [], skip_dict_compile=False, only_one=True)
+        self.assert_spellcheck('.skip_compile.yml', [], skip_dict_compile=True, only_one=True)

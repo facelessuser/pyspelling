@@ -53,7 +53,7 @@ If you want to manually install it, run `#!bash python setup.py build` and `#!ba
 ## Command Line Usage
 
 ```
-usage: pyspelling [-h] [--version] [--verbose] [--name NAME | --group GROUP] [--binary BINARY] [--jobs JOBS] [--config CONFIG] [--source SOURCE] [--spellchecker SPELLCHECKER]
+usage: pyspelling [-h] [--version] [--verbose] [--name NAME | --group GROUP] [--binary BINARY] [--jobs JOBS] [--config CONFIG] [--source SOURCE] [--spellchecker SPELLCHECKER] [--skip-dict-compile]
 
 Spell checking tool.
 
@@ -61,18 +61,16 @@ options:
   -h, --help            show this help message and exit
   --version             show program's version number and exit
   --verbose, -v         Verbosity level.
-  --name NAME, -n NAME  Specific spelling task by name to run.
-  --group GROUP, -g GROUP
-                        Specific spelling task group to run.
-  --binary BINARY, -b BINARY
-                        Provide path to spell checker's binary.
-  --jobs JOBS, -j JOBS  Specify the number of spell checker processes to run in parallel.
-  --config CONFIG, -c CONFIG
-                        Spelling config.
-  --source SOURCE, -S SOURCE
-                        Specify override file pattern. Only applicable when specifying exactly one --name.
-  --spellchecker SPELLCHECKER, -s SPELLCHECKER
-                        Choose between aspell and hunspell
+  --name, -n NAME       Specific spelling task by name to run.
+  --group, -g GROUP     Specific spelling task group to run.
+  --binary, -b BINARY   Provide path to spell checker's binary.
+  --jobs, -j JOBS       Specify the number of spell checker processes to run in parallel.
+  --config, -c CONFIG   Spelling config.
+  --source, -S SOURCE   Specify override file pattern. Only applicable when specifying exactly one --name.
+  --spellchecker, -s SPELLCHECKER
+                        Choose between aspell and hunspell.
+  --skip-dict-compile, -x
+                        Skip dictionary compilation if the compiled file already exists.
 ```
 
 PySpelling can be run with the command below (assuming your Python bin/script folder is in your path).  By default it
