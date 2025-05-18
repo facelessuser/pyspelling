@@ -32,7 +32,7 @@ MIT
 [aspell]: http://aspell.net/
 [hunspell]: https://hunspell.github.io/
 
-[github-ci-image]: https://github.com/facelessuser/pyspelling/workflows/build/badge.svg?branch=master&event=push
+[github-ci-image]: https://github.com/facelessuser/pyspelling/workflows/build/badge.svg
 [github-ci-link]: https://github.com/facelessuser/pyspelling/actions?query=workflow%3Abuild+branch%3Amaster
 [codecov-image]: https://img.shields.io/codecov/c/github/facelessuser/pyspelling/master.svg?logo=codecov&logoColor=aaaaaa&labelColor=333333
 [codecov-link]: https://codecov.io/github/facelessuser/pyspelling
