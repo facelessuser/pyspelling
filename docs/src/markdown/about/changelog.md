@@ -6,6 +6,7 @@
     dictionary already exists. Changes to a custom dictionary will be ignored.
 -   **NEW**: Drop support for Python 3.8.
 -   **NEW**: Add official support for Python 3.13.
+-   **NEW**: Add official support for Python 3.14.
 
 ## 2.10
 
