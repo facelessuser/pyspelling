@@ -1,7 +1,6 @@
 """JavaScript filter."""
 import re
 import textwrap
-import codecs
 from .. import filters
 
 RE_JSDOC = re.compile(r"(?s)^/\*\*$(.*?)[ \t]*\*/", re.MULTILINE)
@@ -282,7 +281,7 @@ class JavaScriptFilter(filters.Filter):
     def filter(self, source_file, encoding):  # noqa A001
         """Parse JavaScript file."""
 
-        with codecs.open(source_file, 'r', encoding=encoding) as f:
+        with open(source_file, 'r', encoding=encoding, errors='strict') as f:
             text = f.read()
 
         return self._filter(text, source_file, encoding)

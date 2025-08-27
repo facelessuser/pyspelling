@@ -65,7 +65,7 @@ class TextFilter(filters.Filter):
     def filter(self, source_file, encoding):  # noqa A001
         """Open and filter the file from disk."""
 
-        with codecs.open(source_file, 'r', encoding=encoding) as f:
+        with codecs.open(source_file, 'r', encoding=encoding, errors='strict') as f:
             text = f.read()
 
         text, encoding = self.convert(text, encoding)

@@ -1,6 +1,5 @@
 """Stylesheets filter."""
 import re
-import codecs
 import textwrap
 from .. import filters
 
@@ -165,7 +164,7 @@ class StylesheetsFilter(filters.Filter):
     def filter(self, source_file, encoding):  # noqa A001
         """Parse stylesheet file."""
 
-        with codecs.open(source_file, 'r', encoding=encoding) as f:
+        with open(source_file, 'r', encoding=encoding, errors='strict') as f:
             text = f.read()
 
         return self._filter(text, source_file, encoding)

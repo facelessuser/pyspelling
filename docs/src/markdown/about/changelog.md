@@ -6,6 +6,8 @@
     dictionary already exists. Changes to a custom dictionary will be ignored.
 -   **NEW**: Drop support for Python 3.8.
 -   **NEW**: Add official support for Python 3.13.
+-   **NEW**: Add official support for Python 3.14.
+-   **NEW**: Python filter is now aware of Python 3.14+ t-strings.
 
 ## 2.10
 

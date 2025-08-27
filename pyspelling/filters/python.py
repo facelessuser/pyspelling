@@ -7,12 +7,12 @@ from .. import filters
 import re
 import textwrap
 import tokenize
-import codecs
 import io
 import unicodedata
 import sys
 
 FSTR_TOKENIZE = (3, 12) <= sys.version_info
+TSTR_TOKENIZE = (3, 14) <= sys.version_info
 
 tokenizer = tokenize.generate_tokens
 PREV_DOC_TOKENS = (tokenize.INDENT, tokenize.DEDENT, tokenize.NEWLINE, tokenize.ENCODING)
@@ -70,20 +70,25 @@ FE_RFESC = re.compile(
     '''
 )
 
-RE_STRING_TYPE = re.compile(r'''((?:r|u|f|b)+)?(\'''|"""|'|")(.*?)\2''', re.I | re.S)
-
 RE_NON_PRINTABLE = re.compile(r'[\x00-\x09\x0b-\x1f\x7f-\xff]+')
 
-RE_VALID_STRING_TYPES = re.compile(r'^(?:\*|(?:[rubf]\*?)+)$', re.I)
+RE_STRING_TYPE = re.compile(r'''((?:r|u|f|b|t)+)?(\'''|"""|'|")(.*?)\2''', re.I | re.S)
 
-RE_ITER_STRING_TYPES = re.compile(r'(\*|[rubf]\*?)', re.I)
+RE_VALID_STRING_TYPES = re.compile(r'^(?:\*|(?:[rubft]\*?)+)$', re.I)
+
+RE_ITER_STRING_TYPES = re.compile(r'(\*|[rubft]\*?)', re.I)
 
 FMT_STR = (
     'f', 'F',
     'fr', 'rf',
     'Fr', 'rF',
     'fR', 'Rf',
-    'FR', 'RF'
+    'FR', 'RF',
+    't', 'T',
+    'tr', 'rt',
+    'Tr', 'rT',
+    'tR', 'Rt',
+    'TR', 'TF'
 )
 
 
@@ -107,7 +112,7 @@ class PythonFilter(filters.Filter):
             'docstrings': True,
             'strings': False,
             'group_comments': False,
-            'string_types': 'fu',
+            'string_types': 'ftu',
             'decode_escapes': True
         }
 
@@ -157,12 +162,13 @@ class PythonFilter(filters.Filter):
                 wstype.add('f')
                 wstype.add('r')
                 wstype.add('b')
+                wstype.add('t')
             elif value.endswith('*'):
                 wstype.add(value[0].lower())
             else:
                 stype.add(value.lower())
 
-        if is_string and 'b' not in stype and 'f' not in stype:
+        if is_string and 'b' not in stype and 'f' not in stype and 't' not in stype:
             stype.add('u')
 
         return stype, wstype
@@ -232,6 +238,7 @@ class PythonFilter(filters.Filter):
         is_bytes = 'b' in stype
         is_raw = 'r' in stype
         is_format = 'f' in stype
+        is_template = 't' in stype
         content = m.group(3)
         if is_raw and (not is_format or not self.decode_escapes):
             string = self.norm_nl(content)
@@ -239,7 +246,7 @@ class PythonFilter(filters.Filter):
             string = self.norm_nl(FE_RFESC.sub(self.replace_unicode, content))
         elif is_bytes:
             string = self.norm_nl(RE_BESC.sub(self.replace_bytes, content))
-        elif is_format:
+        elif is_format or is_template:
             string = self.norm_nl(RE_FESC.sub(self.replace_unicode, content))
         else:
             string = self.norm_nl(RE_ESC.sub(self.replace_unicode, content))
@@ -293,11 +300,17 @@ class PythonFilter(filters.Filter):
                     elif name == 'def':
                         stack.append((f'{prefix}{value}()', len(indent), self.FUNCTION))
                     name = None
-            elif FSTR_TOKENIZE and token_type == tokenize.FSTRING_START:
+            elif (
+                (FSTR_TOKENIZE and token_type == tokenize.FSTRING_START) or
+                (TSTR_TOKENIZE and token_type == tokenize.TSTRING_START)
+            ):
                 dstr = not self.catch_same_level(stack, len(indent)) and (prev_token_type in PREV_DOC_TOKENS)
                 stype = self.get_string_type(value)
                 fstring_stack.append((value, dstr) if self.match_string(stype) else ('', dstr))
-            elif FSTR_TOKENIZE and token_type == tokenize.FSTRING_END:
+            elif (
+                (FSTR_TOKENIZE and token_type == tokenize.FSTRING_END) or
+                (TSTR_TOKENIZE and token_type == tokenize.TSTRING_END)
+            ):
                 fstring_stack.pop()
 
             if token_type == tokenize.COMMENT and self.comments:
@@ -317,7 +330,13 @@ class PythonFilter(filters.Filter):
                         loc = f"{stack[0][0]}({line})"
                     comments.append([value[1:], loc, line_num])
 
-            if FSTR_TOKENIZE and token_type == tokenize.FSTRING_MIDDLE and fstring_stack[-1][0]:
+            if (
+                (
+                    (FSTR_TOKENIZE and token_type == tokenize.FSTRING_MIDDLE) or
+                    (TSTR_TOKENIZE and token_type == tokenize.TSTRING_MIDDLE)
+                ) and
+                fstring_stack[-1][0]
+            ):
                 fstr, dstr = fstring_stack[-1]
                 if (self.docstrings and dstr) or (self.strings and not dstr):
                     end = fstr[-1] * (len(fstr) - 1)
@@ -377,7 +396,7 @@ class PythonFilter(filters.Filter):
     def filter(self, source_file, encoding):  # noqa A001
         """Parse Python file returning content."""
 
-        with codecs.open(source_file, 'r', encoding=encoding) as f:
+        with open(source_file, 'r', encoding=encoding, errors='strict') as f:
             return self._filter(f.read(), source_file, encoding)
 
     def sfilter(self, source):

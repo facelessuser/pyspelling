@@ -3,7 +3,6 @@ import subprocess
 import os
 import sys
 import yaml
-import codecs
 import string
 import random
 import re
@@ -176,7 +175,7 @@ def read_config(file_name):
                 warn_deprecated(
                     "Using '.spelling.yml' as the default is deprecated. Default config is now '.pyspelling.yml'"
                 )
-            with codecs.open(name, 'r', encoding='utf-8') as f:
+            with open(name, 'r', encoding='utf-8', errors='strict') as f:
                 config = yaml_load(f.read())
             break
     # If configuration is still None, or we happened to get an object other than a dictionary (such as a list),
