@@ -46,10 +46,14 @@ types are `b` for bytes, `f` for format, `u` for Unicode, and `r` for raw.  `f` 
 form `#!py3 "my string {}".format(value)"`, and though f-strings are Unicode, they are treated as a separate string type
 from Unicode. Case is not important, and the default value is `fu`.
 
-If specifying `r`, you must also specify either `u`, `b`, or `f` as raw strings are also either `u`, `b`, or `f`
-strings. Selecting `ur` will select both Unicode strings and Unicode raw strings. If you need to target just raw
+If specifying `r`, you must also specify either `u`, `b`, `f`, or `t` as raw strings are also either `u`, `b`, `f`, or
+`t` strings. Selecting `ur` will select both Unicode strings and Unicode raw strings. If you need to target just raw
 strings, you can use `r*` which will target all raw strings types: raw Unicode, raw format, and raw bytes. You can use
 `*` for other types as well. You can also just specify `*` by itself to target all string types.
+
+/// new | New in 2.11
+Template string support was added in 2.11 and is only available for Python 3.14+.
+///
 
 ## Options
 
@@ -60,7 +64,7 @@ Options          | Type     | Default       | Description
 `group_comments` | bool     | `#!py3 False` | Group consecutive Python comments as one `SourceText` entry.
 `decode_escapes` | bool     | `#!py3 True`  | Decode escapes and strip out format variables. Behavior is based on the string type that is encountered. This affects both docstrings and non-docstrings.
 `strings`        | string   | `#!py3 False` | Return `SourceText` entries for each string (non-docstring).
-`string_types`   | string   | `#!py3 fu`    | Specifies which string types `strings` searches: bytes (`b`), format (`f`), raw (`r`), and Unicode (`u`).  `*` captures all strings, or when used with a type, captures all variants of that type `r*`. This does not affect docstrings. When `docstrings` is enabled, all docstrings are parsed.
+`string_types`   | string   | `#!py3 'ftu'` | Specifies which string types `strings` searches: bytes (`b`), format (`f`), template (`t`), raw (`r`), and Unicode (`u`).  `*` captures all strings, or when used with a type, captures all variants of that type `r*`. This does not affect docstrings. When `docstrings` is enabled, all docstrings are parsed.
 
 ## Categories
 

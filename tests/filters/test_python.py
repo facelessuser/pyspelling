@@ -1,6 +1,7 @@
 """Test Python plugin."""
 from .. import util
-
+import pytest
+import sys
 
 class TestPython(util.PluginTestCase):
     """Test Python plugin."""
@@ -115,7 +116,7 @@ class TestPythonStrings(util.PluginTestCase):
               pipeline:
               - pyspelling.filters.python:
                   strings: true
-                  string_types: bfru
+                  string_types: bfrut
                   group_comments: true
             """
         ).format(self.tempdir)
@@ -224,6 +225,33 @@ class TestPythonStrings(util.PluginTestCase):
 
         self.mktemp('test.txt', template, 'utf-8')
         self.assert_spellcheck('.pystrings.yml', bad_words)
+
+    @pytest.mark.skipif(sys.version_info < (3, 14), reason="requires python3.14 or higher")
+    def test_python_template(self):
+        """Test Python template strings."""
+
+        template = self.dedent(
+            r'''
+            from string.templatelib import Template, Interpolation
+
+            def lower_upper(template: Template) -> str:
+                """Render static parts lower cased and interpolations upper cased."""
+
+                parts: list[str] = []
+                for item in template:
+                    if isinstance(item, Interpolation):
+                        parts.append(str(item.value).upper())
+                    else:
+                        parts.append(item.lower())
+                return "".join(parts)
+
+            name = "world"
+            print(lower_upper(t"HLLO {name}"))
+            '''
+        )
+
+        self.mktemp('test.txt', template, 'utf-8')
+        self.assert_spellcheck('.pystrings.yml', ['HLLO'])
 
     def test_python_raw_format(self):
         """Test Python raw format strings."""
