@@ -56,6 +56,11 @@ matrix:
   - **/*.md
 ```
 
+/// tip | Markdown Extensions
+Any Python markdown extensions can be used via `markdown_extensions`. Either built-in Python Markdown extensions or 3rd
+party Python Markdown extensions.
+///
+
 ## Options
 
 Options               | Type          | Default    | Description
