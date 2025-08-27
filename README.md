@@ -40,5 +40,6 @@ MIT
 [pypi-link]: https://pypi.python.org/pypi/pyspelling
 [python-image]: https://img.shields.io/pypi/pyversions/pyspelling?logo=python&logoColor=aaaaaa&labelColor=333333
 [license-image-mit]: https://img.shields.io/badge/license-MIT-blue.svg?labelColor=333333
+[license-link]: https://github.com/facelessuser/pyspelling/blob/main/LICENSE.md
 [donate-image]: https://img.shields.io/badge/Donate-PayPal-3fabd1?logo=paypal
 [donate-link]: https://www.paypal.me/facelessuser
