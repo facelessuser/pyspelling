@@ -20,8 +20,9 @@ def main():
         '--jobs', '-j',
         action='store',
         type=int,
-        default=0,
+        default=None,
         help="Specify the number of spell checker processes to run in parallel."
+        " 0 indicates to use all available CPUs."
     )
     parser.add_argument('--config', '-c', action='store', default='', help="Spelling config.")
     parser.add_argument(
@@ -64,7 +65,7 @@ def run(config, **kwargs):
     verbose = kwargs.get('verbose', 0)
     sources = kwargs.get('sources', [])
     debug = kwargs.get('debug', False)
-    jobs = kwargs.get('jobs', 0)
+    jobs = kwargs.get('jobs', 1)
     skip_dict_compile = kwargs.get('skip_dict_compile', False)
 
     fail = False
