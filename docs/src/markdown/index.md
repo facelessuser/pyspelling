@@ -64,7 +64,7 @@ options:
   --name, -n NAME       Specific spelling task by name to run.
   --group, -g GROUP     Specific spelling task group to run.
   --binary, -b BINARY   Provide path to spell checker's binary.
-  --jobs, -j JOBS       Specify the number of spell checker processes to run in parallel.
+  --jobs, -j JOBS       Specify the number of spell checker processes to run in parallel. 0 indicates to use all available CPUs.
   --config, -c CONFIG   Spelling config.
   --source, -S SOURCE   Specify override file pattern. Only applicable when specifying exactly one --name.
   --spellchecker, -s SPELLCHECKER
@@ -136,6 +136,7 @@ $ pyspelling -s hunspell
 
 To run multiple jobs in parallel, you can use the `--job` or `-j` option. Processing files in parallel can speed up
 processing time. Specifying jobs on the command line will override the `jobs` setting in the configuration file.
+Setting 0 jobs means to use all available CPUs.
 
 ```console
 $ pyspelling -n my_task -j 4
