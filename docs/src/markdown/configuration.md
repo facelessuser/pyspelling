@@ -19,6 +19,8 @@ process files in a given task.
 jobs: 4
 ```
 
+If `jobs` is set to `0`, the maximum available cores will be used.
+
 /// new | New 2.10
 Parallel processing is new in 2.10.
 ///
