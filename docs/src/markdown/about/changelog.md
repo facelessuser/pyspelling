@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.12
+
+-   **NEW**: When `jobs` is set to `0`, use maximum available cores.
+
 ## 2.11
 
 -   **NEW**: Add new command line option `--skip-dict-compile` which will skip the dictionary compiling step if the

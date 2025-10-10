@@ -83,7 +83,7 @@ class PluginTestCase(unittest.TestCase):
         """Make temp directory."""
 
         filename = os.path.join(self.tempdir, os.path.normpath(filename))
-        base, file = os.path.split(filename)
+        base, _ = os.path.split(filename)
         if not os.path.exists(base):
             retry = 3
             while retry:

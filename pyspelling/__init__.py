@@ -578,7 +578,7 @@ class SpellingTask:
         "O": glob.O
     }
 
-    def __init__(self, checker, config, binary='', verbose=0, jobs=0, debug=False, skip_dict_compile=False):
+    def __init__(self, checker, config, binary='', verbose=0, jobs=None, debug=False, skip_dict_compile=False):
         """Initialize."""
 
         if checker == "hunspell":  # pragma: no cover
@@ -678,12 +678,12 @@ class SpellingTask:
             source_patterns = self.task.get('sources', [])
 
         # If jobs was not specified via command line, check the config for jobs settings
-        jobs = max(1, self.config.get('jobs', 1) if self.jobs == 0 else self.jobs)
+        jobs = self.config.get('jobs', 1) if self.jobs is None else self.jobs
 
         expect_match = self.task.get('expect_match', True)
-        if jobs > 1:
+        if jobs != 1 and jobs > 0:
             # Use multi-processing to process files concurrently
-            with ProcessPoolExecutor(max_workers=jobs) as pool:
+            with ProcessPoolExecutor(max_workers=jobs if jobs else None) as pool:
                 for results in pool.map(self.multi_check, self.walk_src(source_patterns, glob_flags, glob_limit)):
                     self.found_match = True
                     yield from results
@@ -711,7 +711,7 @@ def spellcheck(
     sources=None,
     verbose=0,
     debug=False,
-    jobs=0,
+    jobs=None,
     skip_dict_compile=False
 ):
     """Spell check."""
