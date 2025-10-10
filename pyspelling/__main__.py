@@ -21,7 +21,10 @@ def main():
         action='store',
         type=int,
         default=None,
-        help="Specify the number of spell checker processes to run in parallel."
+        help=(
+            "Specify the number of spell checker processes to run in parallel. "
+            "Using 0 will utilize the maximum number of cores."
+        )
     )
     parser.add_argument('--config', '-c', action='store', default='', help="Spelling config.")
     parser.add_argument(

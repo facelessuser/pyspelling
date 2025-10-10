@@ -53,7 +53,8 @@ If you want to manually install it, run `#!bash python setup.py build` and `#!ba
 ## Command Line Usage
 
 ```
-usage: pyspelling [-h] [--version] [--verbose] [--name NAME | --group GROUP] [--binary BINARY] [--jobs JOBS] [--config CONFIG] [--source SOURCE] [--spellchecker SPELLCHECKER] [--skip-dict-compile]
+usage: pyspelling [-h] [--version] [--verbose] [--name NAME | --group GROUP] [--binary BINARY] [--jobs JOBS] [--config CONFIG] [--source SOURCE]
+                  [--spellchecker SPELLCHECKER] [--skip-dict-compile]
 
 Spell checking tool.
 
@@ -64,7 +65,7 @@ options:
   --name, -n NAME       Specific spelling task by name to run.
   --group, -g GROUP     Specific spelling task group to run.
   --binary, -b BINARY   Provide path to spell checker's binary.
-  --jobs, -j JOBS       Specify the number of spell checker processes to run in parallel.
+  --jobs, -j JOBS       Specify the number of spell checker processes to run in parallel. Using 0 will utilize the maximum number of cores.
   --config, -c CONFIG   Spelling config.
   --source, -S SOURCE   Specify override file pattern. Only applicable when specifying exactly one --name.
   --spellchecker, -s SPELLCHECKER
