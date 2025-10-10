@@ -142,6 +142,8 @@ processing time. Specifying jobs on the command line will override the `jobs` se
 $ pyspelling -n my_task -j 4
 ```
 
+If `jobs` is set to `0`, the maximum available cores will be used.
+
 /// new | New 2.10
 Parallel processing is new in 2.10.
 ///
