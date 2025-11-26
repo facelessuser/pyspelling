@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.12.1
+
+-   **NEW**: Don't disallow the `size` option in Aspell.
+
 ## 2.12
 
 -   **NEW**: When `jobs` is set to `0`, use maximum available cores.

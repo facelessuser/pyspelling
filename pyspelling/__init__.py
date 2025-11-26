@@ -373,7 +373,7 @@ class Aspell(SpellChecker):
 
         disallowed = {
             '?', 'a', 'c', 'v', 'ignore-repl', 'dont-ignore-repl', 'keyboard', 'prefix', 'repl', 'save-repl',
-            'dont-save-repl', 'set-prefix', 'dont-set-prefix', 'size', 'sug-mode', 'sug-typo-analysis',
+            'dont-save-repl', 'set-prefix', 'dont-set-prefix', 'sug-mode', 'sug-typo-analysis',
             'dont-sug-typo-analysis', 'sug-repl-table', 'dont-sug-repl-table', 'rem-sug-split-char',
             'add-sug-split-char', 'warn', 'affix-compress', 'dont-affix-compress', 'clean-affixes',
             'dont-clean-affixes', 'invisible-soundslike', 'dont-invisible-soundslike', 'partially-expand',
