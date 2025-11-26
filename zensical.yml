@@ -13,24 +13,48 @@ theme:
   icon:
     logo: material/book-open-page-variant
   palette:
-    scheme: dracula
-    primary: deep purple
-    accent: deep purple
+    # Palette toggle for system
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep purple
+      accent: deep purple
+      toggle:
+        icon: lucide/sun
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      accent: deep purple
+      toggle:
+        icon: lucide/moon
+        name: Switch to light mode
   font:
     text: Roboto
     code: Roboto Mono
   features:
+    - announce.dismiss
     - navigation.tabs
     - navigation.top
     - navigation.instant
-    - toc.follow
-    - content.code.copy
+    - navigation.indexes
+    - navigation.path
     - navigation.footer
+    - toc.follow
+    - content.tabs.link
     - search.share
     - search.highlight
     - search.suggest
-  pymdownx:
-    sponsor: "https://github.com/sponsors/facelessuser"
+    - content.code.copy
+    - content.tabs.link
+    - content.code.annotations
 
 nav:
   - Usage:
@@ -60,35 +84,26 @@ nav:
     - License: about/license.md
 
 markdown_extensions:
-  - markdown.extensions.toc:
+  - toc:
       slugify: !!python/object/apply:pymdownx.slugs.slugify {kwds: {case: lower}}
       permalink: ""
-  - markdown.extensions.smarty:
+  - smarty:
       smart_quotes: false
+  - attr_list:
+  - tables:
+  - abbr:
+  - footnotes:
   - pymdownx.betterem:
-  - markdown.extensions.attr_list:
-  - markdown.extensions.tables:
-  - markdown.extensions.abbr:
-  - markdown.extensions.footnotes:
-  - markdown.extensions.md_in_html:
   - pymdownx.superfences:
+      preserve_tabs: true
   - pymdownx.highlight:
-      extend_pygments_lang:
-        - name: php-inline
-          lang: php
-          options:
-            startinline: true
-        - name: pycon3
-          lang: pycon
-          options:
-            python3: true
   - pymdownx.inlinehilite:
   - pymdownx.magiclink:
       repo_url_shortener: true
       repo_url_shorthand: true
       social_url_shorthand: true
       user: facelessuser
-      repo: pymdown-extensions
+      repo: pyspelling
   - pymdownx.tilde:
   - pymdownx.caret:
   - pymdownx.smartsymbols:
@@ -101,8 +116,6 @@ markdown_extensions:
   - pymdownx.tasklist:
       custom_checkbox: true
   - pymdownx.progressbar:
-  - pymdownx.arithmatex:
-  - pymdownx.mark:
   - pymdownx.striphtml:
   - pymdownx.snippets:
       base_path:
@@ -163,16 +176,20 @@ markdown_extensions:
   - pymdownx.blocks.definition:
   - pymdownx.blocks.tab:
       alternate_style: True
+      slugify: !!python/object/apply:pymdownx.slugs.slugify {kwds: {case: lower}}
+  - pymdownx.fancylists:
+      inject_style: True
+  - pymdownx.blocks.caption:
+  - pymdownx.arithmatex:
+      generic: true
+      block_tag: 'pre'
+
+extra_css:
+  - assets/pymdownx-extras/extra-835c322b67.css
+extra_javascript:
+  - assets/pymdownx-extras/extra-loader-Ccztcqfq.js
 
 extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/facelessuser
-
-plugins:
-  - search
-  - git-revision-date-localized:
-      fallback_to_build_date: true
-  - mkdocs_pymdownx_material_extras
-  - minify:
-      minify_html: true
