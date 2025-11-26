@@ -21,9 +21,7 @@ matrix:
       - title
       - alt
       ignores:
-      - 'code, pre'
-      - 'a:is(.magiclink-compare, .magiclink-commit, .magiclink-repository)'
-      - 'span.keys'
+      - 'code, pre, a.magiclink, span.keys, textarea, sub, sup'
       - '.MathJax_Preview, .md-nav__link, .md-footer-custom-text, .md-source__repository, .headerlink, .md-icon'
       - '.md-social__link'
   - pyspelling.filters.context:

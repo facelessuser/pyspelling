@@ -1,5 +1,4 @@
 [![Donate via PayPal][donate-image]][donate-link]
-[![Build][github-ci-image]][github-ci-link]
 [![Coverage Status][codecov-image]][codecov-link]
 [![PyPI Version][pypi-image]][pypi-link]
 [![PyPI - Python Version][python-image]][pypi-link]
@@ -32,8 +31,6 @@ MIT
 [aspell]: http://aspell.net/
 [hunspell]: https://hunspell.github.io/
 
-[github-ci-image]: https://github.com/facelessuser/pyspelling/workflows/build/badge.svg
-[github-ci-link]: https://github.com/facelessuser/pyspelling/actions?query=workflow%3Abuild+branch%3Amaster
 [codecov-image]: https://img.shields.io/codecov/c/github/facelessuser/pyspelling/master.svg?logo=codecov&logoColor=aaaaaa&labelColor=333333
 [codecov-link]: https://codecov.io/github/facelessuser/pyspelling
 [pypi-image]: https://img.shields.io/pypi/v/pyspelling.svg?logo=pypi&logoColor=aaaaaa&labelColor=333333
