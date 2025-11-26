@@ -142,7 +142,6 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install Aspell
-      if: matrix.tox-env == 'documents'
       run: |
         sudo apt-get install aspell aspell-en
     - name: Install dependencies
