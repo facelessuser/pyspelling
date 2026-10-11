@@ -91,7 +91,6 @@ jobs:
       if: runner.os == 'Linux'
       env:
         PYSPELLING_SPELL_REQUIRE: both
-    - name: Tests
       run: |
         hatch run +py=${{ matrix.python-version }} dev:tests
       continue-on-error: ${{ matrix.continue-on-error }}
