@@ -53,21 +53,25 @@ class XmlFilter(filters.Filter):
             "break_tags": [],
             "ignores": [],
             "captures": self.default_capture,
-            "namespaces": {}
+            "namespaces": {},
+            "css_nostrict": False
         }
 
     def setup(self):
         """Setup."""
 
+        self.nostrict = self.config['css_nostrict']
         self.user_break_tags = set(self.config['break_tags'])
         self.comments = self.config['comments']
         self.attributes = set(self.config['attributes'])
         self.parser = 'xml'
         self.type = 'xml'
+
+        flags = sv.NOSTRICT if self.nostrict else 0
         ignores = ','.join(self.config['ignores'])
-        self.ignores = sv.compile(ignores, self.config['namespaces']) if ignores.strip() else None
+        self.ignores = sv.compile(ignores, self.config['namespaces'], flags=flags) if ignores.strip() else None
         captures = ','.join(self.config['captures'])
-        self.captures = sv.compile(captures, self.config['namespaces']) if captures.strip() else None
+        self.captures = sv.compile(captures, self.config['namespaces'], flags=flags) if captures.strip() else None
 
     def _has_xml_encode(self, content):
         """Check XML encoding."""
