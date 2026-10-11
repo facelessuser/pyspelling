@@ -50,7 +50,8 @@ class HtmlFilter(xml.XmlFilter):
             "break_tags": [],
             "ignores": [],
             "captures": self.default_capture,
-            "namespaces": {}
+            "namespaces": {},
+            "css_nostrict": False
         }
 
     def validate_options(self, k, v):
@@ -63,6 +64,7 @@ class HtmlFilter(xml.XmlFilter):
     def setup(self):
         """Setup."""
 
+        self.nostrict = self.config['css_nostrict']
         self.user_break_tags = set(self.config['break_tags'])
         self.comments = self.config.get('comments', True) is True
         self.attributes = set(self.config['attributes'])
@@ -70,10 +72,12 @@ class HtmlFilter(xml.XmlFilter):
         if self.type not in MODE:
             self.type = 'html'
         self.parser = MODE[self.type]
+
+        flags = sv.NOSTRICT if self.nostrict else 0
         ignores = ','.join(self.config['ignores'])
-        self.ignores = sv.compile(ignores, self.config['namespaces']) if ignores.strip() else None
+        self.ignores = sv.compile(ignores, self.config['namespaces'], flags=flags) if ignores.strip() else None
         captures = ','.join(self.config['captures'])
-        self.captures = sv.compile(captures, self.config['namespaces']) if captures.strip() else None
+        self.captures = sv.compile(captures, self.config['namespaces'], flags=flags) if captures.strip() else None
 
     def header_check(self, content):
         """Special HTML encoding check."""

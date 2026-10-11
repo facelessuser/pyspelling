@@ -30,7 +30,7 @@ def which(executable):
             location = executable
     else:
         paths = [x for x in os.environ["PATH"].split(os.pathsep) if not x.isspace()]
-        paths.extend([x for x in os.environ.get("TOX_SPELL_PATH", "").split(os.pathsep) if not x.isspace()])
+        paths.extend([x for x in os.environ.get("PYSPELLING_SPELL_PATH", "").split(os.pathsep) if not x.isspace()])
         for path in paths:
             exe = os.path.join(path, executable)
             if os.path.isfile(exe):
@@ -118,21 +118,21 @@ class PluginTestCase(unittest.TestCase):
     def assert_spell_required(self, running):
         """Check if what we are running matches what we request."""
 
-        required = os.environ.get("TOX_SPELL_REQUIRE", "any")
+        required = os.environ.get("PYSPELLING_SPELL_REQUIRE", "any")
 
         if required not in ("both", "any", "aspell", "hunspell"):
-            raise RuntimeError(f"Invalid value of '{required}' in 'TOX_SPELL_REQUIRE'")
+            raise RuntimeError(f"Invalid value of '{required}' in 'PYSPELLING_SPELL_REQUIRE'")
 
         if running not in ("both", "aspell", "hunspell"):
             raise RuntimeError(
                 f"Required tests are not being run (currently running '{running}'). " +
                 "Make sure spell checker can be found and " +
-                f"'TOX_SPELL_REQUIRE' is set appropriately (currently '{required}')"
+                f"'TPYSPELLINGSPELL_REQUIRE' is set appropriately (currently '{required}')"
             )
 
         if required != running and (required != "any" and running != "both"):
             raise RuntimeError(
-                "'TOX_SPELL_REQUIRE' env variable, which is "
+                "'PYSPELLING_SPELL_REQUIRE' env variable, which is "
                 "'{}', is not compatible with '{}'".format(running, required)
             )
 

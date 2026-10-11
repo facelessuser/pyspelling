@@ -2,7 +2,7 @@
 
 ## Overview
 
-PySpelling's pipeline utilizes special plugins to provide [text filtering](#filters) and to
+PySpelling's pipeline utilizes special plugins to provide [text filtering](#filter) and to
 [control the flow](#flow-control) of the text down the pipeline. The plugins can be arranged in any order and even
 included multiple times, the only restriction is that you can't start the pipeline with `FlowControl` plugins, the first
 plugin must be a `Filter` plugin.

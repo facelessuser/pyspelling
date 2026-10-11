@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.13
+
+-   **NEW**: Add support for Python 3.15.
+-   **NEW**: Drop Python 3.10 and 3.9 support.
+-   **NEW**: Add `css_nostrict` to XML and HTML filter to allow more relaxed CSS rules due to `soupsieve`'s new stricter
+    defaults.
+
 ## 2.12.1
 
 -   **NEW**: Don't disallow the `size` option in Aspell.

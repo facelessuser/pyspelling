@@ -1109,6 +1109,7 @@ class TestHtml5AdvancedSelectors(util.PluginTestCase):
                   ignores:
                   - 'div:not(.aaaa):has(.kkkk > p.llll)'
                   - 'p:has(+ .dddd:has(+ div .jjjj))'
+                  css_nostrict: true
             """
         ).format(self.tempdir)
         self.mktemp('.html5.yml', config, 'utf-8')
