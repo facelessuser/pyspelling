@@ -32,7 +32,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - run: |
           python -m pip install --upgrade pip build hatch
-          python -m pip install -r requirements/docs.txt
       - run: |
           python -m hatch run docs:build
       - uses: actions/upload-pages-artifact@v5

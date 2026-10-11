@@ -168,36 +168,3 @@ serve = [
 build = [
     "python -m zensical build -f zensical.yml --clean"
 ]
-
-# [tool.tox]
-# legacy_tox_ini = """
-# [tox]
-# isolated_build = true
-# envlist =
-#     py39,py310,py311,py312,py313,py314,lint
-
-# [testenv]
-# passenv = LANG,TOX_SPELL_PATH,TOX_SPELL_REQUIRE,HOME
-# deps=
-#     -r requirements/tests.txt
-# commands=
-#     {envpython} -m pytest --cov pyspelling --cov-append {toxinidir}
-#     {envpython} -m coverage html -d {envtmpdir}/coverage
-#     {envpython} -m coverage xml
-#     {envpython} -m coverage report --show-missing
-
-# [testenv:documents]
-# deps=
-#     .
-#     -r requirements/docs.txt
-# commands=
-#     "{envpython}" -m zensical.main build -f zensical.yml --clean --strict
-#     "{envpython}" -m pyspelling
-
-# [testenv:lint]
-# deps=
-#     .
-#     -r requirements/lint.txt
-# commands=
-#     "{envbindir}"/ruff check .
-# """
