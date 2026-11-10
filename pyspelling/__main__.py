@@ -74,30 +74,34 @@ def run(config, **kwargs):
 
     fail = False
     count = 0
-    for results in spellcheck(
-        config,
-        names=names,
-        groups=groups,
-        binary=binary,
-        checker=spellchecker,
-        sources=sources,
-        verbose=verbose,
-        debug=debug,
-        jobs=jobs,
-        skip_dict_compile=skip_dict_compile
-    ):
-        count += 1
-        if results.error:
-            fail = True
-            print(f'ERROR: {results.context} -- {results.error}')
-        elif results.words:
-            fail = True
-            print(f'Misspelled words:\n<{results.category}> {results.context}')
-            print('-' * 80)
-            for word in results.words:
-                print(word)
-            print('-' * 80)
-            print('')
+    try:
+        for results in spellcheck(
+            config,
+            names=names,
+            groups=groups,
+            binary=binary,
+            checker=spellchecker,
+            sources=sources,
+            verbose=verbose,
+            debug=debug,
+            jobs=jobs,
+            skip_dict_compile=skip_dict_compile
+        ):
+            count += 1
+            if results.error:
+                fail = True
+                print(f'ERROR: {results.context} -- {results.error}')
+            elif results.words:
+                fail = True
+                print(f'Misspelled words:\n<{results.category}> {results.context}')
+                print('-' * 80)
+                for word in results.words:
+                    print(word)
+                print('-' * 80)
+                print('')
+    except (ValueError, KeyError) as e:
+        print(f'ERROR: {e}')
+        return True
 
     if fail:
         print('!!!Spelling check failed!!!')
