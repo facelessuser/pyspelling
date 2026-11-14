@@ -1,7 +1,102 @@
 """Main."""
 import sys
+import shutil
+import time
 import argparse
 from pyspelling import spellcheck, __version__
+
+
+class Progress:
+    """
+    Render per file progress of spelling tasks.
+
+    On a terminal, a single status line is redrawn in place. Otherwise (e.g. CI logs),
+    a plain line is printed every 10% so the log is not flooded.
+    """
+
+    def __init__(self, stream=None):
+        """Initialize."""
+
+        self.stream = sys.stderr if stream is None else stream
+        isatty = getattr(self.stream, 'isatty', None)
+        self.tty = bool(isatty and isatty())
+        self.line = ''
+        self.name = ''
+        self.total = 0
+        self.failed = 0
+        self.start = 0.0
+        self.bucket = 0
+
+    def __call__(self, name, current, total, filename, failed):
+        """Report progress of a task."""
+
+        if current == 0:
+            self.name = name
+            self.total = total
+            self.failed = 0
+            self.start = time.monotonic()
+            self.bucket = 0
+            if total == 0:
+                self._write_line(self._summary())
+            elif self.tty:
+                self._draw(f'[{name}] 0/{total} files (0%)')
+            return
+
+        if failed:
+            self.failed += 1
+
+        if current >= total:
+            self._write_line(self._summary())
+        elif self.tty:
+            percent = current * 100 // total
+            self._draw(f'[{name}] {current}/{total} files ({percent}%) ', filename)
+        else:
+            bucket = current * 10 // total
+            if bucket != self.bucket:
+                self.bucket = bucket
+                self._write_line(f'[{self.name}] {current}/{total} files')
+
+    def _summary(self):
+        """Get the summary line of the current task."""
+
+        elapsed = time.monotonic() - self.start
+        files = 'file' if self.total == 1 else 'files'
+        return f'[{self.name}] {self.total} {files} checked, {self.failed} with errors ({elapsed:.1f}s)'
+
+    def _draw(self, text, filename=''):
+        """Draw the status line in place, truncating the file name to fit the terminal."""
+
+        if filename:
+            room = shutil.get_terminal_size().columns - len(text) - 1
+            if room <= 3:
+                filename = ''
+            elif len(filename) > room:
+                filename = '...' + filename[-(room - 3):]
+        self.line = text + filename
+        self.redraw()
+
+    def _write_line(self, text):
+        """Write a permanent line, replacing the status line if one is shown."""
+
+        self.clear()
+        self.line = ''
+        self.stream.write(text + '\n')
+        self.stream.flush()
+
+    def clear(self):
+        """Erase the status line so other output can be printed."""
+
+        if self.tty and self.line:
+            self.stream.write('\r\033[K')
+            self.stream.flush()
+
+    def redraw(self):
+        """Draw the status line again after other output was printed."""
+
+        if self.tty and self.line:
+            self.stream.write('\r\033[K' + self.line)
+            self.stream.flush()
+
 
 
 def main():
@@ -41,6 +136,12 @@ def main():
         action='store_true',
         help="Skip dictionary compilation if the compiled file already exists."
     )
+    parser.add_argument(
+        '--progress',
+        '-p',
+        action='store_true',
+        help="Show per file progress on stderr. Ignored when --verbose is used."
+    )
     args = parser.parse_args()
 
     return run(
@@ -53,7 +154,8 @@ def main():
         verbose=args.verbose,
         debug=args.debug,
         jobs=args.jobs,
-        skip_dict_compile=args.skip_dict_compile
+        skip_dict_compile=args.skip_dict_compile,
+        progress=args.progress
     )
 
 
@@ -71,6 +173,8 @@ def run(config, **kwargs):
     if jobs is not None and jobs < 0:
         jobs = 1
     skip_dict_compile = kwargs.get('skip_dict_compile', False)
+    # Verbose logging prints per file details already and would garble the status line.
+    progress = Progress() if kwargs.get('progress', False) and not verbose else None
 
     fail = False
     count = 0
@@ -84,9 +188,12 @@ def run(config, **kwargs):
         verbose=verbose,
         debug=debug,
         jobs=jobs,
-        skip_dict_compile=skip_dict_compile
+        skip_dict_compile=skip_dict_compile,
+        progress=progress
     ):
         count += 1
+        if progress is not None and (results.error or results.words):
+            progress.clear()
         if results.error:
             fail = True
             print(f'ERROR: {results.context} -- {results.error}')
@@ -98,6 +205,9 @@ def run(config, **kwargs):
                 print(word)
             print('-' * 80)
             print('')
+        if progress is not None and (results.error or results.words):
+            sys.stdout.flush()
+            progress.redraw()
 
     if fail:
         print('!!!Spelling check failed!!!')

@@ -651,8 +651,15 @@ class SpellingTask:
 
         return list(self.process_file(f, self.get_checker()))
 
-    def run_task(self, task, source_patterns=None):
-        """Walk source and initiate spell check."""
+    def run_task(self, task, source_patterns=None, progress=None):
+        """
+        Walk source and initiate spell check.
+
+        If `progress` is given, it is called as `progress(name, current, total, filename, failed)`
+        once before any file is checked (`current` is `0` and `filename` is `None`), and then once
+        after each file is checked, before that file's results are yielded. `failed` is `True` if
+        the file produced misspelled words or errors.
+        """
 
         # Perform spell check
         self.log('Running Task: %s...' % task.get('name', ''), 1)
@@ -681,18 +688,39 @@ class SpellingTask:
         jobs = self.config.get('jobs', 1) if self.jobs is None else self.jobs
 
         expect_match = self.task.get('expect_match', True)
+        files = self.walk_src(source_patterns, glob_flags, glob_limit)
+        if progress is not None:
+            # Gather all files up front so we know the total amount of work.
+            name = self.task.get('name', '')
+            files = list(files)
+            total = len(files)
+            progress(name, 0, total, None, False)
+
         if jobs != 1 and jobs > 0:
             # Use multi-processing to process files concurrently
             with ProcessPoolExecutor(max_workers=jobs if jobs else None) as pool:
-                for results in pool.map(self.multi_check, self.walk_src(source_patterns, glob_flags, glob_limit)):
-                    self.found_match = True
-                    yield from results
+                if progress is not None:
+                    # `files` is a list here, so it is safe to iterate it twice.
+                    # `pool.map` yields results in the same order as the input.
+                    for count, (f, results) in enumerate(zip(files, pool.map(self.multi_check, files), strict=True), 1):
+                        self.found_match = True
+                        progress(name, count, total, f, any(r.error or r.words for r in results))
+                        yield from results
+                else:
+                    for results in pool.map(self.multi_check, files):
+                        self.found_match = True
+                        yield from results
         else:
             # Avoid overhead of multiprocessing if we are single threaded
             checker = self.get_checker()
-            for f in self.walk_src(source_patterns, glob_flags, glob_limit):
+            for count, f in enumerate(files, 1):
                 self.found_match = True
-                yield from self.process_file(f, checker)
+                if progress is not None:
+                    results = list(self.process_file(f, checker))
+                    progress(name, count, total, f, any(r.error or r.words for r in results))
+                    yield from results
+                else:
+                    yield from self.process_file(f, checker)
 
         if not self.found_match and expect_match:
             raise RuntimeError(
@@ -712,9 +740,15 @@ def spellcheck(
     verbose=0,
     debug=False,
     jobs=None,
-    skip_dict_compile=False
+    skip_dict_compile=False,
+    progress=None
 ):
-    """Spell check."""
+    """
+    Spell check.
+
+    `progress` is an optional callback that reports per file progress.
+    See `SpellingTask.run_task` for its signature.
+    """
 
     config = util.read_config(config_file)
     if sources is None:
@@ -755,7 +789,7 @@ def spellcheck(
 
         spelltask = SpellingTask(checker, config, binary, verbose, jobs, debug, skip_dict_compile)
 
-        for result in spelltask.run_task(task, source_patterns=sources):
+        for result in spelltask.run_task(task, source_patterns=sources, progress=progress):
             log('Context: %s' % result.context, 2, verbose)
             yield result
 

@@ -54,7 +54,7 @@ If you want to manually install it, run `#!bash python setup.py build` and `#!ba
 
 ```
 usage: pyspelling [-h] [--version] [--verbose] [--name NAME | --group GROUP] [--binary BINARY] [--jobs JOBS] [--config CONFIG] [--source SOURCE]
-                  [--spellchecker SPELLCHECKER] [--skip-dict-compile]
+                  [--spellchecker SPELLCHECKER] [--skip-dict-compile] [--progress]
 
 Spell checking tool.
 
@@ -72,6 +72,7 @@ options:
                         Choose between aspell and hunspell.
   --skip-dict-compile, -x
                         Skip dictionary compilation if the compiled file already exists.
+  --progress, -p        Show per file progress on stderr. Ignored when --verbose is used.
 ```
 
 PySpelling can be run with the command below (assuming your Python bin/script folder is in your path).  By default it
@@ -120,6 +121,17 @@ can currently go up to four levels.
 
 ```shell-session
 $ pyspelling -v
+```
+
+To see how far along a long spell check is, use the `--progress` flag. Progress is written to `stderr`, so the
+misspelling report on `stdout` is not affected. In a terminal, a single status line is updated in place with the file
+currently being checked. When the output is not a terminal (e.g. a CI log), a line is printed roughly every 10% instead.
+Each task ends with a summary. `--progress` is ignored when `--verbose` is used.
+
+```shell-session
+$ pyspelling --progress
+[markdown] 120 files checked, 0 with errors (2.4s)
+Spelling check passed :)
 ```
 
 If the binary for your spell checker is not found in your path, you can provide a path to the binary.
