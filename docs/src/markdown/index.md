@@ -72,7 +72,7 @@ options:
                         Choose between aspell and hunspell.
   --skip-dict-compile, -x
                         Skip dictionary compilation if the compiled file already exists.
-  --progress, -p        Show per file progress on stderr. Ignored when --verbose is used.
+  --progress, -p        Show per file progress when stderr is a terminal. Ignored when --verbose is used.
 ```
 
 PySpelling can be run with the command below (assuming your Python bin/script folder is in your path).  By default it
@@ -124,9 +124,9 @@ $ pyspelling -v
 ```
 
 To see how far along a long spell check is, use the `--progress` flag. Progress is written to `stderr`, so the
-misspelling report on `stdout` is not affected. In a terminal, a single status line is updated in place with the file
-currently being checked. When the output is not a terminal (e.g. a CI log), a line is printed roughly every 10% instead.
-Each task ends with a summary. `--progress` is ignored when `--verbose` is used.
+misspelling report on `stdout` is not affected. A single status line is updated in place with the file currently being
+checked, and each task ends with a summary. Progress is only shown when `stderr` is a terminal, so it never ends up in
+logs (e.g. CI). `--progress` is ignored when `--verbose` is used.
 
 ```shell-session
 $ pyspelling --progress

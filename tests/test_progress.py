@@ -4,7 +4,7 @@ import os
 import unittest
 from unittest import mock
 from pyspelling import spellcheck
-from pyspelling.__main__ import Progress
+from pyspelling.__main__ import Progress, run
 from . import util
 
 
@@ -26,24 +26,10 @@ class FakeStream(io.StringIO):
 class TestProgressRenderer(unittest.TestCase):
     """Test the command line progress renderer."""
 
-    def test_non_tty_throttled(self):
-        """Test that non-terminal output prints a line every 10% and a summary."""
+    def test_redraws_line(self):
+        """Test that the status line is redrawn in place and ends with a summary."""
 
-        stream = FakeStream(False)
-        progress = Progress(stream)
-        progress('task', 0, 20, None, False)
-        for i in range(1, 21):
-            progress('task', i, 20, f'file{i}.txt', i == 5)
-
-        lines = stream.getvalue().splitlines()
-        self.assertNotIn('\r', stream.getvalue())
-        self.assertEqual(lines[:-1], [f'[task] {i}/20 files' for i in range(2, 20, 2)])
-        self.assertRegex(lines[-1], r'^\[task\] 20 files checked, 1 with errors \(\d+\.\ds\)$')
-
-    def test_tty_redraws_line(self):
-        """Test that terminal output redraws a single line and ends with a summary."""
-
-        stream = FakeStream(True)
+        stream = io.StringIO()
         progress = Progress(stream)
         progress('task', 0, 2, None, False)
         progress('task', 1, 2, 'a.txt', False)
@@ -55,10 +41,10 @@ class TestProgressRenderer(unittest.TestCase):
             r'\r\033\[K\[task\] 2 files checked, 1 with errors \(\d+\.\ds\)\n$'
         )
 
-    def test_tty_clear_and_redraw(self):
+    def test_clear_and_redraw(self):
         """Test that the status line can be cleared and restored around other output."""
 
-        stream = FakeStream(True)
+        stream = io.StringIO()
         progress = Progress(stream)
         progress('task', 0, 3, None, False)
         progress('task', 1, 3, 'a.txt', False)
@@ -70,10 +56,10 @@ class TestProgressRenderer(unittest.TestCase):
         progress.redraw()
         self.assertEqual(stream.getvalue(), '\r\033[K\r\033[K[task] 1/3 files (33%) a.txt')
 
-    def test_tty_clear_after_summary(self):
+    def test_clear_after_summary(self):
         """Test that nothing is erased once the summary has been written."""
 
-        stream = FakeStream(True)
+        stream = io.StringIO()
         progress = Progress(stream)
         progress('task', 0, 1, None, False)
         progress('task', 1, 1, 'a.txt', False)
@@ -82,10 +68,10 @@ class TestProgressRenderer(unittest.TestCase):
         progress.redraw()
         self.assertEqual(stream.getvalue(), value)
 
-    def test_tty_truncates_file_name(self):
+    def test_truncates_file_name(self):
         """Test that long file names are shortened from the left to fit the terminal."""
 
-        stream = FakeStream(True)
+        stream = io.StringIO()
         progress = Progress(stream)
         progress('task', 0, 2, None, False)
         with mock.patch('shutil.get_terminal_size', return_value=os.terminal_size((40, 24))):
@@ -99,10 +85,42 @@ class TestProgressRenderer(unittest.TestCase):
     def test_no_files(self):
         """Test that a task without files still prints a summary."""
 
-        for tty in (True, False):
-            stream = FakeStream(tty)
-            Progress(stream)('task', 0, 0, None, False)
-            self.assertRegex(stream.getvalue(), r'^\[task\] 0 files checked, 0 with errors \(\d+\.\ds\)\n$')
+        stream = io.StringIO()
+        Progress(stream)('task', 0, 0, None, False)
+        self.assertRegex(stream.getvalue(), r'^\[task\] 0 files checked, 0 with errors \(\d+\.\ds\)\n$')
+
+
+class TestProgressEnabled(unittest.TestCase):
+    """Test when the command line enables progress."""
+
+    def get_progress(self, tty, **kwargs):
+        """Run the command line and get the progress callback passed to `spellcheck`."""
+
+        with mock.patch('pyspelling.__main__.spellcheck', return_value=iter([])) as spellcheck_mock, \
+                mock.patch('sys.stderr', FakeStream(tty)), \
+                mock.patch('sys.stdout', io.StringIO()):
+            run('.pyspelling.yml', **kwargs)
+        return spellcheck_mock.call_args.kwargs['progress']
+
+    def test_terminal(self):
+        """Test that progress is shown when `stderr` is a terminal."""
+
+        self.assertIsInstance(self.get_progress(True, progress=True), Progress)
+
+    def test_not_terminal(self):
+        """Test that progress is not shown when `stderr` is not a terminal (e.g. CI logs)."""
+
+        self.assertIsNone(self.get_progress(False, progress=True))
+
+    def test_verbose(self):
+        """Test that progress is not shown with verbose output."""
+
+        self.assertIsNone(self.get_progress(True, progress=True, verbose=1))
+
+    def test_not_requested(self):
+        """Test that progress is not shown unless requested."""
+
+        self.assertIsNone(self.get_progress(True))
 
 
 class TestProgressCallback(util.PluginTestCase):

@@ -8,24 +8,21 @@ from pyspelling import spellcheck, __version__
 
 class Progress:
     """
-    Render per file progress of spelling tasks.
+    Render per file progress of spelling tasks on a terminal.
 
-    On a terminal, a single status line is redrawn in place. Otherwise (e.g. CI logs),
-    a plain line is printed every 10% so the log is not flooded.
+    A single status line is redrawn in place and replaced by a summary when a task ends.
+    It is only meant for terminals, so `run` does not use it when `stderr` is not one.
     """
 
     def __init__(self, stream=None):
         """Initialize."""
 
         self.stream = sys.stderr if stream is None else stream
-        isatty = getattr(self.stream, 'isatty', None)
-        self.tty = bool(isatty and isatty())
         self.line = ''
         self.name = ''
         self.total = 0
         self.failed = 0
         self.start = 0.0
-        self.bucket = 0
 
     def __call__(self, name, current, total, filename, failed):
         """Report progress of a task."""
@@ -35,10 +32,9 @@ class Progress:
             self.total = total
             self.failed = 0
             self.start = time.monotonic()
-            self.bucket = 0
             if total == 0:
                 self._write_line(self._summary())
-            elif self.tty:
+            else:
                 self._draw(f'[{name}] 0/{total} files (0%)')
             return
 
@@ -47,14 +43,9 @@ class Progress:
 
         if current >= total:
             self._write_line(self._summary())
-        elif self.tty:
+        else:
             percent = current * 100 // total
             self._draw(f'[{name}] {current}/{total} files ({percent}%) ', filename)
-        else:
-            bucket = current * 10 // total
-            if bucket != self.bucket:
-                self.bucket = bucket
-                self._write_line(f'[{self.name}] {current}/{total} files')
 
     def _summary(self):
         """Get the summary line of the current task."""
@@ -86,17 +77,16 @@ class Progress:
     def clear(self):
         """Erase the status line so other output can be printed."""
 
-        if self.tty and self.line:
+        if self.line:
             self.stream.write('\r\033[K')
             self.stream.flush()
 
     def redraw(self):
         """Draw the status line again after other output was printed."""
 
-        if self.tty and self.line:
+        if self.line:
             self.stream.write('\r\033[K' + self.line)
             self.stream.flush()
-
 
 
 def main():
@@ -140,7 +130,7 @@ def main():
         '--progress',
         '-p',
         action='store_true',
-        help="Show per file progress on stderr. Ignored when --verbose is used."
+        help="Show per file progress when stderr is a terminal. Ignored when --verbose is used."
     )
     args = parser.parse_args()
 
@@ -173,8 +163,9 @@ def run(config, **kwargs):
     if jobs is not None and jobs < 0:
         jobs = 1
     skip_dict_compile = kwargs.get('skip_dict_compile', False)
+    # Progress is only shown on a terminal, so it does not end up in logs.
     # Verbose logging prints per file details already and would garble the status line.
-    progress = Progress() if kwargs.get('progress', False) and not verbose else None
+    progress = Progress() if kwargs.get('progress', False) and not verbose and sys.stderr.isatty() else None
 
     fail = False
     count = 0
