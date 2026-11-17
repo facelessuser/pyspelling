@@ -322,7 +322,7 @@ class XmlFilter(filters.Filter):
     def filter(self, source_file, encoding):  # noqa A001
         """Parse XML file."""
 
-        with codecs.open(source_file, 'r', encoding=encoding) as f:
+        with open(source_file, 'r', encoding=encoding, errors='strict', newline='') as f:
             text = f.read()
         return self._filter(text, source_file, encoding)
 

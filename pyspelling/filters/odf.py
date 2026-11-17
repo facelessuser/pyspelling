@@ -6,7 +6,6 @@ Parse the `text` namespace in `content.xml` in ODF zip files.
 import zipfile
 import io
 import bs4
-import codecs
 from .. import filters
 from . import xml
 from wcmatch import glob
@@ -165,7 +164,7 @@ class OdfFilter(xml.XmlFilter):
 
         sources = []
         if encoding:
-            with codecs.open(source_file, 'r', encoding=encoding) as f:
+            with open(source_file, 'r', encoding=encoding, errors='strict', newline='') as f:
                 src = f.read()
             sources.extend(self._filter(src, source_file, encoding))
         else:
