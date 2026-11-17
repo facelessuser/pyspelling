@@ -89,6 +89,7 @@ pycqa
 pymdown
 pytest
 regex
+renderer
 sacrifice
 shebang
 sortable

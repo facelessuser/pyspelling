@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.14
+
+-   **NEW**: Add `--progress` command line option to show per file progress when `stderr` is a terminal.
+    `spellcheck()` accepts a new `progress` callback to report progress when used as a library.
+
 ## 2.13
 
 -   **NEW**: Add support for Python 3.15.
